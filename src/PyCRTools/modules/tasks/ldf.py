@@ -141,7 +141,7 @@ def GetInformationFromFile(topdir, events, plot_parameter, goodonly):
         # check for LORA core only being propagated with two coordinates instead of three
 
         lorcore=cr.hArray(res["pulse_core_lora"])
-        Dim = lorcore.getDim()
+        Dim = lorcore.shape()
         if 2 in Dim:
             par["loracore"]=cr.hArray([lorcore[0],lorcore[1],0.0])
         else:
@@ -769,10 +769,10 @@ class ldf(tasks.Task):
                             StartDistances = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
                             NextDistances  = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
 
-                        Length = int(StartSignals.getDim()[0])
+                        Length = int(StartSignals.shape()[0])
                         Value = np.zeros((Length, 2))
 
-                        Length2 = int(NextSignals.getDim()[0])
+                        Length2 = int(NextSignals.shape()[0])
                         Value2 = np.zeros((Length2, 2))
 
                         Value[:,0] = StartDistances
@@ -852,10 +852,10 @@ class ldf(tasks.Task):
                             StartDistances = self.GetDistance(VarCore,StartDirection,self.positions0).vec()
     #                        NextDistances  = self.GetDistance(VarCore,StartDirection,self.positions1).vec()
 
-                        Length = int(StartSignals.getDim()[0])
+                        Length = int(StartSignals.shape()[0])
                         Value = np.zeros((Length, 2))
 
-    #                    Length2 = int(NextSignals.getDim()[0])
+    #                    Length2 = int(NextSignals.shape()[0])
     #                    Value2 = np.zeros((Length2, 2))
 
                         Value[:,0] = StartDistances

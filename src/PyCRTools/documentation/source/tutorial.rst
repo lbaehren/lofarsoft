@@ -402,12 +402,12 @@ between vectors and arrays is currently not supported.
 Changing dimensions
 -------------------
 
-The dimensions can be obtained and set, using the :meth:`getDim` and
+The dimensions can be obtained and set, using the :meth:`shape` and
 :meth:`setDim` methods. If the length of the underlying vector changes
 due to a change in the dimensions, the vector will be resized and
 padded with zeros, if necessary::
 
-    >>> a.getDim()
+    >>> a.shape()
 
     >>> a.setDim([3,3,2])
 
@@ -617,7 +617,7 @@ elements in the underlying vector.
 
 In principle one could now loop over all slices using a for loop::
 
-    >>> for i in range(a.getDim()[0]):
+    >>> for i in range(a.shape()[0]):
     ...     print "Row",i,":",a[i].val(), " => a =", a
     Row 0 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
     Row 1 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])

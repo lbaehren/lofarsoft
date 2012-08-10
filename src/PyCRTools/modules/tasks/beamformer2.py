@@ -594,7 +594,7 @@ class BeamFormer2(tasks.Task):
         if hdr.has_key("BeamFormer2"):
             if NyquistZone==None:
                 NyquistZone=hdr["BeamFormer"]["NyquistZone"]
-        dim=beams.getDim();blocklen=(dim[-1]-1)*2
+        dim=beams.shape();blocklen=(dim[-1]-1)*2
         self.beamscopy=cr.hArray(dimensions=[dim[-2],dim[-1]],copy=beams)
         self.beamscopy[...].nyquistswap(self.NyquistZone)
         if not hasattr(self,"tbeams2size") or not self.tbeams2size==blocklen:
@@ -696,11 +696,11 @@ class BeamFormer2(tasks.Task):
         """
         if hasattr(dynspec,"par") and hasattr(dynspec.par,"cleanspec") and not plot_cleanspec==False:
             cleanspec=dynspec.par.cleanspec
-            npcleanspec=np.zeros(cleanspec.getDim())
+            npcleanspec=np.zeros(cleanspec.shape())
         else:
             cleanspec=None
         hdr=dynspec.getHeader("DynamicSpectrum")
-        npdynspec=np.zeros(dynspec.getDim())
+        npdynspec=np.zeros(dynspec.shape())
         cr.hCopy(npdynspec,dynspec)
         np.log(npdynspec,npdynspec)
         if cleanspec:

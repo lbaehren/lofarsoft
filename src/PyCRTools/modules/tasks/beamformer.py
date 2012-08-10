@@ -839,7 +839,7 @@ class BeamFormer(tasks.Task):
         if hdr.has_key("BeamFormer"):
             if not NyquistZone:
                 NyquistZone=hdr["BeamFormer"]["NyquistZone"]
-        dim=beams.getDim();blocklen=(dim[-1]-1)*2
+        dim=beams.shape();blocklen=(dim[-1]-1)*2
         self.beamscopy=cr.hArray(dimensions=[dim[-3]*dim[-2],dim[-1]],copy=beams)
         self.beamscopy[...].nyquistswap(self.NyquistZone)
         self.tbeams2=cr.hArray(float,[dim[-3]*dim[-2],blocklen],name="TIMESERIES_DATA")

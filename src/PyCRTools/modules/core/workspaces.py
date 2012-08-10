@@ -738,7 +738,7 @@ def hCRFitBaseline(coeffs, frequency, spectrum, ws=None, **keywords):
       CRFitBaselineWorkSpace().help()
     """
 #Defining the workspace, setting up the arrays, if not existing
-    keywords["nofAntennas"]=spectrum.getDim()[0]
+    keywords["nofAntennas"]=spectrum.shape()[0]
     ws=CRsetWorkSpace(ws,"FitBaseline",**keywords)
 #
 #Donwsample spectrum
@@ -1036,8 +1036,8 @@ def CRQualityCheck(limits,datafile=None,blocklist=None,dataarray=None,nantennas=
             print "CRQualityCheck: Data array provided does not match specified blocksize."
             return
     else:
-        nAntennas=dataarray.getDim()[0]
-        blocksize=dataarray.getDim()[1]
+        nAntennas=dataarray.shape()[0]
+        blocksize=dataarray.shape()[1]
         selected_antennas=range(nAntennas)
         blocklist=[0]
 #Create the some scratch vectors

@@ -110,7 +110,7 @@ class LocatePulseTrain(tasks.Task):
 
         cutlen=dict(default=None, doc="Length of the cut-out data.",output=True),
         timeseries_data_sum=dict(default=None, doc="Incoherent (squared) sum of all antennas."),
-        timeseries_data_cut=dict(default=lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+[self.cutlen]), doc="Contains the time series data cut out around the pulse.",output=True),
+        timeseries_data_cut=dict(default=lambda self:cr.hArray(float,self.timeseries_data.shape()[:-1]+(self.cutlen,)), doc="Contains the time series data cut out around the pulse.",output=True),
 
         timeseries_length = dict(default=lambda self:self.timeseries_data.shape()[-1], doc="Length of the full input time series."),
 

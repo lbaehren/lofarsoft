@@ -584,11 +584,11 @@ class DynamicSpectrum(tasks.Task):
         """
         if hasattr(dynspec,"par") and hasattr(dynspec.par,"cleanspec") and not plot_cleanspec==False:
             cleanspec=dynspec.par.cleanspec
-            npcleanspec=np.zeros(cleanspec.getDim())
+            npcleanspec=np.zeros(cleanspec.shape())
         else:
             cleanspec=None
         hdr=dynspec.getHeader("DynamicSpectrum")
-        npdynspec=np.zeros(dynspec.getDim())
+        npdynspec=np.zeros(dynspec.shape())
         hCopy(npdynspec,dynspec)
         np.log(npdynspec,npdynspec)
         if cleanspec:

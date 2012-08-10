@@ -133,7 +133,7 @@ def CRQualityCheckAntenna(dataarray,
      information. verbose=True only prints when a block is
      flagged. verbose=2 prints information on every chunk.
     """
-    dim=dataarray.getDim()
+    dim=dataarray.shape()
     (nblocks,blocksize)=dim
     qualityflaglist=[]
     nblocksflagged=0

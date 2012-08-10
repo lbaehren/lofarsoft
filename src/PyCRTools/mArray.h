@@ -44,7 +44,6 @@ template <class T>
 
   struct storage_container {
     HInteger refcount;
-    HInteger *ndims_p;
     std::vector<HInteger> * dimensions_p;
     std::vector<HInteger> * slice_sizes_p;
     std::vector<T>* vec_p;
@@ -81,9 +80,10 @@ template <class T>
     hArray<T> & resize(HInteger newsize);
     hArray<T> & setVector(std::vector<T> & vec);
     std::vector<T> & getVector();
-    std::vector<HInteger> & getDimensions();
     std::vector<HInteger> & getSizes();
-    void setDimensions(boost::python::list dims);
+    boost::python::tuple shape();
+    void reshapeList(const boost::python::list & dims);
+    void reshapeTuple(const boost::python::tuple & dims);
     HInteger getNumberOfDimensions();
     hArray<T> & setSlice(HInteger beg, HInteger end=-1);
     hArray<T> & setSliceVector(std::vector<HInteger> & index_vector);
@@ -143,10 +143,11 @@ template <class T>
     .enable_pickling() \
     .def("getVector",&hArray<TYPE>::getVector,return_internal_reference<>()) \
     .def("shared_copy",&hArray<TYPE>::shared_copy,return_internal_reference<>()) \
-    .def("getDimensions",&hArray<TYPE>::getDimensions,return_internal_reference<>()) \
+    .def("shape",&hArray<TYPE>::shape) \
+    .def("reshape",&hArray<TYPE>::reshapeList) \
+    .def("reshape",&hArray<TYPE>::reshapeTuple) \
     .def("getSizes",&hArray<TYPE>::getSizes,return_internal_reference<>()) \
     .def("setVector",&hArray<TYPE>::setVector,return_internal_reference<>())\
-    .def("setDimensions",&hArray<TYPE>::setDimensions)			\
     .def("setSlice",&hArray<TYPE>::setSlice,return_internal_reference<>())				\
     .def("setSliceVector",&hArray<TYPE>::setSliceVector,return_internal_reference<>())				\
     .def("setSubSlice",&hArray<TYPE>::setSubSlice,return_internal_reference<>())				\

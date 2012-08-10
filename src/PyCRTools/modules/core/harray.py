@@ -202,7 +202,7 @@ def hArray_repr(self, maxlen=100):
         name=', name="'+name+'"'
 
     # Compose string
-    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.getDim()))+", fill="+hPrettyString(self.vec(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
+    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.shape()))+", fill="+hPrettyString(self.vec(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
 
     return s
 
@@ -227,23 +227,6 @@ def hArray_newreference(self):
     ary.__stored_vector = self.__stored_vector
     if hasattr(self,"par"): ary.par=self.par
     return ary
-
-def hArray_shape(self):
-    """
-    self.shape() -> [dim1,dim2,...,dimN] or len(self)
-
-    Retrieves the dimensions of a multidimensonal array as  a list of
-    integers.
-
-    Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
-    """
-    return list(self.getDimensions())
-
-def hArray_reshape(self, dimensions):
-    """Reshape array to new dimensions if total number of elements is left
-    unchanged.
-    """
-    self.setDimensions(list(dimensions))
 
 def hArray_return_slice_start(val):
     """ Reduces a slice to its start value"""
@@ -674,7 +657,7 @@ def hArray_transpose(self,ary=None):
     if ary==None:
         ary=self.new()
         dim=self.shape(); ncols=dim[-1]; nrows=dim[-2];
-        dim=dim[:-2]+[ncols,nrows]
+        dim=dim[:-2]+(ncols,nrows)
         ary.reshape(dim)
         hTranspose(ary,self,ncols)
         return ary
@@ -1049,7 +1032,7 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
         if hasattr(self.par,"dim") and not dim:
             dim=self.par.dim
     if not nblocks: nblocks=1
-    arydim=self.getDim()
+    arydim=self.shape()
     if not slicelength==len(self): arydim=[slicelength]
     if dim: arydim=dim
     f.write("# Header for hArray vector written on "+time.ctime()+"\n")
@@ -1392,10 +1375,6 @@ for v in hAllArrayTypes:
     setattr(v,"toNumpy", hArray_toNumpy)
     setattr(v,"checksum", hArray_checksum)
     setattr(v,"setPar",hArray_setPar)
-    setattr(v,"shape",hArray_shape)
-    setattr(v,"reshape",hArray_reshape)
-    setattr(v,"getDim",hArray_shape) # Depriciated use shape
-    setattr(v,"setDim",hArray_reshape) # Depriciated
     setattr(v,"array",hArray_array)
     setattr(v,"vec",hArray_vec)
     setattr(v,"val",hArray_val)

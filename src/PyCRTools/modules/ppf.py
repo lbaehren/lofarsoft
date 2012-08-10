@@ -39,7 +39,7 @@ class PPF():
 
     def add(self,input):
         if not self.buffer:
-            assert input.getSize() == 1024 or input.getDim()[1] == 1024
+            assert input.getSize() == 1024 or input.shape()[1] == 1024
 
             size=input.getSize()
             firstdim=size/1024
@@ -96,7 +96,7 @@ class iPPF():
 
     def add(self,input):
         if not self.buffer:
-            assert input.getSize() == 1024 or input.getDim()[1] == 1024
+            assert input.getSize() == 1024 or input.shape()[1] == 1024
 
             size=input.getSize()
             firstdim=size/1024

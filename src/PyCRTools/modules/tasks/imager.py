@@ -164,7 +164,7 @@ class Imager(Task):
 
         # Get antenna positions
         self.antpos=self.data.getRelativeAntennaPositions()
-        self.nantennas=int(self.antpos.getDim()[0])
+        self.nantennas=int(self.antpos.shape()[0])
 
         # Calculate geometric delays for all sky positions for all antennas
         self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))

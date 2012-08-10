@@ -229,8 +229,15 @@ template <class T> std::vector<T> & hArray<T>::getVector(){
 /*!
 \brief Retrieve the dimensions of the array (returned as reference, hence no copy is made).
  */
-template <class T> std::vector<HInteger> & hArray<T>::getDimensions(){
-  return *(storage_p->dimensions_p);
+template <class T> boost::python::tuple hArray<T>::shape(){
+  boost::python::list s;
+
+  for (uint i=0; i<(*storage_p->dimensions_p).size(); i++)
+  {
+    s.append((*storage_p->dimensions_p)[i]);
+  }
+
+  return boost::python::tuple(s);
 }
 
 /*!
@@ -251,7 +258,7 @@ template <class T> std::vector<HInteger> & hArray<T>::getSizes(){
   return *(storage_p->slice_sizes_p);
 }
 
-template <class T> void hArray<T>::setDimensions(boost::python::list dims)
+template <class T> void hArray<T>::reshapeList(const boost::python::list & dims)
 {
   const int ndims = boost::python::extract<int>(dims.attr("__len__")());
 
@@ -272,7 +279,35 @@ template <class T> void hArray<T>::setDimensions(boost::python::list dims)
   }
   else
   {
-    throw PyCR::ValueError("Total size of new array must not be changed.");
+    throw PyCR::ValueError("total size of new array must be unchanged");
+  }
+
+  setSlice(0,(*storage_p->vec_p).size());
+  calcSizes();
+}
+
+template <class T> void hArray<T>::reshapeTuple(const boost::python::tuple & dims)
+{
+  const int ndims = boost::python::extract<int>(dims.attr("__len__")());
+
+  HInteger size = 1;
+  for (int i=0; i<ndims; i++)
+  {
+    size *= boost::python::extract<HInteger>(dims[i]);
+  }
+
+  if (size == (HInteger)(*storage_p->vec_p).size())
+  {
+    (*storage_p->dimensions_p).resize(ndims);
+
+    for (int i=0; i<ndims; i++)
+    {
+      (*storage_p->dimensions_p)[i] = boost::python::extract<HInteger>(dims[i]);
+    }
+  }
+  else
+  {
+    throw PyCR::ValueError("total size of new array must be unchanged");
   }
 
   setSlice(0,(*storage_p->vec_p).size());
@@ -893,6 +928,7 @@ void hArray_trackHistory(HBool on){
     std::vector<TYPE> vec;	   _H_NL_\
     std::vector<HInteger> ivec;	   _H_NL_\
     boost::python::list list;	   _H_NL_\
+    boost::python::tuple tuple;	   _H_NL_\
     hArray<TYPE> ary0(); _H_NL_\
     hArray<TYPE> ary1; _H_NL_\
     hArray<TYPE> ary(vec); _H_NL_\
@@ -900,9 +936,7 @@ void hArray_trackHistory(HBool on){
     ary.shared_copy();_H_NL_\
     ary.setVector(vec);		_H_NL_\
     ary.getVector();		_H_NL_\
-    ary.getDimensions();		_H_NL_\
     ary.getSizes();		_H_NL_\
-    ary.setDimensions(list);		_H_NL_\
     ary.setSlice(0,0);				_H_NL_\
     ary.setSliceVector(ivec);			_H_NL_\
     ary.getSubSliceStart();			_H_NL_\
@@ -910,6 +944,9 @@ void hArray_trackHistory(HBool on){
     ary.setSubSlice(0,0,0);			_H_NL_\
     ary.setSubSliceVec(ivec,ivec,0);		_H_NL_\
     ary.getNumberOfDimensions();		_H_NL_\
+    ary.shape();				_H_NL_\
+    ary.reshapeList(list);				_H_NL_\
+    ary.reshapeTuple(tuple);				_H_NL_\
     ary.begin();				_H_NL_\
     ary.end();				_H_NL_\
     ary.getBegin();				_H_NL_\

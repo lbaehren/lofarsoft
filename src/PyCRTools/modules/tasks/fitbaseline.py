@@ -162,7 +162,7 @@ class FitBaseline(tasks.Task):
                                default=lambda self:self.numax_i-self.numin_i),
 
         dim_spectrum = dict(doc="""Dimension of input spectrum (typically *n* antennas times *m* spectral points) or just one dimensional for one antenna.""",
-                            default=lambda self:self.spectrum.getDim()),
+                            default=lambda self:self.spectrum.shape()),
 
         ncoeffs = dict(doc="""Number of coefficients for the polynomial.""",
                        default=18),
@@ -576,7 +576,7 @@ CalcBaselineParameters.update(dict(
                   default=lambda self:cr.hArray(float,[1,1],name="Coefficients",fill=0) if self.FitParameters==None else self.FitParameters["coeffs"]),
 
     dim_coeffs = dict(doc="Dimension of the coefficients array (which should be ``[nofAntennas, ncoeff]`` or ``[ncoeff]`` for ``nofAntennas==1``)",
-                      default=lambda self:self.coeffs.getDim()),
+                      default=lambda self:self.coeffs.shape()),
 
     nofAntennasCoeffs = dict(doc="Number of antennas in coeffcient array.",
                              default=lambda self:1 if len(self.dim_coeffs)==1 else self.dim_coeffs[0]),

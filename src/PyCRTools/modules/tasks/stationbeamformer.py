@@ -28,7 +28,7 @@ class StationBeamformer(Task):
         frequencies = dict ( default = lambda self : self.data["FREQUENCY_DATA"] ),
         nfreq = dict ( default = lambda self : len(self.frequencies) ),
         antpos = dict ( default = lambda self : self.data["ANTENNA_POSITIONS"] ),
-        nantennas = dict ( default = lambda self : int(self.antpos.getDim()[0]) ),
+        nantennas = dict ( default = lambda self : int(self.antpos.shape()[0]) ),
         OBSTIME = dict( default = lambda self : self.data["TIME"][0] ),
         OBSLON = dict( default = pytmf.deg2rad(6.869837540), doc = "Observer longitude in radians" ),
         OBSLAT = dict( default = pytmf.deg2rad(52.915122495), doc = "Observer latitude in radians" ),

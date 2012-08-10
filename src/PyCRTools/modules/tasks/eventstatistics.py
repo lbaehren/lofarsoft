@@ -80,7 +80,7 @@ def GetInformationFromFile(topdir, events):
         par["antenna_set"] = res["ANTENNA_SET"]
         
         lorcore=cr.hArray(res["pulse_core_lora"])        
-        Dim = lorcore.getDim()
+        Dim = lorcore.shape()
         if 2 in Dim:         
             par["loracore"]=cr.hArray([lorcore[0],lorcore[1],0.0])
         else:    

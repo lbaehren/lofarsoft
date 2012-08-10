@@ -40,7 +40,7 @@ crfile.setAntennaset(antennaset)
 # Get calibration data and settings from file
 nyquistZone=crfile["nyquistZone"]
 antpos=crfile["RelativeAntennaPositions"]
-nantennas=int(antpos.getDim()[0])
+nantennas=int(antpos.shape()[0])
 
 # Set image parameters
 imparam = {
