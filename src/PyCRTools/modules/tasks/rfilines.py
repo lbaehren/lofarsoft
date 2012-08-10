@@ -153,7 +153,7 @@ class rfilines(tasks.Task):
         incphasemean = hArray(complex, dimensions = f["FFT_DATA"])
         incphase = hArray(complex, dimensions = incphasemean)
         
-        avgspectrum = hfile://localhost/Users/acorstanje/usg/src/PyCRTools/modules/calibration.pyArray(float, dimensions = f["FFT_DATA"])
+#        avgspectrum = hfile://localhost/Users/acorstanje/usg/src/PyCRTools/modules/calibration.pyArray(float, dimensions = f["FFT_DATA"])
         spectrum = hArray(complex, dimensions = f["FFT_DATA"])
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
