@@ -1130,9 +1130,9 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
         block=0
     if block<0:
         if amalgateblocks:
-            dim = [ha_dim[0]*ha_nblocks]+ha_dim[1:]
+            dim = (ha_dim[0]*ha_nblocks)+ha_dim[1:]
         else:
-            dim = [ha_nblocks]+ha_dim
+            dim = (ha_nblocks)+ha_dim
         block=0
     else:
         dim=ha_dim
