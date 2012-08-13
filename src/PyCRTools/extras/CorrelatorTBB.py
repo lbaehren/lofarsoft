@@ -125,6 +125,9 @@ for n in files:
 data = [array]*count
 shiftmax = 0
 f = [array]*count
+nant = zeros(count, dtype=int)
+start_antindex = zeros(count, dtype=int)
+cum_nant = 0
 
 #-------------read in RCUs---------------------------------------
 select_index = [array] * count
@@ -160,24 +163,33 @@ for i in range(0,count,1):
     if i == 0:
 #        import pdb; pdb.set_trace()
         rcun = data[i]["SELECTED_DIPOLES"]
-        nant = len(rcun)
-        print 'rcun = %d' % nant
-        shifts = zeros((count,nant),dtype = int)
-    
+        nant[i] = len(rcun)
+        print 'rcun = %d' % nant[i]
+        shifts2 = zeros(nant, dtype = int)
+        shifts = [shifts2]
+        
     if i != 0:
+        nant[i] = len(data[i]["SELECTED_DIPOLES"])
+        
         rcun2 = data[i]["SELECTED_DIPOLES"]
         rcun = hstack((rcun, rcun2))
+        shifts2 = zeros(nant[i])
+        shifts.append(shifts2) # 2D array won't work as dimensions may not be the same across files
+        del shifts2 # OK?
         del rcun2
 
-#-------------read in antenna positions -------------------------
+    start_antindex[i] = cum_nant
+    cum_nant += nant[i]
 
+#-------------read in antenna positions -------------------------
+import pdb; pdb.set_trace()
 for i in range(0,count,1):
     data[i] = cr.open(files[i],blocksize)
     f[i] = cr.TBBData(files[i])
 
     # reuse selection from above...
     dipoles = np.array(data[i]["DIPOLE_NAMES"])
-    selected_dipoles_numpystr = list(dipoles[select_index])
+    selected_dipoles_numpystr = list(dipoles[select_index[i]])
     selected_dipoles = [str(x) for x in selected_dipoles_numpystr] # needs to be Python-strings
     print 'Number of selected dipoles: %d' % len(selected_dipoles)
 #    notselected = [x for x in dipoles if x not in selected_dipoles]
@@ -189,8 +201,8 @@ for i in range(0,count,1):
     
     if i == 0:
         antposp = data[i]["ITRFANTENNA_POSITIONS"].toNumpy()
-        nant = len(antposp)
-        print '%d antenna positions read in' % nant
+        nantpos = len(antposp)
+        print '%d antenna positions read in' % nantpos
     
     if i != 0:
         antposp2 = data[i]["ITRFANTENNA_POSITIONS"].toNumpy()
@@ -199,7 +211,7 @@ for i in range(0,count,1):
     
     #-------------shifts between differnt RCUs-----------------------
     
-    shifts[i] = data[i]["SAMPLE_NUMBER"]
+    shifts[i] = np.array(data[i]["SAMPLE_NUMBER"])
     
     localmax = max(shifts[i])
     if localmax > shiftmax:
@@ -223,8 +235,8 @@ for d in data:
 
 print "BLAH", antnr
 print shifts
-print '# shifts:' 
-print shifts.shape
+#print '# shifts:' 
+#print shifts.shape
 
 
 #----------------------------------------------------------------
@@ -286,17 +298,24 @@ class readin(threading.Thread):
     def run(self):
         if getFFTData:
             self.offset = cr.hArray(self.block + shifts[self.i])
-            data[self.i].getFFTData(fftdata[self.i*nant:(self.i+1)*nant], self.offset)  
+            data[self.i].getFFTData(fftdata[self.i*nant:(self.i+1)*nant], self.offset)  # broken
         else:
             self.offset = cr.hArray(self.block + shifts[self.i])
             self.offset = cr.hArray((self.block)*blocksize + shifts[self.i]+startblock)
             #                        data[self.i]["BLOCKSIZE"] = blocksize
             #                        print "BLA", fftdata.shape(), self.i*nant, (self.i+1)*nant, self.offset
             #                        data[self.i].getTimeseriesData(fftdata[self.i*nant:(self.i+1)*nant], self.offset)
-            #import pdb; pdb.set_trace()
-            cr.hReadTimeseriesData(fftdata[self.i*nant:(self.i+1)*nant], self.offset, blocksize, f[self.i])
-            fftdata[94] = 0
-            fftdata[95] = 0
+#            import pdb; pdb.set_trace()
+#            cr.hReadTimeseriesData(fftdata[self.i*nant:(self.i+1)*nant], self.offset, blocksize, f[self.i])
+#            print fftdata.shape()
+#            print start_antindex[self.i]
+#            print nant[self.i]
+#            print self.offset
+            cr.hReadTimeseriesData(fftdata[int(start_antindex[self.i]):int(start_antindex[self.i] + nant[self.i])], self.offset, blocksize, f[self.i])
+
+
+#            fftdata[94] = 0
+#            fftdata[95] = 0
 
 #-------------correlate the data---------------------------------
 
@@ -369,6 +388,7 @@ fftdatan = zeros((share,antnr, blocksize/share),dtype = complex)
 if getFFTData:
     fftdata = cr.hArray(complex, dimensions = (antnr,lenfre))
 else:
+    print '# ANTENNAS for FFTDATA array = %d' % antnr
     fftdata = cr.hArray(float, dimensions = (antnr,blocksize))
 
 acm = zeros((antnr,antnr,len(freliste)),dtype = complex)
