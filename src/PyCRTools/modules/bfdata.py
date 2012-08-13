@@ -69,6 +69,7 @@ class BFDataReader():
             if os.path.isfile(file):
                 self.files.append(open(file))
 
+        self.obsID=obsID
         self.channels=self.par["channels"]
         self.nrsubbands=self.par["nrsubbands"]
         self.samples=int(self.par["samples"]/self.par["timeintegration"])
@@ -105,7 +106,7 @@ class BFDataReader():
                 self.datatype="ComplexVoltage"
                 self.samples=self.par["samples"]
         else:
-            "More than one datatype in observation. Select the one you want to read with setDatatype(type), where type is incoherentstokes, coherentstokes or rawvoltage"
+            print "More than one datatype in observation. Select the one you want to read with setDatatype(type), where type is incoherentstokes, coherentstokes or rawvoltage"
 
 
     def setDatatype(self,type):
@@ -117,6 +118,10 @@ class BFDataReader():
                     for file in self.par["files"]:
                          if '.incoherentstokes' in file and  os.path.isfile(file):
                               self.files.append(open(file))
+                    if self.h5:
+                        for file in self.par["files"]:
+                            if '.h5' in file and os.path.isfile(file[0:-3]+'.raw') and file[0:-3]+'.raw' not in self.par['files']:
+                                self.files.append(open(file[0:-3]+'.raw'))   
                     self.data=np.zeros((self.samples,self.channels*len(self.files)))
                 if self.par["stokestype"]=="IQUV":
                     print "Changing datatype to: incoherentstokes IQUV"
@@ -125,6 +130,10 @@ class BFDataReader():
                     for file in self.par["files"]:
                          if '.incoherentstokes' in file and  os.path.isfile(file):
                               self.files.append(open(file))
+                    if self.h5:
+                        for file in self.par["files"]:
+                            if '.h5' in file and os.path.isfile(file[0:-3]+'.raw'):
+                                self.files.append(open(file[0:-3]+'.raw'))   
                     self.data=np.zeros((4,self.samples,self.channels*len(self.files)))
             elif type == "coherentstokes":
                 if self.par["stokestype"]=="I":
@@ -166,6 +175,8 @@ class BFDataReader():
         if self.datatype is "IncoherentStokesI":
             for num, file in enumerate(self.files):
                 self.data[:,num*self.channels:(num+1)*self.channels]=get_stokes_data(file,block,self.channels,self.samples,1,type=self.datatype)[0,:,:].transpose()
+                if self.h5:
+                    self.data[num]=get_stokes_data(file,block,self.channels,self.samples,self.nrsubbands,type=self.datatype,noSubbandAxis=True,h5=self.h5)
         elif self.datatype is "IncoherentStokesIQUV":
             for num, file in enumerate(self.files):
                 self.data[:,:,num*self.channels:(num+1)*self.channels]=get_stokes_data(file,block,self.channels,self.samples,1,type=self.datatype).swapaxes(1,2)
@@ -177,13 +188,70 @@ class BFDataReader():
 
         return self.data
 
+    def useAccessibleFiles(self,type):
+            if type == "incoherentstokes":
+                if self.par["stokestype"]=="I":
+                    print "Changing datatype to: incoherentstokes I"
+                    self.datatype="IncoherentStokesI"
+                    self.files=[]
+                    for file1 in self.par["files"]:
+                      for file in os.listdir(getDir(file1,self.obsID)):
+                         if '.incoherentstokes' in file and os.path.isfile(file) and file not in [f.name for f in self.files]:
+                              self.files.append(open(file))
+                    self.data=np.zeros((self.samples,self.channels*len(self.files)))
+                if self.par["stokestype"]=="IQUV":
+                    print "Changing datatype to: incoherentstokes IQUV"
+                    self.datatype="IncoherentStokesIQUV"
+                    self.files=[]
+                    for file1 in self.par["files"]:
+                      for file in os.listdir(getDir(file1,self.obsID)):
+                         if '.incoherentstokes' in file and  os.path.isfile(file) and file not in [f.name for f in self.files]:
+                              self.files.append(open(file))
+                    self.data=np.zeros((4,self.samples,self.channels*len(self.files)))
+            elif type == "coherentstokes":
+                if self.par["stokestype"]=="I":
+                    print "Changing datatype to: coherentstokes I"
+                    self.datatype="CoherentStokesI"
+                    self.files=[]
+                    tempdirs=set([getDir(file1,self.obsID) for file1 in self.par["files"]])
+                    for tempdir in tempdirs:
+                      if os.path.isdir(tempdir):
+                        for file in os.listdir(tempdir):
+                         if '.raw' in file and  os.path.isfile(tempdir+file) and file not in [f.name for f in self.files]:
+                              self.files.append(open(tempdir+file))
+                    self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))     
+                elif self.par["stokestype"]=="IQUV":
+                    print "Changing datatype to: coherentstokes IQUV"
+                    self.datatype="CoherentStokesIQUV"
+                    self.files=[]
+                    for file1 in self.par["files"]:
+                      for file in os.listdir(getDir(file1,self.obsID)): 
+                         if '.raw' in file and  os.path.isfile(file) and file not in [f.name for f in self.files]:
+                              self.files.append(open(file))
+            elif type == "complexvoltage":
+                self.datatype="ComplexVoltage"
+                self.samples=self.par["samples"]
+            else:
+                print "Invalide type"
+                return False
+            print "datatype set to", self.datatype
+            print "nr files",len(self.files)
+            return True
+
+
+
+
     def setblocksize(self,blocksize):
         self.samples=blocksize
         self.par['nrblocks']=int(self.par['nrblocks']*self.par['samples']/blocksize)
         self.par['samples']=blocksize
         self.data=np.zeros((len(self.files),self.samples,self.channels*self.nrsubbands))
         self.nrblocks=self.par['nrblocks']
-        
+
+
+
+def getDir(filename,obsID):
+    return filename.split(obsID)[0]
 
 
 def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI",noSubbandAxis=False,h5=False):
@@ -243,8 +311,9 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
     dt=dt.newbyteorder('>')
 
     if block>=0:
+        print "h5=",h5
         if not put_file_at_sequence(file,block,szD,h5): #searches for block with sequencence nr block in the data.returns false if sequence number not available. Otherwise put filepointer after header of this block
-            if bCoherent:
+            if h5:
                  if noSubbandAxis:
                       data=np.zeros((samples,channels*nrsubbands))
                  else:
@@ -271,7 +340,13 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
             else:
                 data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples|2,nrsubbands,channels)[0:samples,:,:]
     else:
-        data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(nrStokes,channels,samples|2)[:,:,0:samples]
+        if h5:
+            if noSubbandAxis:
+                data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples,channels*nrsubbands)
+            else:
+                data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(samples,nrsubbands,channels)
+        else:
+            data=np.frombuffer(file.read(szD),dtype=dt,count=n).reshape(nrStokes,channels,samples|2)[:,:,0:samples]
 
 
     # return sequence number as uint, and data as nparray
@@ -432,6 +507,9 @@ def check_data_parameters(file, channels, samples, nrstations=1, type="StokesI",
     """
 
     #
+    if h5:
+        print "Cannot verify data in this way"
+        return True
     if type is "StokesI" or type is "I":
         nrStokes=1
     elif type is "StokesIQUV" or type is "IQUV" or type is "RawVoltage":
@@ -839,8 +917,6 @@ def get_parameters(obsid, useFilename=False):
         else:
             sbspernode[i]=int(sbspernode[i])
     parameters["sbspernode"]=sbspernode
-    parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
-
 
     #parameters["subbandsperMS"]=allparameters["OLAP.StorageProc.subbandsPerMS"]
     #parameters["antennaset"]=allparameters["Observation.antennaSet"]
@@ -860,6 +936,17 @@ def get_parameters(obsid, useFilename=False):
     parameters["filtereddata"]=allparameters["OLAP.outputFilteredData"]=='true'
     parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true'
     parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
+    if p["incoherentstokes"] and not p["coherentstokes"]:
+        parameters["timeintegration"]=parameters["IStimeintegration"]
+    elif p["incoherentstokes"] and not p["coherentstokes"]:
+        parameters["timeintegration"]=parameters["CStimeintegration"]
+    elif p["incoherentstokes"] and p["coherentstokes"]:
+        if parameters["CStimeintegration"]==parameters["IStimeintegration"]:
+            parameters["timeintegration"]=parameters["IStimeintegration"]
+        else:
+            parameters["timeintegration"]="Cannot be defined, IS and CS value disagree"
+
+
     if "Observation.Beam[0].target" in allparameters.keys():
         parameters["target"]=allparameters["Observation.Beam[0].target"]
 
@@ -990,7 +1077,7 @@ def get_parameters(obsid, useFilename=False):
     return parameters
 
 
-def get_parameters_new(obsid, useFilename=False):
+def get_parameters_new(obsid, useFilename=False): # svn version
     """Get the most important observation parameters. Returns a dictionary with these parameters.
     *obsid*        Observation id, f.e. L2010_08834 or D2009_16234. Only works on lofar cluster.
     *useFilename*  If set to true, obsid is filename of the parset.
@@ -1005,7 +1092,9 @@ def get_parameters_new(obsid, useFilename=False):
             obsnr=obsid.strip('L')
 
         # Name of the parset file
-        parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'/L'+obsnr+'.parset'
+        parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'.parset'
+        if not os.path.isfile(parsetfilename):
+            parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'/L'+obsnr+'.parset'
         if not os.path.isfile(parsetfilename):
             parsetfilename='/globalhome/lofarsystem/log/'+obsid+'/RTCP.parset.0'
 
@@ -1044,14 +1133,7 @@ def get_parameters_new(obsid, useFilename=False):
             else:
                 sbspernode[i]=1
         parameters["sbspernode"]=sbspernode
-    if "OLAP.Stokes.integrationSteps" in allparameters.keys():
-        parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
-    else:
-        parameters["CStimeintegration"]=int(allparameters["OLAP.CNProc_CoherentStokes.timeIntegrationFactor"])
-        parameters["IStimeintegration"]=int(allparameters["OLAP.CNProc_IncoherentStokes.timeIntegrationFactor"])
-        if True or parameters["CStimeintegration"]==parameters["IStimeintegration"]:
-            parameters["timeintegration"]=parameters["CStimeintegration"]
-    
+        
     subbands=allparameters["Observation.subbandList"].strip('[]').split(',')
     subbands=[range(int(a.split('..')[0]),int(a.split('..')[1])+1) if '..' in a else [a] for a in subbands if '..' in a]
     parameters["subbands"]=[]
@@ -1083,6 +1165,23 @@ def get_parameters_new(obsid, useFilename=False):
         if "Observation.DataProducts.Output_Filtered.enabled" in allparameters.keys():
             parameters["filtereddata"]=allparameters["Observation.DataProducts.Output_Filtered.enabled"]=='true'
 
+    parameters["IStimeintegration"]=int(allparameters["Observation.ObservationControl.OnlineControl.OLAP.CNProc_IncoherentStokes.timeIntegrationFactor"])
+    parameters["CStimeintegration"]=int(allparameters["Observation.ObservationControl.OnlineControl.OLAP.CNProc_CoherentStokes.timeIntegrationFactor"])
+    if "OLAP.Stokes.integrationSteps" in allparameters.keys():
+        parameters["timeintegration"]=int(allparameters["OLAP.Stokes.integrationSteps"])
+    else:
+        if parameters["incoherentstokes"] and not parameters["coherentstokes"]:
+            parameters["timeintegration"]=parameters["IStimeintegration"]
+        elif parameters["incoherentstokes"] and not parameters["coherentstokes"]:
+            parameters["timeintegration"]=parameters["CStimeintegration"]
+        elif parameters["incoherentstokes"] and parameters["coherentstokes"]:
+            if parameters["CStimeintegration"]==parameters["IStimeintegration"]:
+                parameters["timeintegration"]=parameters["IStimeintegration"]
+            else:
+                parameters["timeintegration"]="Cannot be defined, IS and CS value disagree"
+        else:
+            parameters["timeintegration"]=parameters["IStimeintegration"]
+
     parameters["flyseyes"]=allparameters["OLAP.PencilInfo.flysEye"]=='true'
     if "OLAP.Stokes.which" in allparameters.keys():
         parameters["stokestype"]=allparameters["OLAP.Stokes.which"]
@@ -1111,8 +1210,11 @@ def get_parameters_new(obsid, useFilename=False):
 
     starttime=time.mktime((year,month,day,hour,minute,second,0,0,0))
     stoptime=time.mktime((endyear,endmonth,endday,endhour,endminute,endsecond,0,0,0))
-    blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])*parameters['timeintegration']
-    parameters["nrblocks"]=int((stoptime-starttime)/blockduration)
+    if parameters['timeintegration'] > 0:
+        blockduration=1/(float(parameters["clockfrequency"])*1e6)*1024*float(parameters["samples"])*float(parameters["channels"])*float(parameters['timeintegration'])
+        parameters["nrblocks"]=int((stoptime-starttime)/blockduration)
+    else:
+        print "Block duration and nrblock Cannot be defined, need to sort out difference between IS and CS"
 
     # Get file names
     year=parameters['starttime'].split('-')[0].replace('\'','')
@@ -1267,7 +1369,7 @@ def get_parameters_new(obsid, useFilename=False):
     parameters["locations"]=fullnames
 
 
-    parameters["h5"]=True in ['h5' in t for t in parameters["locations"]]
+    parameters["h5"]=True in ['h5' in t or 'raw' in t for t in parameters["locations"]]
     # Get beams information
     nrbeams=int(allparameters["Observation.nrBeams"])
     parameters["nrbeams"]=nrbeams
@@ -1319,7 +1421,9 @@ def get_all_parameters_new(obsid, useFilename=False):
         else:
             obsnr=obsid.strip('L')
         # Name of the parset file
-        parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'/L'+obsnr+'.parset'
+        parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'.parset'
+        if not os.path.isfile(parsetfilename):
+            parsetfilename='/globalhome/lofarsystem/production/lofar/bgfen/log/L'+obsnr+'/L'+obsnr+'.parset'
         if not os.path.isfile(parsetfilename):
             parsetfilename='/globalhome/lofarsystem/log/'+obsid+'/RTCP.parset.0'
 
