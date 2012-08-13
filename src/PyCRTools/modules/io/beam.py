@@ -431,6 +431,7 @@ class BeamData(IOInterface):
                 
         #Integer offsets to reference frequency (shift to center)
         offsets = cr.Vector(int,frequencies,fill=shifts)
+        offsets*=-1
         
         return offsets
         
