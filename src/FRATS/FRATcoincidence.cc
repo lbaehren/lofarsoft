@@ -1000,13 +1000,17 @@ Save timeseries (append)
                 sqrBaseline.resize(itsNrChannels);
                 sqrDivBaseline.resize(itsNrChannels);
                 sqrDivBaselineSort.resize(itsNrChannels);
+                timeseries.resize(itsNrSamples);
+                avgtimeseries.resize(itsNrSamples);
+                sqrTimeseries.resize(itsNrSamples);
                 
         }
 
 
         bool RFIcleaning::calcBaseline(){
+             float * it;
              for(int ch=0; ch<itsNrChannels; ch++){
-                    float* it=itsDataStart+ch;
+                    it=itsDataStart+ch;
                     baseline[ch]=0.0;
                     for ( ; it<itsDataEnd; it+=itsNrChannels ) {
                         baseline[ch]+=*it;
@@ -1018,8 +1022,9 @@ Save timeseries (append)
         
         
         bool RFIcleaning::calcSqrBaseline(){
+             float * it;
              for(int ch=0; ch<itsNrChannels; ch++){
-                    float* it=itsDataStart+ch;
+                    it=itsDataStart+ch;
                     sqrBaseline[ch]=0.0;
                     for ( ; it<itsDataEnd; it+=itsNrChannels ) {
                         sqrBaseline[ch]+=(*it)*(*it);
@@ -1027,6 +1032,75 @@ Save timeseries (append)
                 }
             return true;
         }
+        
+        bool RFIcleaning::calcTimeseries(){
+             // calculate average timeseries
+             float * it;
+             float * vec_end=itsDataStart;
+             it=itsDataStart;
+             for(int sa=0; sa<itsNrSamples; sa++){
+                    it=itsDataStart+sa*itsNrChannels;
+                    vec_end+=itsNrChannels;
+                    // cout << it << " " << vec_end << endl;
+                    timeseries[sa]=0.0;
+                    for ( ; it<vec_end; it++ ) {
+                        timeseries[sa]+=*it;
+                    }
+                }
+            return true;
+        }
+        
+        bool RFIcleaning::calcAverageTimeseries(){
+             // calculate average timeseries
+             float * it;
+             float * vec_end=itsDataStart;
+             it=itsDataStart;
+             for(int sa=0; sa<itsNrSamples; sa++){
+                    it=itsDataStart+sa*itsNrChannels;
+                    vec_end+=itsNrChannels;
+                    avgtimeseries[sa]=0.0;
+                    // cout << it << " " << vec_end << endl;
+                    for ( ; it<vec_end; it++ ) {
+                        avgtimeseries[sa]+=*it;
+                    }
+                    avgtimeseries[sa]/=itsNrChannels;
+                }
+            return true;
+        }
+        
+
+        bool RFIcleaning::averageTimeseries(){
+            it1=timeseries.begin();
+            it2=avgtimeseries.begin();
+            if(timeseries.size() != avgtimeseries.size()){
+                cerr << " timeseries and avgtimeseries vector not of equal size ";
+                return false;
+            }
+            vec1_end=timeseries.end();
+            while(it1<vec1_end){
+                (*it2)=(*it1)/itsNrChannels;
+                it1++;
+                it2++;
+            }
+            return true;
+        }
+        
+        bool RFIcleaning::calcSqrTimeseries(){
+             float * it;
+             float * vec_end=itsDataStart;
+             it=itsDataStart;
+             for(int sa=0; sa<itsNrSamples; sa++){
+                    it=itsDataStart+sa*itsNrChannels;
+                    vec_end+=itsNrChannels;
+                    // cout << it << " " << vec_end << endl;
+                    sqrTimeseries[sa]=0.0;
+                    for ( ; it<vec_end; it++ ) {
+                        sqrTimeseries[sa]+=(*it)*(*it);
+                    }
+                }
+            return true;
+        }
+        
         
 
         bool RFIcleaning::calcBadChannels(int cutlevel, bool useInterpolatedBaseline=false) {
@@ -1187,24 +1261,41 @@ Save timeseries (append)
             
             int ch;                
             int choffset;
-            for(int i=0; i<badChans.size(); i++){
-                ch=badChans[i].id;
-                float* it=itsDataStart+ch;
-                for ( ; it<itsDataEnd; it+=itsNrChannels ) {
-                    if ( method == "1" ) {
+
+
+            if ( method == "1" ) {
+                for(int i=0; i<badChans.size(); i++){
+                    ch=badChans[i].id;
+                    float* it=itsDataStart+ch;
+                    for ( ; it<itsDataEnd; it+=itsNrChannels ) {
                         *it = 1.0;
-                    } else if ( method == "prevfreq" ){
-                        choffset=-3*itsNrChannels;
-                        if(ch<3){
-                            choffset=3;
-                        }
-                        if((ch-3)%itsChansPerSubband==0){
-                            choffset=-1;
-                        }
+                    }
+                }
+            } else if ( method == "0" ) {
+                for(int i=0; i<badChans.size(); i++){
+                    ch=badChans[i].id;
+                    float* it=itsDataStart+ch;
+                    for ( ; it<itsDataEnd; it+=itsNrChannels ) {
+                        *it = 0.0;
+                    }
+                }
+            } else if ( method == "prevfreq" ){
+                choffset=-3*itsNrChannels;
+                if(ch<3){
+                    choffset=3;
+                }
+                if((ch-3)%itsChansPerSubband==0){
+                    choffset=-1;
+                }
+                for(int i=0; i<badChans.size(); i++){
+                    ch=badChans[i].id;
+                    float* it=itsDataStart+ch;
+                    for ( ; it<itsDataEnd; it+=itsNrChannels ) {
                         *it=*(it+choffset);
                     }
                 }
             }
+            
 
             return true;
         }
@@ -1285,16 +1376,77 @@ Save timeseries (append)
             return true;  
         }
 
+        bool RFIcleaning::printData(){
+            float *it=itsDataStart;
+            cout << " Data from ";
+            cout << *it << " " << it << " ";
+            while(++it!=itsDataEnd){
+                cout << *it << " " << it << " ";
+            }
+            cout << endl;
+            return 0;
+        }
 
-        bool RFIcleaning::printBaseline(){
+        bool RFIcleaning::printBaseline(bool printindex=true){
             cout << " Baseline     ";
-            for(int i=0; i<baseline.size(); i++){
-                cout << i << " " << baseline[i] << " " ; 
+            if(printindex){
+                for(int i=0; i<baseline.size(); i++){
+                    cout << i << " " << baseline[i] << " " ; 
+                }
+            } else {
+                for(int i=0; i<baseline.size(); i++){
+                    cout << baseline[i] << " " ; 
+                }
             }
             cout << endl;
             return true;  
         }
 
+        bool RFIcleaning::printTimeseries(bool printindex=true){
+            cout << " Timeseries     ";
+            if(printindex){
+                for(int i=0; i<timeseries.size(); i++){
+                    cout << i << " " << timeseries[i] << " " ; 
+                }
+            } else {
+                for(int i=0; i<timeseries.size(); i++){
+                    cout << timeseries[i] << " " ; 
+                }
+            }
+            cout << endl;
+            return true;  
+        }
+
+        bool RFIcleaning::printAverageTimeseries(bool printindex=true){
+            cout << " Average Timeseries     ";
+            if(printindex){
+                for(int i=0; i<avgtimeseries.size(); i++){
+                    cout << i << " " << avgtimeseries[i] << " " ; 
+                }
+            } else {
+                for(int i=0; i<avgtimeseries.size(); i++){
+                    cout << avgtimeseries[i] << " " ; 
+                }
+            }
+            cout << endl;
+            return true;  
+        }
+
+        bool RFIcleaning::printSqrTimeseries(bool printindex=true){
+            cout << " Square sum Timeseries     ";
+            
+            if(printindex){
+                for(int i=0; i<sqrTimeseries.size(); i++){
+                    cout << i << " " << sqrTimeseries[i] << " " ; 
+                }
+            } else {
+                for(int i=0; i<sqrTimeseries.size(); i++){
+                    cout << sqrTimeseries[i] << " " ; 
+                }
+            }
+            cout << endl;
+            return true;  
+        }
 
         bool RFIcleaning::divideBaseline(bool useInterpolatedBaseline=false){
             float * dataptr = itsDataStart;
@@ -1314,6 +1466,29 @@ Save timeseries (append)
                     it2=baseline.begin();
                 }
             }
+        }
+        
+        bool RFIcleaning::subtractAverageTimeseries(){
+            float * dataptr = itsDataStart;
+            it1=avgtimeseries.begin();
+            vec1_end=avgtimeseries.end();
+            it2=avgtimeseries.begin();
+            int chindex=0;
+            //cout << it1 << " " << vec1_end << endl;
+            while(dataptr!=itsDataEnd){
+                while(chindex<itsNrChannels && dataptr!=itsDataEnd){
+                    *dataptr -= *it2;
+                    dataptr++;
+                    chindex++;
+                }
+                chindex=0;
+                
+                it2++;
+                if(it2==vec1_end){
+                    it2=avgtimeseries.begin();
+                }
+            }
+            return true;
         }
         
         bool RFIcleaning::writeBadSamples(ofstream * fsfile, int blockNr){
@@ -1341,6 +1516,13 @@ Save timeseries (append)
         }
 
 
+        bool RFIcleaning::writeSqrTimeseries(ofstream * stfile, int blockNr){
+            float blockNrFloat=(float) blockNr;
+            stfile->write((const char*)&blockNrFloat, sizeof(blockNrFloat));
+            float sizefloat=(float) sqrTimeseries.size();
+            stfile->write((const char*)&sizefloat, sizeof(sizefloat));
+            stfile->write((const char*)&sqrTimeseries[0], sqrTimeseries.size() * sizeof(sqrTimeseries[0]));
+        }
 
 
 

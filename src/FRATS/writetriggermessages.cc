@@ -27,6 +27,9 @@ using namespace std;
 
 int main(int argc , char *argv[])
 {
+         cout << "sizes " << endl << "TriggerEvent" << sizeof(struct triggerEvent) << endl << "Float" << sizeof(float) << endl;
+         cout << "unsigned long int" << sizeof(unsigned long int) << endl << "int" << sizeof(int) << endl;
+
 
          if(argc<2){
              

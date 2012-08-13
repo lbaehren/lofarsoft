@@ -366,6 +366,9 @@ namespace FRAT {
                 int itsNrChannels;
                 int itsNrSamples;
                 vector <float> baseline;
+                vector <float> timeseries;
+                vector <float> avgtimeseries;
+                vector <float> sqrTimeseries;
                 vector <float> IPbaseline;
                 vector <float> sqrBaseline;
                 vector <chanIdVal> badChans;
@@ -393,14 +396,24 @@ namespace FRAT {
                 bool cleanChannels(std::string method);
                 bool cleanChannel0(std::string method);
                 bool cleanSamples(std::string method);
+                bool calcTimeseries();
+                bool calcAverageTimeseries();
+                bool averageTimeseries();
+                bool calcSqrTimeseries();
                 bool interpolateBaseline();
                 bool printBadSamples();
                 bool printBadChannels();
-                bool printBaseline();
+                bool printData();
+                bool printBaseline(bool printindex);
+                bool printTimeseries(bool printindex);
+                bool printAverageTimeseries(bool printindex);
+                bool printSqrTimeseries(bool printindex);
                 bool divideBaseline(bool useInterPolatedBaseline);
+                bool subtractAverageTimeseries();
                 bool writeBadSamples(ofstream * fsfile, int blockNr);
                 bool writeBadChannels(ofstream * fcfile, int blockNr);
                 bool writeBaseline(ofstream * blfile, int blockNr);
+                bool writeSqrTimeseries(ofstream *stfile, int blockNr);
 
 
             private:

@@ -381,6 +381,7 @@ int main (int argc,
 	int samples=SAMPLES;
 	int startsubbandnumber=321;
 	bool DoPadding=0, verbose=true;
+    bool DoZeroDM=false;
 	std::string extension=".stokes";
 	int timeintegration=1;
 	int nrCombinedSBs = 1;
@@ -519,6 +520,9 @@ int main (int argc,
 		} else if(topic == "-verbose"){
 			verbose = true;
 			cout << "using verbose output" << endl;
+		} else if(topic == "-zeroDM"){
+			DoZeroDM = true;
+			cout << "using zeroDMing to divide data by average timeseries" << endl;
 		} else if(topic == "-pad"){
 			DoPadding = true;
 			cout << "using padding output" << endl;
@@ -774,6 +778,7 @@ int main (int argc,
 	string flaggedchansfilename=pulsedir+"/flaggedchans.log";
 	string flaggedsamplesfilename=pulsedir+"/flaggedsamples.log";
 	string baselinefilename=pulsedir+"/baseline.log";
+	string sqrtimeseriesfilename=pulsedir+"/sqrtimeseries.log";
 	string avfilename=pulsedir+"/average.log";
 	string stdfilename=pulsedir+"/stddev.log";
     
@@ -783,6 +788,8 @@ int main (int argc,
     fsfile->open(flaggedsamplesfilename.c_str(), ios::binary  | ios::out);
     ofstream * basefile = new ofstream;
     basefile->open(baselinefilename.c_str(), ios::binary |  ios::out);
+    ofstream * sqrtimeseriesfile = new ofstream;
+    basefile->open(sqrtimeseriesfilename.c_str(), ios::binary |  ios::out);
     ofstream * avfile = new ofstream;
     avfile->open(avfilename.c_str(), ios::binary  | ios::out);
     ofstream * stdfile = new ofstream;
@@ -935,6 +942,13 @@ if(doFlagging){
 
         RFIcleaner.cleanChannels("1");
         RFIcleaner.cleanChannel0("1");
+        if(DoZeroDM){
+            RFIcleaner.calcAverageTimeseries();
+            RFIcleaner.subtractAverageTimeseries();
+        }
+
+        RFIcleaner.calcBaseline();
+        RFIcleaner.writeSqrTimeseries(sqrtimeseriesfile, blockNr);
 
         RFIcleaner.writeBaseline(basefile, blockNr);
 
@@ -1028,7 +1042,7 @@ if(doFlagging){
     for(int DMcounter=0; DMcounter<nDMs; DMcounter++){
         for(int fc2=0;fc2<nstreams;fc2++){
             	SBTs[fc2][DMcounter]->writeAverage(avfile);
-            	SBTs[fc2][DMcounter]->writeStdDev(avfile);
+            	SBTs[fc2][DMcounter]->writeStdDev(stdfile);
         }
     }
 
@@ -1038,6 +1052,8 @@ if(doFlagging){
     stdfile->close();
     triggerlogfile.close();
     alltriggerlogfile.close();
+    basefile->close();
+    sqrtimeseriesfile->close();
     //fclose(pFileOut); 
 	return nofFailedTests;
 }
