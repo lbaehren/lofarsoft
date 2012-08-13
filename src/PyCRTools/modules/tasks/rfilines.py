@@ -134,7 +134,8 @@ class rfilines(tasks.Task):
         nblocks = min(f["DATA_LENGTH"]) / self.blocksize # Why is this not working?
         nblocks -= 5 # HACK -- why needed?
 
-        nblocks = min(self.nofblocks, nblocks) # limit to # blocks given in params
+        if self.nofblocks:
+            nblocks = min(self.nofblocks, nblocks) # limit to # blocks given in params
         
         print 'Processing %d blocks of length %d' % (nblocks, self.blocksize)
         averagePhasePerAntenna = np.zeros(self.nofchannels / 2) # do one polarisation; officially: look them up in channel ids!
@@ -153,7 +154,7 @@ class rfilines(tasks.Task):
         incphasemean = hArray(complex, dimensions = f["FFT_DATA"])
         incphase = hArray(complex, dimensions = incphasemean)
         
-#        avgspectrum = hfile://localhost/Users/acorstanje/usg/src/PyCRTools/modules/calibration.pyArray(float, dimensions = f["FFT_DATA"])
+        avgspectrum = hArray(float, dimensions = f["FFT_DATA"])
         spectrum = hArray(complex, dimensions = f["FFT_DATA"])
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
@@ -172,10 +173,10 @@ class rfilines(tasks.Task):
             spectrum.copy(magspectrum)
 
             magspectrum.abs()
-            magspectrum += 1e-9
+#            magspectrum += 1e-9
 
             incphase.copy(spectrum)
-            incphase /= magspectrum # divide magnitude out to get exp(i phi)
+            incphase /= (magspectrum + 1.0e-9) # divide magnitude out to get exp(i phi)
 
             incphaseRef = hArray(incphase[0].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
             incphase /= incphaseRef
@@ -203,43 +204,43 @@ class rfilines(tasks.Task):
             #f["FREQUENCY_DATA"][4538]
             
             # Get phases from spectrum
-            phases = cr.hArray(float, dimensions = spectrum) # dim. 48 x 4096 typically; N_ant x N_freqs
+#            phases = cr.hArray(float, dimensions = spectrum) # dim. 48 x 4096 typically; N_ant x N_freqs
             # has to be recreated here because they are all stored into 'phaseblocks' list
-            cr.hComplexToPhase(phases, spectrum)
+#            cr.hComplexToPhase(phases, spectrum)
             # Apply calibration phases
             #phases -= calphases
             # subtract reference phase, which is phases[0, ...]
-#            hTranspose(phaseT, phases, phases.shape()[0], phases.shape()[1])
-            phaseRef = hArray(phases[0].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
-            phases -= phaseRef
+
+#            phaseRef = hArray(phases[0].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
+#            phases -= phaseRef
 #            for i in range(1, self.nofchannels):
 #                phases[i, ...] -= phases[0, ...] # any way to do this without loop?
                 
 #            phases[0, ...] = 0.0
             # wrap phases again into [-pi, pi]
-            cr.hPhaseWrap(phases, phases) # make that an in-place function in mMath...
+#            cr.hPhaseWrap(phases, phases) # make that an in-place function in mMath...
             
-            phaseblocks.append(phases)
+#            phaseblocks.append(phases)
                    
-        phaseSum = hArray(float, dimensions = phaseblocks[0]) # dim. N_ant x N_freq (e.g. 48 x 4096)
-        wrapped = hArray(float, dimensions = phaseSum)
-        phaseRMS = hArray(float, dimensions = phaseSum) # RMS per antenna per freq channel
-        phizero = phaseblocks[0] # subtract that from all phases; then wrap, then add to sum, then average, then add phi[0] again, then wrap... Done! Hope it works.
-        n = 0
-        for phases in phaseblocks:
-            print 'Mean: Doing block %d' % n
-            n += 1
+#        phaseSum = hArray(float, dimensions = phaseblocks[0]) # dim. N_ant x N_freq (e.g. 48 x 4096)
+#        wrapped = hArray(float, dimensions = phaseSum)
+#        phaseRMS = hArray(float, dimensions = phaseSum) # RMS per antenna per freq channel
+#        phizero = phaseblocks[0] # subtract that from all phases; then wrap, then add to sum, then average, then add phi[0] again, then wrap... Done! Hope it works.
+#        n = 0
+#        for phases in phaseblocks:
+#            print 'Mean: Doing block %d' % n
+#            n += 1
             # do this without loop! Also RMS. Then, no RAM storage of all the spectra is needed!
             # Calculate mean: first calculate sum, then wrap everything into (-pi, pi), then... ???
-            wrapped.copy(phases)
-            wrapped -= phizero
-            cr.hPhaseWrap(wrapped, wrapped)
+#            wrapped.copy(phases)
+#            wrapped -= phizero
+#            cr.hPhaseWrap(wrapped, wrapped)
             
-            phaseSum += wrapped
+#            phaseSum += wrapped
         
-        phaseAvg = phaseSum / len(phaseblocks)
-        phaseAvg += phizero
-        cr.hPhaseWrap(phaseAvg, phaseAvg)
+#        phaseAvg = phaseSum / len(phaseblocks)
+#        phaseAvg += phizero
+#        cr.hPhaseWrap(phaseAvg, phaseAvg)
         
         #linephase_avg.copy(phaseAvg[..., 1111])
         #linephase.copy(phaseblocks[0][..., 1111]) doesnt work!
@@ -248,17 +249,17 @@ class rfilines(tasks.Task):
 #        phaseAvg = phaseblocks[10]
 
         # now do RMS. Sum (phi - mu)^2 where phi - mu is wrapped first
-        n = 0
-        for phases in phaseblocks:
-            print 'RMS: doing block %d' % n
-            n += 1
-            wrapped = phases - phaseAvg
-            cr.hPhaseWrap(wrapped, wrapped)
-            wrapped.square()
-            phaseRMS += wrapped
+#        n = 0
+#        for phases in phaseblocks:
+#            print 'RMS: doing block %d' % n
+#            n += 1
+#            wrapped = phases - phaseAvg
+#            cr.hPhaseWrap(wrapped, wrapped)
+#            wrapped.square()
+#            phaseRMS += wrapped
             
-        phaseRMS /= (len(phaseblocks) - 1)
-        phaseRMS.sqrt()
+#        phaseRMS /= (len(phaseblocks) - 1)
+#        phaseRMS.sqrt()
         
         # to numpy for transpose, then take median RMS over antennas
         # Median is resistant to outliers and gives a good indication of the line phase quality over all antennas
@@ -274,7 +275,7 @@ class rfilines(tasks.Task):
         incPhaseRMS *= -1 / float(nblocks)
         incPhaseRMS += 1
         # HACK2
-        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
         phaseAvg = incPhaseAvg
         phaseRMS = incPhaseRMS
         
