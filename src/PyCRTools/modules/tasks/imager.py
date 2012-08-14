@@ -63,11 +63,9 @@ class Imager(Task):
         intgrfreq = dict( default = False,
                           doc = "Output frequency integrated image." ),
         inversefft = dict( default = False ),
-        mask = dict( default = None ),
         FREQMIN = dict( default = None ),
         FREQMAX = dict( default = None ),
         OBSTIME = dict( default = lambda self : self.data["TIME"][0] ),
-        DM = dict( default = None ),
         OBSLON = dict( default = pytmf.deg2rad(6.869837540),
                        doc = "Observer longitude in radians" ),
         OBSLAT = dict( default = pytmf.deg2rad(52.915122495),
@@ -144,23 +142,11 @@ class Imager(Task):
         if self.FREQMIN != None and self.FREQMAX != None:
             frequency_slice = cr.hArray(int, 2)
             cr.hFindSequenceBetweenOrEqual(frequency_slice, self.frequencies, self.FREQMIN, self.FREQMAX, 0, 0)
-            self.frequencies=self.frequencies[frequency_slice[0]:frequency_slice[1]]
+            self.frequencies=cr.hArray(list(self.frequencies[frequency_slice[0]:frequency_slice[1]].vec()))
 
         self.nfreq = len(self.frequencies)
 
         print "Frequency range:", self.frequencies[0], self.frequencies[-1], "Hz"
-
-        # Calculate dispersion measure shifts if requested
-        if self.DM:
-            self.dispersion_shifts = cr.hArray(int, self.nfreq)
-            cr.hDedispersionShifts(self.dispersion_shifts, self.frequencies, cr.hMin(self.frequencies).val(), self.DM, self.CDELT4)
-
-            print "Dedispersion shifts", self.dispersion_shifts
-
-        # Get steps corresponding to mask if given
-        if self.mask != None:
-            self.step = cr.hArray(int, cr.hCountZero(self.mask))
-            cr.hMaskToStep(self.step, self.mask)
 
         # Get antenna positions
         self.antpos=self.data.getRelativeAntennaPositions()
@@ -218,10 +204,6 @@ class Imager(Task):
 
                 if self.intgrfreq:
                     cr.hBeamformImageAndIntegrate(self.image[tstep], self.fftdata, self.frequencies, self.delays)
-                elif self.DM:
-                    self.t_image.fill(0.)
-                    cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
-                    cr.hShiftedAbsSquareAdd(self.image, self.t_image, self.dispersion_shifts + tstep)
                 elif self.inversefft:
                     self.t_image.fill(0.)
                     cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
