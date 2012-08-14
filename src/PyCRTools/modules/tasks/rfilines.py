@@ -71,7 +71,7 @@ class rfilines(tasks.Task):
 
 #        minSNR = {default: 50, doc: "Minimum required SNR of the line"},
         blocksize = {default: 8192, doc: "Blocksize of timeseries data, for FFTs"},
-        nofblocks = {default:100, doc: "Max. number of blocks to process (memory use grows with nof blocks!)"},
+        nofblocks = {default:100, doc: "Max. number of blocks to process"},
 #        smooth_width = {default: 16, doc: "Smoothing window for FFT, for determining base level (cheap way of doing what AverageSpectrum class does)"},
         direction_resolution = {default: [1, 5], doc: "Resolution in degrees [az, el] for direction search"},
          
@@ -83,10 +83,10 @@ class rfilines(tasks.Task):
 #        positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
 #        antid = p_(lambda self:obtainvalue(self.results,"antid"), doc="hArray containing strings of antenna ids"),
 #        names=p_(lambda self:obtainvalue(self.results,"names"),doc="hArray of dimension [NAnt] with the names or IDs of the antennas"),
-        plot_finish={default: lambda self:cr.plotfinish(doplot=True,filename="cabledelays",plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
-        plot_name={default:"cabledelays",doc:"Extra name to be added to plot filename."},
+        plot_finish={default: lambda self:cr.plotfinish(doplot=True,filename="rfilines",plotpause=False),doc:"Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
+        plot_name={default:"rfilines",doc:"Extra name to be added to plot filename."},
         nofantennas=p_(lambda self: self.positions.shape()[-2],"Number of antennas.",output=True),
-        filetype={default:"png",doc:"extension/type of output file"},
+        filetype={default:"png",doc:"extension/type of plot output files"},
         save_images = {default:False,doc:"Enable if images should be saved to disk in default folder"},
 #        generate_html = {default:False,doc:"Default output to altair webserver"}
         
@@ -334,7 +334,10 @@ class rfilines(tasks.Task):
         plt.title('Median-average spectrum of all antennas versus median-RMS phase stability')
         plt.xlabel('Frequency channel')
         plt.ylabel('Blue: log-spectral power [adc units]\nRed: RMS phase stability [rad]')
-        
+    
+        self.plot_finish(filename=self.plot_name + "-avgspectrum_phaseRMS",filetype=self.filetype)
+
+    
         # plot dirty channels into spectrum plot, in red
         plt.figure()
         x = f["FREQUENCY_DATA"].toNumpy() * 1e-6
@@ -346,6 +349,7 @@ class rfilines(tasks.Task):
         plt.title('Median-average spectrum of all antennas, with flagging')
         plt.xlabel('Frequency [MHz]')
         plt.ylabel('log-spectral power [adc units]')
+        self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
         
         if self.testplots:
             # diagnostic test, plot avg phase, also plot all / many individual measured phases
@@ -381,6 +385,7 @@ class rfilines(tasks.Task):
             elSteps = int(90 / self.direction_resolution[1])
             averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
             (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = self.testplots, verbose = True)
+            self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)
 
             print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
             print 'Phase error = %f' % minPhaseError
@@ -393,6 +398,9 @@ class rfilines(tasks.Task):
             plt.plot(modelphases, label='Modeled phases (plane wave)')
             plt.plot(averagePhasePerAntenna, label='Avg. measured phases')
             plt.legend()
+            self.plot_finish(filename=self.plot_name + "-avg-measuredphases",filetype=self.filetype)
+
+
 
             phaseDiff = averagePhasePerAntenna - modelphases
             
@@ -409,6 +417,8 @@ class rfilines(tasks.Task):
             plt.ylabel('Phase [rad]')
             plt.xlabel('Antenna number (RCU/2)')
             plt.legend()
+            
+            self.plot_finish(filename=self.plot_name + "-calibration-phases",filetype=self.filetype)
 
 """                       
 
