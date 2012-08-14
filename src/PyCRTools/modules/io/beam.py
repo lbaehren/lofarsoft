@@ -21,7 +21,7 @@ class BeamData(IOInterface):
     """This class provides an interface to single file beamformed data.
     """
 
-    def __init__(self, filename, chunk=0, block=0):
+    def __init__(self, filename, chunk=0, block=0,dm=0):
         """Constructor.
         """
         # Useful to do unit conversion
@@ -32,6 +32,9 @@ class BeamData(IOInterface):
 
         # Current block number
         self.__block = block
+
+        # Current dispersion measure
+        self.__dm = dm
 
         # How many beams are there
         self.__nofBeamDataSets = len(filename)
@@ -53,6 +56,7 @@ class BeamData(IOInterface):
             # NON-ICD KEYWORDS
             "CHUNK":lambda: self.__chunk,
             "BLOCK":lambda: self.__block,
+            "DM":lambda: self.__dm,
             "NOF_BEAM_DATASETS": lambda: self.__nofBeamDataSets
             }
 
@@ -76,7 +80,7 @@ class BeamData(IOInterface):
 
 #        'BEAM_STATIONPOS'  add this here for all.
     
-    setable_keywords=set(["CHUNK","BLOCK"])
+    setable_keywords=set(["CHUNK","BLOCK","DM"])
     
     def __setitem__(self, key, value):
         """Set values to keywords if allowed. 
@@ -87,6 +91,8 @@ class BeamData(IOInterface):
             self.__chunk = value
         elif key is "BLOCK":
             self.__block = value
+        elif key is "DM":
+            self.__dm = value
         else:
             raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
@@ -301,61 +307,30 @@ class BeamData(IOInterface):
         else:
             self.__block=block
 
-        for i, file in enumerate(self.__filename):
-            data[i].readfilebinary(os.path.join(file,"data.bin"),self['BLOCK']*self['BEAM_SPECLEN'])
+        if not self['DM']:
+            for i, file in enumerate(self.__filename):
+                data[i].readfilebinary(os.path.join(file,"data.bin"),self['BLOCK']*self['BEAM_SPECLEN'])
+        else:            
+            offset = self.calcDedispersionIndex(self['DM'],Ref_Freq=1.69e8) #Ref_Freq should not be hard coded, but is good for now.
 
-    def getOffsetFFTData(self, data, block,offset=None):
-
-        """Writes FFT data for selected stations to data array.
-
-        Required Arguments:
-
-        ============= =================================================
-        Parameter     Description
-        ============= =================================================
-        *data*        data array to write FFT data to.
-        *block*       index of bock to return data from.
-        *offset*      vector with offset index
-        ============= =================================================
-
-        Output:
-        a two dimensional array containing the FFT data of the
-        specified block (offseted) for each of the selected stations and
-        for the selected frequencies (all freqs and stations for now).
-        
-        So that if `a` is the returned array `a[i]` is an array of
-        length (number of frequencies) of station i.
-        """
-
-        block=cr.asval(block)
-
-        if block<0:
-            block=self.block
-        else:
-            self.__block=block
-
-        if not offset:
-            offset = cr.hArray(int,[spec_len])
+            spec_len = len(data.vec())    
+            if len(offset)!= spec_len:
+                raise ValueError('Variable offset need correct lenght.')
             
-        spec_len = len(data.vec())
-
-        if len(offset)!= spec_len:
-            raise ValueError('Variable offset need correct lenght.')
-        
-        frequency_range = range(spec_len)
-        modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']
-
-        real_offset = cr.hArray(int,len(offset),offset)
-
-        cr.hAdd(real_offset,block)
-        cr.hModulus(real_offset,modulus)
-        cr.hAdd(real_offset,modulus)    # To remove negative indices.
-        cr.hModulus(real_offset,modulus)
-        cr.hMul(real_offset,spec_len)
-        cr.hAdd(real_offset,cr.hArray(int,spec_len,frequency_range))
-
-        for i, file in enumerate(self.__filename):
-            cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
+            frequency_range = range(spec_len)
+            modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']
+    
+            real_offset = cr.hArray(int,len(offset),offset)
+    
+            cr.hAdd(real_offset,block)
+            cr.hModulus(real_offset,modulus)
+            cr.hAdd(real_offset,modulus)    # To remove negative indices.
+            cr.hModulus(real_offset,modulus)
+            cr.hMul(real_offset,spec_len)
+            cr.hAdd(real_offset,cr.hArray(int,spec_len,frequency_range))
+    
+            for i, file in enumerate(self.__filename):
+                cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
 
     def getTimeseriesData(self, data=None, chunk=-1):
         """Returns timeseries data for selected antennas.
