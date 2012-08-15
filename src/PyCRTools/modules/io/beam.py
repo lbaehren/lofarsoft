@@ -313,7 +313,7 @@ class BeamData(IOInterface):
         else:            
             offset = self.calcDedispersionIndex(self['DM'],Ref_Freq=1.69e8) #Ref_Freq should not be hard coded, but is good for now.
 
-            spec_len = len(data.vec())    
+            spec_len = data.shape()[1]    
             if len(offset)!= spec_len:
                 raise ValueError('Variable offset need correct lenght.')
             
