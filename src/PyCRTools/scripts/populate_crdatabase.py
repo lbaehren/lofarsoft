@@ -192,11 +192,15 @@ class CRDatabasePopulator(object):
     def process_lora_data(self, event):
         print "Adding LORA parameters..."
         lora_data = lora.loraInfo(event.timestamp, self.settings.lorapath)
+        print "Retrieved LORA parameters..."
         if lora_data:
             for key in lora_data.keys():
                 lora_key = "lora_" + key
+                print "adding...", lora_key
                 event[lora_key] = lora_data[key]
+            print "writing to database..."
             event.write(recursive=False, parameters=True)
+            print "done"
         else:
             print("Empty lora_data set...")
 
