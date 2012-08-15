@@ -761,6 +761,21 @@ class MultiTBBData(IOInterface):
         else:
             raise KeyError("Unsupported key "+key)
 
+    def empty(self, key):
+        """Return empty array for keyword data.
+        Known keywords are: "TIMESERIES_DATA", "TIME_DATA", "FREQUENCY_DATA", "FFT_DATA".
+        """
+
+        nof_datasets = 0
+
+        for f in self.__files:
+            nof_datasets += f.nofSelectedDatasets()
+
+        if key == "TIMESERIES_DATA":
+            return cr.hArray(float, dimensions=(nof_datasets, self.__blocksize),name="E-Field(t)",units=("","Counts"))
+        else:
+            raise KeyError("Unknown key: " + str(key))
+
     def getTimeseriesData(self, data, block=-1):
         """Returns timeseries data for selected antennas.
 
