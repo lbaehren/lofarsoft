@@ -769,7 +769,7 @@ class MultiTBBData(IOInterface):
         nof_datasets = 0
 
         for f in self.__files:
-            nof_datasets += f.nofSelectedDatasets()
+            nof_datasets += f["NOF_SELECTED_DATASETS"]
 
         if key == "TIMESERIES_DATA":
             return cr.hArray(float, dimensions=(nof_datasets, self.__blocksize),name="E-Field(t)",units=("","Counts"))
