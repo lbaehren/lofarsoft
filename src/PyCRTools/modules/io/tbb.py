@@ -804,7 +804,9 @@ class MultiTBBData(IOInterface):
         for i, f in enumerate(self.__files):
             end = end + nof[i]
 
-            cr.hReadTimeseriesData(data[start:end], f._TBBData__alignment_offset+block*self.__blocksize, self.__blocksize, f)
+            f["BLOCKSIZE"] = self.__blocksize
+
+            f.getTimeseriesData(data[start:end], block)
 
             start = end
 
