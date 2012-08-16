@@ -758,6 +758,11 @@ class MultiTBBData(IOInterface):
             for f in self.__files[1:]:
                 ret = np.vstack((ret, f["ANTENNA_POSITIONS"].toNumpy()))
             return cr.hArray(ret)
+        elif key == "ITRFANTENNA_POSITIONS":
+            ret = self.__files[0]["ITRFANTENNA_POSITIONS"].toNumpy()
+            for f in self.__files[1:]:
+                ret = np.vstack((ret, f["ITRFANTENNA_POSITIONS"].toNumpy()))
+            return cr.hArray(ret)
         else:
             raise KeyError("Unsupported key "+key)
 
