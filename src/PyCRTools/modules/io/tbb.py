@@ -733,25 +733,10 @@ class MultiTBBData(IOInterface):
         """Implements keyword access.
         """
 
-        if key == "DIPOLE_NAMES":
+        if key in ["DIPOLE_NAMES", "SAMPLE_NUMBER", "DATA_LENGTH", "TIME", "DIPOLE_CALIBRATION_DELAY"]:
             ret = []
             for f in self.__files:
-                ret.extend(f["DIPOLE_NAMES"])
-            return ret
-        elif key == "SAMPLE_NUMBER":
-            ret = []
-            for f in self.__files:
-                ret.extend(f["SAMPLE_NUMBER"])
-            return ret
-        elif key == "DATA_LENGTH":
-            ret = []
-            for f in self.__files:
-                ret.extend(f["DATA_LENGTH"])
-            return ret
-        elif key == "TIME":
-            ret = []
-            for f in self.__files:
-                ret.extend(f["TIME"])
+                ret.extend(f[key])
             return ret
         elif key == "ANTENNA_POSITIONS":
             ret = self.__files[0]["ANTENNA_POSITIONS"].toNumpy()
