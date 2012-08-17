@@ -738,6 +738,8 @@ class MultiTBBData(IOInterface):
             for f in self.__files:
                 ret.extend(f[key])
             return ret
+        elif key == "FREQUENCY_DATA":
+            return self.__files[0]["FREQUENCY_DATA"]
         elif key == "ANTENNA_POSITIONS":
             ret = self.__files[0]["ANTENNA_POSITIONS"].toNumpy()
             for f in self.__files[1:]:
