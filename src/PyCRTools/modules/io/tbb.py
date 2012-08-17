@@ -516,7 +516,7 @@ class TBBData(IOInterface):
         # Selection dependent initialization
         self.__initSelection()
 
-    def getTimeseriesData(self, data, block=-1):
+    def getTimeseriesData(self, data, block=-1, sample_offset=0):
         """Returns timeseries data for selected antennas.
 
         Required Arguments:
@@ -543,7 +543,7 @@ class TBBData(IOInterface):
         else:
             self.__block=block
 
-        cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize, self.__blocksize, self.__file)
+        cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize+sample_offset, self.__blocksize, self.__file)
 
 
     def shiftTimeseriesData(self, sample_offset=0):
@@ -768,7 +768,7 @@ class MultiTBBData(IOInterface):
         else:
             raise KeyError("Unknown key: " + str(key))
 
-    def getTimeseriesData(self, data, block=-1):
+    def getTimeseriesData(self, data, block=-1, sample_offset=None):
         """Returns timeseries data for selected antennas.
 
         Required Arguments:
@@ -791,6 +791,9 @@ class MultiTBBData(IOInterface):
 
         nof = [f["NOF_SELECTED_DATASETS"] for f in self.__files]
 
+        if not sample_offset:
+            sample_offset = [0 for i in self.__files]
+
         start = 0
         end = 0
         for i, f in enumerate(self.__files):
@@ -798,7 +801,8 @@ class MultiTBBData(IOInterface):
 
             f["BLOCKSIZE"] = self.__blocksize
 
-            f.getTimeseriesData(data[start:end], block)
+            print "reading data offset by", sample_offset[i], "samples"
+            f.getTimeseriesData(data[start:end], block, sample_offset[i])
 
             start = end
 
