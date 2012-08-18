@@ -235,7 +235,7 @@ def event_handler(eventID):
             if e[0] == "plotfiles":
                 for p in e[1]:
                     figure = SubElement(figures, "figure")
-                    SubElement(figure, "path").text = str(p)
+                    SubElement(figure, "path").text = "results"+str(p).split("results")[1]
             else:
                 SubElement(parameter, "key").text = e[0]
                 SubElement(parameter, "value").text = str(e[1])
@@ -312,7 +312,7 @@ def station_handler(eventID, station_name):
             if e[0] == "plotfiles":
                 for p in e[1]:
                     figure = SubElement(figures, "figure")
-                    SubElement(figure, "path").text = str(p)
+                    SubElement(figure, "path").text = "results"+str(p).split("results")[1]
             else:
                 SubElement(parameter, "key").text = e[0]
                 SubElement(parameter, "value").text = str(e[1])
@@ -392,7 +392,7 @@ def polarization_handler(eventID, station_name, polarization_direction):
             if e[0] == "plotfiles":
                 for p in e[1]:
                     figure = SubElement(figures, "figure")
-                    SubElement(figure, "path").text = str(p)
+                    SubElement(figure, "path").text = "results"+str(p).split("results")[1]
             else:
                 SubElement(parameter, "key").text = e[0]
                 SubElement(parameter, "value").text = str(e[1])
