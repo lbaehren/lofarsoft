@@ -733,13 +733,15 @@ class MultiTBBData(IOInterface):
         """Implements keyword access.
         """
 
-        if key in ["DIPOLE_NAMES", "SAMPLE_NUMBER", "DATA_LENGTH", "TIME", "DIPOLE_CALIBRATION_DELAY"]:
+        if key in ["DIPOLE_NAMES", "SAMPLE_NUMBER", "DATA_LENGTH", "TIME", "DIPOLE_CALIBRATION_DELAY", "SELECTED_DIPOLES"]:
             ret = []
             for f in self.__files:
                 ret.extend(f[key])
             return ret
         elif key == "FREQUENCY_DATA":
             return self.__files[0]["FREQUENCY_DATA"]
+#        elif key == "TIMESERIES_DATA":
+#            return self.getTimeseriesData(
         elif key == "ANTENNA_POSITIONS":
             ret = self.__files[0]["ANTENNA_POSITIONS"].toNumpy()
             for f in self.__files[1:]:
@@ -805,6 +807,76 @@ class MultiTBBData(IOInterface):
             f.getTimeseriesData(data[start:end], block, sample_offset[i])
 
             start = end
+
+    def setAntennaSelection(self, selection):
+        """Sets the antenna selection used in subsequent calls to
+        `getAntennaPositions`, `getFFTData`, `getTimeseriesData`.
+
+        Required Arguments:
+
+        =========== =================================================
+        Parameter   Description
+        =========== =================================================
+        *selection* Either Python list (or hArray, Vector)
+                    with index of the antenna as
+                    known to self (integers (e.g. ``[1, 5, 6]``))
+                    Or list of IDs to specify a LOFAR dipole
+                    (e.g. ``['142000005', '3001008']``)
+                    or say ``odd`` or ``even`` to select odd or even
+                    antennas.
+        =========== =================================================
+
+        Output:
+        This method does not return anything.
+
+        Raises:
+        It raises a `ValueError` if antenna selection cannot be set
+        to requested value (e.g. specified antenna not in file).
+
+        Example:
+           file["SELECTED_DIPOLES"]="odd"
+        """        
+        if type(selection)==str:
+            if selection.upper() == "ODD":
+                selection = list(cr.hArray(self["DIPOLE_NAMES"]).Select("odd"))
+            elif selection.upper() == "EVEN":
+                selection = list(cr.hArray(self["DIPOLE_NAMES"]).Select("even"))
+            else:
+                raise ValueError("Selection needs to be a list of IDs or 'odd' or 'even'.")
+        elif type(selection) in cr.hAllContainerTypes:
+            selection = list(selection.vec())
+            
+        if not isinstance(selection, list):
+            raise ValueError("Selection needs to be a list.")
+
+        if not len(selection)>0:
+            raise ValueError("No antennas selected.")
+
+        if type(selection[0])==int or type(selection[0])==long:
+            # Selection by antenna number
+            # convert selection to list of dipole names
+            selection = [self["DIPOLE_NAMES"][i] for i in selection if i < len(self["DIPOLE_NAMES"])] # self.__nofDipoleDatasets - implement?
+            
+        elif type(selection[0])==str:
+            pass # selection will be checked below
+            # Selection by antenna ID
+#            self.__selectedDipoles = [antennaID for antennaID in selection if antennaID in self["DIPOLE_NAMES"]]
+
+        else:
+            raise ValueError("No antenna ID or number found.")
+
+        # Apply selection
+        # For every file, this is the subset of the overall 'selection' that is present in file.__dipoleNames
+        # Count to see if the conjunction of subsets matches the overall set.
+        count = 0
+        for f in self.__files:
+            thisSelection = [x for x in selection if x in f["DIPOLE_NAMES"]]
+            f.setAntennaSelection(thisSelection) # call TBBData's method
+            count += len(thisSelection)
+            
+        if count != len(selection): # assume count < len(selection)...
+            raise Exception("One or more antennas in selection are in none of the files.")
+
 
 def open(filename, *args, **kwargs):
     """Open file with LOFAR TBB data.
