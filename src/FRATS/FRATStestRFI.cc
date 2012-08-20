@@ -380,7 +380,7 @@ int main (int argc,
 	int channels=CHANNELS;
 	int samples=SAMPLES;
 	int startsubbandnumber=321;
-	bool DoPadding=0, verbose=true;
+	bool DoPadding=0, verbose=false;
     bool DoZeroDM=false;
 	std::string extension=".stokes";
 	int timeintegration=1;
@@ -421,6 +421,7 @@ int main (int argc,
 			"- pad use padding for newer data files\n"
 			"-startSB real subband to set the startfrequency right\n"
 			"-DM dispersion measure\n"
+			"-DMrange start, step, end dispersion measure, overwrites -DM\n"
 			"-nrCSB number of subbands to combine as one"
 			"-tInt <time integration>"
 			"-LBA LBA mode"
@@ -543,6 +544,21 @@ int main (int argc,
 				argcounter++;
 			    DMvalues[i]=atof(argv[argcounter]);
                 cout << " " << DMvalues[i];
+			}		
+            cout << endl;	
+		} else if(topic == "-DMrange"){
+			argcounter++;
+			float firstDM=atof(argv[argcounter]);
+			argcounter++;
+			float stepDM=atof(argv[argcounter]);
+			argcounter++;
+			float endDM=atof(argv[argcounter]);
+			nDMs = int(endDM-firstDM)/stepDM;
+			cout << "dispersion measure: " ;
+			DMvalues.resize(nDMs);
+			for(int i=0;i<nDMs;i++){
+			    DMvalues[i]=firstDM+i*stepDM;
+			cout << " " << DMvalues[i];
 			}		
             cout << endl;	
 		} else if(topic == "-freq"){
@@ -789,7 +805,7 @@ int main (int argc,
     ofstream * basefile = new ofstream;
     basefile->open(baselinefilename.c_str(), ios::binary |  ios::out);
     ofstream * sqrtimeseriesfile = new ofstream;
-    basefile->open(sqrtimeseriesfilename.c_str(), ios::binary |  ios::out);
+    sqrtimeseriesfile->open(sqrtimeseriesfilename.c_str(), ios::binary |  ios::out);
     ofstream * avfile = new ofstream;
     avfile->open(avfilename.c_str(), ios::binary  | ios::out);
     ofstream * stdfile = new ofstream;

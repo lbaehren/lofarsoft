@@ -36,6 +36,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include <algorithm>
 
 
 #include <sys/types.h>
