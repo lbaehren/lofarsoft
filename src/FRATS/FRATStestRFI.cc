@@ -1013,7 +1013,9 @@ if(doFlagging){
 		    
         	for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
 				cout << "Processing " << sc << " " << DMcounter << endl;
-				foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+				//foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+				foundpulse=SBTs[sc][DMcounter]->runTrigger(blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 cout << "f" <<  foundpulse << endl;
               /*  if(DMcounter<mynDMs){
                     datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";

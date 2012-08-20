@@ -419,9 +419,15 @@ namespace FRAT {
 			// LOG_DEBUG ("FRAT CoinCheck destruction");
 		}
 		
-        
-        
-		bool SubbandTrigger::processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
+		bool SubbandTrigger::dedisperseData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
+            //# Input: data, 2-dimensional, axis frequencies and time (dynamic spectrum)
+            //# sequenceNumber: block number
+            //# ...
+            //# The data has already gone through an endianness swap and some RFI mitigation steps.
+            //# Task 1: Dedisperse data
+            //# How?: Loop over time and frequency
+            //# Add data[time][frequency] to the correct sample in DeDispersedBuffer, that is at position (totaltime+dedispersionoffset[channel])%itsBufferLength 
+            //# 
 			bool pulsefound=false;
 			if( ++itsSequenceNumber!=sequenceNumber && false) { 
 				std::cerr << "discontinous data" << std::endl; 
@@ -431,23 +437,209 @@ namespace FRAT {
 				itsBlockNumber++;
 				
 				std::cout << "Processing block " << sequenceNumber << std::endl;
-                // Declaration moved to general level
-                /*
-				float value;
-				unsigned long int totaltime;
-				int rest;
-				//float blocksum =0.0;
-				float blocksum =0.0;
-				
-                int validsamples=0;
-				int zerocounter=0;
-				float SBaverage=0;
-				float SBstdev=0;
-				int SBsumsamples=0;
-                int channeltimeindex=-itsTotNrChannels;
-                int channelindex;
-                */
+                blocksum =0.0;
+                //validsamples=0;
+				//zerocounter=0;
+				//SBaverage=0;
+				//SBstdev=0;
+				//SBsumsamples=0;
+                channeltimeindex=-itsTotNrChannels;
 
+				for(int time=0; time<itsNrSamples; time++){
+					//std::cout << std::endl << " time " << time ;
+					totaltime=itsSequenceNumber*itsNrSamples+time;
+					rest=totaltime%itsBufferLength;
+                    channeltimeindex+=itsTotNrChannels; // increase index for each sample by the number of values on the channel axis
+                    channelindex=channeltimeindex+itsStartChannel+itsNrChannels; // move to the highest frequency of this band. Then count downwards.
+                    
+					for(int channel=itsNrChannels-1; channel>0; channel--){
+                        channelindex--;
+						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=data[channelindex];
+                    } // for channel
+                    //***  channel=0; *******
+                    
+                    channelindex--;
+                    
+                    //value = data[channelindex];
+                        
+                    //DeDispersedBuffer[rest]+=value;
+                    //value = data[channelindex];
+                        
+                    DeDispersedBuffer[rest]+=data[channelindex];
+                    blocksum+=DeDispersedBuffer[rest];
+                    SumDeDispersed[rest]=DeDispersedBuffer[rest];
+
+                
+                    DeDispersedBuffer[rest]=0;
+
+				} // for time
+                    // Calculate sum of integration length
+
+                return pulsefound;
+            }
+        }
+		bool SubbandTrigger::runTrigger(unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
+            bool pulsefound=false;
+            float subsum=0;
+            if( itsSequenceNumber!=sequenceNumber && false) { 
+				std::cerr << "discontinous data" << std::endl; 
+			    return false; 
+			} else {
+				itsFoundTriggers="";
+				itsBlockNumber++;
+				
+				std::cout << "Processing block " << sequenceNumber << std::endl;
+                //blocksum =0.0;
+                validsamples=0;
+				zerocounter=0;
+				SBaverage=0;
+				SBstdev=0;
+				SBsumsamples=0;
+
+				for(int time=0; time<itsNrSamples; time++){
+					//std::cout << std::endl << " time " << time ;
+					totaltime=itsSequenceNumber*itsNrSamples+time;
+					rest=totaltime%itsBufferLength;
+                    subsum=0;
+                    if(rest >= itsIntegrationLength){
+                        for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                    } else {
+                        for(int it=rest; it>rest-itsIntegrationLength; it--){
+                            if(it>=0){
+                                subsum+=SumDeDispersed[it];
+                            }
+                            else {
+                                subsum+=SumDeDispersed[it+itsBufferLength];
+                            }
+                        }
+                        
+                    }
+                    SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
+                    SBsumsamples++;
+                    SBaverage+=subsum;
+                    if(subsum>itsTriggerThreshold) {
+                        //ADD TRIGGER ALGORITHM OR FUNCTION
+                        if(totaltime+itsReferenceTime-trigger.time>5){
+                            //new trigger
+                            //trigger.average[fc]/=triggerlength[fc];
+                            trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
+                            
+                            trigger.sum=subsum;
+                            trigger.length=1;
+                            trigger.sample=time;
+                            trigger.block=itsBlockNumber;
+                            trigger.max=subsum;
+                        
+                        }
+                        else{
+                            //old trigger, or trigger accross blocks
+                            trigger.sum+=subsum;
+                            trigger.length++;
+                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
+                            trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
+                            if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
+                        }
+                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                        //trigger.utc_second=10000;
+                            unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                            unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
+                            trigger.utc_second=itsStarttime_utc_sec+utc_second;
+                            trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
+                            // Change trigger max to value in standard deviations.
+                            trigger.max=(trigger.max-itsSBaverage)/itsSBstdev;
+                            //if(!nosend){
+                            SendTriggerMessage(trigger);
+                            triggerMessages.push_back(trigger);
+                            //UDPtransmitter->SendTriggerMessage(trigger);
+                            //}
+
+                           /* 
+                            int latestindex = cc->add2buffer(trigger);
+                            
+                            
+                            if(cc->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
+                                
+                                
+                                float triggerstrength = trigger.max;//(trigger.max-itsSBaverage)/itsSBstdev;
+                                char output2[400];
+                                //std::string output;
+                                
+                                //sprintf(output,"%f4.2 %d %e %e %e %e %e" ,itsDM,itsSequenceNumber,1000*itsStartFreq,itsSBaverage,itsSBstdev,itsSBstdev/itsSBaverage,itsPrevTriggerLevel);
+
+                                sprintf(output2,"COINCIDENCE TRIGGER FOUND with DM %f at block %i / %i time: %f %f strength %f \n",itsDM,itsSequenceNumber,itsBlockNumber,totaltime*itsTimeResolution,trigger.time*itsTimeResolution,triggerstrength);
+                                itsFoundTriggers=itsFoundTriggers+std::string(output2);
+                                std::cout << "\n\n\n\n COINCIDENCE TRIGGER FOUND with DM " << itsDM << " at block" << itsSequenceNumber << " / " << itsBlockNumber << " time: " << totaltime*itsTimeResolution   << " " << trigger.time*itsTimeResolution << " strength " << triggerstrength << "\n\n";	
+                                //usleep(1000000);
+                                pulsefound=true;
+                            }
+                            */
+								
+								
+								
+                        }
+                        DeDispersedBuffer[rest]=0;
+
+				} // for time
+				
+				
+				
+				
+				
+				// Update class parameters;
+				//itsSBstdev = SBstdev;
+				
+				if(SBsumsamples>0){
+					itsSBaverage = SBaverage/SBsumsamples;
+				    //itsSBaverage=blocksum/SBsumsamples;
+					SBstdev/=SBsumsamples;
+					
+				}
+				itsSBstdev=sqrt(SBstdev);
+				itsTotalZeros += zerocounter;
+				float SBaverageAlt = blocksum/SBsumsamples;
+				//for(int it=rest;it>rest-SBsumsamples;it--){
+				//	SBaverageAlt += SumDeDispersed[rest];
+				//}
+				//SBaverageAlt*=itsIntegrationLength;
+				//SBaverageAlt/=SBsumsamples;
+				if(verbose){
+                    
+					std::cerr << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
+				}
+				char output[200];
+				//std::string output;
+				
+				itsPrevTriggerLevel = (itsTriggerThreshold-itsSBaverage)/itsSBstdev;
+				itsTriggerThreshold = itsSBaverage+itsTriggerLevel*itsSBstdev;
+                itsSBaverageVector.push_back(itsSBaverage);
+                itsSBstdevVector.push_back(itsSBstdev);
+			}
+			
+			
+			return pulsefound;
+		}
+        
+        
+		bool SubbandTrigger::processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
+            //# Input: data, 2-dimensional, axis frequencies and time (dynamic spectrum)
+            //# sequenceNumber: block number
+            //# ...
+            //# The data has already gone through an endianness swap and some RFI mitigation steps.
+            //# Task 1: Dedisperse data
+            //# How?: Loop over time and frequency
+            //# Add data[time][frequency] to the correct sample in DeDispersedBuffer, that is at position (totaltime+dedispersionoffset[channel])%itsBufferLength 
+            //# 
+			bool pulsefound=false;
+            float subsum=0;
+			if( ++itsSequenceNumber!=sequenceNumber && false) { 
+				std::cerr << "discontinous data" << std::endl; 
+			    return false; 
+			} else {
+				itsFoundTriggers="";
+				itsBlockNumber++;
+				
+				std::cout << "Processing block " << sequenceNumber << std::endl;
                 blocksum =0.0;
                 validsamples=0;
 				zerocounter=0;
@@ -456,34 +648,31 @@ namespace FRAT {
 				SBsumsamples=0;
                 channeltimeindex=-itsTotNrChannels;
 
-
-
 				for(int time=0; time<itsNrSamples; time++){
 					//std::cout << std::endl << " time " << time ;
 					totaltime=itsSequenceNumber*itsNrSamples+time;
 					rest=totaltime%itsBufferLength;
-                    channeltimeindex+=itsTotNrChannels;
-                    channelindex=channeltimeindex+itsStartChannel+itsNrChannels;
+                    channeltimeindex+=itsTotNrChannels; // increase index for each sample by the number of values on the channel axis
+                    channelindex=channeltimeindex+itsStartChannel+itsNrChannels; // move to the highest frequency of this band. Then count downwards.
                     
 					for(int channel=itsNrChannels-1; channel>0; channel--){
                         channelindex--;
-						
 						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=data[channelindex];
-					    
-						
-                        
-                    
                     } // for channel
                     //***  channel=0; *******
                     
                     channelindex--;
                     
-                    value = data[channelindex];
+                    //value = data[channelindex];
                         
-                    DeDispersedBuffer[rest]+=value;
+                    //DeDispersedBuffer[rest]+=value;
+                    //value = data[channelindex];
+                        
+                    DeDispersedBuffer[rest]+=data[channelindex];
                     blocksum+=DeDispersedBuffer[rest];
                     SumDeDispersed[rest]=DeDispersedBuffer[rest];
-                    float subsum=0;
+                    // Calculate sum of integration length
+                    subsum=0;
                     if(rest >= itsIntegrationLength){
                         for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
                     } else {
@@ -892,9 +1081,9 @@ namespace FRAT {
 				//SBaverageAlt/=SBsumsamples;
 				if(verbose){
                     
-					std::cerr << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
+					std::cout << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
 				}
-				char output[200];
+				//char output[200];
 				//std::string output;
 				
 				itsPrevTriggerLevel = (itsTriggerThreshold-itsSBaverage)/itsSBstdev;
