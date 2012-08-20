@@ -401,7 +401,7 @@ class TBBData(IOInterface):
             return self.__file.frequencyUnit()
 
     setable_keywords=set(["BLOCKSIZE","BLOCK","SELECTED_DIPOLES","ANTENNA_SET"])
-    
+
     def __setitem__(self, key, value):
         if key not in self.setable_keywords:
             raise KeyError("Invalid keyword '"+str(key)+"' - vailable keywords: "+str(list(self.setable_keywords)))
@@ -741,7 +741,9 @@ class MultiTBBData(IOInterface):
         elif key == "FREQUENCY_DATA":
             return self.__files[0]["FREQUENCY_DATA"]
 #        elif key == "TIMESERIES_DATA":
-#            return self.getTimeseriesData(
+#            y = self.empty("TIMESERIES_DATA")
+#            self.getTimeseriesData(y, block = self.__block)
+#            return y # memory leak!
         elif key == "ANTENNA_POSITIONS":
             ret = self.__files[0]["ANTENNA_POSITIONS"].toNumpy()
             for f in self.__files[1:]:
@@ -754,6 +756,26 @@ class MultiTBBData(IOInterface):
             return cr.hArray(ret)
         else:
             raise KeyError("Unsupported key "+key)
+
+    setable_keywords=set(["BLOCKSIZE","BLOCK","SELECTED_DIPOLES"]) # ANTENNA_SET not implemented.
+    
+    def __setitem__(self, key, value):
+        if key not in self.setable_keywords:
+            raise KeyError("Invalid keyword '"+str(key)+"' - available keywords: "+str(list(self.setable_keywords)))
+        
+        elif key is "BLOCKSIZE":
+            self.__blocksize = value
+            for f in self.__files:
+                f["BLOCKSIZE"] = value
+        elif key is "BLOCK":
+            self.__block = value
+        elif key is "SELECTED_DIPOLES":
+            self.setAntennaSelection(value)
+#        elif key is "ANTENNA_SET":
+#            self.antenna_set=value
+        else:
+            raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
+
 
     def empty(self, key):
         """Return empty array for keyword data.
