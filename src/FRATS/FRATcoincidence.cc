@@ -1,22 +1,4 @@
-//#  FRATcoincidence.cc: Coincidence and subband scan for FRAT project
-//#
-//#  Copyright (C) 2009-2010
-//#  Sander ter Veen (s.terveen at astro.ru.nl )
-//#
-//#  This program is free software; you can redistribute it and/or modify
-//#  it under the terms of the GNU General Public License as published by
-//#  the Free Software Foundation; either version 2 of the License, or
-//#  (at your option) any later version.
-//#
-//#  This program is distributed in the hope that it will be useful,
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//#  GNU General Public License for more details.
-//#
-//#  You should have received a copy of the GNU General Public License
-//#  along with this program; if not, write to the Free Software
-//#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//#
+
 //#  $Id: FRATcoincidence.cc 2010-05-06 14:22:43Z veen $
 
 #include "FRATcoincidence.h"
@@ -434,8 +416,8 @@ namespace FRAT {
 			    return false; 
 			} else {
 				itsFoundTriggers="";
-				itsBlockNumber++;
-				
+				itsBlockNumber++;				
+
 				std::cout << "Processing block " << sequenceNumber << std::endl;
                 blocksum =0.0;
                 //validsamples=0;
@@ -478,81 +460,78 @@ namespace FRAT {
                 return pulsefound;
             }
         }
-		bool SubbandTrigger::runTrigger(unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
-            bool pulsefound=false;
-            float subsum=0;
-            if( itsSequenceNumber!=sequenceNumber && false) { 
-				std::cerr << "discontinous data" << std::endl; 
-			    return false; 
-			} else {
-				itsFoundTriggers="";
-				itsBlockNumber++;
-				
-				std::cout << "Processing block " << sequenceNumber << std::endl;
-                //blocksum =0.0;
-                validsamples=0;
-				zerocounter=0;
-				SBaverage=0;
-				SBstdev=0;
-				SBsumsamples=0;
+	bool SubbandTrigger::runTrigger(unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
+        bool pulsefound=false;
+        float subsum=0;
+        if( itsSequenceNumber!=sequenceNumber && false) { 
+            std::cerr << "discontinous data" << std::endl; 
+            return false; 
+	    } else {
+            itsFoundTriggers="";
+            std::cout << "Processing block " << sequenceNumber << std::endl;
+            //blocksum =0.0;
+            validsamples=0;
+            zerocounter=0;
+            SBaverage=0;
+            SBstdev=0;
+            SBsumsamples=0;
 
-				for(int time=0; time<itsNrSamples; time++){
-					//std::cout << std::endl << " time " << time ;
-					totaltime=itsSequenceNumber*itsNrSamples+time;
-					rest=totaltime%itsBufferLength;
-                    subsum=0;
-                    if(rest >= itsIntegrationLength){
-                        for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
-                    } else {
-                        for(int it=rest; it>rest-itsIntegrationLength; it--){
-                            if(it>=0){
-                                subsum+=SumDeDispersed[it];
-                            }
-                            else {
-                                subsum+=SumDeDispersed[it+itsBufferLength];
-                            }
+            for(int time=0; time<itsNrSamples; time++){
+                //std::cout << std::endl << " time " << time ;
+                totaltime=itsSequenceNumber*itsNrSamples+time;
+                rest=totaltime%itsBufferLength;
+                subsum=0;
+                if(rest >= itsIntegrationLength){
+                    for(int it=rest; it>rest-itsIntegrationLength; it--){subsum+=SumDeDispersed[it];}
+                } else {
+                    for(int it=rest; it>rest-itsIntegrationLength; it--){
+                        if(it>=0){
+                            subsum+=SumDeDispersed[it];
                         }
-                        
+                        else {
+                            subsum+=SumDeDispersed[it+itsBufferLength];
+                        }
                     }
-                    SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
-                    SBsumsamples++;
-                    SBaverage+=subsum;
-                    if(subsum>itsTriggerThreshold) {
-                        //ADD TRIGGER ALGORITHM OR FUNCTION
-                        if(totaltime+itsReferenceTime-trigger.time>5){
-                            //new trigger
-                            //trigger.average[fc]/=triggerlength[fc];
-                            trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
-                            
-                            trigger.sum=subsum;
-                            trigger.length=1;
-                            trigger.sample=time;
-                            trigger.block=itsBlockNumber;
-                            trigger.max=subsum;
                         
-                        }
-                        else{
-                            //old trigger, or trigger accross blocks
-                            trigger.sum+=subsum;
-                            trigger.length++;
-                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-                            trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                            if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
-                        }
-                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
-                        //trigger.utc_second=10000;
-                            unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
-                            unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
-                            trigger.utc_second=itsStarttime_utc_sec+utc_second;
-                            trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
-                            // Change trigger max to value in standard deviations.
-                            trigger.max=(trigger.max-itsSBaverage)/itsSBstdev;
-                            //if(!nosend){
-                            SendTriggerMessage(trigger);
-                            triggerMessages.push_back(trigger);
-                            //UDPtransmitter->SendTriggerMessage(trigger);
-                            //}
+                }
+                SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
+                SBsumsamples++;
+                SBaverage+=subsum;
+                if(subsum>itsTriggerThreshold) {
+                    //ADD TRIGGER ALGORITHM OR FUNCTION
+                    if(totaltime+itsReferenceTime-trigger.time>5){
+                        //new trigger
+                        //trigger.average[fc]/=triggerlength[fc];
+                        trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
+                        trigger.sum=subsum;
+                        trigger.length=1;
+                        trigger.sample=time;
+                        trigger.block=itsBlockNumber;
+                        trigger.max=subsum;
+                    
+                    }
+                    else{
+                        //old trigger, or trigger accross blocks
+                        trigger.sum+=subsum;
+                        trigger.length++;
+                        //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
+                        trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
+                        if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
+                    }
+                } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                    //trigger.utc_second=10000;
+                    unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                    unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                    std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
+                    trigger.utc_second=itsStarttime_utc_sec+utc_second;
+                    trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
+                    // Change trigger max to value in standard deviations.
+                    trigger.max=(trigger.max-itsSBaverage)/itsSBstdev;
+                    //if(!nosend){
+                    SendTriggerMessage(trigger);
+                    triggerMessages.push_back(trigger);
+                    //UDPtransmitter->SendTriggerMessage(trigger);
+                    //}
 
                            /* 
                             int latestindex = cc->add2buffer(trigger);
@@ -577,10 +556,9 @@ namespace FRAT {
 								
 								
 								
-                        }
-                        DeDispersedBuffer[rest]=0;
+                    }
 
-				} // for time
+                } // for time
 				
 				
 				
