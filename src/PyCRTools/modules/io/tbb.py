@@ -729,6 +729,7 @@ class MultiTBBData(IOInterface):
         self.__blocksize = blocksize
         self.__block = block
 
+
     def __getitem__(self, key):
         """Implements keyword access.
         """
@@ -744,6 +745,8 @@ class MultiTBBData(IOInterface):
 #            y = self.empty("TIMESERIES_DATA")
 #            self.getTimeseriesData(y, block = self.__block)
 #            return y # memory leak!
+        elif key == "BLOCKSIZE":
+            return self.__blocksize
         elif key == "ANTENNA_POSITIONS":
             ret = self.__files[0]["ANTENNA_POSITIONS"].toNumpy()
             for f in self.__files[1:]:
@@ -754,6 +757,23 @@ class MultiTBBData(IOInterface):
             for f in self.__files[1:]:
                 ret = np.vstack((ret, f["ITRFANTENNA_POSITIONS"].toNumpy()))
             return cr.hArray(ret)
+        # Extra key-words specific for multi-station TBB
+        elif key == "STATION_LIST":
+            ret = []
+            for f in self.__files: # assuming one station per file! Just taking RCU 0
+                stationID = int(f["DIPOLE_NAMES"][0]) / 1000000
+                stationName = md.idToStationName(stationID)
+                ret.append(stationName)
+            return ret
+        elif key == "STATION_STARTINDEX": # start (RCU) index of station i in dipole list / timeseries etc.
+            ret = []
+            nofDatasets = [f["NOF_SELECTED_DATASETS"] for f in self.__files]
+            index = 0
+            for nofForThisStation in nofDatasets:
+                ret.append(index)
+                index += nofForThisStation
+            ret.append(index) # Last item is end-index + 1, to be used in e.g. data[start:end] with end = station_startindex[i+1]
+            return ret
         else:
             raise KeyError("Unsupported key "+key)
 
@@ -789,6 +809,8 @@ class MultiTBBData(IOInterface):
 
         if key == "TIMESERIES_DATA":
             return cr.hArray(float, dimensions=(nof_datasets, self.__blocksize),name="E-Field(t)",units=("","Counts"))
+        elif key == "FFT_DATA":
+            return cr.hArray(complex, dimensions=(nof_datasets, self.__blocksize / 2 + 1),name="fft(E-Field)",xvalues=self["FREQUENCY_DATA"],logplot="y")
         else:
             raise KeyError("Unknown key: " + str(key))
 
@@ -829,6 +851,46 @@ class MultiTBBData(IOInterface):
             f.getTimeseriesData(data[start:end], block, sample_offset[i])
 
             start = end
+
+    def getFFTData(self, data, block=-1, hanning=True):
+        """Writes FFT data for selected antennas to data array.
+           Calls TBBData.getFFTData(...) per file and merges the output.  
+        Required Arguments:
+
+        ============= =================================================
+        Parameter     Description
+        ============= =================================================
+        *data*        data array to write FFT data to.
+        *block*       index of block to return data from.
+        *hanning*     apply Hannnig filter to timeseries data before
+                      the FFT.
+        ============= =================================================
+
+        Output:
+        a two dimensional array containing the FFT data of the
+        specified block for each of the selected antennae and
+        for the selected frequencies.
+        So that if `a` is the returned array `a[i]` is an array of
+        length (number of frequencies) of antenna i.
+
+        """
+        nof = [f["NOF_SELECTED_DATASETS"] for f in self.__files]
+
+#        if not sample_offset:
+#            sample_offset = [0 for i in self.__files]
+
+        start = 0
+        end = 0
+        for i, f in enumerate(self.__files):
+            end = end + nof[i]
+
+            f["BLOCKSIZE"] = self.__blocksize
+
+ #           print "reading data offset by", sample_offset[i], "samples"
+            f.getFFTData(data[start:end], block, hanning)
+
+            start = end
+
 
     def setAntennaSelection(self, selection):
         """Sets the antenna selection used in subsequent calls to
