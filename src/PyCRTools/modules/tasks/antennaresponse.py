@@ -6,12 +6,12 @@ AntennaResponse documentation
 
 from pycrtools.tasks import Task
 import pycrtools as cr
-import pytmf
+import numpy as np
 
 class AntennaResponse(Task):
     """Calculates and unfolds the LOFAR (LBA or HBA) antenna response.
 
-    Given an array with *fft_data* and a *direction* as (Azimuth, Elevation) the Jones matrix
+    Given an array with *instrumental_polarization* and a *direction* as (Azimuth, Elevation) the Jones matrix
     containing the LOFAR (LBA or HBA) antenna response is calculated.
 
     Mixing the two instrumental polarizations by multiplying with the inverse
@@ -23,24 +23,22 @@ class AntennaResponse(Task):
     """
 
     parameters = dict(
-        fft_data = dict( default = None,
+        instrumental_polarization = dict( default = None,
             doc = "FFT data." ),
+        on_sky_polarization = dict( default = lambda self : self.instrumental_polarization.new(), output = True,
+            doc = "FFT data corrected for element response (contains on sky polarizations)." ),
         frequencies = dict( default = None,
             doc = "Frequencies." ),
         direction = dict( default = (0, 0),
             doc = "Direction in degrees as a (Azimuth, Elevation) tuple." ),
-        nantennas = dict( default = lambda self : self.fft_data.shape()[0],
+        nantennas = dict( default = lambda self : self.instrumental_polarization.shape()[0],
             doc = "Number of antennas." ),
         antennaset = dict ( default = "LBA_OUTER",
             doc = "Antennaset." ),
+        jones_matrix = dict( default = lambda self : cr.hArray(complex, dimensions = (self.frequencies.shape()[0], 2, 2)),
+            doc = "Jones matrix for each frequency." ),
         inverse_jones_matrix = dict( default = lambda self : cr.hArray(complex, dimensions = (self.frequencies.shape()[0], 2, 2)),
             doc = "Inverse Jones matrix for each frequency." ),
-        on_sky_polarization = dict( default = lambda self : self.fft_data.new(), output = True,
-            doc = "FFT data corrected for element response (contains on sky polarizations)." ),
-        normalize = dict( default = True,
-            doc = "Normalize to frequency response in zenith." ),
-        test_with_unity_matrix = dict ( default = False,
-            doc = "Use unity inverse Jones matrix for testing purposes." ),
     )
 
     def run(self):
@@ -48,25 +46,25 @@ class AntennaResponse(Task):
         """
 
         # Copy FFT data over for correction
-        self.on_sky_polarization.copy(self.fft_data)
+        self.on_sky_polarization.copy(self.instrumental_polarization)
+
+        # Read tables with antenna model simulation
+        vt = np.loadtxt("Vout_theta.txt", skiprows=1)
+        vp = np.loadtxt("Vout_phi.txt", skiprows=1)
+
+        cvt = cr.hArray(vt[:,3] + 1j * vt[:,4])
+        cvp = cr.hArray(vp[:,3] + 1j * vp[:,4])
+        
+        fstart = 10.0; fstep = 1.0; fn = 101
+        tstart = 0.0; tstep = 5.0; tn = 19
+        pstart = 0.0; pstep = 10.0; pn = 37
 
         # Get inverse Jones matrix for each frequency
-        if self.test_with_unity_matrix:
-            print "[AntennaResponse] using unity inverse Jones matrix for unfolding"
-            cr.hGetUnityInverseJonesMatrix(self.inverse_jones_matrix)
-        elif "LBA" in self.antennaset:
-            if self.normalize:
-                cr.hGetNormalizedInverseJonesMatrixLBA(self.inverse_jones_matrix, self.frequencies,
-                    pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
-            else:
-                cr.hGetInverseJonesMatrixLBA(self.inverse_jones_matrix, self.frequencies,
-                    pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
-        elif "HBA" in self.antennaset:
-            cr.hGetInverseJonesMatrixHBA(self.inverse_jones_matrix, self.frequencies,
-                pytmf.deg2rad(self.direction[0]), pytmf.deg2rad(self.direction[1]))
-        else:
-            raise ValueError("Invalid antennaset " + self.antennaset)
+        for i, f in enumerate(self.frequencies):
+            cr.hGetJonesMatrix(self.jones_matrix[i], f, 90.0 - self.direction[1], self.direction[0], cvt, cvp, fstart, fstep, fn, tstart, tstep, tn, pstart, pstep, pn)
+
+            cr.hInvertComplexMatrix(self.inverse_jones_matrix[i], self.jones_matrix[i], 2)
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
-        cr.hGetOnSkyPolarizations(self.on_sky_polarization[0:self.nantennas:2,...], self.on_sky_polarization[1:self.nantennas:2,...], self.inverse_jones_matrix)
+#        cr.hGetOnSkyPolarizations(self.on_sky_polarization[0:self.nantennas:2,...], self.on_sky_polarization[1:self.nantennas:2,...], self.inverse_jones_matrix)
 
