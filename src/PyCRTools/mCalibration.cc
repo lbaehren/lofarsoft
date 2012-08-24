@@ -98,8 +98,6 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
     const double yd = (y - y0) / (y1 - y0);
     const double zd = (z - z0) / (z1 - z0);
 
-    std::cout<<"xd "<<xd<<" yd "<<yd<<" zd "<<zd<<std::endl;
-
     c00 = xd > 0 ? abs(V[0]) * (1 - xd) + abs(V[4]) * xd : abs(V[0]);
     c10 = xd > 0 ? abs(V[2]) * (1 - xd) + abs(V[6]) * xd : abs(V[2]);
     c01 = xd > 0 ? abs(V[1]) * (1 - xd) + abs(V[5]) * xd : abs(V[1]);
