@@ -855,3 +855,87 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
     return polar(rho, theta);
 }
 
+//$DOCSTRING: Calculate Jones matrix for given frequencies and positions.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGetJonesMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(J)()("Jones matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(f)()("Frequency.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(theta)()("Theta.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(phi)()("Phi.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HComplex)(Vtheta)()("Table with response of theta polarization.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HComplex)(Vphi)()("Table with response of phi polarization.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_6 (HNumber)(fstart)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_7 (HNumber)(fstep)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_8 (HInteger)(fn)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_9 (HNumber)(tstart)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_10 (HNumber)(tstep)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_11 (HInteger)(tn)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_12 (HNumber)(pstart)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_13 (HNumber)(pstep)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_14 (HInteger)(pn)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
+    const HNumber f, const HNumber theta, const HNumber phi,
+    const CIter Vtheta, const CIter Vtheta_end,
+    const CIter Vphi, const CIter Vphi_end,
+    const HNumber fstart, const HNumber fstep, const HInteger fn,
+    const HNumber tstart, const HNumber tstep, const HInteger tn,
+    const HNumber pstart, const HNumber pstep, const HInteger pn)
+{
+  // Variables
+  HComplex V[8];
+  HInteger fi, ti, pi;
+  HNumber x, y, z, x0, y0, z0, x1, y1, z1;
+
+  // Sanity checks
+  const HInteger jn = std::distance(J, J_end);
+  const HInteger vtn = std::distance(Vtheta, Vtheta_end);
+  const HInteger vpn = std::distance(Vphi, Vphi_end);
+
+  if (jn != 4) throw PyCR::ValueError("Jones matrix array has incorrect size.");
+  if (vtn != fn * tn * pn) throw PyCR::ValueError("Vtheta array has incorrect size.");
+  if (vpn != fn * tn * pn) throw PyCR::ValueError("Vphi array has incorrect size.");
+
+  // Set dimensions
+  x = f;
+  y = theta;
+  z = phi;
+
+  // Get iterators
+  CIter J_it = J;
+
+  // Calculate index into frequency, theta and phi parts of the array before the requested point
+  fi = int((f - fstart) / fstep);
+  ti = int((theta - tstart) / tstep);
+  pi = int((phi - pstart) / pstep);
+
+  // Retrieve values from theta table for corners of the cube surrounding the requested point
+  V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
+  V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi + 1);
+  V[2] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi);
+  V[3] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  
+  V[4] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi);
+  V[5] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi + 1);
+  V[6] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi);
+  V[7] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi + 1);
+
+  // Calculate corresponding start / end values for each dimension
+  x0 = fstart + fi * fstep; x1 = fstart + (fi + 1) * fstep;
+  y0 = tstart + ti * tstep; y1 = tstart + (ti + 1) * tstep;
+  z0 = pstart + pi * pstep; z1 = pstart + (pi + 1) * pstep;
+  
+  // Interpolate to find Jones matrix component for theta
+  *J_it = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
