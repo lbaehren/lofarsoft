@@ -1040,3 +1040,298 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Invert n x n matrix
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInvertMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(Minv)()("Inverse matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(M)()("Matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(n)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class NIter>
+void HFPP_FUNC_NAME (const NIter Minv, const NIter Minv_end,
+    const NIter M, const NIter M_end,
+    const HInteger n)
+{
+  // Sanity checks
+  const HInteger N = n * n;
+
+  if (std::distance(Minv, Minv_end) != N || std::distance(M, M_end) != N)
+  {
+    throw PyCR::ValueError("Matrices are not square or identical in size.");
+  }
+
+  int s = 0;
+  gsl_matrix *work = gsl_matrix_alloc(n,n);
+  gsl_matrix *winv = gsl_matrix_alloc(n,n);
+  gsl_permutation *p = gsl_permutation_alloc(n);
+
+  NIter Minv_it = Minv;
+  NIter M_it = M;
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<n; j++)
+    {
+      gsl_matrix_set(work, i, j, *M_it);
+      M_it++;
+    }
+  }
+  
+  gsl_linalg_LU_decomp(work, p, &s);
+  gsl_linalg_LU_invert(work, p, winv);
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<n; j++)
+    {
+      *Minv_it = gsl_matrix_get(winv, i, j);
+      Minv_it++;
+    }
+  }
+  
+  gsl_matrix_free(work);
+  gsl_matrix_free(winv);
+  gsl_permutation_free(p);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Multiply two matrices
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMultiplyMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(C)()("Output matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(A)()("Input (n * m) matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(B)()("Input (m * p) matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(n)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(m)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(p)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class NIter>
+void HFPP_FUNC_NAME (const NIter C, const NIter C_end,
+    const NIter A, const NIter A_end,
+    const NIter B, const NIter B_end,
+    const HInteger n, const HInteger m, const HInteger p)
+{
+  const double alpha = 1.0;
+  const double beta = 0.0;
+
+  // Sanity check
+  if (std::distance(A, A_end) != n * m || std::distance(B, B_end) != m * p || std::distance(C, C_end) != n * p)
+  {
+    throw PyCR::ValueError("Matrices have wrong size.");
+  }
+
+  gsl_matrix *a = gsl_matrix_alloc(n,m);
+  gsl_matrix *b = gsl_matrix_alloc(m,p);
+  gsl_matrix *c = gsl_matrix_alloc(n,p);
+
+  // Get iterators
+  NIter A_it = A;
+  NIter B_it = B;
+  NIter C_it = C;
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<m; j++)
+    {
+      gsl_matrix_set(a, i, j, *A_it);
+      A_it++;
+    }
+  }
+
+  for (HInteger i=0; i<m; i++)
+  {
+    for (HInteger j=0; j<p; j++)
+    {
+      gsl_matrix_set(b, i, j, *B_it);
+      B_it++;
+    }
+  }
+
+  gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, alpha, a, b, beta, c);
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<p; j++)
+    {
+      *C_it = gsl_matrix_get(c, i, j);
+      C_it++;
+    }
+  }
+
+  gsl_matrix_free(a);
+  gsl_matrix_free(b);
+  gsl_matrix_free(c);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+gsl_complex complex_to_gsl(const std::complex<double> &d)
+{
+  gsl_complex g;
+  g.dat[0]=d.real();
+  g.dat[1]=d.imag();
+  return g;
+}
+
+std::complex<double> gsl_to_complex(const gsl_complex &g)
+{
+  std::complex<double> d(g.dat[0],g.dat[1]);
+  return d;
+}
+
+//$DOCSTRING: Invert n x n matrix
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInvertComplexMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(Minv)()("Inverse matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(M)()("Matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HInteger)(n)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
+    const CIter M, const CIter M_end,
+    const HInteger n)
+{
+  // Sanity checks
+  const HInteger N = n * n;
+
+  if (std::distance(Minv, Minv_end) != N || std::distance(M, M_end) != N)
+  {
+    throw PyCR::ValueError("Matrices are not square or identical in size.");
+  }
+
+  int s = 0;
+  gsl_matrix_complex *work = gsl_matrix_complex_alloc(n,n);
+  gsl_matrix_complex *winv = gsl_matrix_complex_alloc(n,n);
+  gsl_permutation *p = gsl_permutation_alloc(n);
+
+  CIter Minv_it = Minv;
+  CIter M_it = M;
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<n; j++)
+    {
+      gsl_matrix_complex_set(work, i, j, complex_to_gsl(*M_it));
+      M_it++;
+    }
+  }
+  
+  gsl_linalg_complex_LU_decomp(work, p, &s);
+  gsl_linalg_complex_LU_invert(work, p, winv);
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<n; j++)
+    {
+      *Minv_it = gsl_to_complex(gsl_matrix_complex_get(winv, i, j));
+      Minv_it++;
+    }
+  }
+  
+  gsl_matrix_complex_free(work);
+  gsl_matrix_complex_free(winv);
+  gsl_permutation_free(p);
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Multiply two matrices
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMultiplyComplexMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(C)()("Output matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(A)()("Input (n * m) matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HComplex)(B)()("Input (m * p) matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(n)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_4 (HInteger)(m)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HInteger)(p)()("Dimension.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter C, const CIter C_end,
+    const CIter A, const CIter A_end,
+    const CIter B, const CIter B_end,
+    const HInteger n, const HInteger m, const HInteger p)
+{
+  const gsl_complex alpha = gsl_complex_rect(1.0, 0.0);
+  const gsl_complex beta = gsl_complex_rect(0.0, 0.0);
+
+  // Sanity check
+  if (std::distance(A, A_end) != n * m || std::distance(B, B_end) != m * p || std::distance(C, C_end) != n * p)
+  {
+    throw PyCR::ValueError("Matrices have wrong size.");
+  }
+
+  gsl_matrix_complex *a = gsl_matrix_complex_alloc(n,m);
+  gsl_matrix_complex *b = gsl_matrix_complex_alloc(m,p);
+  gsl_matrix_complex *c = gsl_matrix_complex_alloc(n,p);
+
+  // Get iterators
+  CIter A_it = A;
+  CIter B_it = B;
+  CIter C_it = C;
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<m; j++)
+    {
+      gsl_matrix_complex_set(a, i, j, complex_to_gsl(*A_it));
+      A_it++;
+    }
+  }
+
+  for (HInteger i=0; i<m; i++)
+  {
+    for (HInteger j=0; j<p; j++)
+    {
+      gsl_matrix_complex_set(b, i, j, complex_to_gsl(*B_it));
+      B_it++;
+    }
+  }
+
+  gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, alpha, a, b, beta, c);
+
+  for (HInteger i=0; i<n; i++)
+  {
+    for (HInteger j=0; j<p; j++)
+    {
+      *C_it = gsl_to_complex(gsl_matrix_complex_get(c, i, j));
+      C_it++;
+    }
+  }
+
+  gsl_matrix_complex_free(a);
+  gsl_matrix_complex_free(b);
+  gsl_matrix_complex_free(c);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
