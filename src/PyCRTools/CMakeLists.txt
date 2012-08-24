@@ -143,7 +143,6 @@ set (PYCRTOOLS_PREPROCESSOR_DIR
 set (PYCRTOOLS_CPP_FILES
   core
   legacy
-  ElementResponse
   )
 
 set (PYCRTOOLS_CPP_MODULE_PREFIX "m")
