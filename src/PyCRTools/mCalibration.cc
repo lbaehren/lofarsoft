@@ -459,6 +459,57 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Mix two vectors using a mixing matrix
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMatrixMix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec0)()("Vector 0.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vec1)()("Vector 1.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HComplex)(M)()("2 dimensional mixing matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter vec0, const CIter vec0_end,
+    const CIter vec1, const CIter vec1_end,
+    const CIter M, const CIter M_end)
+{
+  // Temporary variable
+  complex<double> temp[2];
+
+  // Get lengths
+  const int Nj = std::distance(M, M_end);
+  const int N = std::distance(vec0, vec0_end);
+
+  // Sanity checks
+  if ((N != std::distance(vec1, vec1_end)) || (Nj != 4*N))
+  {
+    throw PyCR::ValueError("[hMatrixMix] input vectors have incompatible sizes.");
+  }
+
+  // Get iterators
+  CIter vec0_it = vec0;
+  CIter vec1_it = vec1;
+  CIter M_it = M;
+
+  for (int i=0; i<N; i++)
+  {
+    temp[0]  = *M_it++ * *vec0_it;
+    temp[0] += *M_it++ * *vec1_it;
+    temp[1]  = *M_it++ * *vec0_it;
+    temp[1] += *M_it++ * *vec1_it;
+
+    *vec0_it++ = temp[0];
+    *vec1_it++ = temp[1];
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Invert n x n matrix
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hInvertMatrix
