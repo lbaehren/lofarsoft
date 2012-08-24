@@ -98,24 +98,24 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
     const double yd = (y - y0) / (y1 - y0);
     const double zd = (z - z0) / (z1 - z0);
 
-    c00 = abs(V[0]) * (1 - xd) + abs(V[4]) * xd;
-    c10 = abs(V[2]) * (1 - xd) + abs(V[6]) * xd;
-    c01 = abs(V[1]) * (1 - xd) + abs(V[5]) * xd;
-    c11 = abs(V[3]) * (1 - xd) + abs(V[7]) * xd;
+    c00 = xd > 0 ? abs(V[0]) * (1 - xd) + abs(V[4]) * xd : abs(V[0]);
+    c10 = xd > 0 ? abs(V[2]) * (1 - xd) + abs(V[6]) * xd : abs(V[2]);
+    c01 = xd > 0 ? abs(V[1]) * (1 - xd) + abs(V[5]) * xd : abs(V[1]);
+    c11 = xd > 0 ? abs(V[3]) * (1 - xd) + abs(V[7]) * xd : abs(V[3]);
 
-    c0 = c00 * (1 - yd) + c10 * yd;
-    c1 = c01 * (1 - yd) + c11 * yd;
+    c0 = yd > 0 ? c00 * (1 - yd) + c10 * yd : c00;
+    c1 = yd > 0 ? c01 * (1 - yd) + c11 * yd : c01;
 
     rho = c0 * (1 - zd) + c1 * zd;
 
     /* Interpolate phase */
-    c00 = arg(V[0]) * (1 - xd) + arg(V[4]) * xd;
-    c10 = arg(V[2]) * (1 - xd) + arg(V[6]) * xd;
-    c01 = arg(V[1]) * (1 - xd) + arg(V[5]) * xd;
-    c11 = arg(V[3]) * (1 - xd) + arg(V[7]) * xd;
+    c00 = xd > 0 ? arg(V[0]) * (1 - xd) + arg(V[4]) * xd : arg(V[0]);
+    c10 = xd > 0 ? arg(V[2]) * (1 - xd) + arg(V[6]) * xd : arg(V[2]);
+    c01 = xd > 0 ? arg(V[1]) * (1 - xd) + arg(V[5]) * xd : arg(V[1]);
+    c11 = xd > 0 ? arg(V[3]) * (1 - xd) + arg(V[7]) * xd : arg(V[3]);
 
-    c0 = c00 * (1 - yd) + c10 * yd;
-    c1 = c01 * (1 - yd) + c11 * yd;
+    c0 = yd > 0 ? c00 * (1 - yd) + c10 * yd : c00;
+    c1 = yd > 0 ? c01 * (1 - yd) + c11 * yd : c01;
 
     theta = c0 * (1 - zd) + c1 * zd;
 
@@ -318,7 +318,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 {
   // Variables
   HComplex V[8];
-  HInteger fi, ti, pi;
+  HInteger fi, ti, pi, fe, te, pe;
   HNumber x, y, z, x0, y0, z0, x1, y1, z1;
 
   // Sanity checks
@@ -342,24 +342,35 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   fi = int((f - fstart) / fstep);
-  ti = int((theta - tstart) / tstep);
-  pi = int((phi - pstart) / pstep);
+  fe = fi + 1;
 
+  fi = fi >= 0 ? fi : 0;
+  fi = fi < fn ? fi : fn - 1;
+
+  fe = fe >= 0 ? fe : 0;
+  fe = fe < fn ? fe : fn - 1;
+
+  ti = int((theta - tstart) / tstep) % tn;
+  te = (ti + 1) % tn;
+
+  pi = int((phi - pstart) / pstep) % pn;
+  pe = (pi + 1) % pn;
+  
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
-  V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi + 1);
-  V[2] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi);
-  V[3] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
+  V[2] = *(Vtheta + (fi * tn * pn) + (te * pn) + pi);
+  V[3] = *(Vtheta + (fi * tn * pn) + (te * pn) + pe);
   
-  V[4] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi);
-  V[5] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi + 1);
-  V[6] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi);
-  V[7] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  V[4] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pi);
+  V[5] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pe);
+  V[6] = *(Vtheta + (fe * tn * pn) + (te * pn) + pi);
+  V[7] = *(Vtheta + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + (fi + 1) * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + (ti + 1) * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + (pi + 1) * pstep;
+  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
+  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
+  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
   
   // Interpolate to find Jones matrix component for theta
   *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
@@ -373,24 +384,35 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   fi = int((f - fstart) / fstep);
-  ti = int((theta - tstart) / tstep);
-  pi = int((phi - pstart) / pstep);
+  fe = fi + 1;
 
+  fi = fi >= 0 ? fi : 0;
+  fi = fi < fn ? fi : fn - 1;
+
+  fe = fe >= 0 ? fe : 0;
+  fe = fe < fn ? fe : fn - 1;
+
+  ti = int((theta - tstart) / tstep) % tn;
+  te = (ti + 1) % tn;
+
+  pi = int((phi - pstart) / pstep) % pn;
+  pe = (pi + 1) % pn;
+  
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
-  V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi + 1);
-  V[2] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi);
-  V[3] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
+  V[2] = *(Vtheta + (fi * tn * pn) + (te * pn) + pi);
+  V[3] = *(Vtheta + (fi * tn * pn) + (te * pn) + pe);
   
-  V[4] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi);
-  V[5] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi + 1);
-  V[6] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi);
-  V[7] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  V[4] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pi);
+  V[5] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pe);
+  V[6] = *(Vtheta + (fe * tn * pn) + (te * pn) + pi);
+  V[7] = *(Vtheta + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + (fi + 1) * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + (ti + 1) * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + (pi + 1) * pstep;
+  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
+  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
+  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
   
   // Interpolate to find Jones matrix component for theta
   *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
@@ -402,21 +424,36 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   y = theta;
   z = phi;
 
+  fi = int((f - fstart) / fstep);
+  fe = fi + 1;
+
+  fi = fi >= 0 ? fi : 0;
+  fi = fi < fn ? fi : fn - 1;
+
+  fe = fe >= 0 ? fe : 0;
+  fe = fe < fn ? fe : fn - 1;
+
+  ti = int((theta - tstart) / tstep) % tn;
+  te = (ti + 1) % tn;
+
+  pi = int((phi - pstart) / pstep) % pn;
+  pe = (pi + 1) % pn;
+  
   // Retrieve values from phi table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
-  V[1] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi + 1);
-  V[2] = *(Vphi + (fi * tn * pn) + ((ti + 1) * pn) + pi);
-  V[3] = *(Vphi + (fi * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  V[1] = *(Vphi + (fi * tn * pn) + (ti * pn) + pe);
+  V[2] = *(Vphi + (fi * tn * pn) + (te * pn) + pi);
+  V[3] = *(Vphi + (fi * tn * pn) + (te * pn) + pe);
   
-  V[4] = *(Vphi + ((fi + 1) * tn * pn) + (ti * pn) + pi);
-  V[5] = *(Vphi + ((fi + 1) * tn * pn) + (ti * pn) + pi + 1);
-  V[6] = *(Vphi + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi);
-  V[7] = *(Vphi + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  V[4] = *(Vphi + (fe * tn * pn) + (ti * pn) + pi);
+  V[5] = *(Vphi + (fe * tn * pn) + (ti * pn) + pe);
+  V[6] = *(Vphi + (fe * tn * pn) + (te * pn) + pi);
+  V[7] = *(Vphi + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + (fi + 1) * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + (ti + 1) * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + (pi + 1) * pstep;
+  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
+  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
+  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
   
   // Interpolate to find Jones matrix component for phi
   *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
@@ -428,31 +465,37 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   y = theta;
   z = phi - 90.0;
 
-  // Set dimensions
-  x = f;
-  y = theta;
-  z = phi - 90.0;
-
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   fi = int((f - fstart) / fstep);
-  ti = int((theta - tstart) / tstep);
-  pi = int((phi - pstart) / pstep);
+  fe = fi + 1;
 
-  // Retrieve values from theta table for corners of the cube surrounding the requested point
-  V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
-  V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi + 1);
-  V[2] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi);
-  V[3] = *(Vtheta + (fi * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  fi = fi >= 0 ? fi : 0;
+  fi = fi < fn ? fi : fn - 1;
+
+  fe = fe >= 0 ? fe : 0;
+  fe = fe < fn ? fe : fn - 1;
+
+  ti = int((theta - tstart) / tstep) % tn;
+  te = (ti + 1) % tn;
+
+  pi = int((phi - pstart) / pstep) % pn;
+  pe = (pi + 1) % pn;
   
-  V[4] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi);
-  V[5] = *(Vtheta + ((fi + 1) * tn * pn) + (ti * pn) + pi + 1);
-  V[6] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi);
-  V[7] = *(Vtheta + ((fi + 1) * tn * pn) + ((ti + 1) * pn) + pi + 1);
+  // Retrieve values from theta table for corners of the cube surrounding the requested point
+  V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
+  V[1] = *(Vphi + (fi * tn * pn) + (ti * pn) + pe);
+  V[2] = *(Vphi + (fi * tn * pn) + (te * pn) + pi);
+  V[3] = *(Vphi + (fi * tn * pn) + (te * pn) + pe);
+  
+  V[4] = *(Vphi + (fe * tn * pn) + (ti * pn) + pi);
+  V[5] = *(Vphi + (fe * tn * pn) + (ti * pn) + pe);
+  V[6] = *(Vphi + (fe * tn * pn) + (te * pn) + pi);
+  V[7] = *(Vphi + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + (fi + 1) * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + (ti + 1) * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + (pi + 1) * pstep;
+  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
+  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
+  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
   
   // Interpolate to find Jones matrix component for theta
   *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);

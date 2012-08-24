@@ -7,7 +7,7 @@ AntennaResponse documentation
 from pycrtools.tasks import Task
 import pycrtools as cr
 import numpy as np
-import time
+import os
 
 class AntennaResponse(Task):
     """Calculates and unfolds the LOFAR (LBA or HBA) antenna response.
@@ -29,7 +29,7 @@ class AntennaResponse(Task):
         on_sky_polarization = dict( default = lambda self : self.instrumental_polarization.new(), output = True,
             doc = "FFT data corrected for element response (contains on sky polarizations)." ),
         frequencies = dict( default = None,
-            doc = "Frequencies." ),
+            doc = "Frequencies in Hz." ),
         direction = dict( default = (0, 0),
             doc = "Direction in degrees as a (Azimuth, Elevation) tuple." ),
         nantennas = dict( default = lambda self : self.instrumental_polarization.shape()[0],
@@ -46,19 +46,17 @@ class AntennaResponse(Task):
         """Run.
         """
 
-        start = time.time()
-
         # Copy FFT data over for correction
         self.on_sky_polarization.copy(self.instrumental_polarization)
 
         # Read tables with antenna model simulation
-        vt = np.loadtxt("Vout_theta.txt", skiprows=1)
-        vp = np.loadtxt("Vout_phi.txt", skiprows=1)
+        vt = np.loadtxt(os.environ["LOFARSOFT"]+"/data/lofar/antenna_response_model/LBA_Vout_theta.txt", skiprows=1)
+        vp = np.loadtxt(os.environ["LOFARSOFT"]+"/data/lofar/antenna_response_model/LBA_Vout_phi.txt", skiprows=1)
 
         cvt = cr.hArray(vt[:,3] + 1j * vt[:,4])
         cvp = cr.hArray(vp[:,3] + 1j * vp[:,4])
         
-        fstart = 10.0; fstep = 1.0; fn = 101
+        fstart = 10.0 * 1.e6; fstep = 1.0*1.e6; fn = 101
         tstart = 0.0; tstep = 5.0; tn = 19
         pstart = 0.0; pstep = 10.0; pn = 37
 
@@ -70,6 +68,4 @@ class AntennaResponse(Task):
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
         cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2,...], self.on_sky_polarization[1:self.nantennas:2,...], self.inverse_jones_matrix)
-
-        print "total runtime:", time.time()-start, "s"
 
