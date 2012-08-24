@@ -818,3 +818,40 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+/* Helper function to interpolate 3d grid of complex numbers. */
+std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
+                                           const double x, const double y, const double z,
+                                           const double x0, const double y0, const double z0,
+                                           const double x1, const double y1, const double z1)
+{
+    double c00, c10, c01, c11, c0, c1, rho, theta;
+
+    /* Interpolate amplitude */
+    const double xd = (x - x0) / (x1 - x0);
+    const double yd = (y - y0) / (y1 - y0);
+    const double zd = (z - z0) / (z1 - z0);
+
+    c00 = abs(V[0]) * (1 - xd) + abs(V[4]) * xd;
+    c10 = abs(V[2]) * (1 - xd) + abs(V[6]) * xd;
+    c01 = abs(V[1]) * (1 - xd) + abs(V[5]) * xd;
+    c11 = abs(V[3]) * (1 - xd) + abs(V[7]) * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
+
+    rho = c0 * (1 - zd) + c1 * zd;
+
+    /* Interpolate phase */
+    c00 = arg(V[0]) * (1 - xd) + arg(V[4]) * xd;
+    c10 = arg(V[2]) * (1 - xd) + arg(V[6]) * xd;
+    c01 = arg(V[1]) * (1 - xd) + arg(V[5]) * xd;
+    c11 = arg(V[3]) * (1 - xd) + arg(V[7]) * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
+
+    theta = c0 * (1 - zd) + c1 * zd;
+
+    return polar(rho, theta);
+}
+
