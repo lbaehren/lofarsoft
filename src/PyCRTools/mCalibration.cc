@@ -98,6 +98,8 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
     const double yd = (y - y0) / (y1 - y0);
     const double zd = (z - z0) / (z1 - z0);
 
+    std::cout<<"xd "<<xd<<" yd "<<yd<<" zd "<<zd<<std::endl;
+
     c00 = xd > 0 ? abs(V[0]) * (1 - xd) + abs(V[4]) * xd : abs(V[0]);
     c10 = xd > 0 ? abs(V[2]) * (1 - xd) + abs(V[6]) * xd : abs(V[2]);
     c01 = xd > 0 ? abs(V[1]) * (1 - xd) + abs(V[5]) * xd : abs(V[1]);
@@ -319,7 +321,9 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   // Variables
   HComplex V[8];
   HInteger fi, ti, pi, fe, te, pe;
-  HNumber x, y, z, x0, y0, z0, x1, y1, z1;
+  HNumber x, y, z_xdipole, z_ydipole, x0, y0, z0, x1, y1, z1;
+
+  const HNumber fend = fstart + fstep * fn;
 
   // Sanity checks
   const HInteger jn = std::distance(J, J_end);
@@ -329,32 +333,42 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   if (jn != 4) throw PyCR::ValueError("Jones matrix array has incorrect size.");
   if (vtn != fn * tn * pn) throw PyCR::ValueError("Vtheta array has incorrect size.");
   if (vpn != fn * tn * pn) throw PyCR::ValueError("Vphi array has incorrect size.");
+  if (f < 0) throw PyCR::ValueError("Invalid negative frequency.");
+  if (theta < 0) throw PyCR::ValueError("Invalid negative angle theta.");
+  if (phi < 0) throw PyCR::ValueError("Invalid negative angle phi.");
 
   // Get iterators
   CIter J_it = J;
 
-  /********************************* x - dipole response for wave polarized purely in theta direction *********************************/
-
   // Set dimensions
-  x = f;
-  y = theta;
-  z = phi;
+  if (f >= fstart && f < fend)
+  {
+    x = f;
+  }
+  else if (f < fstart)
+  {
+    x = fstart;
+  }
+  else
+  {
+    x = fend;
+  }
+
+  y = fmod(theta, 90.0);
+  z_xdipole = fmod(phi, 360.0);
+  z_ydipole = fmod(phi + 90.0, 360.0);
 
   // Calculate index into frequency, theta and phi parts of the array before the requested point
-  fi = int((f - fstart) / fstep);
+  fi = int((x - fstart) / fstep);
   fe = fi + 1;
+  ti = int((y - tstart) / tstep);
+  te = ti + 1;
 
-  fi = fi >= 0 ? fi : 0;
-  fi = fi < fn ? fi : fn - 1;
+  /********************************* x - dipole response for wave polarized purely in theta direction *********************************/
 
-  fe = fe >= 0 ? fe : 0;
-  fe = fe < fn ? fe : fn - 1;
-
-  ti = int((theta - tstart) / tstep) % tn;
-  te = (ti + 1) % tn;
-
-  pi = int((phi - pstart) / pstep) % pn;
-  pe = (pi + 1) % pn;
+  // Calculate index into frequency, theta and phi parts of the array before the requested point
+  pi = int((z_xdipole - pstart) / pstep);
+  pe = pi + 1;
   
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
@@ -368,35 +382,18 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   V[7] = *(Vtheta + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
+  x0 = fstart + fi * fstep; x1 = x0 + fstep;
+  y0 = tstart + ti * tstep; y1 = y0 + tstep;
+  z0 = pstart + pi * pstep; z1 = z0 + pstep;
   
   // Interpolate to find Jones matrix component for theta
-  *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
+  *J_it++ = interpolate_trilinear(V, x, y, z_xdipole, x0, y0, z0, x1, y1, z1);
 
   /********************************* y - dipole response for wave polarized purely in theta direction *********************************/
 
-  // Set dimensions
-  x = f;
-  y = theta;
-  z = phi - 90.0;
-
   // Calculate index into frequency, theta and phi parts of the array before the requested point
-  fi = int((f - fstart) / fstep);
-  fe = fi + 1;
-
-  fi = fi >= 0 ? fi : 0;
-  fi = fi < fn ? fi : fn - 1;
-
-  fe = fe >= 0 ? fe : 0;
-  fe = fe < fn ? fe : fn - 1;
-
-  ti = int((theta - tstart) / tstep) % tn;
-  te = (ti + 1) % tn;
-
-  pi = int((phi - pstart) / pstep) % pn;
-  pe = (pi + 1) % pn;
+  pi = int((z_ydipole - pstart) / pstep);
+  pe = pi + 1;
   
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
@@ -410,34 +407,17 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   V[7] = *(Vtheta + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
+  x0 = fstart + fi * fstep; x1 = x0 + fstep;
+  y0 = tstart + ti * tstep; y1 = y0 + tstep;
+  z0 = pstart + pi * pstep; z1 = z0 + pstep;
   
   // Interpolate to find Jones matrix component for theta
-  *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
+  *J_it++ = interpolate_trilinear(V, x, y, z_ydipole, x0, y0, z0, x1, y1, z1);
 
   /********************************* x - dipole response for wave polarized purely in phi direction *********************************/
 
-  // Set dimensions
-  x = f;
-  y = theta;
-  z = phi;
-
-  fi = int((f - fstart) / fstep);
-  fe = fi + 1;
-
-  fi = fi >= 0 ? fi : 0;
-  fi = fi < fn ? fi : fn - 1;
-
-  fe = fe >= 0 ? fe : 0;
-  fe = fe < fn ? fe : fn - 1;
-
-  ti = int((theta - tstart) / tstep) % tn;
-  te = (ti + 1) % tn;
-
-  pi = int((phi - pstart) / pstep) % pn;
-  pe = (pi + 1) % pn;
+  pi = int((z_xdipole - pstart) / pstep);
+  pe = pi + 1;
   
   // Retrieve values from phi table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
@@ -451,35 +431,18 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   V[7] = *(Vphi + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
+  x0 = fstart + fi * fstep; x1 = x0 + fstep;
+  y0 = tstart + ti * tstep; y1 = y0 + tstep;
+  z0 = pstart + pi * pstep; z1 = z0 + pstep;
   
   // Interpolate to find Jones matrix component for phi
-  *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
+  *J_it++ = interpolate_trilinear(V, x, y, z_xdipole, x0, y0, z0, x1, y1, z1);
 
   /********************************* y - dipole response for wave polarized purely in phi direction *********************************/
 
-  // Set dimensions
-  x = f;
-  y = theta;
-  z = phi - 90.0;
-
   // Calculate index into frequency, theta and phi parts of the array before the requested point
-  fi = int((f - fstart) / fstep);
-  fe = fi + 1;
-
-  fi = fi >= 0 ? fi : 0;
-  fi = fi < fn ? fi : fn - 1;
-
-  fe = fe >= 0 ? fe : 0;
-  fe = fe < fn ? fe : fn - 1;
-
-  ti = int((theta - tstart) / tstep) % tn;
-  te = (ti + 1) % tn;
-
-  pi = int((phi - pstart) / pstep) % pn;
-  pe = (pi + 1) % pn;
+  pi = int((z_ydipole - pstart) / pstep);
+  pe = pi + 1;
   
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
@@ -493,12 +456,12 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   V[7] = *(Vphi + (fe * tn * pn) + (te * pn) + pe);
 
   // Calculate corresponding start / end values for each dimension
-  x0 = fstart + fi * fstep; x1 = fstart + fe * fstep;
-  y0 = tstart + ti * tstep; y1 = tstart + te * tstep;
-  z0 = pstart + pi * pstep; z1 = pstart + pe * pstep;
+  x0 = fstart + fi * fstep; x1 = x0 + fstep;
+  y0 = tstart + ti * tstep; y1 = y0 + tstep;
+  z0 = pstart + pi * pstep; z1 = z0 + pstep;
   
   // Interpolate to find Jones matrix component for theta
-  *J_it++ = interpolate_trilinear(V, x, y, z, x0, y0, z0, x1, y1, z1);
+  *J_it++ = interpolate_trilinear(V, x, y, z_ydipole, x0, y0, z0, x1, y1, z1);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
