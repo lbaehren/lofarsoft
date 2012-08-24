@@ -7,6 +7,7 @@ AntennaResponse documentation
 from pycrtools.tasks import Task
 import pycrtools as cr
 import numpy as np
+import time
 
 class AntennaResponse(Task):
     """Calculates and unfolds the LOFAR (LBA or HBA) antenna response.
@@ -45,6 +46,8 @@ class AntennaResponse(Task):
         """Run.
         """
 
+        start = time.time()
+
         # Copy FFT data over for correction
         self.on_sky_polarization.copy(self.instrumental_polarization)
 
@@ -66,5 +69,7 @@ class AntennaResponse(Task):
             cr.hInvertComplexMatrix(self.inverse_jones_matrix[i], self.jones_matrix[i], 2)
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
-#        cr.hGetOnSkyPolarizations(self.on_sky_polarization[0:self.nantennas:2,...], self.on_sky_polarization[1:self.nantennas:2,...], self.inverse_jones_matrix)
+        cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2,...], self.on_sky_polarization[1:self.nantennas:2,...], self.inverse_jones_matrix)
+
+        print "total runtime:", time.time()-start, "s"
 
