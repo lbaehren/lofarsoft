@@ -2835,7 +2835,37 @@ void HFPP_FUNC_NAME(const Iter vec,const Iter vec_end, const IterValueType minim
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Fills a vector with random values between minimum and maximum limits.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hRandomComplex
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Output vector which will be filled with random numbers.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(minimum)()("Random numbers will not go below that value.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(maximum)()("Random numbers will not exceed that value.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
 
+  Example:
+  >>> hRandom(vector,-1,1)
+  [-0.5,0.3,0.1, ...]
+  >>> vector.random(-1,1)
+  [-0.5,0.3,0.1, ...]
+*/
+template <class CIter>
+void HFPP_FUNC_NAME(const CIter vec,const CIter vec_end, const HNumber minimum, const HNumber maximum)
+{
+  CIter it=vec;
+  HNumber scale(abs(maximum-minimum));
+  scale /= RAND_MAX;
+  while (it!=vec_end) {
+    *it=std::complex<double>(rand()*scale+minimum, rand()*scale+minimum);
+    ++it;
+  };
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Returns the mean value of all elements in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
