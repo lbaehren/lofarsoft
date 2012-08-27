@@ -155,6 +155,8 @@ class rfilines(tasks.Task):
             selected_dipoles = [x for x in f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
         
         f["SELECTED_DIPOLES"] = selected_dipoles
+        f.applyClockOffsets()
+#        f.shiftTimeseriesData([2, 3, 0])
         self.nofchannels = len(selected_dipoles)
         print '# channels = %d' % self.nofchannels
         # get calibration delays from file
@@ -476,8 +478,9 @@ class rfilines(tasks.Task):
                 # get list of stations in this dataset
                 stationlist = f["STATION_LIST"]
                 stationStartIndex = f["STATION_STARTINDEX"]
+                nofStations = len(stationlist)
                 directions = []
-                for i in range(len(stationlist)):
+                for i in range(nofStations):
                     print 'Processing station: %s' % stationlist[i]
                     start = stationStartIndex[i]
                     end = stationStartIndex[i+1]
@@ -507,8 +510,16 @@ class rfilines(tasks.Task):
                 
                 plt.figure()
                 nanosecondPhase = twopi * freq * 1.0e-9
-                plt.plot(sf.phaseWrap(phaseDiff) / nanosecondPhase, label='Measured - expected phase')
-
+                timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
+                plt.plot(timeDiff, label='Measured - expected phase')
+                
+                interStationDelays = np.zeros(nofStations)
+                for i in range(nofStations):
+                    start = stationStartIndex[i]
+                    end = stationStartIndex[i+1]
+                    interStationDelays[i] = np.median(timeDiff[start:end])
+                    plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g')
+                
                 #plt.figure()
                 rms_phase = phaseRMS.toNumpy()[:, bestchannel]
                 plt.plot(rms_phase, 'r', label='RMS phase noise')
