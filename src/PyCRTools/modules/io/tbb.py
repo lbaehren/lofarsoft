@@ -152,8 +152,11 @@ class TBBData(IOInterface):
         """
         
         # Align data
+        print 'WARNING: user-applied alignments offsets are reset to default!'
         self.__alignment_offset = cr.hArray(self.__file.alignment_offset(self.__refAntenna))
-
+        # has to be re-done also after antenna selection to match array length...
+        # user-applied offsets will be lost.
+        
         # Get antenna set
         if not hasattr(self,"antenna_set"):
             self.antenna_set = self.__file.antenna_set()
@@ -542,7 +545,9 @@ class TBBData(IOInterface):
             block=self.__block
         else:
             self.__block=block
-
+        
+#        print 'Reading from alignment offset %d, block-position %d, sample offset %d' % (self.__alignment_offset.max()[0], block*self.__blocksize, sample_offset)
+        
         cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize+sample_offset, self.__blocksize, self.__file)
 
 
@@ -558,10 +563,12 @@ class TBBData(IOInterface):
         =============== =================================================
 
         """    
+#        print 'shifting %d' % sample_offset
         if sample_offset > self.__keyworddict["MAXIMUM_READ_LENGTH"] :
             raise ValueError('Sample offset > MAXIMUM_READ_LENGTH !!')
 
         self._TBBData__alignment_offset[...] += sample_offset
+#        print self.__alignment_offset
         self.__keyworddict["MAXIMUM_READ_LENGTH"] -= sample_offset
 
     def getFFTData(self, data, block=-1, hanning=True):
@@ -739,6 +746,8 @@ class MultiTBBData(IOInterface):
             for f in self.__files:
                 ret.extend(f[key])
             return ret
+        elif key == "CLOCK_OFFSET":
+            return [f["CLOCK_OFFSET"][0] for f in self.__files] # assume one station per file; return one number per station
         elif key == "FREQUENCY_DATA":
             return self.__files[0]["FREQUENCY_DATA"]
 #        elif key == "TIMESERIES_DATA":
@@ -785,12 +794,14 @@ class MultiTBBData(IOInterface):
         
         elif key is "BLOCKSIZE":
             self.__blocksize = value
+            print 'Warning: user-applied alignment offsets are reset after setting blocksize!'
             for f in self.__files:
                 f["BLOCKSIZE"] = value
         elif key is "BLOCK":
             self.__block = value
         elif key is "SELECTED_DIPOLES":
             self.setAntennaSelection(value)
+            #self.applyClockOffsets()
 #        elif key is "ANTENNA_SET":
 #            self.antenna_set=value
         else:
@@ -845,13 +856,47 @@ class MultiTBBData(IOInterface):
         for i, f in enumerate(self.__files):
             end = end + nof[i]
 
-            f["BLOCKSIZE"] = self.__blocksize
+#            f["BLOCKSIZE"] = self.__blocksize # Removed: implicitly resets alignment offsets as well...
 
             print "reading data offset by", sample_offset[i], "samples"
             f.getTimeseriesData(data[start:end], block, sample_offset[i])
 
             start = end
 
+    def shiftTimeseriesData(self, sample_offset):
+        # needed to be able to call getFFTData per file from self.getFFTData. 
+        """ Apply integer-sample shifts to all opened files to compensate clock offsets.
+        A positive number k shifts forward through the data, i.e. the first k samples are skipped.
+        Required Arguments:
+
+        =============   =================================================
+        Parameter       Description
+        =============   =================================================
+        *sample_offset* List containing integer sample offset for each opened file.
+        ============= =================================================
+        """
+        
+        for i, f in enumerate(self.__files):
+            print 'Applying offset %d to file %s' % (sample_offset[i], self.__files[i]["FILENAME"])
+            f.shiftTimeseriesData(sample_offset[i])
+
+    def applyClockOffsets(self):
+        """ Get clock offsets from opened files; subtract off the smallest one; shift alignment offsets accordingly. 
+            No parameters. 
+        """
+        clockoffsets = np.array(self["CLOCK_OFFSET"])
+        clockoffsets -= min(clockoffsets)
+        sample_offset = [int(x / 5.0e-9) for x in clockoffsets]
+        
+        print 'Clock offsets, smalles one subtracted: '
+        print clockoffsets
+        print 'Sample offsets: '
+        print sample_offset
+        print 'Remaining sub-sample offsets: '
+        print clockoffsets - np.array(sample_offset) * 5.0e-9
+    
+        self.shiftTimeseriesData(sample_offset)
+        
     def getFFTData(self, data, block=-1, hanning=True):
         """Writes FFT data for selected antennas to data array.
            Calls TBBData.getFFTData(...) per file and merges the output.  
@@ -884,7 +929,7 @@ class MultiTBBData(IOInterface):
         for i, f in enumerate(self.__files):
             end = end + nof[i]
 
-            f["BLOCKSIZE"] = self.__blocksize
+#            f["BLOCKSIZE"] = self.__blocksize
 
  #           print "reading data offset by", sample_offset[i], "samples"
             f.getFFTData(data[start:end], block, hanning)
