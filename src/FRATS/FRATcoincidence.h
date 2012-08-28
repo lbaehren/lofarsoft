@@ -260,10 +260,12 @@ namespace FRAT {
 			  ~SubbandTrigger();
 			  SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock=0, int IntegrationLength=1, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool doSend=false, int obsID=0, int beam=0);
               SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock=0, int IntegrationLength=1, int nrblocks=0, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool noSend=false, int obsID=0, int beam=0);
+              //SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock, std::vector<int> IntegrationLength, int nrblocks=0, bool InDoPadding=true, bool InUseSamplesOr2=true, bool verbose=false, bool noSend=false, int obsID=0, int beam=0);
 			  bool processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
 			  bool dedisperseData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
 			  bool dedisperseData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
-			  bool runTrigger(unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
+			  bool runTrigger(unsigned int sequenceNumber, int IntegrationLength, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
+			  bool calcAverageStddev(unsigned int sequenceNumber);
               bool processData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
 			  int CalculateBufferSize();
 			  void InitDedispersionOffset();
@@ -277,6 +279,7 @@ namespace FRAT {
 			  bool SendTriggerMessage(struct triggerEvent trigger);
               bool writeStdDev(ofstream * fsfile);
               bool writeAverage(ofstream * fsfile);
+              bool setObsid(int obsID);
 
               float itsDM;
 			  
@@ -308,8 +311,11 @@ namespace FRAT {
 			  //int itsStartBlock;
 			  std::vector<float> DeDispersedBuffer;
 			  std::vector<int> dedispersionoffset;
+			  std::vector <float> DeDispersed;
 			  std::vector <float> SumDeDispersed;
               std::vector <struct triggerEvent> triggerMessages;
+              std::vector<int> integrationLength;
+              int minBlockNumber;
 			  int itsBufferLength;
 			  bool DoPadding;
 			  bool UseSamplesOr2;

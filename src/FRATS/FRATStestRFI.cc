@@ -1014,8 +1014,15 @@ if(doFlagging){
         	for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
 				cout << "Processing " << sc << " " << DMcounter << endl;
 				//foundpulse=SBTs[sc][DMcounter]->processData(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+                //# Process data no split up into three separate tasks:
+                //# dedisperseData2 : calculates dedispersed datIk stop zelf per 1 oktober.
+                //# calcAverageStddev : calculates average, stddev and thresholdlevel
+                //# runTrigger : sums data and compares it to the trigger threshold.
 				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
-				foundpulse=SBTs[sc][DMcounter]->runTrigger(blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+				foundpulse=SBTs[sc][DMcounter]->calcAverageStddev(blockNr);
+                for(int intLength=4;intLength<33;intLength*=2){
+                    foundpulse=SBTs[sc][DMcounter]->runTrigger(blockNr, intLength, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+                }
                 cout << "f" <<  foundpulse << endl;
               /*  if(DMcounter<mynDMs){
                     datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
