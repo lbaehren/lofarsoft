@@ -33,6 +33,7 @@ FIND_PATH (FFTW3_INCLUDES fftw3.h
   ${include_locations}
   /opt/aips++/local/include
   /var/chroot/meqtrees/usr/include
+  /usr/local/include
   /opt/local/include
   )
 
@@ -44,6 +45,7 @@ FIND_LIBRARY (FFTW3_LIBRARIES libfftw3.a
   ${lib_locations}
   /opt/aips++/local/lib
   /var/chroot/meqtrees/usr/lib
+  /usr/local/lib
   /opt/local/lib
   )
 

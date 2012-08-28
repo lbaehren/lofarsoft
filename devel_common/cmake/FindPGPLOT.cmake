@@ -43,7 +43,7 @@ set (PGPLOT_LIBRARIES "")
 
 find_library (PGPLOT_PGPLOT_LIBRARY
   NAMES pgplot
-  PATHS ${lib_locations}
+  PATHS ${lib_locations} /usr/local/
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
@@ -59,7 +59,7 @@ endif (PGPLOT_PGPLOT_LIBRARY)
 
 find_library (PGPLOT_CPGPLOT_LIBRARY
   NAMES cpgplot
-  PATHS ${lib_locations}
+  PATHS ${lib_locations} /usr/local/
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )

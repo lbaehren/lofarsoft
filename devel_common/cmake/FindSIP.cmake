@@ -57,6 +57,7 @@ if (NOT FIND_SIP_CMAKE)
     PATH_SUFFIXES
     python${PYTHON_VERSION}
     python${PYTHON_VERSION}/site-packages
+    /Library/Frameworks/Python.framework/Versions/${PYTHON_VERSION}/bin/
     sip
     NO_DEFAULT_PATH
     )

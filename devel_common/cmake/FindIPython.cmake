@@ -39,7 +39,7 @@ find_program (IPYTHON_EXECUTABLE ipython)
 if (IPYTHON_EXECUTABLE)
   ## Run IPython to print the version information
   execute_process (
-    COMMAND ${PYTHON_EXECUTABLE} --version
+    COMMAND ${IPYTHON_EXECUTABLE} --version
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     RESULT_VARIABLE ipython_version_test_result
     OUTPUT_VARIABLE ipython_version_test_output
