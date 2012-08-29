@@ -155,7 +155,8 @@ class rfilines(tasks.Task):
             selected_dipoles = [x for x in f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
         
         f["SELECTED_DIPOLES"] = selected_dipoles
-        f.applyClockOffsets()
+        if isinstance(self.event, list):
+            f.applyClockOffsets()
 # test shift:        f.shiftTimeseriesData([-1, 1, 0, -1, 0, -1])
         self.nofchannels = len(selected_dipoles)
         print '# channels = %d' % self.nofchannels
@@ -217,7 +218,7 @@ class rfilines(tasks.Task):
 #            x = f["TIMESERIES_DATA"]
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
-            f.getFFTData(fftdata, block = i)
+            f.getFFTData(fftdata, block = i, hanning = True)
             magspectrum = fftdata / f["BLOCKSIZE"] # normalize
             magspectrum[..., 0] = 0.0
             magspectrum[..., 1] = 0.0
@@ -507,7 +508,12 @@ class rfilines(tasks.Task):
                     directions.append((fitaz, fitel))
                     
                 averageIncomingDirection = vectorAverage(directions)
-
+# HACK: do incoming direction using all stations together and see if that gets better results...
+#                averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
+#                plt.figure()
+#                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(allpositions.ravel(), averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4*nofStations, showImage = self.testplots, verbose = False)
+#                averageIncomingDirection = (fitaz, fitel)
+                
                 print 'Averaged incoming direction: az = %f, el = %f' % (averageIncomingDirection[0] / deg2rad, averageIncomingDirection[1] / deg2rad)
                 # get modeled phases for a plane wave of given overall direction, for all stations together
                 allpositions = allpositions.ravel()
@@ -546,6 +552,9 @@ class rfilines(tasks.Task):
                 print '--- Inter-station delays: ---'
                 for i in range(nofStations):
                     print '%s: %2.3f ns' % (f["STATION_LIST"][i], interStationDelays[i])
+                
+                cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
+
                 
 """                       
 
