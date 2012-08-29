@@ -758,10 +758,13 @@ class MultiTBBData(IOInterface):
 #            return y # memory leak!
         elif key == "BLOCKSIZE":
             return self.__blocksize
-        elif key == "ANTENNA_POSITIONS":
-            ret = self.__files[0]["ANTENNA_POSITIONS"].toNumpy()
+        elif key == "ANTENNA_POSITIONS": # return antenna positions from ITRF, otherwise positions are relative to each station!
+            itrf = self.__files[0]["ITRFANTENNA_POSITIONS"]
+#            antenna_positions_ITRF_m=list(datafile["ITRFANTENNA_POSITIONS"].vec()),
+            ret = md.convertITRFToLocal(itrf).toNumpy()
             for f in self.__files[1:]:
-                ret = np.vstack((ret, f["ANTENNA_POSITIONS"].toNumpy()))
+                itrf = f["ITRFANTENNA_POSITIONS"]
+                ret = np.vstack( (ret, md.convertITRFToLocal(itrf).toNumpy()) )
             return cr.hArray(ret)
         elif key == "ITRFANTENNA_POSITIONS":
             ret = self.__files[0]["ITRFANTENNA_POSITIONS"].toNumpy()
@@ -887,7 +890,9 @@ class MultiTBBData(IOInterface):
             No parameters. 
         """
         clockoffsets = np.array(self["CLOCK_OFFSET"])
-        clockoffsets -= min(clockoffsets)
+        clockoffsets *= 1.0 # Get the sign right...!
+        clockoffsets -= min(clockoffsets) # make them all positive
+        
         sample_offset = [int(x / 5.0e-9) for x in clockoffsets]
         self.__subsample_clockoffsets = clockoffsets - np.array(sample_offset) * 5.0e-9
         
