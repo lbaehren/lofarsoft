@@ -156,11 +156,19 @@ class rfilines(tasks.Task):
         
         f["SELECTED_DIPOLES"] = selected_dipoles
         f.applyClockOffsets()
-#        f.shiftTimeseriesData([2, 3, 0])
+# test shift:        f.shiftTimeseriesData([-1, 1, 0, -1, 0, -1])
         self.nofchannels = len(selected_dipoles)
         print '# channels = %d' % self.nofchannels
         # get calibration delays from file
         caldelays = hArray(f["DIPOLE_CALIBRATION_DELAY"]) # f[...] outputs list!
+        # add subsample clock offsets to caldelays
+        subsample_clockoffsets = f["SUBSAMPLE_CLOCK_OFFSET"]
+        station_startindex = f["STATION_STARTINDEX"]
+        for i in range(len(subsample_clockoffsets)):
+            start = station_startindex[i]
+            end = station_startindex[i+1]
+            caldelays[start:end] += subsample_clockoffsets[i]
+            
         # make calibration phases, i.e. convert delays to phases for every frequency
         freqs = f["FREQUENCY_DATA"]
         calphases = hArray(float, dimensions = [self.nofchannels, len(freqs)]) # check dim.
@@ -317,6 +325,8 @@ class rfilines(tasks.Task):
         incPhaseRMS.copy(incphasemean) 
         incPhaseRMS *= -1 / float(nblocks)
         incPhaseRMS += 1
+        incPhaseRMS.sqrt()
+        incPhaseRMS *= np.sqrt(2.0)
         # HACK2
 #        import pdb; pdb.set_trace()
         phaseAvg = incPhaseAvg
@@ -518,7 +528,11 @@ class rfilines(tasks.Task):
                     start = stationStartIndex[i]
                     end = stationStartIndex[i+1]
                     interStationDelays[i] = np.median(timeDiff[start:end])
-                    plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g')
+                    if i == 0:
+                        plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3, label='Median station delay')
+                    else:
+                        plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3)
+                    
                 
                 #plt.figure()
                 rms_phase = phaseRMS.toNumpy()[:, bestchannel]
@@ -529,6 +543,9 @@ class rfilines(tasks.Task):
                 plt.xlabel('Antenna number (RCU/2)')
                 plt.legend()
                 
+                print '--- Inter-station delays: ---'
+                for i in range(nofStations):
+                    print '%s: %2.3f ns' % (f["STATION_LIST"][i], interStationDelays[i])
                 
 """                       
 
