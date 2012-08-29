@@ -735,7 +735,7 @@ class MultiTBBData(IOInterface):
         self.__files = [TBBData(fname, blocksize, block) for fname in filenames]
         self.__blocksize = blocksize
         self.__block = block
-
+        self.__subsample_clockoffsets = None
 
     def __getitem__(self, key):
         """Implements keyword access.
@@ -748,6 +748,8 @@ class MultiTBBData(IOInterface):
             return ret
         elif key == "CLOCK_OFFSET":
             return [f["CLOCK_OFFSET"][0] for f in self.__files] # assume one station per file; return one number per station
+        elif key == "SUBSAMPLE_CLOCK_OFFSET":
+            return self.__subsample_clockoffsets
         elif key == "FREQUENCY_DATA":
             return self.__files[0]["FREQUENCY_DATA"]
 #        elif key == "TIMESERIES_DATA":
@@ -887,14 +889,15 @@ class MultiTBBData(IOInterface):
         clockoffsets = np.array(self["CLOCK_OFFSET"])
         clockoffsets -= min(clockoffsets)
         sample_offset = [int(x / 5.0e-9) for x in clockoffsets]
+        self.__subsample_clockoffsets = clockoffsets - np.array(sample_offset) * 5.0e-9
         
         print 'Clock offsets, smalles one subtracted: '
         print clockoffsets
         print 'Sample offsets: '
         print sample_offset
         print 'Remaining sub-sample offsets: '
-        print clockoffsets - np.array(sample_offset) * 5.0e-9
-    
+        print self.__subsample_clockoffsets
+        
         self.shiftTimeseriesData(sample_offset)
         
     def getFFTData(self, data, block=-1, hanning=True):
