@@ -42,7 +42,7 @@ class TBBData(IOInterface):
         self.__block = block
 
         # Open file
-        self.__file = cr.TBBData(filename)
+        self.__file = cr.TBBData(filename) # Reference to TBBData, C++ code (?)
 
         # Get a list of antenna IDs for which data is stored in the file
         self.__dipoleNames= self.__file.dipoleNames()
@@ -152,8 +152,10 @@ class TBBData(IOInterface):
         """
         
         # Align data
-        print 'WARNING: user-applied alignments offsets are reset to default!'
+        if hasattr(self, "_TBBData__alignment_offset"):
+            print 'WARNING: user-applied alignments offsets are reset to default!'
         self.__alignment_offset = cr.hArray(self.__file.alignment_offset(self.__refAntenna))
+            
         # has to be re-done also after antenna selection to match array length...
         # user-applied offsets will be lost.
         
@@ -736,6 +738,27 @@ class MultiTBBData(IOInterface):
         self.__blocksize = blocksize
         self.__block = block
         self.__subsample_clockoffsets = None
+        
+        self.__initSelection()
+
+    def __initSelection(self):
+        """ Set the alignment offsets to the actual values, on construction, and after changing antenna selections, blocksizes etc. i.e. whenever the lower TBBData.__initSelection is called. The alignment offsets set here will override TBBData's __alignment_offset (which is a bit ugly).
+        
+        How can this be improved?
+        """
+        allStartSamples = np.array(self["SAMPLE_NUMBER"])
+        station_startindex = self["STATION_STARTINDEX"]
+        station_list = self["STATION_LIST"]
+        
+        alignment_offsets = [int(x) for x in (allStartSamples.max() - allStartSamples)] # need to avoid np.int64's in list for hArray conversion
+        for i in range(len(station_list)):
+            start = station_startindex[i]
+            end = station_startindex[i+1]
+            #import pdb; pdb.set_trace()
+            thisStationsOffsets = cr.hArray(alignment_offsets[start:end])
+            self.__files[i]._TBBData__alignment_offset = thisStationsOffsets
+        
+        self.applyClockOffsets()
 
     def __getitem__(self, key):
         """Implements keyword access.
@@ -800,12 +823,15 @@ class MultiTBBData(IOInterface):
         elif key is "BLOCKSIZE":
             self.__blocksize = value
             print 'Warning: user-applied alignment offsets are reset after setting blocksize!'
+            print 'Should be fixed now... check'
             for f in self.__files:
                 f["BLOCKSIZE"] = value
+            self.__initSelection()
         elif key is "BLOCK":
             self.__block = value
         elif key is "SELECTED_DIPOLES":
             self.setAntennaSelection(value)
+            self.__initSelection()
             #self.applyClockOffsets()
 #        elif key is "ANTENNA_SET":
 #            self.antenna_set=value
@@ -890,7 +916,7 @@ class MultiTBBData(IOInterface):
             No parameters. 
         """
         clockoffsets = np.array(self["CLOCK_OFFSET"])
-        clockoffsets *= 1.0 # Get the sign right...!
+        clockoffsets *= -1.0 # Get the sign right...!
         clockoffsets -= min(clockoffsets) # make them all positive
         
         sample_offset = [int(x / 5.0e-9) for x in clockoffsets]
