@@ -14,7 +14,14 @@ antenna_sets = ["LBA_SPARSE_EVEN",
                 "HBA_ONE",
                 "HBA_ZERO",
                 "LBA_INNER",
-                "LBA_OUTER"]
+                "LBA_OUTER"
+                ]
+
+# Please add and check the following datasets
+#                "HBA_DUAL_INNER",
+#                "HBA_JOINED_INNER",
+#                "HBA_ONE_INNER",
+#                "HBA_ZERO_INNER",
 
 stations = ["CS001", "CS002", "CS003", 
             "CS004", "CS005", "CS006", 
