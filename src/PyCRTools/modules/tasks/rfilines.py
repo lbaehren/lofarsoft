@@ -155,20 +155,22 @@ class rfilines(tasks.Task):
             selected_dipoles = [x for x in f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
         
         f["SELECTED_DIPOLES"] = selected_dipoles
-        if isinstance(self.event, list):
-            f.applyClockOffsets()
+#        if isinstance(self.event, list):
+#            f.applyClockOffsets()
+ #       import pdb; pdb.set_trace()
 # test shift:        f.shiftTimeseriesData([-1, 1, 0, -1, 0, -1])
         self.nofchannels = len(selected_dipoles)
         print '# channels = %d' % self.nofchannels
         # get calibration delays from file
         caldelays = hArray(f["DIPOLE_CALIBRATION_DELAY"]) # f[...] outputs list!
         # add subsample clock offsets to caldelays
-        subsample_clockoffsets = f["SUBSAMPLE_CLOCK_OFFSET"]
-        station_startindex = f["STATION_STARTINDEX"]
-        for i in range(len(subsample_clockoffsets)):
-            start = station_startindex[i]
-            end = station_startindex[i+1]
-            caldelays[start:end] += subsample_clockoffsets[i]
+        if isinstance(self.event, list):
+            subsample_clockoffsets = f["SUBSAMPLE_CLOCK_OFFSET"]
+            station_startindex = f["STATION_STARTINDEX"]
+            for i in range(len(subsample_clockoffsets)):
+                start = station_startindex[i]
+                end = station_startindex[i+1]
+                caldelays[start:end] += subsample_clockoffsets[i]
             
         # make calibration phases, i.e. convert delays to phases for every frequency
         freqs = f["FREQUENCY_DATA"]
