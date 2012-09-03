@@ -24,26 +24,33 @@ class BeamData(IOInterface):
     def __init__(self, filename, chunk=0, block=0,dm=0):
         """Constructor.
         """
+
         # Useful to do unit conversion
         self.__conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
+
+        self.__filename = filename
         
+        # Open files
+        self.__files = [cr.hArrayRead(file,block=0,ext='beam') for file in filename]
+
+        # How many beams are there
+        self.__nofBeamDataSets = len(self.__files)
+
         # Current chunk number
         self.__chunk = chunk
 
         # Current block number
         self.__block = block
 
+        #Total number of chunks
+        self.__nchunks = self.getNchunks()
+
         # Current dispersion measure
         self.__dm = dm
 
-        # How many beams are there
-        self.__nofBeamDataSets = len(filename)
+        # Current phase calibration (between stations)
+        self.__phasecal = cr.hArray(float,len(self.__files),fill=0)  #Need to maybe replace this with a function that reads metadata...?
 
-        # Open files
-        self.__files = [cr.hArrayRead(file,block=0,ext='beam') for file in filename]
-        
-        self.__filename = filename
-        
         #Create keyword dict for easy access
         self.__setKeywordDict()
 
@@ -57,6 +64,7 @@ class BeamData(IOInterface):
             "CHUNK":lambda: self.__chunk,
             "BLOCK":lambda: self.__block,
             "DM":lambda: self.__dm,
+            "NCHUNKS": lambda: self.__nchunks,
             "NOF_BEAM_DATASETS": lambda: self.__nofBeamDataSets
             }
 
@@ -69,7 +77,6 @@ class BeamData(IOInterface):
             else:
                 self.__keyworddict['TBB_'+par2.upper()] = self.__files[0].par.hdr[par2]
 
-        self.__keyworddict['NCHUNKS'] = self.getNchunks()
         self.__keyworddict['FILENAMES'] = self.__filename
         self.__keyworddict['STATION_NAME'] = lambda: [self.__files[i].par.hdr['STATION_NAME'][0] for i in range(self.__nofBeamDataSets)]
         self.__keyworddict['MAXIMUM_READ_LENGTH'] = self['NCHUNKS']*self['BEAM_BLOCKLEN']*self['BEAM_NBLOCKS']
@@ -77,10 +84,12 @@ class BeamData(IOInterface):
         self.__keyworddict['TIME'] = self['TBB_TIME']
         self.__keyworddict['FREQUENCY_INTERVAL'] = [self['TBB_FREQUENCY_INTERVAL']]
         self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
-
+        self.__keyworddict['PHASE_CALIB'] = self.__phasecal
+        self.__keyworddict['DM_OFFSET'] = lambda: self.calcDedispersionIndex(self.__dm,Ref_Freq=1.69e8)
+        
 #        'BEAM_STATIONPOS'  add this here for all.
     
-    setable_keywords=set(["CHUNK","BLOCK","DM"])
+    setable_keywords=set(["CHUNK","BLOCK","DM","NCHUNKS"])
     
     def __setitem__(self, key, value):
         """Set values to keywords if allowed. 
@@ -93,6 +102,8 @@ class BeamData(IOInterface):
             self.__block = value
         elif key is "DM":
             self.__dm = value
+        elif key is "NCHUNKS":
+            self.__nchunks = value
         else:
             raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
@@ -133,7 +144,7 @@ class BeamData(IOInterface):
             key = [k for k in key if 'EMPTY' not in k]
             key.sort()
         else:
-             key=['FILENAMES','TBB_TIME_HR','DATA_LENGTH','DATA_LENGTH_TIME','STATION_NAME','NOF_BEAM_DATASETS']
+             key=['FILENAMES','TBB_TIME_HR','DATA_LENGTH','DATA_LENGTH_TIME','STATION_NAME','NOF_BEAM_DATASETS','BEAM_POINTINGS']
 
         output ='[Beam Data] Summary of object properties' 
         if show: print output.strip()
@@ -310,17 +321,16 @@ class BeamData(IOInterface):
         if not self['DM']:
             for i, file in enumerate(self.__filename):
                 data[i].readfilebinary(os.path.join(file,"data.bin"),self['BLOCK']*self['BEAM_SPECLEN'])
-        else:            
-            offset = self.calcDedispersionIndex(self['DM'],Ref_Freq=1.69e8) #Ref_Freq should not be hard coded, but is good for now.
+        else:
 
             spec_len = data.shape()[1]    
-            if len(offset)!= spec_len:
+            if len(self['DM_OFFSET'])!= spec_len:
                 raise ValueError('Variable offset need correct lenght.')
             
             frequency_range = range(spec_len)
-            modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']
+            modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']  
     
-            real_offset = cr.hArray(int,len(offset),offset)
+            real_offset = cr.hArray(int,len(self['DM_OFFSET']),self['DM_OFFSET'])
     
             cr.hAdd(real_offset,block)
             cr.hModulus(real_offset,modulus)
@@ -332,6 +342,14 @@ class BeamData(IOInterface):
             for i, file in enumerate(self.__filename):
                 cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
 
+        '''       if delay
+            self.phases.delaytophase(self.frequencies,self.delays)
+            self.weights.phasetocomplex(self.phases)
+
+            for i, file in enumerate(self.__filename):
+                data[i].mul(self['STATION_DELAY_CALIB'][i])
+        '''
+        
     def getTimeseriesData(self, data=None, chunk=-1):
         """Returns timeseries data for selected antennas.
 
