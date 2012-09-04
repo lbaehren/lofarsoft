@@ -354,7 +354,9 @@ int main (int argc,
 {
 	bool failsafe=0;
 	cout<<"This file outputs histograms of pulsar data to /Users/STV/Documents/GiantPulse/."<<endl;
-	int integrationlength = 1; //average length
+	std::vector<int> integrationlength; //average length
+    integrationlength.resize(1);
+    integrationlength[0]=1;
 	float triggerlevel = 141/3;
  	unsigned int nofFailedTests=0;
 	float average;
@@ -466,8 +468,19 @@ int main (int argc,
 		    cout << "Last subband: " << lastSB << endl;
 		} else if(topic == "-il"){
 			argcounter++;
-			integrationlength = atoi(argv[argcounter]);
-			cout << "integration length: " << integrationlength << endl;
+			integrationlength[0] = atoi(argv[argcounter]);
+			cout << "integration length: " << integrationlength[0] << endl;
+		} else if(topic == "-ilrange"){
+			argcounter++;
+            int intlenlen=atoi(argv[argcounter]);
+            integrationlength.resize(intlenlen); 
+            cout << "integration lengths: ";
+            for(int i=0;i<intlenlen;i++){
+                argcounter++;
+                integrationlength[i] = atoi(argv[argcounter]);    
+                cout << integrationlength[i] << " ";
+            }
+            cout << endl;
 		} else if(topic == "-tl"){
 			argcounter++;
 			triggerlevel = atof(argv[argcounter]);
@@ -672,7 +685,7 @@ int main (int argc,
 			cout << "StreamNr " << StreamCounter << " DMcounter " << DMcounter << " DM " << DMval << endl;
 			float SBFreq = SubbandToFreq(SB+startsubbandnumber,HBAmode);
             if(nFreqs<1) {
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns,  startpos, integrationlength, DoPadding, DoPadding, verbose);
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns,  startpos, integrationlength[0], DoPadding, DoPadding, verbose);
             } else {
                 StartChannel=stream*NrChannels;
                 // start channel of this stream
@@ -1020,7 +1033,9 @@ if(doFlagging){
                 //# runTrigger : sums data and compares it to the trigger threshold.
 				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
 				foundpulse=SBTs[sc][DMcounter]->calcAverageStddev(blockNr);
-                for(int intLength=4;intLength<33;intLength*=2){
+                int intLength;
+                for(int i=0;i<integrationlength.size();i++){
+                    intLength=integrationlength[i];
                     foundpulse=SBTs[sc][DMcounter]->runTrigger(blockNr, intLength, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 }
                 cout << "f" <<  foundpulse << endl;

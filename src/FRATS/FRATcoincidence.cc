@@ -270,7 +270,7 @@ namespace FRAT {
         }
 */
 
-        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock, int IntegrationLength, int nrblocks, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam )
+        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock, std::vector <int> IntegrationLengthVector, int nrblocks, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam )
 		{
 			noSend=noSend;
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
@@ -291,7 +291,11 @@ namespace FRAT {
 			
 			itsStreamID=StreamID;
 			itsDM = DM;
-			itsIntegrationLength=IntegrationLength; 
+            if(IntegrationLengthVector.size()>0){
+                itsIntegrationLength=IntegrationLengthVector[0]; 
+            } else {
+                cerr << "Integration lengths not defined";
+            }
 			itsTriggerLevel = TriggerLevel;
 			itsStartChannel = StartChannel;
             //itsNrChannels = TotNrChannels;
@@ -536,11 +540,8 @@ namespace FRAT {
     }
 
 	bool SubbandTrigger::runTrigger(unsigned int sequenceNumber, int IntegrationLength, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
-        if(itsBlockNumber<=5){//minBlockNumber){
-            return false;
-        }
-        else {
-        trigger.obsID=minBlockNumber;
+       // for(int i=0;i<itsIntegrationLength.size();i++){
+       //     IntegrationLength=itsIntegrationLengthVector[i];
         float subsum=0;
         int samplessummed=1;
         bool pulsefound=false;
@@ -584,7 +585,7 @@ namespace FRAT {
                             trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
                             if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
                         }
-                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5){
                         //trigger.utc_second=10000;
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -609,7 +610,7 @@ namespace FRAT {
                     } else {
                         subsum=DeDispersed[rest]+DeDispersed[itsBufferLength-1];
                     } 
-                    if(subsum>TriggerThreshold) {
+                    if(subsum>TriggerThreshold && itsBlockNumber>5) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
                         if(totaltime+itsReferenceTime-trigger.time>5){
                             //new trigger
@@ -630,7 +631,7 @@ namespace FRAT {
                             trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
                             if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
                         }
-                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5 && trigger.time>0){
                         //trigger.utc_second=10000;
                         unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -692,9 +693,9 @@ namespace FRAT {
                         }
                     }
 
-                    if(subsum>TriggerThreshold) {
+                    if(subsum>TriggerThreshold && itsBlockNumber > 5) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
-                        //if(totaltime+itsReferenceTime-trigger.time>5){
+                        if(totaltime+itsReferenceTime-trigger.time>5){
                             //new trigger
                             //trigger.average[fc]/=triggerlength[fc];
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
@@ -703,16 +704,16 @@ namespace FRAT {
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
                             trigger.max=subsum;
-                        //}
-                      /*  else{
+                        }
+                        else{
                             //old trigger, or trigger accross blocks
                             //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
                             trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
                             trigger.obsID=samplessummed;
                             if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
                         }
-                        */
-                  //  } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>3){
+                        
+                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5 && trigger.time>0){
                         //trigger.utc_second=10000;
                         unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -734,8 +735,9 @@ namespace FRAT {
                 
             
         }
+    //    }
         return pulsefound;
-        }
+        
         
     }        
 
@@ -1467,12 +1469,13 @@ Save timeseries (append)
                 badChans.resize(0);
                 if(!isnan(sortStd)){
                     float limit=average+cutlevel*sortStd;
+                    float lowerlimit=average-cutlevel*sortStd;
                     int index=0;
                     for(it2=sqrDivBaseline.begin(); it2<sqrDivBaseline.end(); it2++){
                         if(isnan(*it2)){ 
                             cout << " nan " <<  index;
                         }
-                        if(*it2 > limit) {
+                        if(*it2 > limit || *it2 < lowerlimit) {
                             tempIdVal.id=index;
                             val=(int) round(((*it2)-average)/sortStd);
                             tempIdVal.val=val;
