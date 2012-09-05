@@ -48,8 +48,8 @@ class BeamData(IOInterface):
         # Current dispersion measure
         self.__dm = dm
 
-        # Current phase calibration (between stations)
-        self.__phasecal = cr.hArray(float,len(self.__files),fill=0)  #Need to maybe replace this with a function that reads metadata...?
+        # Current delay calibration (between stations)
+        self.__caldelay = cr.hArray(float,len(self.__files),fill=0)  #Need to maybe replace this with a function that reads metadata in the future...?
 
         #Create keyword dict for easy access
         self.__setKeywordDict()
@@ -84,12 +84,12 @@ class BeamData(IOInterface):
         self.__keyworddict['TIME'] = self['TBB_TIME']
         self.__keyworddict['FREQUENCY_INTERVAL'] = [self['TBB_FREQUENCY_INTERVAL']]
         self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
-        self.__keyworddict['PHASE_CALIB'] = self.__phasecal
+        self.__keyworddict['CAL_DELAY'] = lambda: self.__caldelay
         self.__keyworddict['DM_OFFSET'] = lambda: self.calcDedispersionIndex(self.__dm,Ref_Freq=1.69e8)
         
 #        'BEAM_STATIONPOS'  add this here for all.
     
-    setable_keywords=set(["CHUNK","BLOCK","DM","NCHUNKS"])
+    setable_keywords=set(["CHUNK","BLOCK","DM","NCHUNKS","CAL_DELAY"])
     
     def __setitem__(self, key, value):
         """Set values to keywords if allowed. 
@@ -104,6 +104,8 @@ class BeamData(IOInterface):
             self.__dm = value
         elif key is "NCHUNKS":
             self.__nchunks = value
+        elif key is "CAL_DELAY":
+            self.__caldelay = cr.hArray(float,len(self.__files),fill=value)
         else:
             raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
@@ -238,7 +240,7 @@ class BeamData(IOInterface):
         return self['BEAM_FREQUENCIES']
 
     def getNchunks(self):
-        """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbbs.
+        """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbb.py.
         """
         
         all_nblocks = []
@@ -342,13 +344,14 @@ class BeamData(IOInterface):
             for i, file in enumerate(self.__filename):
                 cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
 
-        '''       if delay
-            self.phases.delaytophase(self.frequencies,self.delays)
-            self.weights.phasetocomplex(self.phases)
+        if np.any(self['CAL_DELAY']):
+            pdb.set_trace()
+            weights = self.empty('FFT_DATA')
+            phases=cr.hArray(float,weights,fill=0)
+            phases.delaytophase(self['BEAM_FREQUENCIES'],self['CAL_DELAY'])
+            weights.phasetocomplex(phases)
 
-            for i, file in enumerate(self.__filename):
-                data[i].mul(self['STATION_DELAY_CALIB'][i])
-        '''
+            data[...].mul(weights[...])
         
     def getTimeseriesData(self, data=None, chunk=-1):
         """Returns timeseries data for selected antennas.
