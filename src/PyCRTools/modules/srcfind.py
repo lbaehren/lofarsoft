@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt # want to have plotting in here?
 from scipy.optimize import brute, fmin
 import sys 
 
-c = 299792458.0 # speed of ligth in m/s
+c = 299792458.0 # speed of light in m/s - air has n ~ 1.0003; and cos(2 degrees) ~ 1 / 1.0003... needed?
 twopi = 2 * pi
 halfpi = 0.5 * pi
 rad2deg = 360.0 / twopi
@@ -283,6 +283,20 @@ def mse(az, el, pos, times):
 
     return mse * 1.0e18 # output in nanoseconds-squared
 
+def phaseAverage(phases):
+    """ Calculates the average of an array of phases
+    It uses vector addition, i.e. converting to exp(i phi), and summing all the complex exponentials.
+    This corresponds to concatenating vectors in a polar plot.
+    The angle (argument) of the sum vector is the average phase.
+    The length of the sum vector can be used as a measure of the variance in the phases.
+    Here we just output the average.
+    """
+    
+    phaseAvg = np.angle(np.sum(np.exp(1j * phases)))
+    
+    return phaseAvg
+
+
 def phaseError(az, el, pos, phases, freq, allowOutlierCount=0):
 
     N = len(phases) # phases assumed 0 for phases[0]?
@@ -292,8 +306,10 @@ def phaseError(az, el, pos, phases, freq, allowOutlierCount=0):
         
     # wrap around into [-pi, pi]? Not strictly needed as the sin^2 function will do that...
     deltaPhi = (phases - phases[0]) - calcPhases # measured 'phases' and expected 'calcPhases' at the same reference phase
-    mu = (1.0/N) * np.sum( 2.0/(freq * twopi) * sin(deltaPhi/2) ) # check; uses same procedure as for 'mse' above.
-    msePerAntenna = ( 2.0/(freq * twopi) * sin(deltaPhi/2) ) ** 2 - mu*mu # periodicity 2-pi in deltaPhi needed!
+    # mu = (1.0/N) * np.sum( 2.0/(freq * twopi) * sin(deltaPhi/2) ) # check; uses same procedure as for 'mse' above.
+    mu = phaseAverage(deltaPhi)
+    
+    msePerAntenna = ( 2.0/(freq * twopi) * sin( (deltaPhi - mu)/2) ) ** 2 # periodicity 2-pi in deltaPhi needed!
     
     if allowOutlierCount != 0:
 #        import pdb; pdb.set_trace()
@@ -303,7 +319,7 @@ def phaseError(az, el, pos, phases, freq, allowOutlierCount=0):
         #print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
         msePerAntenna[len(msePerAntenna) - allowOutlierCount:] = 0.0 # zero out the worst ones 
 
-    mse = np.average(msePerAntenna) 
+    mse = np.average(msePerAntenna)
 
     return mse * 1.0e18 # output in nanoseconds-squared; may want to switch to radians-squared?
 
