@@ -23,7 +23,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
 
     Usage:
     hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None,header=None,**kwargs)
-    
+
     Python convenience constructor function for hArrays. If speed is
     of the essence, use the original vector constructors: BoolArray(),
     IntArray(), FloatArray(), ComplexArray(), StringArray(), e.g.::
@@ -94,7 +94,7 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
                                          are provided in units of MHz.
 
     par         dict of parameters       DEPRECIATED: kept for backward compatibilit!
-                                         use kwargs 
+                                         use kwargs
                                          set additional (arbitrary) parameter values that
                                          are stored in the ``.par`` attribute of the array,
                 e.g. dict(logplot="y")   and are used, e.g., by the plot method to use
@@ -182,6 +182,8 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
             ary.vec().fill(fill)
         elif type(fill) in [tuple,list]:
             if len(fill)>0:
+                if Type in [float, int]: # Convert filling list/tuple to a single type.
+                    fill=[Type(i) for i in fill]
                 ary.vec().fill(Vector(fill))
         else:
             ary.fill(fill)
@@ -718,7 +720,7 @@ def hArray_toNumpy(self):
 def hArray_checksum(self):
     """ array.checksum() -> Returns CRC32 checksum of a 'list' representation of the array
     Used for (bug)checking if subsequent calls to the same function with the same inputs yields the same result.
-    
+
     Uses crc32 from the module zlib. Converts array to list, list to string, then takes the checksum of that.
     """
     from zlib import crc32 # here?
@@ -856,7 +858,7 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
     *ext* - name extension used on the folder that contains the binary and header.
      If present, it overwrite any other extension in filename. If not present, it overwrites with ``.pcr``
      It works with or without the dot. NOTE: An extension is defined here as any string after the last dot in the filename.
-    
+
     Example::
 
       xvals=hArray(range(10))
@@ -865,13 +867,13 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
       y=hArrayRead("test")
       y -> hArray(float, [4], name="test" # len=4, slice=[0:4], vec -> [1.0, 2.0, 3.0, 4.0])
       y.par.xvalues -> hArray(int, [10], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) # len=10 slice=[0:10])
-        
+
     The data files are stored in a directory with name test.pcr:
-    
+
     ls test.pcr/ ->  data.bin               header.hdr              par.xvalues.pcr/
-    
+
     Example using blocks::
-  
+
        xvals=hArray(range(10))
        x=hArray(float,[10],fill=range(10),name="test",xvalues=xvals)
        x.write("test.pcr",block=0,nblocks=2)
@@ -908,7 +910,7 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
         if os.path.exists(binfile):
             os.remove(binfile)
     self.writefilebinary(binfile,block*self.getSize())
-    
+
 class hFileContainer():
     """
     Dummy class to hold a filename where an hArray is stored.
@@ -1004,7 +1006,7 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
 
     *ext* - name extension used on the folder that contains the binary and header.
      If present, it overwrite any other extension in filename. If not present, it overwrites with ``.pcr``
-     It works with or without the dot. NOTE: An extension is defined here as any string after the last dot in the filename. 
+     It works with or without the dot. NOTE: An extension is defined here as any string after the last dot in the filename.
 
 
     Example::
@@ -1018,7 +1020,7 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
     """
 
     fn,ext = get_filename(filename,ext)
-   
+
     if not os.path.exists(fn):
         os.mkdir(fn)
     elif not os.path.isdir(fn):
@@ -1072,7 +1074,7 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
     Parameter       Default  Description
     =============== ======== ===============================================
     filename                 The folder name where ``data.bin``
-                             and ``header.hdr`` files are stored. 
+                             and ``header.hdr`` files are stored.
                              (both files need to be present).
     block           -1       Allows one to specify that one has written
                              the same vector multiple times to the same
@@ -1093,10 +1095,10 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
                              returned.
     ext             .pcr     Extension used on the folder name (filename).
                              If present, it overwrite any other extension
-                             in filename. If not present, it overwrites 
+                             in filename. If not present, it overwrites
                              with ``.pcr`` It works with or without the dot.
-                             NOTE: An extension is defined here as any string 
-                             after the last dot in the filename. 
+                             NOTE: An extension is defined here as any string
+                             after the last dot in the filename.
     =============== ======== ===============================================
 
     Example::
@@ -1160,24 +1162,24 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
 def get_filename(filename,ext):
     '''
     Returns the folder name and its proper extention.
-    
+
     =============== ======== ===============================================
     Parameter       Default  Description
     =============== ======== ===============================================
     filename                 The folder name where ``data.bin``
-                             and ``header.hdr`` files are stored. 
-    ext             .pcr     Extension used on the folder name (filename). 
+                             and ``header.hdr`` files are stored.
+    ext             .pcr     Extension used on the folder name (filename).
     =============== ======== ===============================================
 
     '''
-    
-    fn = os.path.expandvars(os.path.expanduser(filename))    
+
+    fn = os.path.expandvars(os.path.expanduser(filename))
     ext=str(ext)
     if '.' not in ext:
-        ext = '.' + ext 
+        ext = '.' + ext
 
     fn = os.path.splitext(fn)[0] + ext
-    
+
     return fn,ext
 
 def ashArray(val):
@@ -1315,7 +1317,7 @@ def hArray_Select(self,*args,**kwargs):
     See also:
 
     hArray_Find
-    
+
     Example::
 
         v=hArray(range(10)) -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
@@ -1351,7 +1353,7 @@ def hArray_Set(self,value,*args,**kwargs):
     **See also:**
 
     hArray_Find, hArray_Set, hArray_Select
-    
+
     **Example::**
 
         v=hArray(range(10)) # -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,8,9]) # len=10 slice=[0:10])
