@@ -98,8 +98,8 @@ class rfilines(tasks.Task):
         crfootprint=cr.trun("plotfootprint",filefilter=filefilter,pol=polarization)
    """
     parameters=dict(
-        event={default:None, doc:"Event data filename (.h5), or list of files"},
-#        filefilter={default:None,doc:"Obtains results from subdirectories of these files (from results.py)"},
+        #event={default:None, doc:"Event data filename (.h5), or list of files"},
+        filefilter={default:None,doc:"File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "},
         doplot = {default:True, doc:"Produce output plots"},
         testplots = {default: False, doc: "Produce testing plots for calibration on RF lines"},
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
@@ -111,6 +111,7 @@ class rfilines(tasks.Task):
         nofblocks = {default:100, doc: "Max. number of blocks to process"},
 #        smooth_width = {default: 16, doc: "Smoothing window for FFT, for determining base level (cheap way of doing what AverageSpectrum class does)"},
         direction_resolution = {default: [1, 5], doc: "Resolution in degrees [az, el] for direction search"},
+        directionFromAllStations = {default: False, doc: "Set True if you want to use all stations together to calculate the incoming direction. Otherwise, it is done per station and the results are averaged. "},
         freq_range = {default: [30, 70], doc: "Frequency range in which to search for calibration sources"}, 
         nofchannels = {default: -1, doc: "nof channels", output:True},
         medians = {default: None, doc: "Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1.", output: True},
@@ -142,7 +143,12 @@ class rfilines(tasks.Task):
         # Hopefully reducing the long I/O processing time (?)
 #        bytes_read = open(self.event, "rb").read()
         
-        f = cr.open(self.event, blocksize = self.blocksize)
+        filelist = cr.listFiles(self.filefilter)
+        if len(filelist) == 1:
+            filelist = filelist[0]
+        print '[rfilines] Processing files: '
+        print filelist
+        f = cr.open(filelist, blocksize = self.blocksize)
         #f = open('/Users/acorstanje/triggering/CR/L29590_D20110714T174749.986Z_CS005_R000_tbb.h5')
         #f = open('/Users/acorstanje/triggering/CR/L43181_D20120120T191949.209Z_CS003_R000_tbb.h5')
 #        f = open('/Users/acorstanje/triggering/CR/L40797_D20111228T200122.223Z_CS007_R000_tbb.h5')
@@ -164,7 +170,7 @@ class rfilines(tasks.Task):
         # get calibration delays from file
         caldelays = hArray(f["DIPOLE_CALIBRATION_DELAY"]) # f[...] outputs list!
         # add subsample clock offsets to caldelays
-        if isinstance(self.event, list):
+        if isinstance(filelist, list):
             subsample_clockoffsets = f["SUBSAMPLE_CLOCK_OFFSET"]
             station_startindex = f["STATION_STARTINDEX"]
             for i in range(len(subsample_clockoffsets)):
@@ -359,6 +365,12 @@ class rfilines(tasks.Task):
         else: # either list or number assumed
             bestchannel = self.lines
 
+        channelsSortedByStability = medians.argsort()
+        freqsByStability = freqs.toNumpy()[channelsSortedByStability]
+        print 'The best 10 channels: '
+        for i in range(10):
+            print 'Channel %d, freq %2.3f: phase RMS = %1.4f' % (channelsSortedByStability[i], freqsByStability[i] / 1.0e6, medians[channelsSortedByStability[i]])
+
         print ' Median phase-sigma is lowest (i.e. best phase stability) at channel %d, value = %f' % (bestchannel, medians[bestchannel])
         y = np.median(avgspectrum.toNumpy(), axis=0)
         self.average_spectrum = cr.hArray(y)
@@ -436,10 +448,15 @@ class rfilines(tasks.Task):
             
             # apply calibration phases here (?) See if that is different from doing it to all phases before...
             calphases = (twopi * freq) * caldelays
+            print calphases
             for i in range(self.nofchannels):
                 phaseAvg[i, bestchannel] += calphases[i]
+                #if i > 0: # Needed????
+                 #   phaseAvg[i, bestchannel] -= 0.3
             
+            #phaseAvg[0, bestchannel] = 0.0
             cr.hPhaseWrap(phaseAvg, phaseAvg)
+            
             print '---'
     #        print phaseAvg
     #        import pdb; pdb.set_trace()
@@ -448,13 +465,13 @@ class rfilines(tasks.Task):
             azSteps = int(360 / self.direction_resolution[0])
             elSteps = int(90 / self.direction_resolution[1])
             
-            if not isinstance(self.event, list):
+            if not isinstance(filelist, list):
             # for one file being processed
                 positions = allpositions.ravel() # only pol 'polarisation'
                 # NB. Indexing to the end is done by thisArray[start::step] !
                 
                 averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
-                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = self.testplots, verbose = True)
+                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 1, showImage = self.testplots, verbose = True)
                 self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)
 
                 print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
@@ -474,7 +491,9 @@ class rfilines(tasks.Task):
                 
                 plt.figure()
                 nanosecondPhase = twopi * freq * 1.0e-9
-                plt.plot(sf.phaseWrap(phaseDiff) / nanosecondPhase, label='Measured - expected phase')
+                timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
+                
+                plt.plot(timeDiff, label='Measured - expected phase')
 
                 #plt.figure()
                 rms_phase = phaseRMS.toNumpy()[:, bestchannel]
@@ -486,6 +505,8 @@ class rfilines(tasks.Task):
                 plt.legend()
                 
                 self.plot_finish(filename=self.plot_name + "-calibration-phases",filetype=self.filetype)
+
+                cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
 
             else:
                 # get list of stations in this dataset
@@ -502,7 +523,7 @@ class rfilines(tasks.Task):
 
                     averagePhasePerAntenna = phaseAvg.toNumpy()[start:end, bestchannel]
                     plt.figure()
-                    (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(thesePositions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = self.testplots, verbose = False)
+                    (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(thesePositions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = self.testplots, verbose = True)
                     self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)                   
                     
                     print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
@@ -510,11 +531,13 @@ class rfilines(tasks.Task):
                     directions.append((fitaz, fitel))
                     
                 averageIncomingDirection = vectorAverage(directions)
+                
 # HACK: do incoming direction using all stations together and see if that gets better results...
-#                averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
-#                plt.figure()
-#                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(allpositions.ravel(), averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4*nofStations, showImage = self.testplots, verbose = False)
-#                averageIncomingDirection = (fitaz, fitel)
+                if self.directionFromAllStations:
+                    averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
+                    plt.figure()
+                    (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(allpositions.ravel(), averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4*nofStations, showImage = self.testplots, verbose = False)
+                    averageIncomingDirection = (fitaz, fitel)
                 
                 print 'Averaged incoming direction: az = %f, el = %f' % (averageIncomingDirection[0] / deg2rad, averageIncomingDirection[1] / deg2rad)
                 # get modeled phases for a plane wave of given overall direction, for all stations together
