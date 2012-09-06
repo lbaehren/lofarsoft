@@ -241,6 +241,7 @@ class BeamData(IOInterface):
 
     def getNchunks(self):
         """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbb.py.
+        WARNING: Note that NCHUNKS is also used as the modulus (for wrapping) when using DM>0.
         """
         
         all_nblocks = []
@@ -345,7 +346,6 @@ class BeamData(IOInterface):
                 cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
 
         if np.any(self['CAL_DELAY']):
-            pdb.set_trace()
             weights = self.empty('FFT_DATA')
             phases=cr.hArray(float,weights,fill=0)
             phases.delaytophase(self['BEAM_FREQUENCIES'],self['CAL_DELAY'])
