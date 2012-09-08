@@ -1,0 +1,39 @@
+#! /bin/csh -f
+
+# @configure_input@
+
+set tarfile = psrchive-@PACKAGE_VERSION@.tar.gz
+
+if ( ! -f $tarfile ) then
+  echo "$tarfile not found"
+  echo "Please run 'make dist' first"
+  exit
+endif
+
+# determine the SourceForge user name from the Git configuration
+
+set server = `git config --get remote.origin.url`
+
+if ( $server =~ git://* ) then
+  echo 'ERROR: this command can be run only by a developer'
+  exit -1
+endif
+
+set SFUSER = `echo $server | awk -F// '{print $2}' | awk -F@ '{print $1}'`
+
+# the sourceforge file release system details
+set frslogin = ${SFUSER},psrchive@frs.sourceforge.net
+set frspath = /home/frs/project/p/ps/psrchive/psrchive/
+
+echo
+echo "This script will install the public release of $tarfile as $SFUSER"
+echo "Please hit <Enter> to continue or <Ctrl-C> to abort"
+$<
+
+mkdir -p @PACKAGE_VERSION@
+cp $tarfile @PACKAGE_VERSION@/
+
+rsync -e ssh -r @PACKAGE_VERSION@ ${frslogin}:${frspath}
+
+echo PSRCHIVE @PACKAGE_VERSION@ released
+
