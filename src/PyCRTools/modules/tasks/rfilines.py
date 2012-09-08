@@ -144,8 +144,16 @@ class rfilines(tasks.Task):
 #        bytes_read = open(self.event, "rb").read()
         
         filelist = cr.listFiles(self.filefilter)
+        superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007"]
         if len(filelist) == 1:
             filelist = filelist[0]
+        else: # sort files on station ID
+            sortedlist = []
+            for station in superterpStations:
+                thisStationsFile = [filename for filename in filelist if station in filename]
+                if len(thisStationsFile) > 0:
+                    sortedlist.append(thisStationsFile[0])
+            filelist = sortedlist
         print '[rfilines] Processing files: '
         print filelist
         f = cr.open(filelist, blocksize = self.blocksize)
@@ -566,6 +574,7 @@ class rfilines(tasks.Task):
                     else:
                         interStationDelays[i] -= refdelay
                         plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3)
+#                    plt.annotate(stationlist[i]
                 # Subtract reference station-delay
                 timeDiff -= refdelay   
                 #interStationDelays -= interStationDelays[0]
