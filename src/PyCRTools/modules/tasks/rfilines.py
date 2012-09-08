@@ -499,7 +499,7 @@ class rfilines(tasks.Task):
                 rms_phase = phaseRMS.toNumpy()[:, bestchannel]
                 plt.plot(rms_phase, 'r', label='RMS phase noise')
                 plt.plot( - rms_phase, 'r')
-                plt.title('Phase difference between measured and best-fit modeled phase\nChannel %d,   f = %2.4f MHz,   pi rad = %1.3f ns' % (bestchannel, freq/1.0e6, 1.0e9 / (2 * freq)))
+                plt.title(self.filefilter+'\nPhase difference between measured and best-fit modeled phase\nChannel %d,   f = %2.4f MHz,   pi rad = %1.3f ns' % (bestchannel, freq/1.0e6, 1.0e9 / (2 * freq)))
                 plt.ylabel('Time difference from phase [ns]')
                 plt.xlabel('Antenna number (RCU/2)')
                 plt.legend()
@@ -552,24 +552,30 @@ class rfilines(tasks.Task):
                 plt.figure()
                 nanosecondPhase = twopi * freq * 1.0e-9
                 timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
-                plt.plot(timeDiff, label='Measured - expected phase')
                 
                 interStationDelays = np.zeros(nofStations)
+                refdelay = 0.0
                 for i in range(nofStations):
                     start = stationStartIndex[i]
                     end = stationStartIndex[i+1]
                     interStationDelays[i] = np.median(timeDiff[start:end])
                     if i == 0:
+                        refdelay = interStationDelays[i]
+                        interStationDelays[i] -= refdelay
                         plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3, label='Median station delay')
                     else:
+                        interStationDelays[i] -= refdelay
                         plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3)
-                    
-                
+                # Subtract reference station-delay
+                timeDiff -= refdelay   
+                #interStationDelays -= interStationDelays[0]
+                plt.plot(timeDiff, 'o-', c = 'b', label='Measured - expected phase')
+
                 #plt.figure()
                 rms_phase = phaseRMS.toNumpy()[:, bestchannel]
                 plt.plot(rms_phase, 'r', label='RMS phase noise')
                 plt.plot( - rms_phase, 'r')
-                plt.title('Phase difference between measured and best-fit modeled phase\nChannel %d,   f = %2.4f MHz,   pi rad = %1.3f ns' % (bestchannel, freq/1.0e6, 1.0e9 / (2 * freq)))
+                plt.title(self.filefilter+'\nPhase difference between measured and best-fit modeled phase\nChannel %d,   f = %2.4f MHz,   pi rad = %1.3f ns' % (bestchannel, freq/1.0e6, 1.0e9 / (2 * freq)))
                 plt.ylabel('Time difference from phase [ns]')
                 plt.xlabel('Antenna number (RCU/2)')
                 plt.legend()
