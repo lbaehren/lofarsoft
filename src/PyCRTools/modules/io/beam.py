@@ -106,6 +106,9 @@ class BeamData(IOInterface):
             self.__nchunks = value
         elif key is "CAL_DELAY":
             self.__caldelay = cr.hArray(float,len(self.__files),fill=value)
+            for i,dt in enumerate(self.__caldelay):
+                if abs(dt) < 1e-15:   #Removing unfeasible time resolution in delays ()
+                    self.__caldelay[i] = 0            
         else:
             raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
 
