@@ -7,20 +7,26 @@ Created by Arthur Corstanje, Sep 2012
 
 from pycrtools import hArray
 import pycrtools as cr
-#from pycrtools.tasks.shortcuts import *
-#from pycrtools import metadata as md
 import numpy as np
 import matplotlib.pyplot as plt
-#from datetime import datetime
-#from pycrtools import xmldict
-
-
+import sys
 # use filefilter as parameter
 #filefilter = '/Users/acorstanje/triggering/CR/L40797_D20111228T200122.223Z_CS00*.h5'
-filefilter = '/Volumes/WDdata/bigdata/L62972_D20120801T100626.???Z_CS00[2356]_R000_tbb.h5'
+
+if len(sys.argv) != 2:
+    print 'Use checkForPulses <filefilter>'
+    exit()
+else:
+    filefilter = sys.argv[1]
+
+#filefilter = '/Volumes/WDdata/bigdata/L62972_D20120801T100626.???Z_CS00[2356]_R000_tbb.h5'
 #filefilter = '~/test/L63248_D20120809T195349.417Z_CS003_R000_tbb.h5'
 blocksize = 65536
-# get corresponding file list
+nblocks = 12 # or from f["DATA_LENGTH"], see below
+nsigma = 5
+minpulselen = 7
+
+# get corresponding file list, sorted by station...
 filelist = cr.listFiles(filefilter)
 superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007"]
 if len(filelist) == 1:
@@ -43,8 +49,7 @@ print '# channels = %d' % nofchannels
 
 nblocks = min(f["DATA_LENGTH"]) / blocksize # MAXIMUM_READ_LENGTH should be implemented... this may not work
 #nblocks = max(100, nblocks)
-nblocks = 12
-nblocks -= 2 # hack
+nblocks -= 1 # hack
 timeseries_data = f.empty("TIMESERIES_DATA")
 
 pulseLocationsPerAntenna = np.zeros( (nofchannels, 2048) )
@@ -70,12 +75,13 @@ for i in range(nblocks):
     timeseries_data[...] /= sigma[...] # dividing out sigma to get it in SNR-units
     print "searching per antenna"
     # Look for >= 7-sigma pulses
-    pulse = cr.trerun("LocatePulseTrain","separate",timeseries_data, nsigma = 4, minpulselen = 7, prepulselen = 400, search_per_antenna=True) 
+    pulse = cr.trerun("LocatePulseTrain","separate",timeseries_data, nsigma = nsigma, minpulselen = minpulselen, prepulselen = 400, search_per_antenna=True) 
     peaksPerAntenna = cr.hArray(pulse.npeaks_list).toNumpy()
 
     indexlist = pulse.indexlist.toNumpy()
     if pulse.npeaks > 0: 
         maxima = pulse.maxima.toNumpy()
+        # needed maximaStrongestPulse, or can do as well with 'maxima'? Timeseries_data_cut can contain more crossings of the threshold than pulse detections...
         maximaStrongestPulse = cr.hArray( pulse.timeseries_data_cut[...].max() ).toNumpy()
         # remove possible NaN's, convert to zero
         NaNlocations = np.isnan(maximaStrongestPulse)
@@ -103,6 +109,8 @@ for i in range(nofchannels):
     x = pulseLocationsPerAntenna[i][select_index]
     y = maximaPerAntenna[i][select_index]
     plt.plot(x, y, 'o')
+    
+plt.xlim(xmin = 0, xmax = nblocks * blocksize)
 
 for i in range(nblocks):
     x = locationStrongestPulse[i] 
