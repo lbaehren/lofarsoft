@@ -10,6 +10,7 @@ import pycrtools as cr
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import os
 # use filefilter as parameter
 #filefilter = '/Users/acorstanje/triggering/CR/L40797_D20111228T200122.223Z_CS00*.h5'
 
@@ -68,11 +69,16 @@ for i in range(nblocks):
 
     # get all sigmas
     sigma = cr.hArray( timeseries_data[...].stddev() ) # avoid problems with Vectors
-#    timeseries_data[..., 32000:32007] = 500.0 + np.random.rand() * 10.0 # artificial peak
+    medianSigma = np.median(sigma.toNumpy())
+    if i == 3:
+        timeseries_data[..., 32000:32007] = 2040 + np.random.rand() * 10.0 # artificial peak
+        timeseries_data[..., 30000:30007] = 2000
+        timeseries_data[..., 28000:28007] = 1800
+        timeseries_data[..., 25000:25007] = 1403
 #    timeseries_data[..., 32001] = -500.0
 #    timeseries_data[..., 32002] = +500.0
 #    timeseries_data[..., 21000:21007] = 300.0 + np.random.rand() * 20.0
-    timeseries_data[...] /= sigma[...] # dividing out sigma to get it in SNR-units
+    timeseries_data[...] /= medianSigma # or / sigma[...] # dividing out sigma to get it in SNR-units
     print "searching per antenna"
     # Look for >= 7-sigma pulses
     pulse = cr.trerun("LocatePulseTrain","separate",timeseries_data, nsigma = nsigma, minpulselen = minpulselen, prepulselen = 400, search_per_antenna=True) 
@@ -82,12 +88,14 @@ for i in range(nblocks):
     if pulse.npeaks > 0: 
         maxima = pulse.maxima.toNumpy()
         # needed maximaStrongestPulse, or can do as well with 'maxima'? Timeseries_data_cut can contain more crossings of the threshold than pulse detections...
+        pulse.timeseries_data_cut.abs() # get abs-max
         maximaStrongestPulse = cr.hArray( pulse.timeseries_data_cut[...].max() ).toNumpy()
         # remove possible NaN's, convert to zero
         NaNlocations = np.isnan(maximaStrongestPulse)
         maximaStrongestPulse[NaNlocations] = 0
         antennasAboveThreshold = len( np.where(maximaStrongestPulse > pulse.nsigma)[0] )
-        print 'Block %d: start pos %d, time = %3.3f ms, # antennas for strongest pulse = %d' % (i, pulse.start, 1e3 * (pulse.start + i*blocksize) / 200.0e6, pulse.npeaks)
+        antennasSaturated = len( np.where(maximaStrongestPulse >= (2046.0 / medianSigma))[0] )
+        print 'Block %d: start pos %d, time = %3.3f ms, # antennas for strongest pulse = %d, # saturated = %d' % (i, pulse.start, 1e3 * (pulse.start + i*blocksize) / 200.0e6, pulse.npeaks, antennasSaturated)
         antennasPerBlock[i] = pulse.npeaks # antennasAboveThreshold
         locationStrongestPulse[i] = pulse.start + i * blocksize
         strongestMaximum[i] = maximaStrongestPulse.max()
@@ -101,22 +109,50 @@ for i in range(nblocks):
             for j in range(peaksPerAntenna[ch]):
                 pulseLocationsPerAntenna[ch, npulsesPerAntenna[ch] + j] = indexlist[ch, j, 0] + i * blocksize
                 maximaPerAntenna[ch, npulsesPerAntenna[ch] + j] = maxima[ch, j]
+        # why is strongestMaximum for this block not equal (in fact larger than) to the largest
+        # maximaPerAntenna here?
         npulsesPerAntenna += peaksPerAntenna
 
 plt.figure()
+overallMax = 0.0
+samplesToTime = 1e3 / 200.0e6
+
 for i in range(nofchannels):
     select_index = np.where(maximaPerAntenna[i] > 0.01)
     x = pulseLocationsPerAntenna[i][select_index]
     y = maximaPerAntenna[i][select_index]
+    if (len(y) > 0) and (max(y) > overallMax):
+        overallMax = max(y)
+
+    # convert x to time in ms
+    x *= samplesToTime
     plt.plot(x, y, 'o')
     
-plt.xlim(xmin = 0, xmax = nblocks * blocksize)
+# plot red bar for threshold nsigma and for saturation point
+
+plt.plot([0.0, nblocks * blocksize * samplesToTime], [nsigma, nsigma], c='r', lw=4)
+plt.plot([0.0, nblocks * blocksize * samplesToTime], [2047.0 / medianSigma, 2047.0 / medianSigma], c='r', lw=4)
+
+plt.xlim(xmin = 0, xmax = nblocks * blocksize * samplesToTime)
+plt.ylim(ymin = 0, ymax = max(strongestMaximum) * 1.1)
+
 
 for i in range(nblocks):
     x = locationStrongestPulse[i] 
     y = strongestMaximum[i] * 1.03
     
+#    print '%d, %d' % (i, antennasPerBlock[i])
+#    print '%f, %f' % (x, y)
+    x *= samplesToTime
     plt.annotate(str(int(antennasPerBlock[i])), (x, y), horizontalalignment = 'center')
+
+if type(filelist) == type('str'):
+    filestr = filelist
+else:
+    filestr = filelist[0]
+plt.title('Pulse diagram for: ' + os.path.split(filestr)[1])
+plt.xlabel('Time [ms]')
+plt.ylabel('Pulse amplitude voltage [SNR]')
 
 #for i in range(nofchannels):
 #    pulseLocationsPerAntenna[i, npulsesPerAntenna:npulsesPerAntenna+peaksPerAntenna] = indexlist[i, npulsesPerAntenna:npulsesPerAntenna+peaksPerAntenna, 0]
