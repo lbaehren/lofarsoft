@@ -1125,13 +1125,20 @@ class BeamFormer(tasks.Task):
                 print '     Max  = %2.3f, SNR = %2.3f' %(Stats[2,npulse],Stats[3,npulse])
                 print '--------'
 
+        pulse_timeseries = cr.hArray(pulse_timeseries)
+
         if verbose:
             cr.plt.clf()
-            cr.plt.plot(cr.hArray_toNumpy(self.times),np.transpose(pulse_timeseries))
+            cr.plt.rcParams['legend.loc']='best'
+            cr.plt.rcParams['font.size']=20
+#            cr.plt.plot(cr.hArray_toNumpy(self.times),np.transpose(pulse_timeseries))
+            cr.plt.plot(self.times[0:260].vec(),pulse_timeseries[0,0:260].vec())
+            cr.plt.plot(self.times[260:2*260].vec(),pulse_timeseries[1,260:2*260].vec())
+            cr.plt.plot(self.times[2*260:-1].vec(),pulse_timeseries[2,2*260:-1].vec())
             cr.plt.xlabel("+/- Time [s]")
-            cr.plt.ylabel("Normalized Time_Series")
+            cr.plt.title("Normalized Time_Series")
 
-        pulse_timeseries = cr.hArray(pulse_timeseries)
+#        pulse_timeseries = cr.hArray(pulse_timeseries)
         pulse_timeseries.par.xvalues= self.times
         
         return pulse_timeseries,Stats
@@ -1274,7 +1281,7 @@ class BeamFormer(tasks.Task):
             self.beams = beams 
 
         nbeams = len(self.spectrum_file)
-        print 'WARNING: The results obtained from this program will be off, if the beams are not the same size. A fix may not be supported here in the future, but new code is beeing added to Beam_Tools.py'
+        print 'WARNING: The results obtained from this program will be off if the beams are not the same size. A fix may not be supported here in the future, but new code is beeing added to Beam_Tools.py'
 
         self.spectrum_file_bin=self.spectrum_file
         for i,name in enumerate(self.spectrum_file):

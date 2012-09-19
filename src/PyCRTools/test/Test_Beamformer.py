@@ -24,7 +24,7 @@ def strdate2jd(strdate):
     return utc
 
 pulsar = 1
-altair = 1 #If you are running this program in altair.
+altair = 0 #If you are running this program in altair.
 
 if pulsar:
     cr.tload('BeamFormer')  #Using this since it seems the program runs faster when the task is preloaded (if other task is "loaded" then it runs slower).
@@ -44,17 +44,17 @@ if pulsar:
         f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5')
         filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5'  
         output_dir= '/Users/eenriquez/RESEARCH/Pulsars/Results/'
-        f2=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
+        f2=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5')
 
     else:    
-#        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
-#        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
-        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
-        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
+        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
+        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
+#        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
+#        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
         output_dir= '~/RESEARCH/Pulsars/Results/'
         f2=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
 
-#PSR B0329+54 -- Pulsar    
+#PSR B0329+54 -- Pulsar    0.71452 sec
 #Wikipidea Values
     #alpha = hms2rad(3, 32, 59.368); # Right assention
     #delta = dms2rad(54, 34, 43.57); # Declination        
@@ -117,7 +117,7 @@ nantennas_start = 1
 nantennas_stride = 2
 maxnantennas = f1['NOF_DIPOLE_DATASETS']
 detail_name = '.pol1.multi_station'
-single_station = True
+single_station = False
 
 #------------------------------
 #Additional calibration values.
@@ -137,6 +137,7 @@ if pulsar:
 #tpar antenna_positions= dict(zip(f1["CHANNEL_ID"],f1.getITRFAntennaPositions()))
 #clock_delay = metadata.getClockCorrection(f2['STATION_NAME'][0],f2['ANTENNA_SET']
 
+#------------------------------
 #Multi station starting times.
 if pulsar:
     t0 = max(f2['SAMPLE_NUMBER'])*f2['SAMPLE_INTERVAL'][0]+f2['CLOCK_OFFSET'][0]
@@ -146,9 +147,9 @@ if pulsar:
     sample_offset = int((t0-t1)/f1['SAMPLE_INTERVAL'][0])
 
 #----------------------------------
-bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,single_station=single_station,maxnchunks=maxnchunks)
+bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,single_station=single_station)
 
-#antenna_positions=antenna_positions ,,phase_center=phase_center,,sample_offset=sample_offset
+#antenna_positions=antenna_positions ,,phase_center=phase_center,,sample_offset=sample_offset,,maxnchunks=maxnchunks)
 #-------------------------------------------------------------------------------------
 
 #Run for Beamformer Pulsar case
@@ -157,7 +158,7 @@ from pycrtools import *
 tpar filenames=['~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5']
 tpar maxchunklen=2**20
 tpar blocklen=2**14
-tpar detail_name='.pol0.fixed_Nyquist'
+tpar detail_name='.h5.pol1.multi_station'
 dynspec,cleandynspec=Task.dyncalc(tbin=16,clean=True,save_file=True)
 
 tpar NyquistZone=2
