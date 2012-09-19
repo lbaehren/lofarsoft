@@ -47,6 +47,7 @@ class BeamData(IOInterface):
 
         # Current dispersion measure
         self.__dm = dm
+        self.__dm_offset = None
 
         # Current delay calibration (between stations)
         self.__caldelay = cr.hArray(float,len(self.__files),fill=0)  #Need to maybe replace this with a function that reads metadata in the future...?
@@ -79,15 +80,14 @@ class BeamData(IOInterface):
 
         self.__keyworddict['FILENAMES'] = self.__filename
         self.__keyworddict['STATION_NAME'] = lambda: [self.__files[i].par.hdr['STATION_NAME'][0] for i in range(self.__nofBeamDataSets)]
+        #self.__keyworddict['BEAM_STATIONPOS'] =??
         self.__keyworddict['MAXIMUM_READ_LENGTH'] = self['NCHUNKS']*self['BEAM_BLOCKLEN']*self['BEAM_NBLOCKS']
-        self.__keyworddict['BLOCKSIZE'] = lambda: self['BEAM_BLOCKLEN']
+        self.__keyworddict['BLOCKSIZE'] = self['BEAM_BLOCKLEN']
         self.__keyworddict['TIME'] = self['TBB_TIME']
         self.__keyworddict['FREQUENCY_INTERVAL'] = [self['TBB_FREQUENCY_INTERVAL']]
         self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
         self.__keyworddict['CAL_DELAY'] = lambda: self.__caldelay
-        self.__keyworddict['DM_OFFSET'] = lambda: self.calcDedispersionIndex(self.__dm,Ref_Freq=1.69e8)
-        
-#        'BEAM_STATIONPOS'  add this here for all.
+        self.__keyworddict['DM_OFFSET'] = lambda: self.__dm_offset
     
     setable_keywords=set(["CHUNK","BLOCK","DM","NCHUNKS","CAL_DELAY"])
     
@@ -102,6 +102,7 @@ class BeamData(IOInterface):
             self.__block = value
         elif key is "DM":
             self.__dm = value
+            self.__dm_offset = self.calcDedispersionIndex(self.__dm,Ref_Freq=1.69e8)
         elif key is "NCHUNKS":
             self.__nchunks = value
         elif key is "CAL_DELAY":
@@ -295,7 +296,6 @@ class BeamData(IOInterface):
         return pos
 
     def getFFTData(self, data, block):
-
         """Writes FFT data for selected stations to data array.
 
         Required Arguments:
@@ -330,13 +330,13 @@ class BeamData(IOInterface):
         else:
 
             spec_len = data.shape()[1]    
-            if len(self['DM_OFFSET'])!= spec_len:
+            if len(self['DM_OFFSET'][0])!= spec_len:
                 raise ValueError('Variable offset need correct lenght.')
             
             frequency_range = range(spec_len)
             modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']  
     
-            real_offset = cr.hArray(int,len(self['DM_OFFSET']),self['DM_OFFSET'])
+            real_offset = cr.hArray(int,len(self['DM_OFFSET'][0]),self['DM_OFFSET'][0])
     
             cr.hAdd(real_offset,block)
             cr.hModulus(real_offset,modulus)
@@ -345,15 +345,23 @@ class BeamData(IOInterface):
             cr.hMul(real_offset,spec_len)
             cr.hAdd(real_offset,cr.hArray(int,spec_len,frequency_range))
     
+            #Note, this following loop could be slow (hOffsetReadFileBinary could maybe be optimized)
             for i, file in enumerate(self.__filename):
                 cr.hOffsetReadFileBinary(data[i],os.path.join(file,"data.bin"),real_offset)
 
+            #Addding phase correction to DM offsets.
+            weights_dm = self.empty('FFT_DATA')
+            phases_dm=cr.hArray(float,weights_dm,fill=0)
+            cr.hDelayToPhase(phases_dm,self['BEAM_FREQUENCIES'],self['DM_OFFSET'][1])  #Using this form of delay2phase since have delays as func. of freq.
+            weights_dm.phasetocomplex(phases_dm)
+            data[...].mul(weights_dm[...])
+
+        #Adding extra calibration delay between stations.
         if np.any(self['CAL_DELAY']):
             weights = self.empty('FFT_DATA')
             phases=cr.hArray(float,weights,fill=0)
             phases.delaytophase(self['BEAM_FREQUENCIES'],self['CAL_DELAY'])
             weights.phasetocomplex(phases)
-
             data[...].mul(weights[...])
         
     def getTimeseriesData(self, data=None, chunk=-1):
@@ -413,7 +421,8 @@ class BeamData(IOInterface):
             raise KeyError("Unknown key: " + str(key))
 
     def calcDedispersionIndex(self,DM,Ref_Freq=None):
-        ''' It calculates the indices for a given DM. 
+        ''' It calculates the integer indices (number of blocks) for a given DM.
+            It also returns the time offset from the residual values (to be added as phases).
         '''
 
         DM=cr.asval(DM)
@@ -427,12 +436,18 @@ class BeamData(IOInterface):
         #Calculate the relative shifts in samples per frequency channels
         #Constant value comes from "Handbook of Pulsar Astronomy - by Duncan Ross Lorimer , Section 4.1.1, pagina 86 (in google books)"
         shifts = ( 4.148808e-3*DM/dt) * 1e9**2 * (Ref_Freq**-2 - frequencies**-2)
-                
-        #Integer offsets to reference frequency (shift to center)
-        offsets = cr.Vector(int,frequencies,fill=shifts)
+
+        #Residual offsets to reference frequency 
+        residuals = cr.hArray(float,frequencies,fill=shifts)
+        cr.hFmod(residuals,1)
+ 
+        #Integer offsets to reference frequency 
+        offsets = shifts - residuals
         offsets*=-1
         
-        return offsets
+        residuals*=-1*dt    # Since use exclusively by getFFTData.
+       
+        return [offsets,residuals]
         
     def close(self):
         """Closes file and sets the data attribute `.closed` to
