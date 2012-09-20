@@ -443,10 +443,10 @@ class CRDatabase(object):
         db_version_pre = 2
         db_version_post = 3
 
-        print "Upgrading database to version {0}...".format(db_version_post)
-
         if ((self.settings.db_version == db_version_pre) and
             (self.db_required_version >= db_version_post)):
+
+            print "Upgrading database to version {0}...".format(db_version_post)
 
             # Add parameters for cr_physics pipeline
             print "  Adding additional parameters for cr_physics pipeline..." # DEBUG
