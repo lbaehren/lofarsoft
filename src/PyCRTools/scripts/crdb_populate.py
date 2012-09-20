@@ -230,7 +230,7 @@ def populate(db_filename, data_filename):
                         parameters = xmldict.load(results_filename)
                         for key in parameters.keys():
                             p[key] = parameters[key]
-                            p.write(recursive=False, parameters=True)
+                        p.write(recursive=False, parameters=True)
                     else:
                         print("Results file {0} does not exist...".format(results_filename))
 
@@ -280,8 +280,8 @@ def update(db_filename):
                     else:
                         print("Results file {0} does not exist...".format(results_filename))
 
-    # Add LORA data to event parameters
-    process_lora_data(e, dbManager.settings.lorapath)
+        # Add LORA data to event parameters
+        process_lora_data(e, dbManager.settings.lorapath)
 
 
 def process_lora_data(event, lorapath):
