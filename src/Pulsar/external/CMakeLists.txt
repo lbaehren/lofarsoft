@@ -64,7 +64,8 @@ add_dependencies (tempo_install tempo_build tempo_unpack)
 ##
 ## ==============================================================================
 
-set (tempo2_version   "2011.7"                          )
+#set (tempo2_version   "2011.7"                          )
+set (tempo2_version   "2012.6.1"                        )
 set (tempo2_name      "tempo2-${tempo2_version}"        )
 set (tempo2_directory "tempo2/tempo2-${tempo2_version}" )
 set (tempo2_archive   "${tempo2_directory}.tar.gz"      )
