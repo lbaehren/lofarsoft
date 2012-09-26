@@ -334,11 +334,10 @@ class Shower(Task):
                 if self.footprint_scale:
                     scaling_check = (self.positions[:,0]>-self.footprint_scale_box)&(self.positions[:,1]<self.footprint_scale_box)&(self.positions[:,1]>-self.footprint_scale_box)&(self.positions[:,0]<self.footprint_scale_box)
                     scaling_check = scaling_check.transpose()
-                    
+
                     self.signals = self.signals[scaling_check]
                     self.positions = self.positions[scaling_check]
                     self.timelags = self.timelags[scaling_check]
-                    
                     
                 if self.timelags is None:
                    self.scolors="blue"
@@ -346,9 +345,11 @@ class Shower(Task):
                 
                 
                 # ------------- POL 0
-                 
-                self.sizes0 = np.copy(self.signals[:,0])
-                self.sizes0 = np.log(self.sizes0) 
+                if len(self.signals.shape) == 1: 
+                    self.sizes0 = np.copy(self.signals)
+                else:
+                    self.sizes0 = np.copy(self.signals[:,0]) 
+                self.sizes0 = np.log(self.sizes0)
                 if self.sizes0.min() > 0:
                     self.sizes0 = self.sizes0 - self.sizes0.min()
                 self.sizes0 *= self.footprint_point_scaling
@@ -365,7 +366,11 @@ class Shower(Task):
                     cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
                 
                 if self.timelags is not None:
-                    self.scolors=self.timelags[:,0]-self.timelags[:,0].min()
+                    if len(self.signals.shape) == 1:
+                        self.scolors=self.timelags-self.timelags.min() 
+                    else:
+                        self.scolors=self.timelags[:,0]-self.timelags[:,0].min()
+                    
                     self.scolors *=1e9  
                                       
                 cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes0,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)
@@ -378,7 +383,10 @@ class Shower(Task):
                     if self.eventid:
                         self.title = str(self.eventid)+" in pol X" 
                     else:
-                        self.title = 'pol X'    
+                        if len(self.signals.shape) == 1:
+                            self.title = 'total signal'
+                        else:    
+                            self.title = 'pol X'    
                     cr.plt.title(self.title)
                 
                 #Plotting the shower
@@ -393,56 +401,58 @@ class Shower(Task):
                     self.plotlist.append(plotname)
 
                 # ----------- POL 1
-                
-                self.sizes1 = np.copy(self.signals[:,1])
-                self.sizes1 = np.log(self.sizes1) 
-                if self.sizes1.min() > 0:
-                    self.sizes1 = self.sizes1 - self.sizes1.min()
-                self.sizes1 *= self.footprint_point_scaling
-
-                                
-                cr.plt.figure()
-                
-                # Adding LORA
-                if LORA_time:
-                    cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.loracolor,marker=self.footprint_marker_lora,cmap="winter")
-                if LORA_regular:
-                    cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.footprint_color_lora,marker=self.footprint_marker_lora)
-                
-                # Background
-                if bgim is not None and self.footprint_use_background:
-                    cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
-                
-                # Signals    
-                if self.timelags is not None:
-                    self.scolors=self.timelags[:,1]-self.timelags[:,1].min()
-                    self.scolors *=1e9   
-                cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes1,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
-                cr.plt.xlabel("LOFAR East [meters] ")
-                cr.plt.ylabel("LOFAR North [meters] ")
-                if self.timelags is not None:
-                    self.cbar=cr.plt.colorbar()
-                    self.cbar.set_label("Time of arrival (ns)")
-                if self.footprint_use_title:
-                    if self.eventid:
-                        self.title = str(self.eventid)+" in pol Y" 
-                    else:
-                        self.title = 'pol Y'    
-                    cr.plt.title(self.title)                
-                
-                #Plotting the shower
-                if self.footprint_shower_enable:
-                    cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
-                    cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)
-
-                                                         
-                if self.save_plots:
-                    plotname = self.plot_prefix+"shower_footprint_polY.png"
-                    cr.plt.savefig(plotname)
-                    self.plotlist.append(plotname)
+                if len(self.signals.shape) > 1:
+                  if self.signals.shape[1] > 1:
+                    self.sizes1 = np.copy(self.signals[:,1])
+                    self.sizes1 = np.log(self.sizes1) 
+                    if self.sizes1.min() > 0:
+                        self.sizes1 = self.sizes1 - self.sizes1.min()
+                    self.sizes1 *= self.footprint_point_scaling
+    
+                                    
+                    cr.plt.figure()
+                    
+                    # Adding LORA
+                    if LORA_time:
+                        cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.loracolor,marker=self.footprint_marker_lora,cmap="winter")
+                    if LORA_regular:
+                        cr.plt.scatter(self.lora_positions[:,0],self.lora_positions[:,1],s=self.lsizes,c=self.footprint_color_lora,marker=self.footprint_marker_lora)
+                    
+                    # Background
+                    if bgim is not None and self.footprint_use_background:
+                        cr.plt.imshow(bgim,origin='upper',extent=[-375/2,375/2,-375/2-6*120/227,375/2-6*120/227],alpha=1.0)
+                    
+                    # Signals    
+                    if self.timelags is not None:
+                        self.scolors=self.timelags[:,1]-self.timelags[:,1].min()
+                        self.scolors *=1e9   
+                    cr.plt.scatter(self.positions[:,0],self.positions[:,1],s=self.sizes1,c=self.scolors,marker=self.footprint_marker_lofar,cmap=self.footprint_colormap)    
+                    cr.plt.xlabel("LOFAR East [meters] ")
+                    cr.plt.ylabel("LOFAR North [meters] ")
+                    if self.timelags is not None:
+                        self.cbar=cr.plt.colorbar()
+                        self.cbar.set_label("Time of arrival (ns)")
+                    if self.footprint_use_title:
+                        if self.eventid:
+                            self.title = str(self.eventid)+" in pol Y" 
+                        else:
+                            self.title = 'pol Y'    
+                        cr.plt.title(self.title)                
+                    
+                    #Plotting the shower
+                    if self.footprint_shower_enable:
+                        cr.plt.arrow(self.core[0]+elev*dsin,self.core[1]+elev*dcos,-elev*dsin,-elev*dcos,lw=4,color=self.footprint_shower_color)
+                        cr.plt.scatter(self.core[0],self.core[1],marker='x',s=600,color=self.footprint_shower_color,linewidth=4)
+    
+                                                             
+                    if self.save_plots:
+                        plotname = self.plot_prefix+"shower_footprint_polY.png"
+                        cr.plt.savefig(plotname)
+                        self.plotlist.append(plotname)
                
                 # -------- POL 2
-                if self.signals.shape[1] == 3:
+                if len(self.signals.shape) > 1:  
+                  if self.signals.shape[1] == 3:
                 
                     self.sizes2 = np.copy(self.signals[:,2])
                     self.sizes2 = np.log(self.sizes2) 
@@ -489,7 +499,8 @@ class Shower(Task):
                         self.plotlist.append(plotname)
                 
                 if not self.save_plots:   
-                    cr.plt.show()
+                    pass
+                    #cr.plt.show()
 
             
             else:
