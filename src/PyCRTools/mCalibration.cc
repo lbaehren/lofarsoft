@@ -309,7 +309,7 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
 
 template <class CIter>
 void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
-    const HNumber f, const HNumber theta, const HNumber phi,
+    const HNumber f, const HNumber theta, HNumber phi,
     const CIter Vtheta, const CIter Vtheta_end,
     const CIter Vphi, const CIter Vphi_end,
     const HNumber fstart, const HNumber fstep, const HInteger fn,
@@ -333,6 +333,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   if (vpn != fn * tn * pn) throw PyCR::ValueError("Vphi array has incorrect size.");
   if (f < 0) throw PyCR::ValueError("Invalid negative frequency.");
   if (theta < 0) throw PyCR::ValueError("Invalid negative angle theta.");
+  if (phi < 0) phi += 360.;
   if (phi < 0) throw PyCR::ValueError("Invalid negative angle phi.");
 
   // Get iterators
