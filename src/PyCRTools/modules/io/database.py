@@ -4,7 +4,7 @@ Provide a simple database access interface using sqlite3.
 
 import sqlite3
 
-class Database:
+class Database(object):
     """Class to handle all python communication with an SQLite database."""
 
     def __init__(self, filename=":memory:"):
