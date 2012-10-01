@@ -76,6 +76,8 @@ class CMDLine:
                            help="making only summaries on already processed data", default=False)
         	self.cmd.add_option('--plots-only', action="store_true", dest='is_plots_only', 
                            help="creating diagnostic plots only on processing nodes assuming the data required for plots is there already", default=False)
+        	self.cmd.add_option('--single-pulse', action="store_true", dest='is_single_pulse', 
+                           help="running single-pulse analysis in addition to folding a profile", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
                                  TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
@@ -143,8 +145,6 @@ class CMDLine:
                            help="normalize the data based on entire data set. Otherwise, the scaling is updated after every data block", default=False)
         	self.groupCV.add_option('--write-ascii', action="store_true", dest='is_write_ascii',
                            help="write out also ascii files (.rv) containing complex values", default=False)
-        	self.groupCV.add_option('--output-chans-per-subband', dest='output_chans_per_subband', metavar='#CHANS',
-                           help="set output number of channels per subband. Default: %default (all channels in subband are collapsed)", default=1, type='int')
         	self.groupCV.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
                            help="skip running rmfit program", default=False)
 		self.cmd.add_option_group(self.groupCV)

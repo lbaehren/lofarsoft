@@ -1588,11 +1588,18 @@ class CVUnit(PipeUnit):
 							dspsr_popens=[] # list of dspsr Popen objects
 							for cc in range(bb, bb+self.nrChanPerSub):
 								input_file=bf2puma_outfiles[cc]
-								cmd="dspsr -m %s -A -L %d -F %d:D %s -fft-bench -E %s/%s.par -O %s_%s_SB%s -t %d %s" % \
-									(obsmjd, cmdline.opts.tsubint, cmdline.opts.output_chans_per_subband, verbose, \
-									self.outdir, psr2, psr, self.output_prefix, input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
+								cmd="dspsr -m %s -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_SB%s -t %d %s" % \
+									(obsmjd, cmdline.opts.tsubint, verbose, self.outdir, psr2, psr, self.output_prefix, \
+										input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
 								dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 								dspsr_popens.append(dspsr_popen)
+								# running the single-pulse analysis
+								if cmdline.opts.is_single_pulse:
+									cmd="dspsr -c 900 -D 71.0398 -L 900 -A -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
+										(obsmjd, verbose, psr, self.output_prefix, \
+											input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
+									dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
+									dspsr_popens.append(dspsr_popen)
 
 							# waiting for dspsr to finish
 							self.waiting_list("dspsr", dspsr_popens)
@@ -1602,6 +1609,11 @@ class CVUnit(PipeUnit):
 						ar_files=glob.glob("%s/%s_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
 						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 						self.execute(cmd, workdir=self.curdir)
+						if cmdline.opts.is_single_pulse:
+							self.log.info("Adding frequency channels together for single-pulse analysis...")
+							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
+							cmd="psradd -R -o %s_sp_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
+							self.execute(cmd, workdir=self.curdir)
 						# removing corrupted freq channels
 						if self.nrChanPerSub > 1:
 							self.log.info("Zapping every %d channel..." % (self.nrChanPerSub))
