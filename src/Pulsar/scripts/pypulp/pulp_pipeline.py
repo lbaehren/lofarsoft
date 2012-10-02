@@ -1595,7 +1595,7 @@ class CVUnit(PipeUnit):
 								dspsr_popens.append(dspsr_popen)
 								# running the single-pulse analysis
 								if cmdline.opts.is_single_pulse:
-									cmd="dspsr -b 140468750 -c 899 -D 71.0398 -L 899 -A -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
+									cmd="dspsr -T 59 -b 2097152 -c 59 -D 71.0398 -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
 										(obsmjd, verbose, psr, self.output_prefix, \
 											input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
 									dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
