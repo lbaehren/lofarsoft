@@ -13,6 +13,7 @@ print sys.argv
 obsid='L54717'
 #obsid='L39700'
 cutlevel=5
+nrstreams=8
 parsetdir='/vol/astro/lofar/frats/bf/parsets/'
 datadir='/vol/astro/lofar/frats/bf/'
 if len(sys.argv)>1:
@@ -21,7 +22,7 @@ elif len(sys.argv)>3:
     parsetdir=sys.argv[2]
     datadir=sys.argv[3]
 else:
-    usage sys.argv[0] <obsid> [<parsetdir>] [<datadir>]
+    print "usage",sys.argv[0],"<obsid> [<parsetdir>] [<datadir>]"
     quit()
 obsids=[obsid]
 block=0
@@ -68,25 +69,62 @@ std1=np.std(stdNormSort[int(0.1*Lstd):int(0.9*Lstd)])
 index=np.arange(0,Lstd)
 muteindex=index[stdNorm>av+cutlevel*std1]
 # flag data
-data[:,muteindex]=np.average(data)
+# replace by 1 or average, but remove baseline first
+#data[:,muteindex]=np.average(data)
 
-
+def divideBaseline(data,freqaxis=1):
+    if len(data.shape) != 2:
+        raise dimensionError("only works for dimension 2 arrays")
+    if freqaxis not in [0,1]:
+        raise dimensionError("select 0th or 1st axis")
+    freqdata=np.sum(data,1-freqaxis)
+    if freqaxis==1:
+        data/=freqdata
+    else:
+        data=np.transpose(np.transpose(data)/freqdata)
+    return data
 
 # plot dynamic spectrum and collapsed spectrum
 def myplot(data):
-    plt.subplot(221)
-    plt.imshow(data[:,0,:],aspect='auto')
-    plt.subplot(222)
-    plt.plot(np.sum(data[:,0,:],axis=1))
-    plt.subplot(223)
-    plt.plot(np.sum(data[:,0,:],axis=0))
-    plt.subplot(224)
-    plt.imshow(np.log(data[:,0,:]),aspect='auto')
-
+    plt.suptitle('(dynamic) spectum of '+obsid)
+    try:
+        plt.subplot(221)
+        plt.imshow(data[:,0,:],aspect='auto')
+        plt.xlabel('channel nr')
+        plt.ylabel('sample nr')
+        plt.subplot(222)
+        plt.plot(np.sum(data[:,0,:],axis=1))
+        plt.xlabel('sample nr')
+        plt.ylabel('summed power')
+        plt.subplot(223)
+        plt.plot(np.sum(data[:,0,:],axis=0))
+        plt.xlabel('channel nr')
+        plt.ylabel('summed power')
+        plt.subplot(224)
+        plt.imshow(np.log(data[:,0,:]),aspect='auto')
+        plt.xlabel('channel nr')
+        plt.ylabel('sample nr')
+    except:
+        plt.subplot(221)
+        plt.imshow(data,aspect='auto')
+        plt.xlabel('channel nr')
+        plt.ylabel('sample nr')
+        plt.subplot(222)
+        plt.plot(np.sum(data,axis=1))
+        plt.xlabel('sample nr')
+        plt.ylabel('summed power')
+        plt.subplot(223)
+        plt.plot(np.sum(data,axis=0))
+        plt.xlabel('channel nr')
+        plt.ylabel('summed power')
+        plt.subplot(224)
+        plt.imshow(np.log(data),aspect='auto')
+        plt.xlabel('channel nr')
+        plt.ylabel('sample nr')
 # reshape data into streams
 data3=data.reshape(dr.samples,nrstreams,totCh/nrstreams)
 # calculate frequencies for each stream
-freqs=dr.par['frequencies']
+freqs=np.array(dr.par['frequencies'])
 freqs=freqs[0:totCh].reshape(nrstreams,totCh/nrstreams)
 stream=5
 # dedisperse data for the specified stream
