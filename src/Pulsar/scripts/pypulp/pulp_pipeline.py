@@ -11,6 +11,7 @@ import cPickle
 import logging
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
+import psr_utils as pu
 from pulp_parset import Observation, radial_distance, find_pulsars
 from pulp_usercmd import CMDLine, check_pulsars
 from pulp_sysinfo import CEP2Info
@@ -1595,7 +1596,12 @@ class CVUnit(PipeUnit):
 								dspsr_popens.append(dspsr_popen)
 								# running the single-pulse analysis
 								if cmdline.opts.is_single_pulse:
-									cmd="digifil %s -F 2 -D 0.0 -o %s_sp_%s_SB%s.fil %s" % (verbose, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
+									# getting coordinates string of the pulsar
+									psr_ra=pu.coord_to_string(pu.rad_to_hms(self.tab.rarad))
+									psr_dec=pu.coord_to_string(pu.rad_to_dms(self.tab.decrad))
+									if self.tab.decrad < 0: psr_coords=psr_ra+psr_dec
+									else: psr_coords=psr_ra+"+"+psr_dec
+									cmd="digifil -set name=%s -set coord=%s %s -F 2 -D 0.0 -o %s_sp_%s_SB%s.fil %s" % (psr, psr_coords, verbose, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
 #									cmd="dspsr -T 59 -b 2097152 -c 59 -D 71.0398 -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
 #										(obsmjd, verbose, psr, self.output_prefix, \
 #											input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
