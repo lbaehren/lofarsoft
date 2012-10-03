@@ -1595,9 +1595,10 @@ class CVUnit(PipeUnit):
 								dspsr_popens.append(dspsr_popen)
 								# running the single-pulse analysis
 								if cmdline.opts.is_single_pulse:
-									cmd="dspsr -T 59 -b 2097152 -c 59 -D 71.0398 -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
-										(obsmjd, verbose, psr, self.output_prefix, \
-											input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
+									cmd="digifil %s -F 1 -D 0.0 -o %s_sp_%s_SB%s %s" % (verbose, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
+#									cmd="dspsr -T 59 -b 2097152 -c 59 -D 71.0398 -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
+#										(obsmjd, verbose, psr, self.output_prefix, \
+#											input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
 									dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 									dspsr_popens.append(dspsr_popen)
 
@@ -1611,8 +1612,10 @@ class CVUnit(PipeUnit):
 						self.execute(cmd, workdir=self.curdir)
 						if cmdline.opts.is_single_pulse:
 							self.log.info("Adding frequency channels together for single-pulse analysis...")
-							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
-							cmd="psradd -R -o %s_sp_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
+#							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
+#							cmd="psradd -R -o %s_sp_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
+							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.fil" % (self.curdir, psr, self.output_prefix))
+							cmd="splice %s > %s_sp_%s.fil" % (psr, " ".join(ar_files), self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 						# removing corrupted freq channels
 						if self.nrChanPerSub > 1:
