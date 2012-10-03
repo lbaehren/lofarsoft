@@ -65,7 +65,7 @@ static int default_aliases ()
 
   add_alias ("w", "UTR-2");
   // LOFAR stations
-  add_alias ("t", "LOFAR");
+  add_alias ("LF", "t");
   add_alias ("u", "FR606");
   add_alias ("x", "DE601");
   add_alias ("y", "UK608");
