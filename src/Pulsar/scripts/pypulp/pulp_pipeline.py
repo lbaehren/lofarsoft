@@ -1595,7 +1595,7 @@ class CVUnit(PipeUnit):
 								dspsr_popens.append(dspsr_popen)
 								# running the single-pulse analysis
 								if cmdline.opts.is_single_pulse:
-									cmd="digifil %s -F 1 -D 0.0 -o %s_sp_%s_SB%s %s" % (verbose, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
+									cmd="digifil %s -F 2 -D 0.0 -o %s_sp_%s_SB%s.fil %s" % (verbose, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
 #									cmd="dspsr -T 59 -b 2097152 -c 59 -D 71.0398 -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
 #										(obsmjd, verbose, psr, self.output_prefix, \
 #											input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
