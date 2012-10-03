@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from pycrtools.tasks.shortcuts import *
 import pycrtools.tasks as tasks
 import pytmf
+import datetime
 
 twopi = 2 * np.pi
 deg2rad = twopi / 360.0
@@ -100,6 +101,7 @@ class rfilines(tasks.Task):
     parameters=dict(
         #event={default:None, doc:"Event data filename (.h5), or list of files"},
         filefilter={default:None,doc:"File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "},
+        outputDataFile = {default: None, doc: "Optional: output text file where results can be written."},
         doplot = {default:True, doc:"Produce output plots"},
         testplots = {default: False, doc: "Produce testing plots for calibration on RF lines"},
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
@@ -117,6 +119,10 @@ class rfilines(tasks.Task):
         medians = {default: None, doc: "Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1.", output: True},
         dirtychannels = {default: None, doc: "Output array of dirty channels, based on stability of relative phases from consecutive data blocks. Deviations from uniform-randomness are quite small, unless there is an RF transmitter present at a given frequency.", output:True},
         phase_average = {default: None, doc: "Output array of average phases for each antenna, per frequency channel, dim = e.g. 48 x 4097", output: True},
+        strongestDirection = {default: None, doc: "Output list [az, el] with the direction of the strongest transmitter", output: True},
+        strongestFrequency = {default: None, doc: "The frequency with the smallest phaseRMS, from the range specified in the freq_range parameter", output: True},
+        bestPhaseRMS = {default: None, doc: "PhaseRMS for the best frequency", output: True},
+        timestamp = {default: None, doc: "Unix timestamp of input file(s)", output: True},
         average_spectrum = {default: None, doc: "Output median over antennas of averaged spectrum (over blocks)", output: True},
 #        results=p_(lambda self:gatherresults(self.topdir, self.maxspread, self.antennaSet),doc="Results dict containing cabledelays_database, antenna positions and names"),
 #        positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
@@ -448,12 +454,11 @@ class rfilines(tasks.Task):
         
         # find direction of this source; plot image to check quality of fit.
         print 'Find direction of source based on averaged phases per antenna...'
-        if self.testplots:
-        # do calibration test plots
+        if self.doplot:
+        # do calibration plots
             freqs = f["FREQUENCY_DATA"]
             freq = freqs[bestchannel]
 
-            
             # apply calibration phases here (?) See if that is different from doing it to all phases before...
             calphases = (twopi * freq) * caldelays
             print calphases
@@ -489,11 +494,12 @@ class rfilines(tasks.Task):
                 modelphases -= modelphases[0]
                 modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
 
-                plt.figure()
-                plt.plot(modelphases, label='Modeled phases (plane wave)')
-                plt.plot(averagePhasePerAntenna, label='Avg. measured phases')
-                plt.legend()
-                self.plot_finish(filename=self.plot_name + "-avg-measuredphases",filetype=self.filetype)
+                if self.testplots:
+                    plt.figure()
+                    plt.plot(modelphases, label='Modeled phases (plane wave)')
+                    plt.plot(averagePhasePerAntenna, label='Avg. measured phases')
+                    plt.legend()
+                    self.plot_finish(filename=self.plot_name + "-avg-measuredphases",filetype=self.filetype)
 
                 phaseDiff = averagePhasePerAntenna - modelphases
                 
@@ -513,8 +519,22 @@ class rfilines(tasks.Task):
                 plt.legend()
                 
                 self.plot_finish(filename=self.plot_name + "-calibration-phases",filetype=self.filetype)
+                
+                if self.doplot:
+                    cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
+                if self.outputDataFile:
+                    outf = open(self.outputDataFile, 'a') # Append to file
+                    timestamp = f["TIME"][0]
+                    datestring = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
+                    timestring = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+                    bestFrequency = freqs[bestchannel]
 
-                cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
+                    outstr = filelist + ' ' + datestring + ' ' + timestring + ' ' + str(timestamp) + ' ' + format('%3.4f' % bestFrequency) + ' ' + format('%3.2f' % (fitaz / deg2rad)) + ' '
+                    outstr += format('%3.2f' % (fitel / deg2rad)) + ' ' + format('%3.4f' % minPhaseError) + ' '
+                    outstr += format('%3.6f' % medians[bestchannel])
+                    
+                    outf.write(outstr + '\n')
+                    outf.close()
 
             else:
                 # get list of stations in this dataset
@@ -595,6 +615,11 @@ class rfilines(tasks.Task):
                 
                 cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
 
+        # set output params
+        self.strongestFrequency = freqs[bestchannel]
+        self.strongestDirection = [fitaz / deg2rad, fitel / deg2rad]
+        self.bestPhaseRMS = medians[bestchannel]
+        self.timestamp = f["TIME"][0]
                 
 """                       
 
