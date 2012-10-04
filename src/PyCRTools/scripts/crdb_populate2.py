@@ -95,7 +95,6 @@ class CRDatabasePopulator(object):
         sql = "INSERT INTO main.datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}');".format(self.ID['datafile'], self.dataFilename, 'NEW')
         self.sqlList.append(sql)
 
-
         # Write datafile parameters to list of SQL statements
         # if options.parameters:
         #     datafileParameters = CRParameter(ID=self.ID['datafile'], parentname='datafile')
@@ -121,6 +120,7 @@ class CRDatabasePopulator(object):
             # Add LORA data to event parameters
             eventParameters = CRParameter(ID=self.ID['event'], parentname='event')
             if options.parameters:
+                print "Collecting parameters..."
                 process_lora_data(timestamp, eventParameters, options.lorapath)
 
                 # Write event parameters to list of SQL statements
@@ -201,8 +201,8 @@ class CRDatabasePopulator(object):
             if self.db:
                 if options.verbose:
                     print "Nr. of SQL lines: %d" %(len(self.sqlList))
-                    # for sql in self.sqlList:
-                    #     print sql
+                    for sql in self.sqlList:
+                        print sql
                 self.db.executelist(self.sqlList)
 
 
@@ -223,13 +223,6 @@ class CRDatabasePopulator(object):
         print "  %38s : %s" %("new DatafileID", self.newID['datafile'])
         print "  %38s : %s" %("new StationID", self.newID['station'])
         print "  %38s : %s" %("new PolarizationID", self.newID['polarization'])
-
-        print "-"*linewidth
-
-        print "  %38s : %s" %("EventID", self.ID['event'])
-        print "  %38s : %s" %("DatafileID", self.ID['datafile'])
-        print "  %38s : %s" %("StationID", self.ID['station'])
-        print "  %38s : %s" %("PolarizationID", self.ID['polarization'])
 
         print "="*linewidth
 
@@ -391,8 +384,6 @@ class DataExtractor(object):
         self._filename = filename
         self._datafile = None
 
-
-
         self.open()
 
 
@@ -427,8 +418,8 @@ class DataExtractor(object):
         """Timestamp of the event."""
         result = 0
 
-        if options.verbose:
-            print "  Retrieving timestamp of the event..."
+        # if options.verbose:
+        #     print "  Retrieving timestamp of the event..."
 
         if self.isOpen():
             seconds = self._datafile["TIME"][0]
@@ -445,8 +436,8 @@ class DataExtractor(object):
         """List of station names."""
         result = []
 
-        if options.verbose:
-            print "  Retrieving station names..."
+        # if options.verbose:
+        #     print "  Retrieving station names..."
 
         if self.isOpen():
             result = list(set(self._datafile["STATION_NAME"]))
@@ -459,8 +450,8 @@ class DataExtractor(object):
         """Name of the used antennaset in the datafile."""
         result = ""
 
-        if options.verbose:
-            print "  Retrieving antennaset information..."
+        # if options.verbose:
+        #     print "  Retrieving antennaset information..."
 
         if self.isOpen():
             result = self._datafile["ANTENNA_SET"]
@@ -468,7 +459,7 @@ class DataExtractor(object):
         return result
 
 
-    def resultsfile(self, pol=0):
+    def resultsfile(self, pol='0'):
         """Name of the resultsfile where the pipeline results are stored.
 
         This filename is derived from metadata in the datafile.
@@ -483,8 +474,8 @@ class DataExtractor(object):
         """
         result = ""
 
-        if options.verbose:
-            print "  Retrieving polarization information..."
+        # if options.verbose:
+        #     print "  Retrieving polarization information..."
 
         if self.isOpen():
             # The filename of the resultsfile is created/derived in the same way as in cr_event.py
