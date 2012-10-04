@@ -152,6 +152,7 @@ class rfilines(tasks.Task):
         filelist = cr.listFiles(self.filefilter)
         superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007"]
         if len(filelist) == 1:
+            print 'There is only 1 file'
             filelist = filelist[0]
         else: # sort files on station ID
             sortedlist = []
@@ -230,6 +231,8 @@ class rfilines(tasks.Task):
         
         avgspectrum = hArray(float, dimensions = fftdata)
         spectrum = hArray(complex, dimensions = fftdata)
+        
+        skippedblocks = 0
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
         # have to cut out the block with the pulse... autodetect is best? 
@@ -242,19 +245,27 @@ class rfilines(tasks.Task):
 #            stdx = x.stddev()[0]
             f.getFFTData(fftdata, block = i, hanning = True)
             magspectrum = fftdata / f["BLOCKSIZE"] # normalize
-            magspectrum[..., 0] = 0.0
-            magspectrum[..., 1] = 0.0
+#            magspectrum[..., 0] = 0.0
+#            magspectrum[..., 1] = 0.0
             spectrum.copy(magspectrum)
 
             magspectrum.abs()
 #            magspectrum += 1e-9
 
             incphase.copy(spectrum)
-            incphase /= (magspectrum + 1.0e-9) # divide magnitude out to get exp(i phi)
-
+            incphase /= (magspectrum + 1.0e-9) # divide abs-magnitude out to get exp(i phi)
+            
             incphaseRef = hArray(incphase[0].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
             incphase /= incphaseRef
-
+            
+            incphase[..., 0] = 0.0
+            incphase[..., 1] = 0.0
+            
+            if np.isnan(incphase.sum()[0]):
+                print 'Warning: NaN found! Skipping block'
+                skippedblocks += 1
+                continue
+                
             incphasemean += incphase
 
             magspectrum.square()
@@ -340,6 +351,13 @@ class rfilines(tasks.Task):
         # that's all we need from it.
         
         # HACK
+        
+        nblocks -= skippedblocks
+        print 'nblocks = %d' % nblocks
+        if nblocks == 0:
+            print 'Error: all blocks have been skipped!'
+            # may want to exit here
+        
         incPhaseRMS = hArray(float, dimensions = incphasemean)
         incPhaseAvg = hArray(float, dimensions = incphasemean)
         
@@ -527,7 +545,7 @@ class rfilines(tasks.Task):
                     timestamp = f["TIME"][0]
                     datestring = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
                     timestring = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
-                    bestFrequency = freqs[bestchannel]
+                    bestFrequency = freqs[bestchannel] / 1.0e6
 
                     outstr = filelist + ' ' + datestring + ' ' + timestring + ' ' + str(timestamp) + ' ' + format('%3.4f' % bestFrequency) + ' ' + format('%3.2f' % (fitaz / deg2rad)) + ' '
                     outstr += format('%3.2f' % (fitel / deg2rad)) + ' ' + format('%3.4f' % minPhaseError) + ' '
