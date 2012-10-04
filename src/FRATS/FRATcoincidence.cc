@@ -222,6 +222,7 @@ namespace FRAT {
 			itsBufferLength=2000;
 			InitDedispersionOffset();
 			verbose=verbose;
+            std::cout << "verbose " << verbose << std::endl;
 		    std::cout << "Resizing dedispersionBuffer "  << std::endl;	
 			DeDispersedBuffer.resize(itsBufferLength, 0.0);
 		    std::cout << "Resizing sum Buffer "  << std::endl;	
@@ -270,7 +271,7 @@ namespace FRAT {
         }
 */
 
-        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock, std::vector <int> IntegrationLengthVector, int nrblocks, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam )
+        SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock, std::vector <int> IntegrationLengthVector, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam, int nrblocks )
 		{
 			noSend=noSend;
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
@@ -283,6 +284,7 @@ namespace FRAT {
             itsFREQvalues = FREQvalues;
             itsNrblocks= nrblocks;
             UDPtransmitter=UDPtransmitter;
+            verbose=verbose;
 			if(UseSamplesOr2){
 				itsNrSamplesOr2 = NrSamples|2;
 			} else {
@@ -294,7 +296,7 @@ namespace FRAT {
             if(IntegrationLengthVector.size()>0){
                 itsIntegrationLength=IntegrationLengthVector[0]; 
             } else {
-                cerr << "Integration lengths not defined";
+                cerr << "Integration lengths not defined" << endl;
             }
 			itsTriggerLevel = TriggerLevel;
 			itsStartChannel = StartChannel;
@@ -313,7 +315,7 @@ namespace FRAT {
 			itsTotalZeros=0;
 			itsBufferLength=1000;
 			InitDedispersionOffset(FREQvalues);
-			verbose=verbose;
+            std::cout << "verbose SBtrigger " << verbose << std::endl;
 		    std::cout << "Resizing dedispersionBuffer "  << itsBufferLength << std::endl;	
 			DeDispersedBuffer.resize(itsBufferLength, 0.0);
 		    std::cout << "Resizing sum Buffer "  << std::endl;	
@@ -416,6 +418,7 @@ namespace FRAT {
 		}
 		
 		bool SubbandTrigger::dedisperseData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
+            //# Version used in the trigger
             //# Input: data, 2-dimensional, axis frequencies and time (dynamic spectrum)
             //# sequenceNumber: block number
             //# ...
@@ -431,8 +434,9 @@ namespace FRAT {
 			} else {
 				itsFoundTriggers="";
 				itsBlockNumber++;				
-
-				std::cout << "Processing block " << sequenceNumber << std::endl;
+                if(verbose){
+                    std::cout << "Processing block " << sequenceNumber << std::endl;
+                }
                 blocksum =0.0;
                 //validsamples=0;
 				//zerocounter=0;
@@ -485,7 +489,9 @@ namespace FRAT {
             return false; 
 	    } else {
             itsFoundTriggers="";
-            std::cout << "Processing block " << sequenceNumber << std::endl;
+            if(verbose){
+                std::cout << "Processing block " << sequenceNumber << std::endl;
+            }
             //blocksum =0.0;
             validsamples=0;
             zerocounter=0;
@@ -515,9 +521,8 @@ namespace FRAT {
 				//}
 				//SBaverageAlt*=itsIntegrationLength;
 				//SBaverageAlt/=SBsumsamples;
-            if(verbose){
-                    
-                std::cerr << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
+            if(verbose && false){
+                std::cerr << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
             }
             //std::string output;
             
@@ -545,6 +550,7 @@ namespace FRAT {
         float subsum=0;
         int samplessummed=1;
         bool pulsefound=false;
+        verbose=false;
 //# Correct SB average and stddev for the integration length
         SBaverage=itsSBaverage*IntegrationLength;
         SBstdev=itsSBstdev*sqrt(1.0*IntegrationLength);
@@ -635,7 +641,10 @@ namespace FRAT {
                         //trigger.utc_second=10000;
                         unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                        std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
+                        if(verbose){
+                            std::cout << "verbose " << verbose << endl;
+                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
+                        }
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
                         // Change trigger max to value in standard deviations.
@@ -717,7 +726,10 @@ namespace FRAT {
                         //trigger.utc_second=10000;
                         unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                        std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
+                        if(verbose){
+                            std::cout << "verbose " << verbose << endl;
+                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
+                        }
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
                         // Change trigger max to value in standard deviations.
@@ -758,8 +770,9 @@ namespace FRAT {
 			} else {
 				itsFoundTriggers="";
 				itsBlockNumber++;
-				
-				std::cout << "Processing block " << sequenceNumber << std::endl;
+			    if(verbose){	
+                    std::cout << "Processing block " << sequenceNumber << std::endl;
+                }
                 blocksum =0.0;
                 validsamples=0;
 				zerocounter=0;
@@ -896,6 +909,7 @@ namespace FRAT {
 				//SBaverageAlt*=itsIntegrationLength;
 				//SBaverageAlt/=SBsumsamples;
 				if(verbose){
+                    std::cout << "verbose " << verbose << endl;
                     
 					std::cerr << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
 				}
@@ -1133,8 +1147,9 @@ namespace FRAT {
 			} else {
 				itsFoundTriggers="";
 				itsBlockNumber++;
-				
-				std::cout << "Processing block " << sequenceNumber << std::endl;
+			    if(verbose) {	
+                    std::cout << "Processing block " << sequenceNumber << std::endl;
+                }
 
                 blocksum =0.0;
                 validsamples=0;
@@ -1214,7 +1229,7 @@ namespace FRAT {
 				//SBaverageAlt*=itsIntegrationLength;
 				//SBaverageAlt/=SBsumsamples;
 				if(verbose){
-                    
+                    std::cout << "verbose "  << verbose << endl;
 					std::cout << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
 				}
 				//char output[200];
@@ -1332,6 +1347,10 @@ Save timeseries (append)
 
         bool RFIcleaning::calcBaseline(){
              float * it;
+             #ifdef _OPENMP
+                #pragma omp parallel for private(it)
+             #else
+             #endif // _OPENMP 
              for(int ch=0; ch<itsNrChannels; ch++){
                     it=itsDataStart+ch;
                     baseline[ch]=0.0;
@@ -1339,13 +1358,17 @@ Save timeseries (append)
                         baseline[ch]+=*it;
                     }
                 }
-            return true;
+             return true;
         }
         
         
         
         bool RFIcleaning::calcSqrBaseline(){
              float * it;
+            #ifdef _OPENMP
+                #pragma omp parallel for private(it)
+            #else
+            #endif // _OPENMP
              for(int ch=0; ch<itsNrChannels; ch++){
                     it=itsDataStart+ch;
                     sqrBaseline[ch]=0.0;
@@ -1361,6 +1384,10 @@ Save timeseries (append)
              float * it;
              float * vec_end=itsDataStart;
              it=itsDataStart;
+            #ifdef _OPENMP
+                #pragma omp parallel for private(it,vec_end)
+            #else
+            #endif // _OPENMP
              for(int sa=0; sa<itsNrSamples; sa++){
                     it=itsDataStart+sa*itsNrChannels;
                     vec_end+=itsNrChannels;
@@ -1378,6 +1405,10 @@ Save timeseries (append)
              float * it;
              float * vec_end=itsDataStart;
              it=itsDataStart;
+             #ifdef _OPENMP
+                #pragma omp parallel for private(it,vec_end)
+            #else
+            #endif // _OPENMP
              for(int sa=0; sa<itsNrSamples; sa++){
                     it=itsDataStart+sa*itsNrChannels;
                     vec_end+=itsNrChannels;
@@ -1410,8 +1441,12 @@ Save timeseries (append)
         
         bool RFIcleaning::calcSqrTimeseries(){
              float * it;
-             float * vec_end=itsDataStart;
+             float * vec_end=itsDataStart;            
              it=itsDataStart;
+             #ifdef _OPENMP
+                #pragma omp parallel for private(it,vec_end)
+            #else
+            #endif // _OPENMP
              for(int sa=0; sa<itsNrSamples; sa++){
                     it=itsDataStart+sa*itsNrChannels;
                     vec_end+=itsNrChannels;
@@ -1463,7 +1498,7 @@ Save timeseries (append)
                 double average=sum/nrelem;
                 sortStd=sqrt(sqr/nrelem-average*average);
     
-                cout << " sum " << sum << " nrelem" << nrelem << " average " << average << " std " << sortStd << " sqr " << sqr << " ";
+                //cout << " sum " << sum << " nrelem" << nrelem << " average " << average << " std " << sortStd << " sqr " << sqr << " ";
 
                 chanIdVal tempIdVal;
                 badChans.resize(0);
@@ -1521,6 +1556,10 @@ Save timeseries (append)
                 stopchannel=(div+1)*channelsPerPart;
 
                 collapsedData[div].resize(itsNrSamples);
+                #ifdef _OPENMP
+                    #pragma omp parallel for 
+                #else
+                #endif // _OPENMP                
                 for(int sa=0; sa<itsNrSamples; sa++){
                     collapsedData[div][sa]=0.0;
                     float* it_start=itsDataStart+sa*itsNrChannels;
@@ -1543,7 +1582,7 @@ Save timeseries (append)
                 }
                 average=sum/nrelem;
                 sortStd=sqrt(sqr/nrelem-average*average);
-                cout << "sum" << sum << "nrelem" << nrelem << "average " << average << "\n std " << sortStd;
+                //cout << "sum" << sum << "nrelem" << nrelem << "average " << average << "\n std " << sortStd;
                 limit=average+cutlevel*sortStd;
                 index=0;
                 for(it2=collapsedData[div].begin(); it2<collapsedData[div].end(); it2++){
@@ -1588,6 +1627,10 @@ Save timeseries (append)
 
 
             if ( method == "1" ) {
+                #ifdef _OPENMP
+                    #pragma omp parallel for 
+                #else
+                #endif // _OPENMP
                 for(int i=0; i<badChans.size(); i++){
                     ch=badChans[i].id;
                     float* it=itsDataStart+ch;
@@ -1596,6 +1639,10 @@ Save timeseries (append)
                     }
                 }
             } else if ( method == "0" ) {
+                #ifdef _OPENMP
+                    #pragma omp parallel for 
+                #else
+                #endif // _OPENMP
                 for(int i=0; i<badChans.size(); i++){
                     ch=badChans[i].id;
                     float* it=itsDataStart+ch;
@@ -1611,6 +1658,10 @@ Save timeseries (append)
                 if((ch-3)%itsChansPerSubband==0){
                     choffset=-1;
                 }
+                #ifdef _OPENMP
+                    #pragma omp parallel for 
+                #else
+                #endif // _OPENMP
                 for(int i=0; i<badChans.size(); i++){
                     ch=badChans[i].id;
                     float* it=itsDataStart+ch;
@@ -1634,6 +1685,10 @@ Save timeseries (append)
             
             int ch;                
             int choffset;
+            #ifdef _OPENMP
+                #pragma omp parallel for 
+            #else
+            #endif // _OPENMP
             for(int ch=0; ch<itsNrChannels; ch+=itsChansPerSubband){
                 float* it=itsDataStart+ch;
                 for ( ; it<itsDataEnd; it+=itsNrChannels ) {
@@ -1660,6 +1715,11 @@ Save timeseries (append)
         bool RFIcleaning::cleanSamples(std::string method){
             int sam;
             int samoffset=-3;
+
+            #ifdef _OPENMP
+                #pragma omp parallel for 
+            #else
+            #endif // _OPENMP
             for(int i=0; i<badSamples.size(); i++){
    //             validsamples--;                
                 sam=badSamples[i];

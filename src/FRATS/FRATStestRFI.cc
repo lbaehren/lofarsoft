@@ -20,9 +20,9 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+//#ifdef _OPENMP
+//#include <omp.h>
+//#endif
 //#include <crtools.h>
 //#include <Data/LOFAR_TBB.h>
 //#include <Display/SimplePlot.h>
@@ -536,6 +536,9 @@ int main (int argc,
 		} else if(topic == "-verbose"){
 			verbose = true;
 			cout << "using verbose output" << endl;
+		} else if(topic == "-silent"){
+			verbose = false;
+			cout << "not using verbose output" << endl;
 		} else if(topic == "-zeroDM"){
 			DoZeroDM = true;
 			cout << "using zeroDMing to divide data by average timeseries" << endl;
@@ -772,7 +775,7 @@ int main (int argc,
 		cerr << "Memory could not be allocated\n";
 		return 1;
 	}
-	cout << "stokesdatasize " << stokesdatasize << endl;
+    cout << "stokesdatasize " << stokesdatasize << endl;
 
     // indicator for new data format
     bool Transposed=true;
@@ -795,14 +798,18 @@ int main (int argc,
     // Read all blocks
 	for(int blockNr = 0; blockNr< nrblocks; blockNr++){
         // Read data
+        cout << " Analyzing block " << blockNr << endl;
         fgetpos(pFile,&pos);
-        cout << "Current positions " << blockNr << " " << startpos << " " << ftell(pFile)/blockdatasize << endl;
+        if(verbose){
+            cout << "Current positions " << blockNr << " " << startpos << " " << ftell(pFile)/blockdatasize << endl;
+        }
         
         num = fread( &(data[0]), blockdatasize, 1, pFile); //read data
         
         if( !num) {
             // Data could not be read. Wait a little and try again.
             cout << "*";
+            cout.flush();
             usleep(50000);
             fsetpos(pFile,&pos);
             blockNr--;
@@ -812,27 +819,26 @@ int main (int argc,
         }
         
         // swap endianness of the data. NOTE see if we can make this parallel?
-        cout << "About to swap " << blockdatasize << " floats" << endl;
+        if(verbose) {
+            cout << "About to swap " << blockdatasize << " floats" << endl;
+        }
         unsigned char *datachar=(unsigned char*) data;
         if(DoPadding){
             SwapFloats(datachar,nFreqs*samples);//nFreqs*samples);
         }
-        cout << "Done swapping floats" << endl;
+        if(verbose) {
+            cout << "Done swapping floats" << endl;
+        }
 
 //      Find out what the bad channels are NOTE check if we can skip this, as this is already done with the RFI cleaner
         int validchannels=TotNrChannels;
         int validsamples=samples;
         bool doFlagging=true;
+
 if(doFlagging){
-        cout << "Flagging channels in bewtween " << data << " " << data_end << endl; ;
-        vector<chanIdVal> badChans15=CalcBadChannels(data,data_end,TotNrChannels,samples,15,validsamples);
-        // printing found bad channels
-        cout << "\n  bad channels ";
-        for(int i=0; i<badChans15.size(); i++){
-            cout << badChans15[i].id << " " << badChans15[i].val << " ";
+        if(verbose){
+            cout << "Flagging channels in bewtween " << data << " " << data_end << endl; 
         }
-        cout << "\n";
-        
 
 // RFI cleaning. Calculate baseline (sum over time for each channel) and divide by it. 
 // This makes the average one.
@@ -846,24 +852,20 @@ if(doFlagging){
         RFIcleaner.calcSqrBaseline();
         RFIcleaner.calcBadChannels(15); // 15 sigma cut, because bad samples may also give rise to 
         // seeing a lot of 'bad' channels.
-        RFIcleaner.printBadChannels();
+        if(verbose){
+            RFIcleaner.printBadChannels();
+        }
         RFIcleaner.cleanChannels("1"); // replaced by 1
         RFIcleaner.writeBadChannels(fcfile, blockNr); // write bad channels to file
 
 
-        // flagging bad samples NOTE obsolote?
-        vector<int> badSamples=CalcBadSamples(data,data_end,TotNrChannels,samples,4);
-
-        cout << "Flagging bad samples " ;
-        for(int i=0; i<badSamples.size(); i++){
-            cout << badSamples[i] << " ";
-        }
-        cout << "\n ";
 
 // Calculate bad samples, by summing in time over a quarter of the bandwidth
 // samples that are more than cutlevel*sigma above average in at least 2 of the quarters are flagged
         RFIcleaner.calcBadSamples(4); // cutlevel = 4 sigma
-        RFIcleaner.printBadSamples();
+        if(verbose){
+            RFIcleaner.printBadSamples();
+        }
         RFIcleaner.cleanSamples("1"); // replace by 1
         RFIcleaner.writeBadSamples(fsfile, blockNr); // write bad samples to file
 
@@ -872,17 +874,10 @@ if(doFlagging){
         RFIcleaner.calcBaseline();
         RFIcleaner.calcSqrBaseline();
         RFIcleaner.calcBadChannels(6); // 6 sigma cut
-        RFIcleaner.printBadChannels();
-        RFIcleaner.writeBadChannels(fcfile, blockNr);
-
-        //vector<chanIdVal> badChans=CalcBadChannels(data,data_end,TotNrChannels,samples,5,validsamples);
-        cout << "\n";
-        cout << "Flagging channels " ;
-        vector<chanIdVal> badChans=CalcBadChannels(data,data_end,TotNrChannels,samples,6,validsamples);
-        for(int i=0; i<badChans.size(); i++){
-            cout << badChans[i].id << " " << badChans[i].val << " ";
+        if(verbose){
+            RFIcleaner.printBadChannels();
         }
-        cout << "\n";
+        RFIcleaner.writeBadChannels(fcfile, blockNr);
 
         // cleans channels
         RFIcleaner.cleanChannels("1");
@@ -900,12 +895,15 @@ if(doFlagging){
 
         RFIcleaner.writeBaseline(basefile, blockNr);
 
-        cout << " We are here now . 1 " << sizeof(chanIdVal)<< endl;     
+        if(verbose){
+            cout << " We are here now . 1 " << sizeof(chanIdVal)<< endl;     
+        }
 
 } //do flagging
    
-
-        cout << " We are here now . 2 " << endl;     
+        if(verbose){
+            cout << " We are here now . 2 " << endl;     
+        }
 
         // For each stream
 		for(int sc=0; sc < nstreams; sc++){
@@ -913,15 +911,17 @@ if(doFlagging){
 
             // Do the DMs in parallel
             #ifdef _OPENMP
-                std::cout<<"Running in parallel mode"<<std::endl;
+                //std::cout<<"Running in parallel mode"<<std::endl;
                 #pragma omp parallel for private(foundpulse)
             #else
-                std::cout<<"Running in serial mode"<<std::endl;
+                //std::cout<<"Running in serial mode"<<std::endl;
             #endif // _OPENMP
 		    
             
         	for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
-				cout << "Processing " << sc << " " << DMcounter << endl;
+                if(verbose){
+                    cout << "Processing " << sc << " " << DMcounter << endl;
+                }
                 //# Processing data now split up into three separate tasks:
                 //# dedisperseData2 : calculates dedispersed data
 				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
@@ -934,7 +934,9 @@ if(doFlagging){
                     //# runTrigger : sums data and compares it to the trigger threshold.
                     foundpulse=SBTs[sc][DMcounter]->runTrigger(blockNr, intLength, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 }
-                cout << "f" <<  foundpulse << endl;
+                if(verbose){
+                    cout << "f" <<  foundpulse << endl;
+                }
               /*  if(DMcounter<mynDMs){
                     datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
                 } */
