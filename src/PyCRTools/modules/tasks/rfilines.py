@@ -9,6 +9,8 @@ import pycrtools as cr
 from pycrtools import hArray
 from pycrtools import srcfind as sf
 import numpy as np
+import matplotlib
+matplotlib.use("Agg") # doesn't work?
 import matplotlib.pyplot as plt
 from pycrtools.tasks.shortcuts import *
 import pycrtools.tasks as tasks
@@ -102,6 +104,7 @@ class rfilines(tasks.Task):
         #event={default:None, doc:"Event data filename (.h5), or list of files"},
         filefilter={default:None,doc:"File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "},
         outputDataFile = {default: None, doc: "Optional: output text file where results can be written."},
+        batch = {default: False, doc: "Suppress plot display when set to True."},
         doplot = {default:True, doc:"Produce output plots"},
         testplots = {default: False, doc: "Produce testing plots for calibration on RF lines"},
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
@@ -145,6 +148,13 @@ class rfilines(tasks.Task):
         twopi = 2 * np.pi
         deg2rad = twopi / 360.0
         
+        if self.batch or (not self.doplot):
+            import matplotlib
+            matplotlib.use("Agg") # ! Has no effect. Has to be done before calling / outside Task?
+            import matplotlib.pyplot as plt
+        if not self.doplot and self.testplots:
+            print 'Warning: setting self.testplots to False because self.doplot = False'
+            self.testplots = False
         # Fool the OS's disk cache by reading the entire file as binary
         # Hopefully reducing the long I/O processing time (?)
 #        bytes_read = open(self.event, "rb").read()
@@ -439,28 +449,29 @@ class rfilines(tasks.Task):
 
         # Plot average spectrum for one antenna, and median-RMS phase stability.
         logspectrum = np.log(y)
-        plt.figure()
-        plt.plot(logspectrum, c='b')
-        plt.plot(medians, c='r')
-        plt.title('Median-average spectrum of all antennas versus median-RMS phase stability')
-        plt.xlabel('Frequency channel')
-        plt.ylabel('Blue: log-spectral power [adc units]\nRed: RMS phase stability [rad]')
-    
-        self.plot_finish(filename=self.plot_name + "-avgspectrum_phaseRMS",filetype=self.filetype)
+        if self.doplot:
+            plt.figure()
+            plt.plot(logspectrum, c='b')
+            plt.plot(medians, c='r')
+            plt.title('Median-average spectrum of all antennas versus median-RMS phase stability')
+            plt.xlabel('Frequency channel')
+            plt.ylabel('Blue: log-spectral power [adc units]\nRed: RMS phase stability [rad]')
+        
+            self.plot_finish(filename=self.plot_name + "-avgspectrum_phaseRMS",filetype=self.filetype)
 
     
-        # plot dirty channels into spectrum plot, in red
-        plt.figure()
-        x = f["FREQUENCY_DATA"].toNumpy() * 1e-6
-        plt.plot(x, logspectrum, c='b')
-        dirtyspectrum = np.zeros(len(logspectrum))
-        dirtyspectrum += min(logspectrum)
-        dirtyspectrum[self.dirtychannels] = logspectrum[self.dirtychannels]
-        plt.plot(x, dirtyspectrum, 'x', c = 'r', markersize=8)
-        plt.title('Median-average spectrum of all antennas, with flagging')
-        plt.xlabel('Frequency [MHz]')
-        plt.ylabel('log-spectral power [adc units]')
-        self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
+            # plot dirty channels into spectrum plot, in red
+            x = f["FREQUENCY_DATA"].toNumpy() * 1e-6
+            plt.figure()
+            plt.plot(x, logspectrum, c='b')
+            dirtyspectrum = np.zeros(len(logspectrum))
+            dirtyspectrum += min(logspectrum)
+            dirtyspectrum[self.dirtychannels] = logspectrum[self.dirtychannels]
+            plt.plot(x, dirtyspectrum, 'x', c = 'r', markersize=8)
+            plt.title('Median-average spectrum of all antennas, with flagging')
+            plt.xlabel('Frequency [MHz]')
+            plt.ylabel('log-spectral power [adc units]')
+            self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
         
         if self.testplots:
             # diagnostic test, plot avg phase, also plot all / many individual measured phases
@@ -472,55 +483,57 @@ class rfilines(tasks.Task):
         
         # find direction of this source; plot image to check quality of fit.
         print 'Find direction of source based on averaged phases per antenna...'
-        if self.doplot:
+#        if self.doplot:
         # do calibration plots
-            freqs = f["FREQUENCY_DATA"]
-            freq = freqs[bestchannel]
+        freqs = f["FREQUENCY_DATA"]
+        freq = freqs[bestchannel]
 
-            # apply calibration phases here (?) See if that is different from doing it to all phases before...
-            calphases = (twopi * freq) * caldelays
-            print calphases
-            for i in range(self.nofchannels):
-                phaseAvg[i, bestchannel] += calphases[i]
-                #if i > 0: # Needed????
-                 #   phaseAvg[i, bestchannel] -= 0.3
+        # apply calibration phases here (?) See if that is different from doing it to all phases before...
+        calphases = (twopi * freq) * caldelays
+        print calphases
+        for i in range(self.nofchannels):
+            phaseAvg[i, bestchannel] += calphases[i]
+            #if i > 0: # Needed????
+             #   phaseAvg[i, bestchannel] -= 0.3
+        
+        #phaseAvg[0, bestchannel] = 0.0
+        cr.hPhaseWrap(phaseAvg, phaseAvg)
+        
+        print '---'
+#        print phaseAvg
+#        import pdb; pdb.set_trace()
+        
+        allpositions = f["ANTENNA_POSITIONS"].toNumpy()
+        azSteps = int(360 / self.direction_resolution[0])
+        elSteps = int(90 / self.direction_resolution[1])
+        
+        if not isinstance(filelist, list):
+        # for one file being processed
+            positions = allpositions.ravel() # only pol 'polarisation'
+            # NB. Indexing to the end is done by thisArray[start::step] !
             
-            #phaseAvg[0, bestchannel] = 0.0
-            cr.hPhaseWrap(phaseAvg, phaseAvg)
-            
-            print '---'
-    #        print phaseAvg
-    #        import pdb; pdb.set_trace()
-            
-            allpositions = f["ANTENNA_POSITIONS"].toNumpy()
-            azSteps = int(360 / self.direction_resolution[0])
-            elSteps = int(90 / self.direction_resolution[1])
-            
-            if not isinstance(filelist, list):
-            # for one file being processed
-                positions = allpositions.ravel() # only pol 'polarisation'
-                # NB. Indexing to the end is done by thisArray[start::step] !
-                
-                averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
-                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 1, showImage = self.testplots, verbose = True)
+            averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
+            (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = (self.doplot and self.testplots), verbose = True)
+            if self.doplot and self.testplots:
                 self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)
 
-                print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
-                print 'Phase error = %f' % minPhaseError
-                
-                modelphases = sf.phasesFromDirection(positions, (fitaz, fitel), freq)
-                modelphases -= modelphases[0]
-                modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
+            print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
+            print 'Phase error = %f' % minPhaseError
+            
+            modelphases = sf.phasesFromDirection(positions, (fitaz, fitel), freq)
+            modelphases -= modelphases[0]
+            modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
 
-                if self.testplots:
-                    plt.figure()
-                    plt.plot(modelphases, label='Modeled phases (plane wave)')
-                    plt.plot(averagePhasePerAntenna, label='Avg. measured phases')
-                    plt.legend()
-                    self.plot_finish(filename=self.plot_name + "-avg-measuredphases",filetype=self.filetype)
+            if self.testplots:
+                plt.figure()
+                plt.plot(modelphases, label='Modeled phases (plane wave)')
+                plt.plot(averagePhasePerAntenna, label='Avg. measured phases')
+                plt.legend()
+                self.plot_finish(filename=self.plot_name + "-avg-measuredphases",filetype=self.filetype)
 
-                phaseDiff = averagePhasePerAntenna - modelphases
-                
+            phaseDiff = averagePhasePerAntenna - modelphases
+            
+            if self.doplot:
                 plt.figure()
                 nanosecondPhase = twopi * freq * 1.0e-9
                 timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
@@ -537,85 +550,94 @@ class rfilines(tasks.Task):
                 plt.legend()
                 
                 self.plot_finish(filename=self.plot_name + "-calibration-phases",filetype=self.filetype)
-                
-                if self.doplot:
-                    cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
-                if self.outputDataFile:
-                    outf = open(self.outputDataFile, 'a') # Append to file
-                    timestamp = f["TIME"][0]
-                    datestring = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
-                    timestring = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
-                    bestFrequency = freqs[bestchannel] / 1.0e6
+            
+                cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
+            if self.outputDataFile:
+                outf = open(self.outputDataFile, 'a') # Append to file
+                timestamp = f["TIME"][0]
+                datestring = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
+                timestring = datetime.datetime.fromtimestamp(timestamp).strftime('%H:%M:%S')
+                bestFrequency = freqs[bestchannel] / 1.0e6
 
-                    outstr = filelist + ' ' + datestring + ' ' + timestring + ' ' + str(timestamp) + ' ' + format('%3.4f' % bestFrequency) + ' ' + format('%3.2f' % (fitaz / deg2rad)) + ' '
-                    outstr += format('%3.2f' % (fitel / deg2rad)) + ' ' + format('%3.4f' % minPhaseError) + ' '
-                    outstr += format('%3.6f' % medians[bestchannel])
-                    
-                    outf.write(outstr + '\n')
-                    outf.close()
+                outstr = filelist + ' ' + datestring + ' ' + timestring + ' ' + str(timestamp) + ' ' + format('%3.4f' % bestFrequency) + ' ' + format('%3.2f' % (fitaz / deg2rad)) + ' '
+                outstr += format('%3.2f' % (fitel / deg2rad)) + ' ' + format('%3.4f' % minPhaseError) + ' '
+                outstr += format('%3.6f' % medians[bestchannel])
+                
+                outf.write(outstr + '\n')
+                outf.close()
 
-            else:
-                # get list of stations in this dataset
-                stationlist = f["STATION_LIST"]
-                stationStartIndex = f["STATION_STARTINDEX"]
-                nofStations = len(stationlist)
-                directions = []
-                for i in range(nofStations):
-                    print 'Processing station: %s' % stationlist[i]
-                    start = stationStartIndex[i]
-                    end = stationStartIndex[i+1]
-                    thesePositions = allpositions[start:end]
-                    thesePositions = thesePositions.ravel()
+        else:
+            # get list of stations in this dataset
+            stationlist = f["STATION_LIST"]
+            stationStartIndex = f["STATION_STARTINDEX"]
+            nofStations = len(stationlist)
+            directions = []
+            for i in range(nofStations):
+                print 'Processing station: %s' % stationlist[i]
+                start = stationStartIndex[i]
+                end = stationStartIndex[i+1]
+                thesePositions = allpositions[start:end]
+                thesePositions = thesePositions.ravel()
 
-                    averagePhasePerAntenna = phaseAvg.toNumpy()[start:end, bestchannel]
-                    plt.figure()
-                    (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(thesePositions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = self.testplots, verbose = True)
-                    self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)                   
-                    
-                    print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
-                    print 'Phase error = %f' % minPhaseError                    
-                    directions.append((fitaz, fitel))
-                    
-                averageIncomingDirection = vectorAverage(directions)
-                
-# HACK: do incoming direction using all stations together and see if that gets better results...
-                if self.directionFromAllStations:
-                    averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
-                    plt.figure()
-                    (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(allpositions.ravel(), averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4*nofStations, showImage = self.testplots, verbose = False)
-                    averageIncomingDirection = (fitaz, fitel)
-                
-                print 'Averaged incoming direction: az = %f, el = %f' % (averageIncomingDirection[0] / deg2rad, averageIncomingDirection[1] / deg2rad)
-                # get modeled phases for a plane wave of given overall direction, for all stations together
-                allpositions = allpositions.ravel()
-                modelphases = sf.phasesFromDirection(allpositions, averageIncomingDirection, freq)
-                modelphases -= modelphases[0]
-                modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
-                
-                averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel] # now for all antennas
-                phaseDiff = averagePhasePerAntenna - modelphases
-                
+                averagePhasePerAntenna = phaseAvg.toNumpy()[start:end, bestchannel]
                 plt.figure()
-                nanosecondPhase = twopi * freq * 1.0e-9
-                timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
+                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(thesePositions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = (self.doplot and self.testplots), verbose = True)
+                if self.doplot and self.testplots:
+                    self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)                   
                 
-                interStationDelays = np.zeros(nofStations)
-                refdelay = 0.0
-                for i in range(nofStations):
-                    start = stationStartIndex[i]
-                    end = stationStartIndex[i+1]
-                    interStationDelays[i] = np.median(timeDiff[start:end])
-                    if i == 0:
-                        refdelay = interStationDelays[i]
-                        interStationDelays[i] -= refdelay
+                print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
+                print 'Phase error = %f' % minPhaseError                    
+                directions.append((fitaz, fitel))
+                
+            averageIncomingDirection = vectorAverage(directions)
+            
+# HACK: do incoming direction using all stations together and see if that gets better results...
+            if self.directionFromAllStations:
+                averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
+                plt.figure()
+                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(allpositions.ravel(), averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4*nofStations, showImage = (self.doplot and self.testplots), verbose = False)
+                averageIncomingDirection = (fitaz, fitel)
+            
+            print 'Averaged incoming direction: az = %f, el = %f' % (averageIncomingDirection[0] / deg2rad, averageIncomingDirection[1] / deg2rad)
+            # get modeled phases for a plane wave of given overall direction, for all stations together
+            allpositions = allpositions.ravel()
+            modelphases = sf.phasesFromDirection(allpositions, averageIncomingDirection, freq)
+            modelphases -= modelphases[0]
+            modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
+            
+            averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel] # now for all antennas
+            phaseDiff = averagePhasePerAntenna - modelphases
+            
+            nanosecondPhase = twopi * freq * 1.0e-9
+            timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
+            
+            interStationDelays = np.zeros(nofStations)
+            refdelay = 0.0
+            if self.doplot:
+                plt.figure()
+
+            for i in range(nofStations):
+                start = stationStartIndex[i]
+                end = stationStartIndex[i+1]
+                interStationDelays[i] = np.median(timeDiff[start:end])
+                if i == 0:
+                    refdelay = interStationDelays[i]
+                    interStationDelays[i] -= refdelay
+                    if self.doplot:
                         plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3, label='Median station delay')
-                    else:
-                        interStationDelays[i] -= refdelay
+                else:
+                    interStationDelays[i] -= refdelay
+                    if self.doplot:
                         plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3)
 #                    plt.annotate(stationlist[i]
-                # Subtract reference station-delay
-                timeDiff -= refdelay   
-                #interStationDelays -= interStationDelays[0]
+            # Subtract reference station-delay
+            timeDiff -= refdelay   
+            print '--- Inter-station delays: ---'
+            for i in range(nofStations):
+                print '%s: %2.3f ns' % (f["STATION_LIST"][i], interStationDelays[i])
+
+            #interStationDelays -= interStationDelays[0]
+            if self.doplot:
                 plt.plot(timeDiff, 'o-', c = 'b', label='Measured - expected phase')
 
                 #plt.figure()
@@ -626,11 +648,7 @@ class rfilines(tasks.Task):
                 plt.ylabel('Time difference from phase [ns]')
                 plt.xlabel('Antenna number (RCU/2)')
                 plt.legend()
-                
-                print '--- Inter-station delays: ---'
-                for i in range(nofStations):
-                    print '%s: %2.3f ns' % (f["STATION_LIST"][i], interStationDelays[i])
-                
+                        
                 cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
 
         # set output params
