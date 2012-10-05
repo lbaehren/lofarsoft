@@ -96,10 +96,10 @@ class CRDatabasePopulator(object):
         self.sqlList.append(sql)
 
         # Write datafile parameters to list of SQL statements
-        # if options.parameters:
-        #     datafileParameters = CRParameter(ID=self.ID['datafile'], parentname='datafile')
-        #     sql = datafileParameters.writeSql()
-        #     self.sqlList.append(sql)
+        if options.parameters:
+            datafileParameters = CRParameter(ID=self.ID['datafile'], parentname='datafile')
+            sql = datafileParameters.writeSql()
+            self.sqlList.append(sql)
 
         # ______________________________________________________________________________
         #                                                                          Event
@@ -201,6 +201,7 @@ class CRDatabasePopulator(object):
             if self.db:
                 if options.verbose:
                     print "Nr. of SQL lines: %d" %(len(self.sqlList))
+                if options.sqlverbose:
                     for sql in self.sqlList:
                         print sql
                 self.db.executelist(self.sqlList)
@@ -529,6 +530,7 @@ def parseOptions():
     parser.add_option("-p", "--parameters", action="store_true", dest="parameters", default=False, help="Enable storing polarization parameter information if available [default=False].")
 
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="Show verbose information [default=False].")
+    parser.add_option("--sqlverbose", action="store_true", dest="sqlverbose", default=False, help="Show verbose SQL information [default=False].")
     parser.add_option("-f", "--force", action="store_true", dest="force", default=False, help="Force writing to the database resetting the write-lock [default=False].")
 
     (options, args) = parser.parse_args()
@@ -538,9 +540,10 @@ def parseOptions():
 
     options.basepath = os.path.dirname(os.path.abspath(args[0]))
 
-    # print "datapath = %s" %(options.datapath)
-    # print "resultspath = %s" %(options.resultspath)
-    # print "lorapath = %s" %(options.lorapath)
+    print "datapath = %s" %(options.datapath)
+    print "resultspath = %s" %(options.resultspath)
+    print "lorapath = %s" %(options.lorapath)
+    print "parameters = ", options.parameters
 
     return (options, args)
 
