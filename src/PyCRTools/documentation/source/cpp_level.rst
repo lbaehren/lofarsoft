@@ -25,7 +25,6 @@ pycrtools:
 * mFilter
 * mFitting
 * mImaging
-* mIO_AERA
 * mIO
 * mMath
 * mModule
