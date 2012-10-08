@@ -96,10 +96,11 @@ class CRDatabasePopulator(object):
         self.sqlList.append(sql)
 
         # Write datafile parameters to list of SQL statements
-        if options.parameters:
-            datafileParameters = CRParameter(ID=self.ID['datafile'], parentname='datafile')
-            sql = datafileParameters.writeSql()
-            self.sqlList.append(sql)
+        # Disabled as there are at the moment no station parameters
+        # if options.parameters:
+        #     datafileParameters = CRParameter(ID=self.ID['datafile'], parentname='datafile')
+        #     sql = datafileParameters.writeSql()
+        #     self.sqlList.append(sql)
 
         # ______________________________________________________________________________
         #                                                                          Event
@@ -119,7 +120,7 @@ class CRDatabasePopulator(object):
 
             # Add LORA data to event parameters
             eventParameters = CRParameter(ID=self.ID['event'], parentname='event')
-            if options.parameters:
+            if options.lorapath != "":
                 print "Collecting parameters..."
                 process_lora_data(timestamp, eventParameters, options.lorapath)
 
@@ -143,6 +144,7 @@ class CRDatabasePopulator(object):
             self.sqlList.append(sql)
 
             # Write station parameters to list of SQL statements
+            # Disabled as there are at the moment no station parameters
             # if options.parameters:
             #     stationParameters = CRParameter(ID=self.ID['station'], parentname='station')
             #     sql = stationparameters.writeSql()
