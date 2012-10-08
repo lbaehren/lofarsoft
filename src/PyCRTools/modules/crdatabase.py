@@ -146,10 +146,6 @@ class CRDatabase(object):
             """
             self.db.executescript(sql)
 
-            # Filters table
-            sql = "CREATE TABLE IF NOT EXISTS main.filters (name TEXT, filter TEXT NOT NULL UNIQUE);"
-            self.db.execute(sql)
-
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -898,22 +894,6 @@ class CRDatabase(object):
             print "  %-40s : %d" %("Nr. of polarizations", n_polarizations)
 
         print "-"*linewidth
-
-        # Filters
-        if self.db:
-            # Number of filter groups
-            sql = "SELECT COUNT(DISTINCT name) FROM main.filters"
-            records = self.db.select(sql)
-            n_filtergroups = records[0][0]
-            print "  %-40s : %d" %("Nr. of filter groups", n_filtergroups)
-
-            # Number of filters
-            sql = "SELECT COUNT(name) FROM main.filters"
-            records = self.db.select(sql)
-            n_filters = records[0][0]
-            print "  %-40s : %d" %("Nr. of filters", n_filters)
-
-        print "="*linewidth
 
 
 
@@ -2422,149 +2402,4 @@ class PolarizationParameter(BaseParameter):
     def summary(self):
         """Summary of the PolarizationParameter object."""
         BaseParameter.summary(self, "PolarizationParameter")
-
-
-
-class Filter(object):
-    #    """Filter"""
-
-    def __init__(self, db=None, name="DEFAULT"):
-        """Initialisation of Filter object.
-
-        **Properties**
-
-        ========== ==============================================
-        Parameter  Description
-        ========== ==============================================
-        *db*       database in which the filters are stored.
-        *name*     name of the filter.
-        ========== ==============================================
-        """
-        self._db = db
-        self.name = name
-        self.filters = []
-
-
-    def __repr__(self):
-        return "name='%s'" %(self.name)
-
-
-    def read(self):
-        """Read filter from the database."""
-        self.filters = []
-
-        if self._db:
-            sql = "SELECT filter FROM main.filters WHERE name='{0}'".format(self.name)
-            self.filters = [str(record[0]) for record in self._db.select(sql)]
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-        return self.filters
-
-
-    def write(self):
-        """Write filter to database."""
-        if self._db:
-            for filtervalue in self.filters:
-                # Check if filtervalue already exists
-                sql = "SELECT filter FROM main.filters WHERE name='{0}' AND filter='{1}'".format(self.name, filtervalue)
-                n = len(self._db.select(sql))
-                # Only write new filters
-                if 0 == n:
-                    sql = "INSERT INTO main.filters (name, filter) VALUES ('{0}', '{1}');".format(self.name, filtervalue)
-                    self._db.insert(sql)
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-
-    def add(self, filtervalue=""):
-        """Add a filtervalue to the database.
-
-        **Properties**
-
-        ===============  ========================
-        Parameter        Description
-        ===============  ========================
-        *filtervalue*    content of the filter.
-        ===============  ========================
-        """
-        # Write filtervalue to database
-        if self._db:
-            # Check if filtervalue already exists
-            sql = "SELECT filter FROM main.filters WHERE name='{0}' AND filter='{1}'".format(self.name, filtervalue)
-            n = len(self._db.select(sql))
-            # Only write new filters
-            if 0 == n:
-                sql = "INSERT INTO main.filters (name, filter) VALUES ('{0}', '{1}');".format(self.name, filtervalue)
-                self._db.insert(sql)
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-        # Add filtervalue to object
-        if not filtervalue in self.filters:
-            self.filters.append(filtervalue)
-
-
-    def delete(self, filtervalue=""):
-        """Delete a filtervalue from the database.
-
-        **Properties**
-
-        ===============  ========================
-        Parameter        Description
-        ===============  ========================
-        *filtervalue*    content of the filter.
-        ===============  ========================
-        """
-        if self._db:
-            sql = "DELETE FROM main.filters WHERE name='{0}' AND filter='{1}';".format(self.name, filtervalue)
-            self._db.execute(sql)
-        else:
-            raise ValueError("Unable to read from database: no database was set.")
-
-        self.filters.remove(filtervalue)
-
-
-    def execute(self, string=""):
-        """Execute the filtering of a string.
-
-        **Properties**
-
-        ===========  =======================================================
-        Parameter    Description
-        ===========  =======================================================
-        *string*     String with which the filters are tested.
-        ===========  =======================================================
-
-        Returns *True* if at least one subfilter matches a sunstring
-        of *string*, *False* otherwise.
-        """
-        result = False
-
-        if len(string) > 0:
-            for f in self.filters:
-                if f in string:
-                    return True
-        else:
-            raise ValueError("Unable to check empty string.")
-
-        return result
-
-
-    def summary(self):
-        """Summary of the filter object."""
-        linewidth = 80
-
-        print "="*linewidth
-        print "  Summary of the Filter object."
-        print "="*linewidth
-
-        print "  %-40s : %s" %("Filter name", self.name)
-        print "  %-40s : %d" %("Nr. of filters", len(self.filters))
-
-        if len(self.filters) > 0:
-            for f in self.filters:
-                print "    %s" %(f)
-
-        print "="*linewidth
 
