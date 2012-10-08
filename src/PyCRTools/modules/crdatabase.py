@@ -1,7 +1,7 @@
 """
 Interface classes to communicate with the Cosmic Ray Pipeline Database.
 
-:Author: Martin van den Akker <martinva@astro.ru.nl>
+:Author: Martin van den Akker <m.vandenakker@astro.ru.nl>
 """
 
 from pycrtools.io import database as db

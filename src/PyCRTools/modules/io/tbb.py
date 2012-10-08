@@ -34,7 +34,7 @@ class TBBData(IOInterface):
         """
         # Useful to do unit conversion
         self.__conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
-        
+
         # Store blocksize for readout
         self.__blocksize = blocksize
 
@@ -73,10 +73,10 @@ class TBBData(IOInterface):
             "RELATIVEANTENNA_POSITIONS":self.getRelativeAntennaPositions,
             "ITRFANTENNA_POSITIONS":self.getITRFAntennaPositions,
             "ANTENNA_POSITIONS":self.getRelativeAntennaPositions,
-            "TIMESERIES_DATA":lambda:(lambda x:x if self.getTimeseriesData(x) else x)(self.empty("TIMESERIES_DATA")), 
+            "TIMESERIES_DATA":lambda:(lambda x:x if self.getTimeseriesData(x) else x)(self.empty("TIMESERIES_DATA")),
             "TIME_DATA":self.getTimeData,
             "FREQUENCY_DATA":self.getFrequencies,
-            "FFT_DATA":lambda:(lambda x:x if self.getFFTData(x) else x)(self.empty("FFT_DATA")), 
+            "FFT_DATA":lambda:(lambda x:x if self.getFFTData(x) else x)(self.empty("FFT_DATA")),
             "EMPTY_TIMESERIES_DATA":lambda:self.empty("TIMESERIES_DATA"),
             "EMPTY_FFT_DATA":lambda:self.empty("FFT_DATA"),
             "SAMPLE_FREQUENCY":lambda:[v*self.__conversiondict[u] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
@@ -150,15 +150,15 @@ class TBBData(IOInterface):
     def __initSelection(self):
         """Selection dependent initialization.
         """
-        
+
         # Align data
         if hasattr(self, "_TBBData__alignment_offset"):
             print 'WARNING: user-applied alignments offsets are reset to default!'
         self.__alignment_offset = cr.hArray(self.__file.alignment_offset(self.__refAntenna))
-            
+
         # has to be re-done also after antenna selection to match array length...
         # user-applied offsets will be lost.
-        
+
         # Get antenna set
         if not hasattr(self,"antenna_set"):
             self.antenna_set = self.__file.antenna_set()
@@ -193,7 +193,7 @@ class TBBData(IOInterface):
             print "WARNING: ANTENNA_SET == UNDEFINED cannot read antenna positions."
             key = [k for k in key if 'POSITION' not in k]
 
-        output ='[TBB_Timeseries] Summary of object properties' 
+        output ='[TBB_Timeseries] Summary of object properties'
         if show: print output.strip()
 
         #For the print out format.
@@ -206,46 +206,46 @@ class TBBData(IOInterface):
         #Loop over the selected keys.
         for k in key:
             s = ""
-            if k == 'DATA_LENGTH_TIME' and not(verbose): 
-                s =  k +' '*(stringlength-len(k))+' : '+str(self['DATA_LENGTH'][0]*self['SAMPLE_INTERVAL'][0])+' s'               
+            if k == 'DATA_LENGTH_TIME' and not(verbose):
+                s =  k +' '*(stringlength-len(k))+' : '+str(self['DATA_LENGTH'][0]*self['SAMPLE_INTERVAL'][0])+' s'
                 if show: print s
-                output += '\n'+s 
+                output += '\n'+s
                 continue
-        
+
             ss = k +' '*(stringlength-len(k))+' : '
-            
-            if k == 'DATA_LENGTH' and not(verbose): 
-                s =  ss+str(self[k][0])+' Samples ( '+str(self[k][0]/self['BLOCKSIZE'])+' BLOCKS, each of '+str(self['BLOCKSIZE'])+' Samples) '              			
+
+            if k == 'DATA_LENGTH' and not(verbose):
+                s =  ss+str(self[k][0])+' Samples ( '+str(self[k][0]/self['BLOCKSIZE'])+' BLOCKS, each of '+str(self['BLOCKSIZE'])+' Samples) '
                 if show: print s
-                output += '\n'+s 
+                output += '\n'+s
                 continue
             if k == 'NOF_DIPOLE_DATASETS' and not(verbose):
-                s =  ss+str(self[k])+'  ( '+str(self['NOF_SELECTED_DATASETS'])+'  NOF_SELECTED_DATASETS ) '               
+                s =  ss+str(self[k])+'  ( '+str(self['NOF_SELECTED_DATASETS'])+'  NOF_SELECTED_DATASETS ) '
                 if show: print s
-                output += '\n'+s 
+                output += '\n'+s
                 continue
-            
+
             try:
                 if type(self[k])==type([0,0]) and len(self[k])>7 :
                     if all(x == self[k][0] for x in self[k]):
                         if verbose:
                             s =  ss+'[ '+str(self[k][0])+', ...] x'+ str(len(self[k]))+' with '+str(type(self[k][0]))
                         else:
-                            s =  ss+str(self[k][0])               
+                            s =  ss+str(self[k][0])
                     else:
                         s = ss+str(self[k][:3]+['...']+self[k][-3:])
                 else:
                     if isinstance(self[k],(cr.core.hftools._hftools.ComplexArray,cr.core.hftools._hftools.IntArray,cr.core.hftools._hftools.BoolArray,cr.core.hftools._hftools.FloatArray,cr.core.hftools._hftools.StringArray)):
                         s = ss + str(self[k].__repr__(maxlen=10))
-                    else:    
+                    else:
                         if self[k]=='UNDEFINED':
                             und += k+' , '
                             continue
                         else:
-                            s = ss + str(self[k])                       
+                            s = ss + str(self[k])
                 if show: print s
                 output += '\n'+s
-                
+
             except IOError:
                 pass
         if len(und) > 0:
@@ -263,7 +263,7 @@ class TBBData(IOInterface):
     def keys(self,excludedata=False):
         """Returns list of valid keywords.
         """
-        return [k for k in self.__keyworddict.keys() if not k[-5:]=="_DATA"] if excludedata else self.__keyworddict.keys() 
+        return [k for k in self.__keyworddict.keys() if not k[-5:]=="_DATA"] if excludedata else self.__keyworddict.keys()
 
     def items(self,excludedata=False):
         """Return list of keyword/content tuples of all header variables
@@ -278,7 +278,7 @@ class TBBData(IOInterface):
                 pass
 
         return lst
-    
+
     def getHeader(self):
         """Return a dict with keyword/content pairs for all header variables."""
         return dict(self.items(excludedata=True))
@@ -288,7 +288,7 @@ class TBBData(IOInterface):
         *step* = 1 - advance by 'step' blocks (optional)
         """
         self.__block+=step
-        
+
     def __getitem__(self, *keys):
         """Implements keyword access.
         """
@@ -305,7 +305,7 @@ class TBBData(IOInterface):
                 return self.__keyworddict[key]()
             else:
                 return self.__keyworddict[key]
-        
+
     def getitem__old(self, key):
 
         """Implements keyword access.
@@ -410,7 +410,7 @@ class TBBData(IOInterface):
     def __setitem__(self, key, value):
         if key not in self.setable_keywords:
             raise KeyError("Invalid keyword '"+str(key)+"' - vailable keywords: "+str(list(self.setable_keywords)))
-        
+
         elif key is "BLOCKSIZE":
             self.__blocksize = value
             self.__initSelection()
@@ -426,7 +426,7 @@ class TBBData(IOInterface):
     def __contains__(self, key):
         """Allows inquiry if key is implemented.
         """
-        
+
         return key in self.keys()
 
     def getTimeData(self,data=None,block=-1):
@@ -447,7 +447,7 @@ class TBBData(IOInterface):
 
         data.fillrange(self["BLOCK"]*self["BLOCKSIZE"]*cr.asval(self["SAMPLE_INTERVAL"]),cr.asval(self["SAMPLE_INTERVAL"]))
         return data
-    
+
     def __makeScratch(self):
         """Create scratch arrays.
         """
@@ -493,7 +493,7 @@ class TBBData(IOInterface):
                 raise ValueError("Selection needs to be a list of IDs or 'odd' or 'even'.")
         elif type(selection) in cr.hAllContainerTypes:
             selection = list(selection.vec())
-            
+
         if not isinstance(selection, list):
             raise ValueError("Selection needs to be a list.")
 
@@ -547,9 +547,9 @@ class TBBData(IOInterface):
             block=self.__block
         else:
             self.__block=block
-        
+
 #        print 'Reading from alignment offset %d, block-position %d, sample offset %d' % (self.__alignment_offset.max()[0], block*self.__blocksize, sample_offset)
-        
+
         cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize+sample_offset, self.__blocksize, self.__file)
 
 
@@ -564,7 +564,7 @@ class TBBData(IOInterface):
         *sample_offset* Number of samples to offset timeseries data.
         =============== =================================================
 
-        """    
+        """
 #        print 'shifting %d' % sample_offset
         if sample_offset > self.__keyworddict["MAXIMUM_READ_LENGTH"] :
             raise ValueError('Sample offset > MAXIMUM_READ_LENGTH !!')
@@ -654,13 +654,13 @@ class TBBData(IOInterface):
         in Hz.
 
         """
-        
+
         # Get empty array of correct size
         frequencies = self.empty("FREQUENCY_DATA")
 
         # Calculate sample frequency in Hz
         cr.hFFTFrequencies(frequencies, self["SAMPLE_FREQUENCY"][0], self["NYQUIST_ZONE"][0])
-    
+
         return frequencies
 
     def getClockOffset(self):
@@ -738,18 +738,18 @@ class MultiTBBData(IOInterface):
         self.__blocksize = blocksize
         self.__block = block
         self.__subsample_clockoffsets = None
-        
+
         self.__initSelection()
 
     def __initSelection(self):
         """ Set the alignment offsets to the actual values, on construction, and after changing antenna selections, blocksizes etc. i.e. whenever the lower TBBData.__initSelection is called. The alignment offsets set here will override TBBData's __alignment_offset (which is a bit ugly).
-        
+
         How can this be improved?
         """
         allStartSamples = np.array(self["SAMPLE_NUMBER"])
         station_startindex = self["STATION_STARTINDEX"]
         station_list = self["STATION_LIST"]
-        
+
         alignment_offsets = [int(x) for x in (allStartSamples.max() - allStartSamples)] # need to avoid np.int64's in list for hArray conversion
         for i in range(len(station_list)):
             start = station_startindex[i]
@@ -757,7 +757,7 @@ class MultiTBBData(IOInterface):
             #import pdb; pdb.set_trace()
             thisStationsOffsets = cr.hArray(alignment_offsets[start:end])
             self.__files[i]._TBBData__alignment_offset = thisStationsOffsets
-        
+
         self.applyClockOffsets()
 
     def __getitem__(self, key):
@@ -815,11 +815,11 @@ class MultiTBBData(IOInterface):
             raise KeyError("Unsupported key "+key)
 
     setable_keywords=set(["BLOCKSIZE","BLOCK","SELECTED_DIPOLES"]) # ANTENNA_SET not implemented.
-    
+
     def __setitem__(self, key, value):
         if key not in self.setable_keywords:
             raise KeyError("Invalid keyword '"+str(key)+"' - available keywords: "+str(list(self.setable_keywords)))
-        
+
         elif key is "BLOCKSIZE":
             self.__blocksize = value
             print 'Warning: user-applied alignment offsets are reset after setting blocksize!'
@@ -895,45 +895,45 @@ class MultiTBBData(IOInterface):
             start = end
 
     def shiftTimeseriesData(self, sample_offset):
-        # needed to be able to call getFFTData per file from self.getFFTData. 
+        # needed to be able to call getFFTData per file from self.getFFTData.
         """ Apply integer-sample shifts to all opened files to compensate clock offsets.
         A positive number k shifts forward through the data, i.e. the first k samples are skipped.
         Required Arguments:
 
-        =============   =================================================
-        Parameter       Description
-        =============   =================================================
-        *sample_offset* List containing integer sample offset for each opened file.
-        ============= =================================================
+        ================= =================================================
+        Parameter         Description
+        ================= =================================================
+        *sample_offset*   List containing integer sample offset for each opened file.
+        ================= =================================================
         """
-        
+
         for i, f in enumerate(self.__files):
             print 'Applying offset %d to file %s' % (sample_offset[i], self.__files[i]["FILENAME"])
             f.shiftTimeseriesData(sample_offset[i])
 
     def applyClockOffsets(self):
-        """ Get clock offsets from opened files; subtract off the smallest one; shift alignment offsets accordingly. 
-            No parameters. 
+        """ Get clock offsets from opened files; subtract off the smallest one; shift alignment offsets accordingly.
+            No parameters.
         """
         clockoffsets = np.array(self["CLOCK_OFFSET"])
         clockoffsets *= -1.0 # Get the sign right...!
         clockoffsets -= min(clockoffsets) # make them all positive
-        
+
         sample_offset = [int(x / 5.0e-9) for x in clockoffsets]
         self.__subsample_clockoffsets = clockoffsets - np.array(sample_offset) * 5.0e-9
-        
+
         print 'Clock offsets, smalles one subtracted: '
         print clockoffsets
         print 'Sample offsets: '
         print sample_offset
         print 'Remaining sub-sample offsets: '
         print self.__subsample_clockoffsets
-        
+
         self.shiftTimeseriesData(sample_offset)
-        
+
     def getFFTData(self, data, block=-1, hanning=True):
         """Writes FFT data for selected antennas to data array.
-           Calls TBBData.getFFTData(...) per file and merges the output.  
+           Calls TBBData.getFFTData(...) per file and merges the output.
         Required Arguments:
 
         ============= =================================================
@@ -998,7 +998,7 @@ class MultiTBBData(IOInterface):
 
         Example:
            file["SELECTED_DIPOLES"]="odd"
-        """        
+        """
         if type(selection)==str:
             if selection.upper() == "ODD":
                 selection = list(cr.hArray(self["DIPOLE_NAMES"]).Select("odd"))
@@ -1008,7 +1008,7 @@ class MultiTBBData(IOInterface):
                 raise ValueError("Selection needs to be a list of IDs or 'odd' or 'even'.")
         elif type(selection) in cr.hAllContainerTypes:
             selection = list(selection.vec())
-            
+
         if not isinstance(selection, list):
             raise ValueError("Selection needs to be a list.")
 
@@ -1019,7 +1019,7 @@ class MultiTBBData(IOInterface):
             # Selection by antenna number
             # convert selection to list of dipole names
             selection = [self["DIPOLE_NAMES"][i] for i in selection if i < len(self["DIPOLE_NAMES"])] # self.__nofDipoleDatasets - implement?
-            
+
         elif type(selection[0])==str:
             pass # selection will be checked below
             # Selection by antenna ID
@@ -1036,7 +1036,7 @@ class MultiTBBData(IOInterface):
             thisSelection = [x for x in selection if x in f["DIPOLE_NAMES"]]
             f.setAntennaSelection(thisSelection) # call TBBData's method
             count += len(thisSelection)
-            
+
         if count != len(selection): # assume count < len(selection)...
             raise Exception("One or more antennas in selection are in none of the files.")
 
