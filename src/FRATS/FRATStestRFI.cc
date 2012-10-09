@@ -333,9 +333,13 @@ int main (int argc,
 	std::vector<int> integrationlength;
     integrationlength.resize(1);
     integrationlength[0]=1;
+    int nrFlaggedSamples=0;
+    int nrFlaggedChannels=0;
 // Trigger level in each band
 	float triggerlevel = 141/3;
 	float average; // obsolote?
+    int obsID=0;
+    int beam=-1;
 // data files to read. Configfile is not yet implemented
 	std::string inputfile, configfilename;
 	vector<std::string> inputdirs;
@@ -431,6 +435,8 @@ int main (int argc,
 			"-LBA LBA mode"
             "-noSend do not send trigger messages over UDP"
             "-sleep <sleeptime (sec)>"
+            "-obsID <obsID>"
+            "-beam <beam>"
 			"Examples:\n"
 			"./TransientTrigger -i ~/Astro/data/pulsars/obs/ -FSB 0 -LSB 10 -il 20 -tl 50 -n 51 \n"
 			"./TransientTrigger -i ~/Astro/data/pulsars/L2009_13298/ -FSB 0 -LSB 10 -il 20 -tl 50 -n 3595 \n; open /Users/STV/Documents/GiantPulse/excesslog_pdt.txt\n"
@@ -610,11 +616,19 @@ int main (int argc,
 			starttime_sec = atoi(argv[argcounter]);
             argcounter++;
 			starttime_ns = atoi(argv[argcounter]);            
-			cout << "start time of observation: " << timeintegration << endl;
+			cout << "start time of observation: " << starttime_sec << " " << starttime_ns << endl;
 		} else if(topic == "-nrCSB"){
 			argcounter++;
 			nrCombinedSBs = atoi(argv[argcounter]);
 			cout << "number of subbands to take together: " << nrCombinedSBs << endl;
+		} else if(topic == "-obsID"){
+			argcounter++;
+			obsID = atoi(argv[argcounter]);
+			cout << "observation ID: " << obsID << endl;
+		} else if(topic == "-beam"){
+			argcounter++;
+			beam = atoi(argv[argcounter]);
+			cout << "beam: " << beam << endl;
 		} else {
 			cout << "specify at least an config file with -c <config file>";
 		}
@@ -684,14 +698,14 @@ int main (int argc,
 			cout << "StreamNr " << StreamCounter << " DMcounter " << DMcounter << " DM " << DMval << endl;
 			float SBFreq = SubbandToFreq(SB+startsubbandnumber,HBAmode);
             if(nFreqs<1) {
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns,  startpos, integrationlength[0], DoPadding, DoPadding, verbose);
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns,  startpos, integrationlength[0], DoPadding, DoPadding, verbose, DoNotSendUDPtriggers, obsID, beam);
             } else {
                 StartChannel=stream*NrChannels;
                 // start channel of this stream
                 // total number of channels in this stream
                 printf("Channel, %i, Integration, %i ",channels,timeintegration);
                 //if(stream==1 && DMcounter==0)
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, UDPtransmitter, startpos, integrationlength, DoPadding, DoPadding, verbose); // Add obsid and beam    
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, UDPtransmitter, startpos, integrationlength, DoPadding, DoPadding, verbose, DoNotSendUDPtriggers, obsID, beam); // Add obsID and beam    
                 
                 //}
             }
@@ -850,7 +864,7 @@ if(doFlagging){
         RFIcleaner.calcBaseline(); // NOTE this should be one? Do we need to calculate it?
         //RFIcleaner.printBaseline();
         RFIcleaner.calcSqrBaseline();
-        RFIcleaner.calcBadChannels(15); // 15 sigma cut, because bad samples may also give rise to 
+        nrFlaggedChannels=RFIcleaner.calcBadChannels(15); // 15 sigma cut, because bad samples may also give rise to 
         // seeing a lot of 'bad' channels.
         if(verbose){
             RFIcleaner.printBadChannels();
@@ -862,7 +876,7 @@ if(doFlagging){
 
 // Calculate bad samples, by summing in time over a quarter of the bandwidth
 // samples that are more than cutlevel*sigma above average in at least 2 of the quarters are flagged
-        RFIcleaner.calcBadSamples(4); // cutlevel = 4 sigma
+        nrFlaggedSamples=RFIcleaner.calcBadSamples(4); // cutlevel = 4 sigma
         if(verbose){
             RFIcleaner.printBadSamples();
         }
@@ -873,7 +887,7 @@ if(doFlagging){
         // flagging remaining bad channels, see steps above
         RFIcleaner.calcBaseline();
         RFIcleaner.calcSqrBaseline();
-        RFIcleaner.calcBadChannels(6); // 6 sigma cut
+        nrFlaggedChannels+=RFIcleaner.calcBadChannels(6); // 6 sigma cut
         if(verbose){
             RFIcleaner.printBadChannels();
         }
@@ -882,7 +896,7 @@ if(doFlagging){
         // cleans channels
         RFIcleaner.cleanChannels("1");
         // removes the bad 0th channel of each subband.
-        RFIcleaner.cleanChannel0("1");
+        nrFlaggedChannels+=RFIcleaner.cleanChannel0("1");
         // Subtract average timeseries, a technique known as ZeroDMing. Effectiveness needs to be investigated.
         if(DoZeroDM){
             RFIcleaner.calcAverageTimeseries();
@@ -924,6 +938,8 @@ if(doFlagging){
                 }
                 //# Processing data now split up into three separate tasks:
                 //# dedisperseData2 : calculates dedispersed data
+                SBTs[sc][DMcounter]->setNrFlaggedChannels(nrFlaggedChannels);
+                SBTs[sc][DMcounter]->setNrFlaggedSamples(nrFlaggedSamples);
 				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 //# calcAverageStddev : calculates average, stddev and thresholdlevel
 				foundpulse=SBTs[sc][DMcounter]->calcAverageStddev(blockNr);

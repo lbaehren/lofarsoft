@@ -555,6 +555,9 @@ namespace FRAT {
         SBaverage=itsSBaverage*IntegrationLength;
         SBstdev=itsSBstdev*sqrt(1.0*IntegrationLength);
         float TriggerThreshold=SBaverage+itsTriggerLevel*SBstdev; 
+        trigger.SBaverage=SBaverage;
+        trigger.SBstdev=SBstdev;
+        trigger.Threshold=SBaverage+itsTriggerLevel*SBstdev;
 
         unsigned long int utc_second;
         unsigned long int utc_nanosecond;
@@ -574,7 +577,7 @@ namespace FRAT {
                     subsum=DeDispersed[rest];
                     if(subsum>TriggerThreshold) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
-                        if(totaltime+itsReferenceTime-trigger.time>5){
+                   //     if(totaltime+itsReferenceTime-trigger.time>5){
                             //new trigger
                             //trigger.average[fc]/=triggerlength[fc];
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
@@ -582,16 +585,20 @@ namespace FRAT {
                             trigger.length=IntegrationLength;
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
-                            trigger.max=subsum;
+                            trigger.max=(trigger.sum-SBaverage)/SBstdev;
                         
-                        }
+                 /*       }
                         else{
                             //old trigger, or trigger accross blocks
                             //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
                             trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                            if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
-                        }
-                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5){
+                            if(subsum>trigger.sum){
+                                trigger.sum=subsum;
+                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                            } //calculate maximum
+                */
+                //        }
+                //    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5){
                         //trigger.utc_second=10000;
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -599,7 +606,7 @@ namespace FRAT {
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
                         // Change trigger max to value in standard deviations.
-                        trigger.max=(trigger.max-SBaverage)/SBstdev;
+                        //trigger.max=(trigger.sum-SBaverage)/SBstdev;
                         //if(!nosend){
                         SendTriggerMessage(trigger);
                         triggerMessages.push_back(trigger);
@@ -618,7 +625,7 @@ namespace FRAT {
                     } 
                     if(subsum>TriggerThreshold && itsBlockNumber>5) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
-                        if(totaltime+itsReferenceTime-trigger.time>5){
+                    //    if(totaltime+itsReferenceTime-trigger.time>5){
                             //new trigger
                             //trigger.average[fc]/=triggerlength[fc];
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
@@ -626,20 +633,23 @@ namespace FRAT {
                             trigger.length=IntegrationLength;
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
-                            trigger.max=subsum;
+                            trigger.max=(subsum-SBaverage)/SBstdev;
                         
-                        }
-                        else{
+                   //     }
+                   /*     else{
                             //old trigger, or trigger accross blocks
                             trigger.sum+=subsum;
                             trigger.length++;
                             //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
                             trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                            if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
+                            if(subsum>trigger.max){
+                                trigger.sum=subsum;
+                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                            } //calculate maximum
                         }
                     } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5 && trigger.time>0){
                         //trigger.utc_second=10000;
-                        unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                   */   unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
                         if(verbose){
                             std::cout << "verbose " << verbose << endl;
@@ -648,7 +658,7 @@ namespace FRAT {
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
                         // Change trigger max to value in standard deviations.
-                        trigger.max=(trigger.max-SBaverage)/SBstdev;
+                        //trigger.max=(trigger.max-SBaverage)/SBstdev;
                         //if(!nosend){
                         SendTriggerMessage(trigger);
                         triggerMessages.push_back(trigger);
@@ -704,7 +714,7 @@ namespace FRAT {
 
                     if(subsum>TriggerThreshold && itsBlockNumber > 5) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
-                        if(totaltime+itsReferenceTime-trigger.time>5){
+                //        if(totaltime+itsReferenceTime-trigger.time>5){
                             //new trigger
                             //trigger.average[fc]/=triggerlength[fc];
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
@@ -712,19 +722,21 @@ namespace FRAT {
                             trigger.length=IntegrationLength;
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
-                            trigger.max=subsum;
-                        }
+                            trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                /*        }
                         else{
                             //old trigger, or trigger accross blocks
                             //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
                             trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                            trigger.obsID=samplessummed;
-                            if(subsum>trigger.max){trigger.max=subsum;} //calculate maximum
+                            if(subsum>trigger.max){
+                                trigger.sum=subsum;
+                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                            } //calculate maximum
                         }
                         
                     } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5 && trigger.time>0){
                         //trigger.utc_second=10000;
-                        unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                 */     unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
                         if(verbose){
                             std::cout << "verbose " << verbose << endl;
@@ -733,7 +745,7 @@ namespace FRAT {
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
                         // Change trigger max to value in standard deviations.
-                        trigger.max=(trigger.max-SBaverage)/SBstdev;
+                        //trigger.max=(trigger.max-SBaverage)/SBstdev;
                         
                         //if(!nosend){
                         SendTriggerMessage(trigger);
@@ -926,6 +938,16 @@ namespace FRAT {
 			return pulsefound;
 		}
 		
+		int SubbandTrigger::setNrFlaggedChannels(int nrFlaggedChannels){
+            trigger.nrFlaggedChannels=nrFlaggedChannels; 
+            return 0;
+        }
+
+		int SubbandTrigger::setNrFlaggedSamples(int nrFlaggedSamples){
+            trigger.nrFlaggedSamples=nrFlaggedSamples; 
+            return 0;
+        }
+
 		int SubbandTrigger::CalculateBufferSize(){
             printf("Started ... %i %i %i ",dedispersionoffset[itsNrChannels-1],itsIntegrationLength,itsNrSamples);
             int requiredLength=2*(dedispersionoffset[itsNrChannels-1]+itsIntegrationLength+itsNrSamples+itsReferenceTime);
@@ -1461,7 +1483,7 @@ Save timeseries (append)
         
         
 
-        bool RFIcleaning::calcBadChannels(int cutlevel, bool useInterpolatedBaseline=false) {
+        int RFIcleaning::calcBadChannels(int cutlevel, bool useInterpolatedBaseline=false) {
                 // divide sqrBaseline by baseline^2
                 if(useInterpolatedBaseline){
                     it1=IPbaseline.begin();
@@ -1522,10 +1544,10 @@ Save timeseries (append)
 
 
 
-            return true;
+            return badChans.size();
         }
 
-        bool RFIcleaning::calcBadSamples(int cutlevel) {
+        int RFIcleaning::calcBadSamples(int cutlevel) {
 // Channel collapse:
         
 
@@ -1611,7 +1633,7 @@ Save timeseries (append)
 
             // check if any value appears at least reqsubdiv times
 
-            return true;
+            return badSamples.size();
         }
         
         bool RFIcleaning::cleanChannels(std::string method) {
@@ -1675,7 +1697,7 @@ Save timeseries (append)
             return true;
         }
         
-        bool RFIcleaning::cleanChannel0(std::string method) {
+        int  RFIcleaning::cleanChannel0(std::string method) {
         /*  Replaces the values in the channels in the badChans list
             according to the method. Options:
             method "1" replaces values with value 1
@@ -1707,7 +1729,7 @@ Save timeseries (append)
                 }
             }
 
-            return true;
+            return itsChansPerSubband/itsNrChannels;
         }
         
 

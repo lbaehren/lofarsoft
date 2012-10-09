@@ -80,6 +80,11 @@ struct triggerEvent {
 	int obsID;
     int beam;
 	float DM;
+    float SBaverage;
+    float SBstdev;
+    float Threshold;
+    int nrFlaggedChannels;
+    int nrFlaggedSamples;
 };
 
 
@@ -290,6 +295,9 @@ namespace FRAT {
               bool processData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime, bool Transposed=false);
               // Calculate how large the buffer for dedispersed data should be
 			  int CalculateBufferSize();
+              // Set number of bad samples and channels in the trigger message 
+			  int setNrFlaggedChannels(int nrFlaggedChannels);
+			  int setNrFlaggedSamples(int nrFlaggedSamples);
               // Calculate dedispersion offset of the different channels, based on settings in the SubbandTrigger
 			  void InitDedispersionOffset();
               // Calculate dedispersion offset of the different channels from the FREQvalues.
@@ -441,10 +449,10 @@ namespace FRAT {
                 string outFileName;
                 bool calcBaseline(); // sum over time of the sample for each channel
                 bool calcSqrBaseline(); // sum over time of samples^2 for each channel
-                bool calcBadChannels(int cutlevel, bool useInterpolatedBaseline); // True if SqrBaseline/Baseline > average+cutlevel*stddev for a certain frequencychannel
-                bool calcBadSamples(int cutlevel); // True if 
+                int calcBadChannels(int cutlevel, bool useInterpolatedBaseline); // True if SqrBaseline/Baseline > average+cutlevel*stddev for a certain frequencychannel
+                int calcBadSamples(int cutlevel); // True if 
                 bool cleanChannels(std::string method); // replace bad channels
-                bool cleanChannel0(std::string method); // replace 0th channel of each subband
+                int cleanChannel0(std::string method); // replace 0th channel of each subband/ return number of 0th channels that are cleaned
                 bool cleanSamples(std::string method); // replace bad samples
                 bool calcTimeseries(); // sum over channels for each timestep
                 bool calcAverageTimeseries(); // sum over channels for each timestep divided by number of channels
