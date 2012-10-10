@@ -52,6 +52,7 @@ ExternalProject_Add (dal1
   GIT_REPOSITORY ${DAL1_GIT_REPOSITORY}
   GIT_TAG rename
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DDAL_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+  PATCH_COMMAND patch -p0 -i ${PROJECT_SOURCE_DIR}/dal1-with-clang.patch
   )
 
 add_dependencies (dal1 git casacore num_util)
