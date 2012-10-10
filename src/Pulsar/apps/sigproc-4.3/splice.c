@@ -15,7 +15,7 @@ FILE *output;
 main (int argc, char **argv)
 {
   int i=1, j, k, nfiles=0, *numbt, schans=0, nbytes, *nchan;
-  FILE *input;
+  FILE **input;
   char *block;
   double *stamp, *frch1, *froff, *frmhz;
   output=stdout;
