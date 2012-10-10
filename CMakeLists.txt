@@ -119,6 +119,7 @@ foreach (varSystemPackage
     CUDA
     CppUnit
     DAL1
+    DAL
     Doxygen
     FFTW3
     FLEX
