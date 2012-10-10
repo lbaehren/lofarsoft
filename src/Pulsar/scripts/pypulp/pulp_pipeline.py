@@ -1601,7 +1601,7 @@ class CVUnit(PipeUnit):
 									psr_dec=pu.coord_to_string(*pu.rad_to_dms(self.tab.decrad))
 									if self.tab.decrad < 0: psr_coords=psr_ra+psr_dec
 									else: psr_coords=psr_ra+"+"+psr_dec
-									cmd="digifil -set site=LOFAR -set name=%s -set coord=%s %s -F 2 -D 0.0 -o %s_sp_%s_SB%s.fil %s" % (psr, psr_coords, verbose, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
+									cmd="digifil -set site=LOFAR -set name=%s -set coord=%s %s -F 2 -D 0.0 -b 8 -o %s_sp_%s_SB%s.fil %s" % (psr, psr_coords, verbose, psr, self.output_prefix, input_file.split("_SB")[1], input_file)
 #									cmd="dspsr -T 59 -b 2097152 -c 59 -D 71.0398 -m %s %s -fft-bench -O %s_sp_%s_SB%s -t %d %s" % \
 #										(obsmjd, verbose, psr, self.output_prefix, \
 #											input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
@@ -1621,7 +1621,7 @@ class CVUnit(PipeUnit):
 #							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
 #							cmd="psradd -R -o %s_sp_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.fil" % (self.curdir, psr, self.output_prefix))
-							cmd="splice %s > %s_sp_%s.fil" % (psr, " ".join(ar_files), self.output_prefix)
+							cmd="splice -o %s_sp_%s.fil %s" % (psr, self.output_prefix, " ".join(ar_files))
 							self.execute(cmd, workdir=self.curdir)
 						# removing corrupted freq channels
 						if self.nrChanPerSub > 1:
