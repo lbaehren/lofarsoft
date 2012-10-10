@@ -15,7 +15,7 @@ FILE *output;
 main (int argc, char **argv)
 {
   int i=1, j, k, nfiles=0, *numbt, schans=0, nbytes, *nchan;
-  FILE *input[32];
+  FILE *input;
   char *block;
   double *stamp, *frch1, *froff, *frmhz;
   output=stdout;
@@ -27,16 +27,20 @@ main (int argc, char **argv)
     print_version(argv[0],argv[1]);
   }
 
-  /* open up files */
+  /* VLAD's modification. Oct 10, 2012
+     Instead of having only 32 input files maximum, changed to unlimited number
+     of input files. However, we need first to get the exact number of input files
+  */
   while (i<argc) {
-    if (file_exists(argv[i])) {
-      input[nfiles]=open_file(argv[i],"rb");
-      nfiles++;
-    } else if (strings_equal(argv[i],"-o")) {
-      output=open_file(argv[++i],"wb");
-    }
+    if (file_exists(argv[i])) nfiles++;
+     else { if (strings_equal(argv[i],"-o")) output=open_file(argv[++i],"wb"); }
     i++;
   }
+  printf ("LALLALALAl\n");
+  input = (FILE *) malloc(nfiles*sizeof(FILE));
+
+  /* open up files */
+  for (i=1, j=0; i<argc; i++) if (file_exists(argv[i])) input[j++]=open_file(argv[i],"rb");
 
   /* read in headers and check time stamps */
   stamp = (double *) malloc(nfiles*sizeof(double));
@@ -107,4 +111,14 @@ main (int argc, char **argv)
       fwrite(block,nbytes,1,output);
     }
   }
+
+ /* VLAD: free'ing all dynamic arrays */
+ free (input);
+ free (stamp);
+ free (frch1);
+ free (froff);
+ free (numbt);
+ free (nchan);
+ free (frmhz);
+ free (block);
 }

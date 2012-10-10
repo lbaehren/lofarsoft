@@ -130,7 +130,7 @@ sizeof_file.c
 slalib.c
 smooth.c
 #snrdm.c
-#splice.c
+splice.c
 #splitter.c
 ssm.c
 strings_equal.c
@@ -161,7 +161,7 @@ ${PULSAR_BINARY_DIR}/apps/sigproc/y.tab.c
 
 set (sigproc_binaries
     filterbank fake bandpass reader decimate
-    sigproc_fold polyco2period sigproc_profile flux splice barycentre
+    sigproc_fold polyco2period sigproc_profile flux barycentre
     depolyco sigproc_downsample splitter snrdm blanker 
     header flatten dedisperse clip sigproc_tree extract clipper gmrt2fil
 ) 
@@ -295,7 +295,7 @@ add_executable (flux
   flux.c
   )
 
-add_executable (splice
+add_executable (sigproc_splice
   splice.c
   )
 
