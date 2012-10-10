@@ -42,6 +42,8 @@
 #include "mMath.h"
 #include "mFitting.h"
 
+#define PYCRTOOLS_WITH_GSL
+
 #ifdef PYCRTOOLS_WITH_GSL
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_bspline.h>
@@ -67,7 +69,7 @@ void hInitFitting(){
 #ifdef PYCRTOOLS_WITH_GSL
   gsl_set_error_handler_off ();
 #else
-  ERROR("hInit: GSL-Libraries not installed. Some functions are not defined.")
+  ERROR("hInit: GSL-Libraries not installed. Some functions are not defined.");
 #endif /* PYCRTOOLS_WITH_GSL */
 }
 
