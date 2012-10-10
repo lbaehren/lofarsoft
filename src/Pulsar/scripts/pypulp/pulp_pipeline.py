@@ -1621,7 +1621,7 @@ class CVUnit(PipeUnit):
 #							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
 #							cmd="psradd -R -o %s_sp_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 							ar_files=glob.glob("%s/%s_sp_%s_SB*_CH*.fil" % (self.curdir, psr, self.output_prefix))
-							cmd="splice -o %s_sp_%s.fil %s" % (psr, self.output_prefix, " ".join(ar_files))
+							cmd="sigproc_splice -o %s_sp_%s.fil %s" % (psr, self.output_prefix, " ".join(ar_files))
 							self.execute(cmd, workdir=self.curdir)
 						# removing corrupted freq channels
 						if self.nrChanPerSub > 1:
