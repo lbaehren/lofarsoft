@@ -37,7 +37,7 @@ main (int argc, char **argv)
     i++;
   }
   printf ("LALLALALAl\n");
-  input = (FILE *) malloc(nfiles*sizeof(FILE));
+  input = (FILE *) malloc(nfiles*sizeof(FILE *));
 
   /* open up files */
   for (i=1, j=0; i<argc; i++) if (file_exists(argv[i])) input[j++]=open_file(argv[i],"rb");
