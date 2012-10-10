@@ -31,11 +31,7 @@ main (int argc, char **argv)
      Instead of having only 32 input files maximum, changed to unlimited number
      of input files. However, we need first to get the exact number of input files
   */
-  while (i<argc) {
-    if (file_exists(argv[i])) nfiles++;
-     else { if (strings_equal(argv[i],"-o")) output=open_file(argv[++i],"wb"); }
-    i++;
-  }
+  while (i<argc) if (strings_equal(argv[i],"-o")) i+=2; else { if (file_exists(argv[i++])) nfiles++; }
   input = (FILE **) malloc(nfiles*sizeof(FILE *));
   for (i=0; i<nfiles; i++) {
    input[i] = (FILE *)malloc(sizeof(FILE*));
@@ -43,7 +39,9 @@ main (int argc, char **argv)
   }
 
   /* open up files */
-  for (i=1, j=0; i<argc; i++) if (file_exists(argv[i])) input[j++]=open_file(argv[i],"rb");
+  for (i=1, j=0; i<argc; i++) 
+   if (file_exists(argv[i])) input[j++]=open_file(argv[i],"rb");
+     else { if (strings_equal(argv[i],"-o")) output=open_file(argv[++i],"wb"); }
 
   /* read in headers and check time stamps */
   stamp = (double *) malloc(nfiles*sizeof(double));
