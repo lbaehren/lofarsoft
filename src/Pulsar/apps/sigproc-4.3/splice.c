@@ -36,8 +36,11 @@ main (int argc, char **argv)
      else { if (strings_equal(argv[i],"-o")) output=open_file(argv[++i],"wb"); }
     i++;
   }
-  printf ("LALLALALAl\n");
-  input = (FILE *) malloc(nfiles*sizeof(FILE *));
+  input = (FILE **) malloc(nfiles*sizeof(FILE *));
+  for (i=0; i<nfiles; i++) {
+   input[i] = (FILE *)malloc(sizeof(FILE*));
+   if (!input[i]) { perror("Not enough memory!\n"); exit(1); }
+  }
 
   /* open up files */
   for (i=1, j=0; i<argc; i++) if (file_exists(argv[i])) input[j++]=open_file(argv[i],"rb");
@@ -113,6 +116,7 @@ main (int argc, char **argv)
   }
 
  /* VLAD: free'ing all dynamic arrays */
+ for (i=0; i<nfiles; i++) free (input[i]);
  free (input);
  free (stamp);
  free (frch1);
