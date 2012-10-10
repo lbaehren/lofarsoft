@@ -564,6 +564,7 @@ add_custom_target (sigproc_helpdocs
   COMMAND ./help.csh dedisperse > /dev/null
   COMMAND ./help.csh sigproc_fold > /dev/null
   COMMAND ./help.csh sigproc_profile > /dev/null
+  COMMAND ./help.csh sigproc_splice > /dev/null
   COMMAND ./help.csh flux > /dev/null
   COMMAND ./help.csh scripts/polyco > /dev/null
   COMMAND ./help.csh barycentre > /dev/null
