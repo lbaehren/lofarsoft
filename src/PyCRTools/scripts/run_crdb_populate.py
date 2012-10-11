@@ -33,7 +33,17 @@ class CRDatabasePopulator(object):
 
     def getDatabaseFileList(self):
         """Get a list of filenames that are already in the CR database."""
-        pass
+        result = []
+
+        # TODO: CRDatabasePopulator.getDatabaseFileList() - Add implementation
+        if self.db:
+            sql = "SELECT filename FROM datafiles;"
+            records = self.db.select(sql)
+            result = [str(r[0]) for r in records]
+        else:
+            raise ValueError("No database available.")
+
+        return result
 
 
     def getDiskFileList(self):
@@ -47,40 +57,54 @@ class CRDatabasePopulator(object):
         else:
             print "  Building list of files to process..."
             self.filename_list = os.listdir(datapath)
+            print "  - Sorting filename list..."
+            self.filename_list.sort()
+
             if options.verbose:
-                print "initial list contains {0} files".format(len(self.filename_list))
+                print "  initial list contains {0} files".format(len(self.filename_list))
 
             # Include: h5
-            print "filtering h5..."
+            print "  filtering h5..."
             self.filename_list = [f for f in self.filename_list if ("h5" in f)]
             if options.verbose:
-                print "list contains {0} files after filtering".format(len(self.filename_list))
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
+
             # Exclude: test
-            print "filtering test..."
+            print "  filtering test..."
             self.filename_list = [f for f in self.filename_list if ("test" not in f)]
             if options.verbose:
-                print "list contains {0} files after filtering".format(len(self.filename_list))
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
+
             # Exclude: bkp
-            print "filtering bkp..."
+            print "  filtering bkp..."
             self.filename_list = [f for f in self.filename_list if ("bkp" not in f)]
             if options.verbose:
-                print "list contains {0} files after filtering".format(len(self.filename_list))
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
+
             # Exclude: R001-R009
-            print "filtering R00x..."
+            print "  filtering R00x..."
             r_exclude = ["R00%1d"%(i) for i in range(1,10)]
             for r in r_exclude:
-                print "filtering %s..." %(r)
+                print "  filtering %s..." %(r)
                 self.filename_list = [f for f in self.filename_list if (str(r) not in f)]
             if options.verbose:
-                print "list contains {0} files after filtering".format(len(self.filename_list))
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
+
             # Exclude: R01x-R09x
-            print "filtering R0xx..."
+            print "  filtering R0xx..."
             r_exclude = ["R0%1d"%(i) for i in range(1,10)]
             for r in r_exclude:
-                print "filtering %s..." %(r)
+                print "  filtering %s..." %(r)
                 self.filename_list = [f for f in self.filename_list if (str(r) not in f)]
             if options.verbose:
-                print "list contains {0} files after filtering".format(len(self.filename_list))
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
+
+            # Exclude files already in the database
+            print "  filtering out files already in database..."
+            db_filename_list = self.getDatabaseFileList()
+            self.filename_list = [f for f in self.filename_list if (f not in db_filename_list)]
+            if options.verbose:
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
 
 
 def parseOptions():
