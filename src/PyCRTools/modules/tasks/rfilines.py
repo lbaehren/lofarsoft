@@ -9,8 +9,6 @@ import pycrtools as cr
 from pycrtools import hArray
 from pycrtools import srcfind as sf
 import numpy as np
-import matplotlib
-matplotlib.use("Agg") # doesn't work?
 import matplotlib.pyplot as plt
 from pycrtools.tasks.shortcuts import *
 import pycrtools.tasks as tasks
@@ -148,10 +146,6 @@ class rfilines(tasks.Task):
         twopi = 2 * np.pi
         deg2rad = twopi / 360.0
         
-        if self.batch or (not self.doplot):
-            import matplotlib
-            matplotlib.use("Agg") # ! Has no effect. Has to be done before calling / outside Task?
-            import matplotlib.pyplot as plt
         if not self.doplot and self.testplots:
             print 'Warning: setting self.testplots to False because self.doplot = False'
             self.testplots = False
