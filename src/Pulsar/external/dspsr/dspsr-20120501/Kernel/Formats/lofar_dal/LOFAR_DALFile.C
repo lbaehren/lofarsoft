@@ -325,7 +325,7 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 	cerr << "SANITY CHECK" << endl;
 	std::vector<double> w = world.get();
 	for (unsigned i=0; i<w.size(); i++)
-	  if (w[i] != info.get_centre_frequency(i) /**1e6*/)
+	  if (w[i] != info.get_centre_frequency(i) *1e6)
 	    cerr << "NOT EQUAL: " << w[i] << " != " << info.get_centre_frequency(i)
 		 << endl;
       }
