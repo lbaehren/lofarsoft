@@ -5,7 +5,7 @@
 
 #import pycrtools
 import numpy as np
-from numpy import sin, cos, pi
+from numpy import sin, cos, tan, arctan2, sqrt, pi
 import matplotlib.pyplot as plt # want to have plotting in here?
 from scipy.optimize import brute, fmin
 import sys 
@@ -17,6 +17,57 @@ rad2deg = 360.0 / twopi
 deg2rad = twopi / 360.0
 nan = float('nan')
 
+def GPSplusOffset(startingGPS, offsetXYZ):
+    """
+    Convert GPS position + xyz offset -> GPS position
+    Where (x, y, z) points (east, north, up)
+
+    Linearized approximation; accurate to ~ 1 mm for x, y up to 100 m
+
+    Required arguments:
+
+    =========== =================================================
+    Parameter   Description
+    =========== =================================================
+    *startingGPS* tuple/array/list ``(long, lat)`` in degrees;
+    *offsetXYZ*   array/list ``[x, y, z]``.
+    =========== =================================================
+    """
+    R_earth = 6367449 # meters; see Wikipedia on Geographic Coordinate System
+    metersPerDegree = 111132.954 # in latitude; ignoring nonspherical components
+    
+    long = startingGPS[0]
+    lat = startingGPS[1]
+    
+    x = offsetXYZ[0]
+    y = offsetXYZ[1]
+    
+    outLat = lat + y / metersPerDegree
+    outLong = long + x / (metersPerDegree * cos(lat * deg2rad))
+    
+    return (outLong, outLat)
+
+def greatCircleDistance(gps1, gps2):
+    """
+    Calculate the distance along a great-circle, between 2 GPS points (long, lat) in degrees N, E
+    Distance in meters.
+    
+    Taken from: http://www.movable-type.co.uk/scripts/latlong.html
+    """
+    
+    lat1 = gps1[1] * deg2rad; lat2 = gps2[1] * deg2rad
+    long1 = gps1[0] * deg2rad; long2 = gps2[0] * deg2rad
+    
+    delta_lat = lat2 - lat1
+    delta_long = long2 - long1
+    
+    a = sin(delta_lat / 2)**2 + cos(lat1) * cos(lat2) * sin(delta_long / 2)**2
+    b = 2 * arctan2(sqrt(a), sqrt(1 - a))
+    R_earth = 6367449
+    distance = R_earth * b
+    
+    return distance
+    
 def directionFromThreeAntennas(positions, times):
     """
     Given three antenna positions, and (pulse) arrival times for each antenna,
@@ -177,6 +228,42 @@ def phasesFromDirection(positions, direction, freq, nowrap = False):
     else:
         return phaseWrap(phases)
 
+def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
+    """
+    Get time delays for a radio signal travelling from GPS point ``gps`` to antennas at ``positions``.
+    The antenna ids are needed for identifying the station it belongs to. 
+
+    Required arguments:
+
+    =========== =================================================
+    Parameter   Description
+    =========== =================================================
+    *gps*       array / list / tuple ``(lat, long)``
+    *positions* ``(np-array x1, y1, z1, x2, y2, z2, ...)``
+    *antids*    Array or list of antenna ids 
+    *antennaset* e.g. 'LBA_OUTER'
+    =========== =================================================
+    """
+    
+    from pycrtools import metadata as md
+    
+    stationIDs = np.array(list(antids))/1000000
+    stationGPS = np.array([md.getStationPositions(stationID, antennaset) for stationID in stationIDs])
+    
+#    gpspositions = np.zeros(len(antids))
+    timedelays = np.zeros(len(antids))
+    import pdb; pdb.set_trace()
+    for i in range(len(antids)):
+        thisposition = positions[3*i:3*(i+1)]
+        thisGPS = GPSplusOffset(stationGPS[i], thisposition)
+#        gpspositions[i] = thisGPS
+        timedelays[i] = greatCircleDistance(gps, thisGPS)
+    
+    timedelays -= timedelays[0]
+    timedelays /= c
+    
+    return timedelays
+    
 def timeDelaysFromDirectionAndDistance(positions, direction):
     """
     Get time delays for antennas at given position for a given direction and distance.
