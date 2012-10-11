@@ -923,17 +923,26 @@ class Settings(object):
         else:
             raise ValueError("Unable to set database: no database was provided.")
 
+        self._datapath = None
+        self._resultspath = None
+        self._lorapath = None
+        #self._db_version = None
+
 
     @property
     def datapath(self):
         """Get the value of the *datapath* variable as set in the database."""
         result = None
 
-        if self._db:
-            sql = "SELECT value FROM main.settings WHERE key='datapath'"
-            result = str(self._db.select(sql)[0][0])
+        if self._datapath:
+            result = self._datapath
         else:
-            raise ValueError("Unable to read from database: no database was set.")
+            if self._db:
+                sql = "SELECT value FROM main.settings WHERE key='datapath'"
+                result = str(self._db.select(sql)[0][0])
+                self._datapath = result
+            else:
+                raise ValueError("Unable to read from database: no database was set.")
 
         return result
 
@@ -953,6 +962,7 @@ class Settings(object):
         if self._db:
             sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', str(value))
             self._db.execute(sql)
+            self._datapath = str(value)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -962,11 +972,15 @@ class Settings(object):
         """Get the value of the *resultspath* variable as set in the database."""
         result = None
 
-        if self._db:
-            sql = "SELECT value FROM main.settings WHERE key='resultspath'"
-            result = str(self._db.select(sql)[0][0])
+        if self._resultspath:
+            result = self._resultspath
         else:
-            raise ValueError("Unable to read from database: no database was set.")
+            if self._db:
+                sql = "SELECT value FROM main.settings WHERE key='resultspath'"
+                result = str(self._db.select(sql)[0][0])
+                self._resultspath = result
+            else:
+                raise ValueError("Unable to read from database: no database was set.")
 
         return result
 
@@ -986,6 +1000,7 @@ class Settings(object):
         if self._db:
             sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
             self._db.execute(sql)
+            self._resultspath = str(value)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -995,11 +1010,15 @@ class Settings(object):
         """Get the value of the *lorapath* variable as set in the database."""
         result = None
 
-        if self._db:
-            sql = "SELECT value FROM main.settings WHERE key='lorapath'"
-            result = str(self._db.select(sql)[0][0])
+        if self._lorapath:
+            result = self._lorapath
         else:
-            raise ValueError("Unable to read from database: no database was set.")
+            if self._db:
+                sql = "SELECT value FROM main.settings WHERE key='lorapath'"
+                result = str(self._db.select(sql)[0][0])
+                self._lorapath = result
+            else:
+                raise ValueError("Unable to read from database: no database was set.")
 
         return result
 
@@ -1019,6 +1038,7 @@ class Settings(object):
         if self._db:
             sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('lorapath',str(value))
             self._db.execute(sql)
+            self._lorapath = value
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -1031,6 +1051,7 @@ class Settings(object):
         if self._db:
             sql = "SELECT value FROM settings WHERE key='db_version'"
             result = int(self._db.select(sql)[0][0])
+            self._db_version = result   # Not used at the moment.
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
