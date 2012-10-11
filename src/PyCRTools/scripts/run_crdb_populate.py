@@ -31,7 +31,12 @@ class CRDatabasePopulator(object):
             raise ValueError("Unable to set CRDatabase.")
 
 
-    def getFileList(self):
+    def getDatabaseFileList(self):
+        """Get a list of filenames that are already in the CR database."""
+        pass
+
+
+    def getDiskFileList(self):
         """Get a list of filenames that need to be added to the CR database."""
         datapath = self.settings.datapath
 
@@ -42,28 +47,40 @@ class CRDatabasePopulator(object):
         else:
             print "  Building list of files to process..."
             self.filename_list = os.listdir(datapath)
+            if options.verbose:
+                print "initial list contains {0} files".format(len(self.filename_list))
 
             # Include: h5
             print "filtering h5..."
             self.filename_list = [f for f in self.filename_list if ("h5" in f)]
+            if options.verbose:
+                print "list contains {0} files after filtering".format(len(self.filename_list))
             # Exclude: test
             print "filtering test..."
             self.filename_list = [f for f in self.filename_list if ("test" not in f)]
+            if options.verbose:
+                print "list contains {0} files after filtering".format(len(self.filename_list))
             # Exclude: bkp
             print "filtering bkp..."
             self.filename_list = [f for f in self.filename_list if ("bkp" not in f)]
+            if options.verbose:
+                print "list contains {0} files after filtering".format(len(self.filename_list))
             # Exclude: R001-R009
             print "filtering R00x..."
             r_exclude = ["R00%1d"%(i) for i in range(1,10)]
             for r in r_exclude:
                 print "filtering %s..." %(r)
                 self.filename_list = [f for f in self.filename_list if (str(r) not in f)]
+            if options.verbose:
+                print "list contains {0} files after filtering".format(len(self.filename_list))
             # Exclude: R01x-R09x
             print "filtering R0xx..."
             r_exclude = ["R0%1d"%(i) for i in range(1,10)]
             for r in r_exclude:
                 print "filtering %s..." %(r)
                 self.filename_list = [f for f in self.filename_list if (str(r) not in f)]
+            if options.verbose:
+                print "list contains {0} files after filtering".format(len(self.filename_list))
 
 
 def parseOptions():
@@ -84,6 +101,7 @@ def parseOptions():
     parser.add_option("--max-threads", default=1, type=int, help="Maximum number of threads to use.")
     parser.add_option("--max-attempts", default=1, type=int, help="Maximum number of attempts to use.")
     parser.add_option("--logpath", type="str", dest="logpath", default="./log", help="directory where logged information should be written.")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="Write verbose information.")
 
     (options, args) = parser.parse_args()
 
@@ -135,6 +153,7 @@ if ("" != options.lorapath): commandline_base += "-l {0} ".format(options.lorapa
 if ("" != options.datafile): commandline_base += "-s {0} ".format(options.datafile)
 if (options.update): commandline_base += "-u "
 if (options.parameters): commandline_base += "-p "
+if (options.verbose): commandline_base += "-v "
 
 
 if __name__ == '__main__':
@@ -148,8 +167,7 @@ if __name__ == '__main__':
     dbp = CRDatabasePopulator(db_filename=db_filename, options=options)
 
     # Create a list of all files
-    dbp.getFileList()
-
+    dbp.getDiskFileList()
 
     # Loop over all files
     count_cpu = multiprocessing.cpu_count()
