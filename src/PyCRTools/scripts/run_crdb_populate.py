@@ -80,21 +80,9 @@ class CRDatabasePopulator(object):
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
-            # Exclude: R001-R009
-            print "  filtering R00x..."
-            r_exclude = ["R00%1d"%(i) for i in range(1,10)]
-            for r in r_exclude:
-                print "  filtering %s..." %(r)
-                self.filename_list = [f for f in self.filename_list if (str(r) not in f)]
-            if options.verbose:
-                print "    list contains {0} files after filtering".format(len(self.filename_list))
-
-            # Exclude: R01x-R09x
-            print "  filtering R0xx..."
-            r_exclude = ["R0%1d"%(i) for i in range(1,10)]
-            for r in r_exclude:
-                print "  filtering %s..." %(r)
-                self.filename_list = [f for f in self.filename_list if (str(r) not in f)]
+            # Only include R000 files
+            print "  Filtering R000..."
+            self.filename_list = [f for f in self.filename_list if ("R000" in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
