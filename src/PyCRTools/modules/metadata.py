@@ -1044,6 +1044,30 @@ def getAntennaPositions(station,antennaset,return_as_hArray=False):
 
     return returnpos
 
+def getClockCorrectionParset(parsetfilename,station,antennaset="LBA"):
+    if antennaset in ['HBA_ZERO','HBA0']:
+        antennaset='HBA0'
+    elif antennaset in ['HBA_ONE','HBA1']:
+        antennaset='HBA1'
+    else:
+        antennaset=antennaset[0:3]
+    keyname='PIC.Core.'+station+antennaset+'.clockCorrectionTime' 
+    parsetfile=open(parsetfilename,'r')
+    parsetfile.seek(0)
+    # Read in the parameters from the parset file
+    allparameters={}
+    for line in parsetfile:
+        if 'clockCorrectionTime' in line:
+            str2 = line.split(None,2)
+            if len(str2)>=3:
+                allparameters[str2[0]] = str2[2].strip('\n')
+            else:
+                allparameters[str2[0]] = "UNDEFINED"
+    if keyname in allparameters.keys():
+        return allparameters[keyname]
+    elif keyname[0:-1] in allparameters.keys():
+        return allparameters[keyname[0:-1]]
+        
 
 def getClockCorrection(station,antennaset="LBA",time=1278480000):
     """Get clock correction for superterp stations in seconds. Currently static values.
