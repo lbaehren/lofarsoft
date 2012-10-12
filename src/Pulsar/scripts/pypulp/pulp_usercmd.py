@@ -77,7 +77,7 @@ class CMDLine:
         	self.cmd.add_option('--plots-only', action="store_true", dest='is_plots_only', 
                            help="creating diagnostic plots only on processing nodes assuming the data required for plots is there already", default=False)
         	self.cmd.add_option('--single-pulse', action="store_true", dest='is_single_pulse', 
-                           help="running single-pulse analysis in addition to folding a profile", default=False)
+                           help="running single-pulse analysis in addition to folding a profile (not implemented yet)", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
                                  TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
@@ -135,7 +135,7 @@ class CMDLine:
         	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
                            help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
         	self.groupCV.add_option('--maxram', dest='maxram', metavar='MBYTES',
-                           help="set the upper limit on RAM usage for dspsr. Default is %default MB", default=512, type='float')
+                           help="set the upper limit on RAM usage for dspsr. Default is %default MB", default=32768, type='float')
         	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
                                  clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
