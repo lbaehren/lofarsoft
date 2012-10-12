@@ -35,7 +35,6 @@ class CRDatabasePopulator(object):
         """Get a list of filenames that are already in the CR database."""
         result = []
 
-        # TODO: CRDatabasePopulator.getDatabaseFileList() - Add implementation
         if self.db:
             sql = "SELECT filename FROM datafiles;"
             records = self.db.select(sql)
@@ -105,6 +104,7 @@ class CRDatabasePopulator(object):
             self.filename_list = [f for f in self.filename_list if (f not in db_filename_list)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
+
 
 
 def parseOptions():
