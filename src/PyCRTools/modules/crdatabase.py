@@ -81,7 +81,6 @@ class CRDatabase(object):
         self.lockfilename = os.path.join(os.path.dirname(filename), "." + os.path.basename(filename) + ".lock")
 
 
-
     def __createDatabase(self):
         """***DO NOT UPDATE TABLE DEFINITIONS IN THIS METHOD***.
 
@@ -1162,6 +1161,25 @@ class BaseParameter(object):
         self._db.insert(sql)
 
 
+    def getUpdateSql(self):
+        """Get a list of SQL statements to update the parameter
+        information in the database.
+        """
+        sql_list = []
+
+        if len(self._parameter) > 0:
+            sql_keys = "{0}".format(self._idlabel)
+            sql_values = "{0}".format(self._id)
+            for key in self._parameter.keys():
+                sql_keys += ", {0}".format(key)
+                sql_values += ", '{0}'".format(self.pickle_parameter(self._parameter[key]))
+            sql = "INSERT OR REPLACE INTO {0} ({1}) VALUES ({2});".format(self._tablename, sql_keys, sql_values)
+
+            sql_list.append(sql)
+
+        return sql_list
+
+
     def pickle_parameter(self, value):
         """Return the parameter as a database friendly pickle
         representation.
@@ -1349,6 +1367,68 @@ class Event(object):
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
+
+
+    def writeFast(self, recursive=True, parameters=True):
+        """Write event information to the database in a faster buffered way.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (datafiles, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        # TEST: Event.writeFast() - Add implementation
+
+        if self._db:
+            sql_list = self.getUpdateSql(recursive, parameters)
+
+            self._db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def getUpdateSql(self, recursive=True, parameters=True):
+        """Get a list of SQL statements to update the event
+        information in the database.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (datafiles, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        sql_list = []
+
+        # TEST: Event.getUpdateSql() - Add implementation
+        if self._db:
+            if self._inDatabase:
+                # Add the event information
+                sql = "UPDATE main.events SET timestamp={1}, status='{2}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()))
+                sql_list.append(sql)
+
+                # Add the event parameters
+                if parameters:
+                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_list += sql_sublist
+
+                # Add underlying structures (datafiles)
+                if recursive:
+                    for datafile in self.datafiles:
+                        sql_sublist = datafile.getUpdateSql(recursive, parameters)
+                        sql_list += sql_sublist
+            else:
+                raise ValueError("No records found for EventID={0}".format(self._id))
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return sql_list
 
 
     def inDatabase(self):
@@ -1701,6 +1781,68 @@ class Datafile(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
+    def writeFast(self, recursive=True, parameters=True):
+        """Write datafile information to the database in a faster buffered way.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (stations, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        # TEST: Datafile.writeFast() - Add implementation
+
+        if self._db:
+            sql_list = self.getUpdateSql(recursive, parameters)
+
+            self._db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def getUpdateSql(self, recursive=True, parameters=True):
+        """Get a list of SQL statements to update the datafile
+        information in the database.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (stations, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        sql_list = []
+
+        # TEST: Datafile.getUpdateSql() - Add implementation
+        if self._db:
+            if self._inDatabase:
+                # Add the datafile information
+                sql = "UPDATE main.datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status.upper()))
+                sql_list.append(sql)
+
+                # Add the datafile parameters
+                if parameters:
+                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_list += sql_sublist
+
+                # Add underlying structures (stations)
+                if recursive:
+                    for station in self.stations:
+                        sql_sublist = station.getUpdateSql(recursive, parameters)
+                        sql_list += sql_sublist
+            else:
+                raise ValueError("No records found for datafileID={0}".format(self._id))
+        else:
+            raise NotImplementedError("Functionality needs to be implemented.")
+
+        return sql_list
+
+
     def inDatabase(self):
         """Check if the datafile information is available in the database.
 
@@ -2021,6 +2163,68 @@ class Station(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
+    def writeFast(self, recursive=True, parameters=True):
+        """Write station information to the database in a faster buffered way.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (polarizations, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        # TEST: Station.writeFast() - Add implementation
+
+        if self._db:
+            sql_list = self.getUpdateSql(recursive, parameters)
+
+            self._db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def getUpdateSql(self, recursive=True, parameters=True):
+        """Get a list of SQL statements to update the station
+        information in the database.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *recursive*   if *True* write all underlying datastructures (polarizations, etc.)
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        sql_list = []
+
+        # TEST: Station.getUpdateSql() - Add implementation
+        if self._db:
+            if self._inDatabase:
+                # Add the station information
+                sql = "UPDATE main.stations SET stationname='{1}', status='{2}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()))
+                sql_list.append(sql)
+
+                # Add the station parameters
+                if parameters:
+                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_list += sql_sublist
+
+                # Add underlying structures (polarizations)
+                if recursive:
+                    for polarization in self.polarizations:
+                        sql_sublist = polarization.getUpdateSql(parameters)
+                        sql_list += sql_sublist
+            else:
+                raise ValueError("No records found for stationID={0}".format(self._id))
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return sql_list
+
+
     def inDatabase(self):
         """Check if the station information is available in the database.
 
@@ -2228,7 +2432,6 @@ class Polarization(object):
     * *status*: the status of the polarization.
     * *resultsfile*: the name of the resultsfile, where all the results from the pipeline are stored.
     * *parameter*: a dictionary of optional parameters. This contains also resulting information from the pipeline.
-
     """
 
     def __init__(self, db=None, id=0):
@@ -2338,6 +2541,60 @@ class Polarization(object):
 
         else:
             raise ValueError("Unable to read from database: no database was set.")
+
+
+    def writeFast(self, parameters=True):
+        """Write polarization information to the database in a faster buffered way.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        # TEST: Polarization.writeFast() - Add implementation
+
+        if self._db:
+            sql_list = self.getUpdateSql(parameters)
+
+            self._db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+
+    def getUpdateSql(self, parameters=True):
+        """Get a list of SQL statements to update the polarization
+        information in the database.
+
+        **Properties**
+
+        ============  =================================================================
+        Parameter     Description
+        ============  =================================================================
+        *parameters*  if *True* write all parameters
+        ============  =================================================================
+        """
+        sql_list = []
+
+        # TEST: Polarization.getUpdateSql() - Add implementation
+        if self._db:
+            if self._inDatabase:
+                # Add the station information
+                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', resultsfile='{4}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.resultsfile))
+                sql_list.append(sql)
+
+                # Add the polarization parameters
+                if parameters:
+                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_list += sql_sublist
+            else:
+                raise ValueError("No records found for polarizationID={0}".format(self._id))
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        return sql_list
 
 
     def inDatabase(self):
