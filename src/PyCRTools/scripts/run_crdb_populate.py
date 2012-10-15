@@ -63,25 +63,31 @@ class CRDatabasePopulator(object):
                 print "  initial list contains {0} files".format(len(self.filename_list))
 
             # Include: h5
-            print "  filtering h5..."
+            print "  filtering in h5..."
             self.filename_list = [f for f in self.filename_list if ("h5" in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
             # Exclude: test
-            print "  filtering test..."
+            print "  filtering out test..."
             self.filename_list = [f for f in self.filename_list if ("test" not in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
             # Exclude: bkp
-            print "  filtering bkp..."
+            print "  filtering out bkp..."
             self.filename_list = [f for f in self.filename_list if ("bkp" not in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
+            # Exclude: test
+            print "  filtering out manual dumps..."
+            self.filename_list = [f for f in self.filename_list if ("manual" not in f)]
+            if options.verbose:
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
+
             # Only include R000 files
-            print "  Filtering R000..."
+            print "  Filtering in R000..."
             self.filename_list = [f for f in self.filename_list if ("R000" in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
@@ -172,7 +178,6 @@ if __name__ == '__main__':
     print "Populating the CR database..."
 
     from pycrtools import crdatabase as crdb
-    import multiprocessing
     import subprocess
 
     db_filename = args[0]
@@ -181,13 +186,6 @@ if __name__ == '__main__':
     # Create a list of all files
     dbp.getDiskFileList()
 
-    # Loop over all files
-    count_cpu = multiprocessing.cpu_count()
-
-    print "Using", min(options.max_threads, count_cpu), "out of", count_cpu, "available CPU's."
-
-    # Create a thread pool
-    pool = multiprocessing.Pool(processes=min(options.max_threads, count_cpu))
-
-    # Populate the CR Database for each file
-    pool.map(call_populate_script, dbp.filename_list)
+    # Populate database in a 'single thread'
+    for f in dbp.filename_list:
+        call_populate_script(f)
