@@ -354,7 +354,10 @@ int main (int argc,
 {
 	bool failsafe=0;
 	cout<<"This file outputs histograms of pulsar data to /Users/STV/Documents/GiantPulse/."<<endl;
-	int integrationlength = 1; //average length
+    // Length to integrate over for the trigger
+	std::vector<int> integrationlength;
+    integrationlength.resize(1);
+    integrationlength[0]=1;
 	float triggerlevel = 141/3;
  	unsigned int nofFailedTests=0;
 	float average;
@@ -363,7 +366,8 @@ int main (int argc,
 	int ninputdirs;
 	bool multipledirs=false;
 	vector<int> inputstartSBs;
-	int firstSB, lastSB, nrblocks=5, startpos=0;
+	int firstSB, lastSB, nrblocks=5; 
+    long int startpos=0;
 	int CoinNr=10;
 	int CoinTime=80;
 	float DM=56.8;
@@ -463,13 +467,24 @@ int main (int argc,
 			lastSB = atoi(argv[argcounter]);
 		    cout << "Last subband: " << lastSB << endl;
 		} else if(topic == "-il"){
-			argcounter++;
-			integrationlength = atoi(argv[argcounter]);
-			cout << "integration length: " << integrationlength << endl;
+            argcounter++;
+			integrationlength[0] = atoi(argv[argcounter]);
+			cout << "integration length: " << integrationlength[0] << endl;
 		} else if(topic == "-tl"){
 			argcounter++;
 			triggerlevel = atof(argv[argcounter]);
 			cout << "triggerlevel " << triggerlevel << endl;
+		} else if(topic == "-ilrange"){
+			argcounter++;
+            int intlenlen=atoi(argv[argcounter]);
+            integrationlength.resize(intlenlen); 
+            cout << "integration lengths: ";
+            for(int i=0;i<intlenlen;i++){
+                argcounter++;
+                integrationlength[i] = atoi(argv[argcounter]);    
+                cout << integrationlength[i] << " ";
+            }
+            cout << endl;            
 		} else if(topic == "-log"){
 			argcounter++;
 			logfilename = string(argv[argcounter]);
@@ -643,7 +658,7 @@ int main (int argc,
 			cout << "StreamNr " << StreamCounter << " DMcounter " << DMcounter << " DM " << DMval << endl;
 			float SBFreq = SubbandToFreq(SB+startsubbandnumber,HBAmode);
             if(nFreqs<1) {
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns,  startpos, integrationlength, DoPadding, DoPadding, verbose);
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChannels, samples,DMval,triggerlevel,ReferenceFreq, SBFreq, FreqResolution, TimeResolution, starttime_sec, starttime_ns,  startpos, integrationlength[0], DoPadding, DoPadding, verbose);
             } else {
                 StartChannel=stream*NrChannels;
                 // start channel of this stream
