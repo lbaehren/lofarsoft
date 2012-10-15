@@ -80,9 +80,15 @@ class CRDatabasePopulator(object):
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
-            # Exclude: test
+            # Exclude: manual dumps
             print "  filtering out manual dumps..."
             self.filename_list = [f for f in self.filename_list if ("manual" not in f)]
+            if options.verbose:
+                print "    list contains {0} files after filtering".format(len(self.filename_list))
+
+            # Exclude: L00000 dumps
+            print "  filtering out L00000 dumps..."
+            self.filename_list = [f for f in self.filename_list if ("L00000_" not in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
