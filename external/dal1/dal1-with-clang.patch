@@ -1,0 +1,21 @@
+diff --git src/dal/data_hl/TBB.cc src/dal/data_hl/TBB.cc
+index 26f5efa..a28981b 100644
+--- src/dal/data_hl/TBB.cc
++++ src/dal/data_hl/TBB.cc
+@@ -1080,7 +1080,7 @@ namespace DAL {
+ 
+   void TBB::processSpectralFileDataBlock()
+   {
+-    std::complex<Int16> csdata[ headerp_p->n_samples_per_frame];
++    std::complex<Int16> *csdata = new std::complex<Int16>[headerp_p->n_samples_per_frame];
+ 
+     for ( short zz=0; zz < headerp_p->n_samples_per_frame; zz++ )
+       {
+@@ -1107,6 +1107,7 @@ namespace DAL {
+     rawfile_p->read( reinterpret_cast<char *>(&payload_crc),
+                      sizeof(payload_crc) );
+ 
++    delete csdata;
+   }
+ 
+   //_____________________________________________________________________________
