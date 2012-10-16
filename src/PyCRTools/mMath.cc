@@ -5948,6 +5948,12 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   // Get vector length
   const int n = std::distance(vec, vec_end);
   const int nm = n - (signal_end - signal_start);
+  
+  // Initialize values
+  *snr = 0;
+  *rms = 0;
+  *max = 0;
+  *maxpos = 0;
 
   // Get iterator
   NIter it = vec;
@@ -5967,7 +5973,6 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 
   // Pulse window to find maximum in (should be excluded from RMS)
   *max = *it;
-  *maxpos = 0;
   for (int i=signal_start; i<signal_end; i++)
   {
     if (*it > *max)
