@@ -113,6 +113,7 @@ class rfilines(tasks.Task):
         blocksize = {default: 8192, doc: "Blocksize of timeseries data, for FFTs"},
         nofblocks = {default:100, doc: "Max. number of blocks to process"},
 #        smooth_width = {default: 16, doc: "Smoothing window for FFT, for determining base level (cheap way of doing what AverageSpectrum class does)"},
+        referenceTransmitterGPS = {default: None, doc: "GPS [long, lat] in degrees (N, E is positive) for a known transmitter. Typically used when tuning to a known frequency. The Smilde tower is at (6.403565, 52.902671)."},
         direction_resolution = {default: [1, 5], doc: "Resolution in degrees [az, el] for direction search"},
         directionFromAllStations = {default: False, doc: "Set True if you want to use all stations together to calculate the incoming direction. Otherwise, it is done per station and the results are averaged. "},
         freq_range = {default: [30, 70], doc: "Frequency range in which to search for calibration sources"}, 
@@ -514,10 +515,16 @@ class rfilines(tasks.Task):
             print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
             print 'Phase error = %f' % minPhaseError
             
-            modelphases = sf.phasesFromDirection(positions, (fitaz, fitel), freq)
-            modelphases -= modelphases[0]
-            modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
-
+            if not self.referenceTransmitterGPS:
+                modelphases = sf.phasesFromDirection(positions, (fitaz, fitel), freq)
+                modelphases -= modelphases[0]
+                modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
+            else:
+                modelphases = sf.timeDelaysFromGPSPoint(self.referenceTransmitterGPS, positions, np.array(f["CHANNEL_ID"]), f["ANTENNA_SET"])
+                modelphases -= modelphases[0]
+                modelphases *= - twopi * freq # !! Minus sign to be compatible with FFT's phase sign
+                modelphases = sf.phaseWrap(modelphases)
+            
             if self.testplots:
                 plt.figure()
                 plt.plot(modelphases, label='Modeled phases (plane wave)')
@@ -595,10 +602,18 @@ class rfilines(tasks.Task):
             print 'Averaged incoming direction: az = %f, el = %f' % (averageIncomingDirection[0] / deg2rad, averageIncomingDirection[1] / deg2rad)
             # get modeled phases for a plane wave of given overall direction, for all stations together
             allpositions = allpositions.ravel()
-            modelphases = sf.phasesFromDirection(allpositions, averageIncomingDirection, freq)
-            modelphases -= modelphases[0]
-            modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
             
+            if not self.referenceTransmitterGPS:
+                modelphases = sf.phasesFromDirection(allpositions, averageIncomingDirection, freq)
+                modelphases -= modelphases[0]
+                modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
+            else:
+                #import pdb; pdb.set_trace()
+                modelphases = sf.timeDelaysFromGPSPoint(self.referenceTransmitterGPS, allpositions, np.array(f["SELECTED_DIPOLES"]), f["ANTENNA_SET"][0])
+                modelphases -= modelphases[0]
+                modelphases *= - twopi * freq # !! Minus sign to be compatible with FFT's phase sign
+                modelphases = sf.phaseWrap(modelphases)
+                
             averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel] # now for all antennas
             phaseDiff = averagePhasePerAntenna - modelphases
             
