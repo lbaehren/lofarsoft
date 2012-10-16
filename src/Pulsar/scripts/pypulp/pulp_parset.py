@@ -279,8 +279,10 @@ class TABeam:
 		if np.size(status)>0:
 			self.assigned_files=[el for el in status[0][:-1].split(",") if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), el)]
 			# if we are processing not all the frequency splits, then we include only files from those splits that we need	
+			print self.assigned_files
 			if cmdline.opts.nsplits != root.nsplits:
 				for sp in np.arange(cmdline.opts.first_freq_split, cmdline.opts.first_freq_split + cmdline.opts.nsplits):
+					print self.assigned_files
 					self.assigned_files=[el for el in self.assigned_files if re.search("_P%03d" % (sp), el)]
 		# Now checking that the number of available files is the same as assigned number
 		if self.numfiles != np.size(self.assigned_files):
@@ -292,7 +294,7 @@ class TABeam:
 				msg="This is weird... There are should be at least one file missing..."	
 				if log != None: log.warning(msg)
 				else: print msg
-			msg="Error: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (np.size(self.assigned_files), self.numfiles, sapid, self.tabid)
+			msg="Error: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (self.numfiles, np.size(self.assigned_files), sapid, self.tabid)
 			if len(missing_files) > 0:
 				msg += "\n[Missing files]: %s" % (",".join(missing_files))
 			if len(missing_nodes) > 0:
