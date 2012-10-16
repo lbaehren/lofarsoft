@@ -76,7 +76,7 @@ class CRDatabasePopulator(object):
             return
 
         # Retrieve new IDs for database entries
-        for tableName in ['event', 'datafile', 'station', 'polarization']:
+        for tableName in ['datafile', 'station', 'polarization']:
             sql = "SELECT max({0}ID) FROM main.{0}s;".format(tableName)
             records = self.db.select(sql)
             if records and records[0] and records[0][0]:
@@ -107,12 +107,12 @@ class CRDatabasePopulator(object):
 
         # Find corresponding eventID and check if this is lower than self.eventID
         timestamp = dx.timestamp
+        print "Timestamp = ",timestamp
         eventIDs = self.dbManager.getEventIDs(timestamp=timestamp)
         if eventIDs:
             self.ID['event'] = eventIDs[0]
         else:
-            self.ID['event'] = self.newID['event']
-            self.newID['event'] += 1
+            self.ID['event'] = self.createEventID(timestamp=timestamp)
 
             # Write event info to list of SQL statements
             sql = "INSERT INTO main.events (eventID, timestamp, status) VALUES ({0}, {1}, '{2}');".format(self.ID['event'], timestamp, 'NEW')
@@ -187,6 +187,29 @@ class CRDatabasePopulator(object):
         if options.verbose:
             self.summary()
         self.writeDatabase()
+
+
+    def createEventID(self, timestamp=None):
+        """Create an event ID from the timestamp.
+
+        **Properties**
+
+        ===========  ===============================================
+        Parameter    Description
+        ===========  ===============================================
+        *timestamp*  Timestamp of the event.
+        ===========  ===============================================
+        """
+        timestamp_0 = 1262304000 # Unix timestamp on Jan 1, 2010 (date -u --date "Jan 1, 2010 00:00:00" +"%s")
+        result = timestamp_0
+
+        if timestamp:
+            result = int(timestamp) - timestamp_0
+            print "Timestamp={0} -> EventID={1}".format(timestamp, result)
+        else:
+            raise ValueError("No timestamp provided.")
+
+        return result
 
 
     def writeDatabase(self):
@@ -421,9 +444,6 @@ class DataExtractor(object):
         """Timestamp of the event."""
         result = 0
 
-        # if options.verbose:
-        #     print "  Retrieving timestamp of the event..."
-
         if self.isOpen():
             seconds = self._datafile["TIME"][0]
             subsec  = self._datafile["SAMPLE_NUMBER"][0] * self._datafile["SAMPLE_INTERVAL"][0]
@@ -439,9 +459,6 @@ class DataExtractor(object):
         """List of station names."""
         result = []
 
-        # if options.verbose:
-        #     print "  Retrieving station names..."
-
         if self.isOpen():
             result = list(set(self._datafile["STATION_NAME"]))
 
@@ -452,9 +469,6 @@ class DataExtractor(object):
     def antennaset(self):
         """Name of the used antennaset in the datafile."""
         result = ""
-
-        # if options.verbose:
-        #     print "  Retrieving antennaset information..."
 
         if self.isOpen():
             result = self._datafile["ANTENNA_SET"]
@@ -476,9 +490,6 @@ class DataExtractor(object):
         =========  ===================================================
         """
         result = ""
-
-        # if options.verbose:
-        #     print "  Retrieving polarization information..."
 
         if self.isOpen():
             # The filename of the resultsfile is created/derived in the same way as in cr_event.py
