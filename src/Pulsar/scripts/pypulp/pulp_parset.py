@@ -281,9 +281,9 @@ class TABeam:
 			missing_nodes=list(set(root.assigned_nodeslist)-set(self.location))
 			msg="Error: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (np.size(self.assigned_files), self.numfiles, sapid, self.tabid)
 			if len(missing_files) > 0:
-				msg += "\nFiles %s are missing" % (",".join(missing_files))
+				msg += "\n[Missing files]: %s" % (",".join(missing_files))
 			if len(missing_nodes) > 0:
-				msg += " on nodes %s" % (",".join(missing_nodes))
+				msg += "[Missing nodes]: %s" % (",".join(missing_nodes))
 			if log != None: log.error(msg)
 			else: print msg
 			quit(1)
