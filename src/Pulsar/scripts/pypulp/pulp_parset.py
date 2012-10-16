@@ -283,7 +283,7 @@ class TABeam:
 			if len(missing_files) > 0:
 				msg += "\n[Missing files]: %s" % (",".join(missing_files))
 			if len(missing_nodes) > 0:
-				msg += "[Missing nodes]: %s" % (",".join(missing_nodes))
+				msg += "\n[Missing nodes]: %s" % (",".join(missing_nodes))
 			if log != None: log.error(msg)
 			else: print msg
 			quit(1)
