@@ -451,7 +451,7 @@ class CRDatabase(object):
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("station", "crp_pulse_direction")
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_itrf_antenna_positions")
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_pulse_delays")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_pulse_strength")
+            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_pulse_peak_amplitude")
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_rms")
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_stokes")
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_polarization_angle")

@@ -45,7 +45,7 @@ for f in event.datafiles:
     stations.extend(f.stations)
 
 combined_antenna_positions = []
-combined_pulse_strength = []
+combined_pulse_peak_amplitude = []
 combined_rms = []
 
 for station in stations:
@@ -213,7 +213,7 @@ for station in stations:
         # Add parameters
         p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
         p["crp_pulse_delays"] = time_delays
-        p["crp_pulse_strength"] = cr.hArray(pulse_envelope_xyz.maxima).toNumpy().reshape((nantennas, 3))
+        p["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_xyz.peak_amplitude).toNumpy().reshape((nantennas, 3))
         p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
         p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
         p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
@@ -238,7 +238,7 @@ plotlist = []
 # Get combined parameters from (cached) database
 all_station_antenna_positions = []
 all_station_pulse_delays = []
-all_station_pulse_strength = []
+all_station_pulse_peak_amplitude = []
 all_station_rms = []
 all_station_direction = []
 
@@ -248,14 +248,14 @@ for station in stations:
         p = station.polarization["xyz"]
         all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
         all_station_pulse_delays.append(p["crp_pulse_delays"])
-        all_station_pulse_strength.append(p["crp_pulse_strength"])
+        all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
         all_station_rms.append(p["crp_rms"])
     except:
         print "Do not have all pulse parameters for station", station.stationname
 
 all_station_antenna_positions = np.vstack(all_station_antenna_positions)
 all_station_pulse_delays = np.vstack(all_station_pulse_delays)
-all_station_pulse_strength = np.vstack(all_station_pulse_strength)
+all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
 all_station_rms = np.vstack(all_station_rms)
 all_station_direction = np.asarray(all_station_direction)
 
@@ -276,7 +276,7 @@ core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
 core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
 direction_uncertainties = [3.,3.,0]
 
-ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, timelags = all_station_pulse_delays, core_uncertainties = core_uncertainties, signals = all_station_pulse_strength, direction_uncertainties = direction_uncertainties, ldf_enable = True, footprint_enable = True, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+str(options.id)+"-")
+ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, timelags = all_station_pulse_delays, core_uncertainties = core_uncertainties, signals = all_station_pulse_peak_amplitude, direction_uncertainties = direction_uncertainties, ldf_enable = True, footprint_enable = True, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+str(options.id)+"-")
 
 # Add LDF and footprint plots to list of event level plots
 plotlist.extend(ldf.plotlist)
