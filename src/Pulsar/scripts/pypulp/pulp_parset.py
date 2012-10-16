@@ -445,7 +445,7 @@ class Observation:
 		if np.size(status)>0:
 			self.assigned_nodeslist=status[0][:-1].split(",")
 			self.assigned_nodeslist=[n.split(":")[0] for n in self.assigned_nodeslist]
-			self.assigned_nodeslist=np.unique(self.asigned_nodeslist)
+			self.assigned_nodeslist=np.unique(self.assigned_nodeslist)
 		# checking if all nodes in assigned_nodeslist are in alive
 		if not cmdline.opts.is_locate_rawdata and len(self.assigned_nodeslist) > 0:
 			nodes_unavail=list(set(self.assigned_nodeslist)-set(si.alive_nodes).intersection(set(self.assigned_nodeslist)))
