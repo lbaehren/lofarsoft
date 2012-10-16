@@ -176,6 +176,8 @@ class TABeam:
 		self.rawfiles={}           # dictionary that keeps info about all raw files
                                            # key - locus node, value - list of rawfiles on this node (with full path)
                                            # self.location - is just a list of keys
+		self.assigned_files=[]     # list of assigned files from the parset file (for this particular beam)
+					   # we use this to check its number against the actual number of present files
 		self.nrSubbands = nrSubbands # duplicating number of subbands from parent SAP
 		self.numfiles=0            # number of all files for this beam (sum of rawfiles for each node)
 
@@ -260,6 +262,18 @@ class TABeam:
 			# getting the total number of files available
 			for loc in self.location:
 				self.numfiles += len(self.rawfiles[loc])
+
+		# Now getting the list of assigned files for this beam from the Parset file
+        	cmd="grep %s_SAP%03d_B%03d %s | awk '{print $3}' - | tr -d '[]'" % (root.id, sapid, self.tabid, parset,)
+		status=os.popen(cmd).readlines()
+		if np.size(status)>0:
+			self.assigned_files=[el for el in status[0][:-1].split(",") if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), el)]
+		# Now checking that the number of available files is the same as assigned number
+		if self.numfiles != np.size(self.assigned_files):
+			msg="Error: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (np.size(self.assigned_files), self.numfiles, sapid, self.tabid)
+			if log != None: log.error(msg)
+			else: print msg
+			quit(1)
 
 
 # Class Observation with info from the parset file
