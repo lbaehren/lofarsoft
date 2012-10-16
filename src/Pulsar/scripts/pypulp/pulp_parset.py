@@ -227,6 +227,7 @@ class TABeam:
 		# Determining where the raw data are....
                 # forming string with all locus nodes needed to check in one cexec command
 		# here we are using only nodes that are alive
+		missing_nodes=root.assigned_nodeslist[:]
 		if cmdline.opts.is_locate_rawdata: nodeslist=si.alive_nodes
 		else: nodeslist=root.nodeslist
 		if len(nodeslist) > 0:
@@ -248,10 +249,19 @@ class TABeam:
 						if cexec_output[l] in self.rawfiles[cloc]:
 							rawfile_exist=True
 							break
+					# if we are processing not all the frequency splits, then we include only files from those splits that we need
+					if cmdline.opts.nsplits != root.nsplits:
+						fpart=int(cexec_output[l].split("/")[-1].split("_P")[-1].split("_")[0])
+						if fpart < cmdline.opts.first_freq_split or fpart >= cmdline.opts.first_freq_split + cmdline.opts.nsplits:
+							rawfile_exist=True
 					# adding the file if it's not already added
 					if not rawfile_exist:
 						if loc in self.rawfiles: self.rawfiles[loc].append(cexec_output[l])
 						else: self.rawfiles[loc]=[cexec_output[l]]	
+					# excluding this locus node from the list of missing nodes
+					if loc in missing_nodes:
+						missing_nodes=list(set(missing_nodes)-set([loc]))
+
 			# list of all nodes
 			self.location=self.rawfiles.keys()
 			if len(self.location) == 0:
@@ -268,6 +278,10 @@ class TABeam:
 		status=os.popen(cmd).readlines()
 		if np.size(status)>0:
 			self.assigned_files=[el for el in status[0][:-1].split(",") if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), el)]
+			# if we are processing not all the frequency splits, then we include only files from those splits that we need	
+			if cmdline.opts.nsplits != root.nsplits:
+				for sp in np.arange(cmdline.opts.first_freq_split, cmdline.opts.first_freq_split + cmdline.opts.nsplits):
+					self.assigned_files=[el for el in self.assigned_files if re.search("_P%03d" % (sp), el)]
 		# Now checking that the number of available files is the same as assigned number
 		if self.numfiles != np.size(self.assigned_files):
 			missing_files=self.assigned_files[:]
@@ -278,7 +292,6 @@ class TABeam:
 				msg="This is weird... There are should be at least one file missing..."	
 				if log != None: log.warning(msg)
 				else: print msg
-			missing_nodes=list(set(root.assigned_nodeslist)-set(self.location))
 			msg="Error: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (np.size(self.assigned_files), self.numfiles, sapid, self.tabid)
 			if len(missing_files) > 0:
 				msg += "\n[Missing files]: %s" % (",".join(missing_files))
@@ -324,6 +337,7 @@ class Observation:
 		self.nrSubsPerFileCS = 0    
 		self.nrChanPerSubIS = 0    # number of channels per subband (for IS)
 		self.nrChanPerSubCS = 0    # number of channels per subband (for CS)
+		self.nsplits = 0           # number of frequency splits (for CS, i.e. CV data)
 		self.sampleClock = 0       # clock in MHz (200 or 160)
 		self.downsample_factorIS = 0  # time integration (downsampling) factor, can be different for IS and CS 
 		self.downsample_factorCS = 0  
@@ -574,6 +588,33 @@ class Observation:
 			try:
 				self.nrChanPerSubCS=int(status[0][:-1].split(" = ")[-1])
 			except: pass
+
+		# getting the number of subbands per File for IS
+		cmd="grep OLAP.CNProc_IncoherentStokes.subbandsPerFile %s" % (self.parset,)
+		status=os.popen(cmd).readlines()
+		if np.size(status)>0:
+			# getting number of subbands per file for IS
+			try:
+				self.nrSubsPerFileIS=int(status[0][:-1].split(" = ")[-1])
+			except: pass
+
+		# getting the number of subbands per File for CS
+		cmd="grep OLAP.CNProc_CoherentStokes.subbandsPerFile %s" % (self.parset,)
+		status=os.popen(cmd).readlines()
+		if np.size(status)>0:
+			# getting number of subbands per file for CS
+			try:
+				self.nrSubsPerFileCS=int(status[0][:-1].split(" = ")[-1])
+			except: pass
+
+		# calculate the number of frequency splits
+		self.nsplits = int(self.nrSubbands / self.nrSubsPerFileCS)
+		if self.nrSubbands % self.nrSubsPerFileCS != 0: self.nsplits += 1
+		# silent checking of cmdline options
+		if cmdline.opts.first_freq_split >= self.nsplits: cmdline.opts.first_freq_split = 0
+		if cmdline.opts.nsplits == -1: cmdline.opts.nsplits = self.nsplits
+		if cmdline.opts.first_freq_split + cmdline.opts.nsplits > self.nsplits: 
+			cmdline.opts.nsplits -= (cmdline.opts.first_freq_split + cmdline.opts.nsplits - self.nsplits)
 
 		# Getting the sample clock
 		cmd="grep Observation.sampleClock %s" % (self.parset,)

@@ -1358,7 +1358,8 @@ class CVUnit(PipeUnit):
 
 			if not cmdline.opts.is_plots_only:
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
-				s0_files=[f for f in input_files if re.search("_S0_", f) is not None]
+				# we also sort this list by split number
+				s0_files=sorted([f for f in input_files if re.search("_S0_", f) is not None], key=lambda input_file: int(input_file.split("_P")[-1].split("_")[0]))
 				if not cmdline.opts.is_nofold and not cmdline.opts.is_nodecode:
 					verbose="-q"
 					if cmdline.opts.is_debug: verbose="-v"
@@ -1533,7 +1534,8 @@ class CVUnit(PipeUnit):
 			if not cmdline.opts.is_plots_only:
 
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
-				s0_files=[f for f in input_files if re.search("_S0_", f) is not None]
+				# we also sort this list by split number
+				s0_files=sorted([f for f in input_files if re.search("_S0_", f) is not None], key=lambda input_file: int(input_file.split("_P")[-1].split("_")[0]))
 				if not cmdline.opts.is_nodecode:
 					# checking if extra options for complex voltages processing were set in the pipeline
 					nblocks=""
