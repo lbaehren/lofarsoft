@@ -270,7 +270,20 @@ class TABeam:
 			self.assigned_files=[el for el in status[0][:-1].split(",") if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), el)]
 		# Now checking that the number of available files is the same as assigned number
 		if self.numfiles != np.size(self.assigned_files):
+			missing_files=self.assigned_files[:]
+			# checking first what files are missing
+			for loc in self.location:
+				missing_files=list(set(missing_files)-set([s.split("/")[-1] for s in self.rawfiles[loc]]))
+			if len(missing_files) == 0:
+				msg="This is weird... There are should be at least one file missing..."	
+				if log != None: log.warning(msg)
+				else: print msg
+			missing_nodes=list(set(root.assigned_nodeslist)-set(self.location))
 			msg="Error: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (np.size(self.assigned_files), self.numfiles, sapid, self.tabid)
+			if len(missing_files) > 0:
+				msg += "\nFiles %s are missing" % (",".join(missing_files))
+			if len(missing_nodes) > 0:
+				msg += " on nodes %s" % (",".join(missing_nodes))
 			if log != None: log.error(msg)
 			else: print msg
 			quit(1)
@@ -297,6 +310,7 @@ class Observation:
                 self.antenna=self.antenna_config=self.band=""
 		self.nstations=self.ncorestations=self.nremotestations=0
 		self.stations=[]
+		self.assigned_nodeslist=[]
 		self.nodeslist=[]
 		self.IM=self.IS=self.CS=self.CV=self.FE=self.OCD=False    # False until it's checked to be otherwise
 		self.stokesIS = ""         # Stokes parameters for IS and CS
@@ -429,14 +443,13 @@ class Observation:
         	cmd="grep Output_Beamformed.locations %s | awk '{print $3}' - | tr -d '[]'" % (self.parset,)
 		status=os.popen(cmd).readlines()
 		if np.size(status)>0:
-			self.nodeslist=status[0][:-1].split(",")
-			self.nodeslist=[n.split(":")[0] for n in self.nodeslist]
-			self.nodeslist=np.unique(self.nodeslist)
-		# checking if all nodes in nodeslist are in alive
-		# also updating the nodeslist only keeping the ones that are alive
-		if not cmdline.opts.is_locate_rawdata and len(self.nodeslist) > 0:
-			nodes_unavail=list(set(self.nodeslist)-set(si.alive_nodes).intersection(set(self.nodeslist)))
-			self.nodeslist=list(set(si.alive_nodes).intersection(set(self.nodeslist)))
+			self.assigned_nodeslist=status[0][:-1].split(",")
+			self.assigned_nodeslist=[n.split(":")[0] for n in self.assigned_nodeslist]
+			self.assigned_nodeslist=np.unique(self.asigned_nodeslist)
+		# checking if all nodes in assigned_nodeslist are in alive
+		if not cmdline.opts.is_locate_rawdata and len(self.assigned_nodeslist) > 0:
+			nodes_unavail=list(set(self.assigned_nodeslist)-set(si.alive_nodes).intersection(set(self.assigned_nodeslist)))
+			self.nodeslist=list(set(si.alive_nodes).intersection(set(self.assigned_nodeslist)))
 			if len(nodes_unavail) > 0:
 				msg="Warning! Some raw data are on nodes that are not available [%d]: %s" % (len(nodes_unavail), ", ".join(nodes_unavail))
 				if log != None: log.warning(msg)
