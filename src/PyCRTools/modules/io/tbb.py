@@ -779,6 +779,8 @@ class MultiTBBData(IOInterface):
 #            y = self.empty("TIMESERIES_DATA")
 #            self.getTimeseriesData(y, block = self.__block)
 #            return y # memory leak!
+        elif key == "ANTENNA_SET":
+            return [f["ANTENNA_SET"] for f in self.__files]
         elif key == "BLOCKSIZE":
             return self.__blocksize
         elif key == "ANTENNA_POSITIONS": # return antenna positions from ITRF, otherwise positions are relative to each station!
@@ -889,7 +891,8 @@ class MultiTBBData(IOInterface):
 
 #            f["BLOCKSIZE"] = self.__blocksize # Removed: implicitly resets alignment offsets as well...
 
-            print "reading data offset by", sample_offset[i], "samples"
+            if sample_offset[i] != 0:
+                print "reading data offset by", sample_offset[i], "samples"
             f.getTimeseriesData(data[start:end], block, sample_offset[i])
 
             start = end
