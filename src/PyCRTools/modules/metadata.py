@@ -264,7 +264,13 @@ def getStationPhaseCalibration(station, antennaset,return_as_hArray=False, calta
             complexdata.real=1
         return complexdata
 
-
+    # Test for header record above raw data - present in newer caltables (starting 2012)
+    line = file.readline()
+    if 'HeaderStart' in line:
+        while not 'HeaderStop' in line:
+            line = file.readline()
+    else: # no header present, seek to starting position
+        file.seek(0)
 
     # reading in 96 * 512 * 2 doubles
     fmt='98304d'
@@ -1082,12 +1088,16 @@ def getClockCorrection(station,antennaset="LBA",time=1278480000):
     clockcorrection={}
     # Entering values as of April 26, 2012; for HBA and for LBA. HBA0 and HBA1 are available separately in LOFAR parsets.
     if "LBA" in antennaset:
+#        clockcorrection["CS003"] = 6.936566e-06
+#        clockcorrection["CS004"] = 7.905512e-06
+#        clockcorrection["CS005"] = 8.556805e-06
+#        clockcorrection["CS006"] = 7.905282e-06
         clockcorrection["CS002"] = 8.291395e-06
         clockcorrection["CS003"] = 6.890990e-06
         clockcorrection["CS004"] = 7.855759e-06
         clockcorrection["CS005"] = 8.507690e-06
         clockcorrection["CS006"] = 7.850904e-06
-        clockcorrection["CS007"] = 7.885136e-06
+        clockcorrection["CS007"] = 7.885136e-06        
     elif "HBA" in antennaset:
         clockcorrection["CS002"] = 8.291395e-06 # is the same as LBA for CS002 and CS007
         clockcorrection["CS003"] = 6.889990e-06
