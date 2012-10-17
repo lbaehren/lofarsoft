@@ -24,6 +24,9 @@ def GPSplusOffset(startingGPS, offsetXYZ):
 
     Linearized approximation; accurate to ~ 1 mm for x, y up to 100 m
 
+    Warning: approximating the Earth as a sphere, error up to 0.3 % is possible!
+    However, xyz distances are consistent with greatCircleDistance when using the same Earth radius in both functions.
+    
     Required arguments:
 
     =========== =================================================
@@ -33,8 +36,8 @@ def GPSplusOffset(startingGPS, offsetXYZ):
     *offsetXYZ*   array/list ``[x, y, z]``.
     =========== =================================================
     """
-    R_earth = 6367449 # meters; see Wikipedia on Geographic Coordinate System
-    metersPerDegree = 111132.954 # in latitude; ignoring nonspherical components
+    R_earth = 6367449 * 1.000# meters; see Wikipedia on Geographic Coordinate System
+    metersPerDegree = 111132.954 * 1.000 # in latitude; ignoring nonspherical components
     
     long = startingGPS[0]
     lat = startingGPS[1]
@@ -63,7 +66,7 @@ def greatCircleDistance(gps1, gps2):
     
     a = sin(delta_lat / 2)**2 + cos(lat1) * cos(lat2) * sin(delta_long / 2)**2
     b = 2 * arctan2(sqrt(a), sqrt(1 - a))
-    R_earth = 6367449
+    R_earth = 6367449 * 1.000
     distance = R_earth * b
     
     return distance
@@ -238,7 +241,7 @@ def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
     =========== =================================================
     Parameter   Description
     =========== =================================================
-    *gps*       array / list / tuple ``(lat, long)``
+    *gps*       array / list / tuple ``(long, lat)``
     *positions* ``(np-array x1, y1, z1, x2, y2, z2, ...)``
     *antids*    Array or list of antenna ids 
     *antennaset* e.g. 'LBA_OUTER'
@@ -247,15 +250,20 @@ def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
     
     from pycrtools import metadata as md
     
-    stationIDs = np.array(list(antids))/1000000
-    stationGPS = np.array([md.getStationPositions(stationID, antennaset) for stationID in stationIDs])
-    
+    if isinstance(antids[0], basestring):
+        stationIDs = np.array([int(x) for x in antids]) / 1000000
+    else:
+        stationIDs = np.array(list(antids))/1000000
+
+    #stationGPS = np.array([md.getStationPositions(stationID, antennaset) for stationID in stationIDs])
+    stationGPS = md.getStationPositions('CS002', antennaset)
 #    gpspositions = np.zeros(len(antids))
     timedelays = np.zeros(len(antids))
-    import pdb; pdb.set_trace()
+#    import pdb; pdb.set_trace()
     for i in range(len(antids)):
+#        import pdb; pdb.set_trace()
         thisposition = positions[3*i:3*(i+1)]
-        thisGPS = GPSplusOffset(stationGPS[i], thisposition)
+        thisGPS = GPSplusOffset(stationGPS, thisposition) # stationGPS[i] if variable...
 #        gpspositions[i] = thisGPS
         timedelays[i] = greatCircleDistance(gps, thisGPS)
     
@@ -383,6 +391,24 @@ def phaseAverage(phases):
     
     return phaseAvg
 
+def phaseErrorFromDifference(deltaPhi, freq, allowOutlierCount = 0):
+    # Calculate phase error given two arrays of phases
+    # mean phase difference is subtracted
+    mu = phaseAverage(deltaPhi)
+    
+    msePerPhase = ( 2.0 / (freq*twopi) * sin( (deltaPhi - mu) / 2 )) ** 2
+    
+    if allowOutlierCount != 0:
+#        import pdb; pdb.set_trace()
+        sortedAntennas = msePerPhase.argsort() # lists antennas
+        msePerPhase = msePerPhase[sortedAntennas]
+        #print 'Worst antennas: '
+        #print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
+        msePerPhase[len(msePerPhase) - allowOutlierCount:] = 0.0 # zero out the worst ones 
+
+    mse = np.average(msePerPhase)
+
+    return mse * 1.0e18 # unit ns^2
 
 def phaseError(az, el, pos, phases, freq, allowOutlierCount=0):
 
