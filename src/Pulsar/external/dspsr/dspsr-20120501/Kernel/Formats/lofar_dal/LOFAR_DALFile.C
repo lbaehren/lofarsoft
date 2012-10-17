@@ -307,9 +307,19 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   // getting the channel width
   Attribute<double> rate = beam.channelWidth();
   if (rate.exists()) {
+    cerr << "channel Width=" << rate.get() << " Hz" << endl;
     info.set_rate (rate.get());
+    // temporary patch
+    info.set_centre_frequency( cfreq.get() - rate.get()*5.0e-7 );
   }
-  cerr << "VLAD: rate = " << rate.get() << endl;
+  else cerr << "channel Width undefined" << endl;
+
+  // getting the subband width
+  Attribute<double> subwidth = beam.subbandWidth();
+  if (sibwidth.exists()) {
+    cerr << "subband Width=" << subwidth.get() << " Hz" << endl;
+  }
+  else cerr << "subband Width undefined" << endl;
 
   
   if (coord.exists())
@@ -324,10 +334,10 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
       {
 	cerr << "SANITY CHECK" << endl;
 	std::vector<double> w = world.get();
+	cerr << "Size of the freq array = " << w.size() << endl;
 	for (unsigned i=0; i<w.size(); i++)
-	  if (w[i] != info.get_centre_frequency(i) *1e6)
-	    cerr << "NOT EQUAL: " << w[i] << " != " << info.get_centre_frequency(i)
-		 << endl;
+	  if (w[i] * 1.0e-6 != info.get_centre_frequency(i))
+	    cerr << "NOT EQUAL: " << w[i]*1.0e-6 << " != " << info.get_centre_frequency(i) << endl;
       }
     }
   }
