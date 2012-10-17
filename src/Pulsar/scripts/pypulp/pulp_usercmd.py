@@ -134,8 +134,8 @@ class CMDLine:
                            help="use bf2puma2 to read raw data instead of using dspsr to read *.h5 files directly", default=False)
         	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
                            help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
-        	self.groupCV.add_option('--maxram', dest='maxram', metavar='MBYTES',
-                           help="set the upper limit on RAM usage for dspsr. Default is %default MB", default=512, type='float')
+        	self.groupCV.add_option('--maxram', dest='maxram', metavar='MULTIPLE',
+                           help="set the upper limit on RAM usage for dspsr as the multiple of the minimum possible block size. Default is %default", default=2, type='int')
         	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
                                  clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
@@ -482,7 +482,7 @@ class CMDLine:
 				if self.opts.is_plots_only: log.info("Diagnostic plots ONLY")
 				else:
 					if obs.CV: 
-						log.info("DSPSR with LOFAR DAL = %s%s" % (self.opts.is_nodal and "no" or "yes", self.opts.is_nodal and "" or " (max RAM = %g MB)" % (self.opts.maxram)))
+						log.info("DSPSR with LOFAR DAL = %s%s" % (self.opts.is_nodal and "no" or "yes", self.opts.is_nodal and "" or " (max RAM = minX%d)" % (self.opts.maxram)))
 						if self.opts.first_freq_split != 0:
 							log.info("FIRST FREQUENCY SPLIT = %d" % (self.opts.first_freq_split))
 						if self.opts.nsplits != -1:
