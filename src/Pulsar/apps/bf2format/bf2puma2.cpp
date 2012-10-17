@@ -1171,7 +1171,7 @@ void writer::readParset()
 // VLAD, 17.10.2012 - Determine the filter used and it's low freq, e.g. 110-190, or 210-250, etc
         string tmp = "Observation.bandFilter"; 
 	string value = getKeyVal(tmp).substr(4, 3);
-	if (value[2] == "_") value = getKeyVal(tmp).substr(4, 2);
+	if (value[2] == '_') value = getKeyVal(tmp).substr(4, 2);
         filter_low_freq = atoi(value.c_str());
 	if (verb)
 		cout << " BAND FILTER LOW FREQUENCY = " << filter_low_freq << endl;
