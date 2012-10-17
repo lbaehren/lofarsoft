@@ -108,11 +108,12 @@ def numberBeams(triggermsgDBlist):
         for k,v in m.iteritems():
             v['beam']=num
 
-def loadTriggerMsg(directory='',filename='TriggerMsg.log'):
+def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False):
     """
     Trigger messages are stored in a log file, made by the writetriggermessages program. These can be read in by this function. The underlying format is:
     
     fmt='i3L3i2f2i1f'
+    new version: 'i3L3i2f2i4f3i'
 
     Returns a dictionary with the following entries:
     trmsg[i]['magic']
@@ -128,6 +129,13 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log'):
     trmsg[i]['obsID']
     trmsg[i]['beam']
     trmsg[i]['DM']
+    new version also:
+    trmsg[i]['SBaverage']
+    trmsg[i]['SBstddev']
+    trmsg[i]['Threshold']
+    trmsg[i]['nrFlaggedSamples']
+    trmsg[i]['nrFlaggedChannels']
+
         
 
     """
@@ -143,6 +151,8 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log'):
     trmsg=dict()
 # the format in which the data is stored 
     fmt='<3q4i2f2i1f1i'
+    if newVersion:
+        fmt='<3q4i2f2i4f2i'
     #magic=struct.unpack('i',data[0:4])
     #if(magic==0x65):
     #    fmt=fmt+'i'
@@ -150,6 +160,8 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log'):
     fmtlen=struct.calcsize(fmt)
     if len(data)%fmtlen>0:
         fmt='3L4i2f2i1f'
+        if newVersion:
+            fmt='3L4i2f2i4f2i'
         fmtlen=struct.calcsize(fmt)
 
 # read in all triggermessage (size is total datasize/ size per trigger) and code them according to the definition from FRATcoincidence.h
@@ -168,6 +180,12 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log'):
         trmsg[i]['obsID']=msg[9]
         trmsg[i]['beam']=msg[10]
         trmsg[i]['DM']=msg[11]
+        if newVersion:
+            trmsg[i]['SBaverage']=msg[12]
+            trmsg[i]['SBstddev']=msg[13]
+            trmsg[i]['Threshold']=msg[14]
+            trmsg[i]['nrFlaggedChannels']=msg[15]
+            trmsg[i]['nrFlaggedSamples']=msg[16]
         if(msg[-1]==0x65):
             trmsg[i]['magic']=msg[-1]
 # return the dictionary
@@ -190,9 +208,14 @@ def filterTriggers(trmsg,subband, keyword,strictKeywordchecking=True):
     'obsID',
     'beam',
     'DM', 
+    'SBaverage',
+    'SBstddev',
+    'Threshold',
+    'nrFlaggedSamples',
+    'nrFlaggedChannels'
     
      """
-    if strictKeywordchecking and keyword not in ['time','utc_second','utc_nanosecond','length','sample','block','subband','sum','max','obsID','beam','DM']:
+    if strictKeywordchecking and keyword not in ['time','utc_second','utc_nanosecond','length','sample','block','subband','sum','max','obsID','beam','DM','SBaverage','SBstddev','Threshold','nrFlaggedSamples','nrFlaggedChannels']:
         raise ValueError("Keyword "+str(keyword)+" not in database")
     if type(subband) != type(1):
         raise ValueError("Subband "+str(subband)+" is not an integer")
@@ -328,9 +351,17 @@ def obsParameters(directory='',file=None):
             else: # fill in single value of keyword     
                 if keyword not in listkeywords and keyword not in rangekeywords:
                     if keyword in intkeywords:
-                        parameters[keyword]=int(i)
+                        try:
+                            parameters[keyword]=int(i)
+                        except:
+                            print "Error. Omiting",keyword,i
+                            pass
                     elif keyword in floatkeywords:
-                        parameters[keyword]=float(i)
+                        try:
+                            parameters[keyword]=float(i)
+                        except:
+                            print "Error Omiting",keyword,i
+                            pass
                     else:
                         parameters[keyword]=i
                     newkeyword=False
@@ -952,6 +983,10 @@ def makeSets(msg,threshold,window):
         sets[DM]=np.array(triggercoincidenceSets2(timesSubband[timesSubband[:,3]==DM],window))   
     print "tuples of time, nr subband, lowest trigger threshold, DM"
     return sets
+
+
+def msgFromCoincidence(trmsg,timestamp,window,DM):
+    return [t for t in trmsg.values() if timestamp-window<t['time']<timestamp+window and round(t['DM'],2)==DM]
 
 def filterSets(sets,coincidenceThreshold):
     """ filters set made by makeSets, such that the pulse power should at least be coincidenceThreshold in all streams.
