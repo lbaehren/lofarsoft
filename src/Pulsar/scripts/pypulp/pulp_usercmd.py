@@ -135,7 +135,7 @@ class CMDLine:
         	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
                            help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
         	self.groupCV.add_option('--maxram', dest='maxram', metavar='MBYTES',
-                           help="set the upper limit on RAM usage for dspsr. Default is %default MB", default=32768, type='float')
+                           help="set the upper limit on RAM usage for dspsr. Default is %default MB", default=512, type='float')
         	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
                                  clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
