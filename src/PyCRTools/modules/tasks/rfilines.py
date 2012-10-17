@@ -460,8 +460,9 @@ class rfilines(tasks.Task):
             plt.figure()
             plt.plot(x, logspectrum, c='b')
             dirtyspectrum = np.zeros(len(logspectrum))
-            dirtyspectrum += min(logspectrum)
+            dirtyspectrum += np.float('nan') # min(logspectrum)
             dirtyspectrum[self.dirtychannels] = logspectrum[self.dirtychannels]
+            import pdb; pdb.set_trace()
             plt.plot(x, dirtyspectrum, 'x', c = 'r', markersize=8)
             plt.title('Median-average spectrum of all antennas, with flagging')
             plt.xlabel('Frequency [MHz]')
@@ -573,33 +574,35 @@ class rfilines(tasks.Task):
             stationStartIndex = f["STATION_STARTINDEX"]
             nofStations = len(stationlist)
             directions = []
-            for i in range(nofStations):
-                print 'Processing station: %s' % stationlist[i]
-                start = stationStartIndex[i]
-                end = stationStartIndex[i+1]
-                thesePositions = allpositions[start:end]
-                thesePositions = thesePositions.ravel()
+            if not self.referenceTransmitterGPS:
+            # Get direction fits for each station if no fixed reference transmitter is given.
+                for i in range(nofStations):
+                    print 'Processing station: %s' % stationlist[i]
+                    start = stationStartIndex[i]
+                    end = stationStartIndex[i+1]
+                    thesePositions = allpositions[start:end]
+                    thesePositions = thesePositions.ravel()
 
-                averagePhasePerAntenna = phaseAvg.toNumpy()[start:end, bestchannel]
-                plt.figure()
-                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(thesePositions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = (self.doplot and self.testplots), verbose = True)
-                if self.doplot and self.testplots:
-                    self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)                   
-                
-                print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
-                print 'Phase error = %f' % minPhaseError                    
-                directions.append((fitaz, fitel))
-                
-            averageIncomingDirection = vectorAverage(directions)
+                    averagePhasePerAntenna = phaseAvg.toNumpy()[start:end, bestchannel]
+                    plt.figure()
+                    (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(thesePositions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4, showImage = (self.doplot and self.testplots), verbose = True)
+                    if self.doplot and self.testplots:
+                        self.plot_finish(filename=self.plot_name + "-phaseimage",filetype=self.filetype)                   
+                    
+                    print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
+                    print 'Phase error = %f' % minPhaseError                    
+                    directions.append((fitaz, fitel))
+                    
+                averageIncomingDirection = vectorAverage(directions)
             
-# HACK: do incoming direction using all stations together and see if that gets better results...
-            if self.directionFromAllStations:
-                averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
-                plt.figure()
-                (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(allpositions.ravel(), averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4*nofStations, showImage = (self.doplot and self.testplots), verbose = False)
-                averageIncomingDirection = (fitaz, fitel)
-            
-            print 'Averaged incoming direction: az = %f, el = %f' % (averageIncomingDirection[0] / deg2rad, averageIncomingDirection[1] / deg2rad)
+    # HACK: do incoming direction using all stations together and see if that gets better results...
+                if self.directionFromAllStations:
+                    averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel]
+                    plt.figure()
+                    (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(allpositions.ravel(), averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, allowOutlierCount = 4*nofStations, showImage = (self.doplot and self.testplots), verbose = False)
+                    averageIncomingDirection = (fitaz, fitel)
+                
+                print 'Averaged incoming direction: az = %f, el = %f' % (averageIncomingDirection[0] / deg2rad, averageIncomingDirection[1] / deg2rad)
             # get modeled phases for a plane wave of given overall direction, for all stations together
             allpositions = allpositions.ravel()
             
@@ -615,7 +618,11 @@ class rfilines(tasks.Task):
                 modelphases = sf.phaseWrap(modelphases)
                 
             averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel] # now for all antennas
+            
             phaseDiff = averagePhasePerAntenna - modelphases
+            phaseError = sf.phaseErrorFromDifference(phaseDiff[0:stationStartIndex[1]], freq, allowOutlierCount = 8)
+            
+            print 'Phase error for first station: %3.3f' % phaseError
             
             nanosecondPhase = twopi * freq * 1.0e-9
             timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
@@ -662,7 +669,7 @@ class rfilines(tasks.Task):
 
         # set output params
         self.strongestFrequency = freqs[bestchannel]
-        self.strongestDirection = [fitaz / deg2rad, fitel / deg2rad]
+        #self.strongestDirection = [fitaz / deg2rad, fitel / deg2rad]
         self.bestPhaseRMS = medians[bestchannel]
         self.timestamp = f["TIME"][0]
                 
