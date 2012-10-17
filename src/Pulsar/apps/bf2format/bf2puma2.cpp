@@ -247,6 +247,7 @@ public:
 
 	string DATE;
 	string ANTENNA;
+	uint32_t filter_low_freq;
 
 private:
 	FILE* datafile[MAX_NFILES];
@@ -1167,8 +1168,16 @@ void writer::readParset()
 	if (verb)
 		cout << " ANTENNA TYPE = " << ANTENNA << endl;
 
+// VLAD, 17.10.2012 - Determine the filter used and it's low freq, e.g. 110-190, or 210-250, etc
+        string tmp = "Observation.bandFilter"; 
+	string value = getKeyVal(tmp).substr(4, 3);
+	if (value[2] == "_") value = getKeyVal(tmp).substr(4, 2);
+        filter_low_freq = atoi(value.c_str());
+	if (verb)
+		cout << " BAND FILTER LOW FREQUENCY = " << filter_low_freq << endl;
+
 // Determine clock resolution:
-	string tmp = "Observation.subbandWidth";
+	tmp = "Observation.subbandWidth";
 	CLOCKRES = atof(getKeyVal(tmp).c_str())/1000.0;
 	if (verb)
 		cout << " CLOCK RESOLUTION = " <<setprecision(7)<< CLOCKRES << endl;
@@ -1510,24 +1519,27 @@ void writer::writeHeader(unsigned int &isub, unsigned int &ichan)
 	ifstream headerfile;
 	headerfile.open(_hdrFilename);
 
-
 	while (1)
 	{
 		getline(headerfile, line, '\n');
 
 		if (line.substr(0, 4) == "FREQ")
 		{
-			/* Now is working for 160 MHz clock as well. However, does not cover 210_250 MHz case
-                           Vlad, Jul 14, 2012 */
+			/* VLAD: 17.10.2012 Should work for all possible filters and antennas */
 			float extra_half, lower_edge;
-			if (CLOCKRES == 0.1953125) lower_edge = 100.0; else lower_edge = 160.0;
+			if (CLOCKRES == 0.1953125) {  // 200 MHz clock
+				if (filter_low_freq >= 200) lower_edge = 200.0;
+				else if (filter_low_freq < 200 && filter_low_freq >= 100) lower_edge = 100.0;
+				else lower_edge = 0.0;
+			} else { // 160 MHz clock
+				if (filter_low_freq >= 160) lower_edge = 160.0;
+				else if (filter_low_freq < 160 && filter_low_freq >= 80) lower_edge = 80.0;
+				else lower_edge = 0.0;
+			}
+			// this line takes care if we use 2nd PPF or not as in the case when we bypass 2nd PPF (1chan/sub)
+			// we do not need to subtract half of the channel width for frequency calculation
 			if (NCHANNELS > 1) extra_half = 0.5; else extra_half = 0.0;
-			if (ANTENNA == "HBA") the_freq << setprecision(20) 
-				<< lower_edge + (SUBBLIST[isub] + float(ichan) / float(NCHANNELS) - extra_half) * CLOCKRES;
-			else if (ANTENNA == "LBA") the_freq << setprecision(20)
-					<< (SUBBLIST[isub] + float(ichan) / float(NCHANNELS) - extra_half) * CLOCKRES;
-			else the_freq << setprecision(20)
-					<< lower_edge + (SUBBLIST[isub] + float(ichan) / float(NCHANNELS) - extra_half) * CLOCKRES;
+			the_freq << setprecision(20) << lower_edge + (SUBBLIST[isub] + float(ichan) / float(NCHANNELS) - extra_half) * CLOCKRES;
 
 			line = "FREQ " + the_freq.str();
 		}
