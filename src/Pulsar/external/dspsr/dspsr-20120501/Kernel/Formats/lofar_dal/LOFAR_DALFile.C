@@ -9,6 +9,7 @@ using namespace std;
 
 #include "dsp/LOFAR_DALFile.h"
 #include "dal/lofar/BF_File.h"
+#include <iomanip>  // for setprecision use
 using namespace dal;
 
 class dsp::LOFAR_DALFile::Handle
@@ -65,7 +66,7 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   // getting frequency center
   Attribute<double> freq = bf_file->observationFrequencyCenter();
   if (freq.exists())
-    cerr << "LOFAR_DALFile::open_file observation frequency=" << freq.get() << endl;
+    cerr << "LOFAR_DALFile::open_file observation frequency=" << setprecision(20) << freq.get() << endl;
 
   // getting number of SAPs
   Attribute<unsigned> nsap = bf_file->nofSubArrayPointings();
@@ -94,7 +95,7 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   // getting the center frequency of the beam
   Attribute<double> freq2 = beam.beamFrequencyCenter();
   if (freq2.exists())
-    cerr << "LOFAR_DALFile::open_file beam frequency=" << freq2.get() << endl;
+    cerr << "LOFAR_DALFile::open_file beam frequency=" << setprecision(20) << freq2.get() << endl;
 
   // getting the vector of targets
   Attribute< std::vector<std::string> > targets = beam.targets();
@@ -109,7 +110,7 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   // getting the subband width
   Attribute<double> bw2 = beam.subbandWidth();
   if (bw2.exists())
-    cerr << "LOFAR_DALFile::open_file sap subbandwidth=" << bw2.get() << endl;
+    cerr << "LOFAR_DALFile::open_file sap subbandwidth=" << setprecision(20) << bw2.get() << endl;
 
   // getting number of channels per subband
   Attribute<unsigned> nchan = beam.channelsPerSubband();
@@ -261,18 +262,20 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 
   // assuming cfreq is in MHz (default?)
   info.set_centre_frequency( cfreq.get() /** 1e-6 */ );
-  cerr << "VLAD: center freq = " << cfreq.get() << endl;
+  cerr << "VLAD: center freq = " << setprecision(20) << cfreq.get() << endl;
 
+  /*
   // getting the bandwidth
+     // This approach of getting the bandwidth is BAD, because it returns the Total bandwidth
+     // However, if we have several frequency splits, then per file bandwidth is different and this causes the problems
   Attribute<double> bw = bf_file->bandwidth();
-
   if (!bw.exists())
-    throw Error (InvalidState, "dsp::LOFAR_DALFile::open_file",
-		 "bandwidth not defined");
+    throw Error (InvalidState, "dsp::LOFAR_DALFile::open_file", "bandwidth not defined");
   
   // assuming bandwidth is in MHz
   info.set_bandwidth( bw.get() );
   cerr << "VLAD: bandwidth = " << bw.get() << endl;
+  */
 
   info.set_dc_centred( true );
   cerr << "VLAD: dc_centered = True" << endl;
@@ -281,45 +284,60 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   Attribute<double> mjd = bf_file->observationStartMJD();
   if (mjd.exists())
     info.set_start_time( MJD(mjd.get()) );
-  cerr << "MJD=" << info.get_start_time() << endl;
+  cerr << "MJD=" << setprecision(20) << info.get_start_time() << endl;
 
   // getting the clock rate
   Attribute<double> cRate = bf_file->clockFrequency();
   if (cRate.exists())
-    cerr << "clockRate=" << cRate.get() << endl;
+    cerr << "clockRate=" << setprecision(20) << cRate.get() << endl;
   else
     cerr << "clockRate undefined" << endl;
 
   // getting the sampling rate
   Attribute<double> sRate = beam.samplingRate();
   if (sRate.exists())
-    cerr << "samplingRate=" << sRate.get() << endl;
+    cerr << "samplingRate=" << setprecision(20) << sRate.get() << endl;
   else
     cerr << "samplingRate undefined" << endl;
 
   // getting the sampling time
   Attribute<double> sTime = beam.samplingTime();
   if (sTime.exists())
-    cerr << "samplingTime=" << sTime.get() << endl;
+    cerr << "samplingTime=" << setprecision(20) << sTime.get() << endl;
   else
     cerr << "samplingTime undefined" << endl;
 
   // getting the channel width
   Attribute<double> rate = beam.channelWidth();
   if (rate.exists()) {
-    cerr << "channel Width=" << rate.get() << " Hz" << endl;
+    cerr << "channel Width=" << setprecision(20) << rate.get() << " Hz" << endl;
     info.set_rate (rate.get());
-    // temporary patch
-    info.set_centre_frequency( cfreq.get() - rate.get()*5.0e-7 );
   }
   else cerr << "channel Width undefined" << endl;
 
   // getting the subband width
   Attribute<double> subwidth = beam.subbandWidth();
-  if (sibwidth.exists()) {
-    cerr << "subband Width=" << subwidth.get() << " Hz" << endl;
+  if (subwidth.exists()) {
+    cerr << "subband Width=" << setprecision(20) << subwidth.get() << " Hz" << endl;
   }
   else cerr << "subband Width undefined" << endl;
+
+  // setting the bandwidth (in MHz) of the file
+  double bw_file = info.get_nchan() * rate.get() * 1.0e-6;
+  info.set_bandwidth(bw_file);
+  cerr << "VLAD: bandwidth = " << setprecision(20) << bw_file << endl;
+
+  // Checks
+  cerr << "Number of CHANNELS = " << info.get_nchan() << endl;
+  cerr << "SWAP = " << info.get_swap() << endl;
+  cerr << "NSUB_SWAP = " << info.get_nsub_swap() << endl;
+  cerr << "CENTER FREQ = " << setprecision(20) << info.get_centre_frequency() << endl;
+  cerr << "Center freq of first channel = " << setprecision(20) << info.get_centre_frequency(0) << endl;
+  cerr << "Center freq of last channel  = " << setprecision(20) << info.get_centre_frequency(info.get_nchan()-1) << endl;
+  cerr << "BANDWIDTH = " << setprecision(20) << info.get_bandwidth() << endl;
+  unsigned unswap_chan = info.get_unswapped_ichan(0);
+  cerr << "0 unswapped ichan = " << unswap_chan << endl;
+  cerr << "BASE FREQUENCY = " << setprecision(20) << info.get_base_frequency() << endl;
 
   
   if (coord.exists())
@@ -337,7 +355,7 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 	cerr << "Size of the freq array = " << w.size() << endl;
 	for (unsigned i=0; i<w.size(); i++)
 	  if (w[i] * 1.0e-6 != info.get_centre_frequency(i))
-	    cerr << "NOT EQUAL: " << w[i]*1.0e-6 << " != " << info.get_centre_frequency(i) << endl;
+	    cerr << "NOT EQUAL: " << setprecision(20) << w[i]*1.0e-6 << " != " << setprecision(20) << info.get_centre_frequency(i) << endl;
       }
     }
   }
