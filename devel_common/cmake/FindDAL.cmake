@@ -54,7 +54,7 @@ if (NOT DAL_FOUND)
 
   set (DAL_LIBRARIES "")
   
-  find_library (DAL_DAL_LIBRARY dal
+  find_library (DAL_DAL_LIBRARY lofardal
     HINTS ${DAL_ROOT_DIR}
     PATHS /sw /usr /usr/local /opt/dal ${lib_locations}
     PATH_SUFFIXES lib lib/dal
