@@ -461,7 +461,12 @@ class Pipeline:
 					# we need it for combined.pdf
 					bigfile=thumbfile.split(".th.png")[0] + ".png"
                	        		# getting current number for SAP and TA beam (or station name for FE)
-                      		  	cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+					try: # we need this try block in case User manually creates sub-directories with some test bestprof files there
+					     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
+					     # on a wrong-formed string applying int()
+                      		  		cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+					except Exception:
+						continue
                	                	curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
       	               	        	chi_val = 0.0
                         		cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
