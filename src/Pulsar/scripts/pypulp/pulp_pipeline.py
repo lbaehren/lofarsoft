@@ -748,6 +748,23 @@ class PipeUnit:
 			cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
 			self.execute(cmd, is_os=True)
 
+		# Now we check the par-files if they have non-appropriate flags that can cause prepfold to crash
+		for psr in self.psrs:
+			psr2=re.sub(r'[BJ]', '', psr)
+			parfile="%s/%s.par" % (self.outdir, psr2)
+			# check first for PSRB name. It should be changed to PSRJ
+			cmd="grep 'PSRB' %s" % (parfile,)
+                	status=os.popen(cmd).readlines()
+			if np.size(status)>0:
+				self.log.warning("WARNING: Par-file %s has PSRB keyword that can cause prepfold to crash!\n\
+If your pipeline run calls prepfold you might need to change PSRB to PSRJ.")
+			cmd="grep 'CLK' %s" % (parfile,)
+                	status=os.popen(cmd).readlines()
+			if np.size(status)>0:
+				self.log.warning("WARNING: Par-file %s has CLK keyword that can cause prepfold to crash!\n\
+If your pipeline run calls prepfold you might need to remove it from your parfile.")
+
+
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
 	    	"""
         	Execute the command 'cmd' after logging the command
@@ -1014,10 +1031,11 @@ class PipeUnit:
 						self.log.info("Number of subbands, -nsubs, for prepfold is %d" % (prepfold_nsubs))
 						prepfold_popens=[]  # list of prepfold Popen objects
 						for psr in self.psrs:   # pulsar list is empty if --nofold is used
+							psr2=re.sub(r'[BJ]', '', psr)
 							# first running prepfold with mask (if --norfi was not set)
 							if not cmdline.opts.is_norfi:
-								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
-									(psr, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, self.output_prefix)
+								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par %s/%s.par -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
+									(psr, self.outdir, psr2, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, self.output_prefix)
 								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 								prepfold_popens.append(prepfold_popen)
 								time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish 
@@ -1025,8 +1043,8 @@ class PipeUnit:
 							# running prepfold without mask
 							if not cmdline.opts.is_norfi: output_stem="_nomask"
 							else: output_stem=""
-							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -nsub %d -n 256 -fine -nopdsearch -o %s_%s%s %s.fits" % \
-								(psr, prepfold_nsubs, psr, self.output_prefix, output_stem, self.output_prefix)
+							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par %s/%s.par -nsub %d -n 256 -fine -nopdsearch -o %s_%s%s %s.fits" % \
+								(psr, self.outdir, psr2, prepfold_nsubs, psr, self.output_prefix, output_stem, self.output_prefix)
 							prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 							prepfold_popens.append(prepfold_popen)
 							time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish 
@@ -1129,11 +1147,16 @@ class PipeUnit:
 					for bp in good_bestprofs:
 						psr=bp.split("/")[-1].split("_")[0]
 						thumbfile=bp.split(self.outdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
-						thumbs.append(thumbfile)
 						# getting current number for SAP and TA beam
-						cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+						try: # we need this try block in case User manually creates sub-directories with some test bestprof files there
+						     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
+						     # on a wrong-formed string applying int()
+							cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+						except Exception:
+							continue
 						curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
 						chi_val = 0.0
+						thumbs.append(thumbfile)
 						cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
 						chiline=os.popen(cmd).readlines()
 						if np.size(chiline) > 0:
