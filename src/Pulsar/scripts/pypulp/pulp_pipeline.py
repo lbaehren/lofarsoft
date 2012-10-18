@@ -24,13 +24,14 @@ def getDirs(base):
 	return [x for x in glob.iglob(os.path.join(base, '*')) if os.path.isdir(x)]
 
 # recursive glob
-def rglob(base, pattern):
+def rglob(base, pattern, maxdepth=0):
 	flist=[]
 	flist.extend(glob.glob(os.path.join(base, pattern)))
 	dirs = getDirs(base)
+	if maxdepth <= 0: return flist
 	if len(dirs):
 		for d in dirs:
-			flist.extend(rglob(os.path.join(base, d), pattern))
+			flist.extend(rglob(os.path.join(base, d), pattern, maxdepth-1))
 	return flist
 
 
@@ -353,7 +354,7 @@ class Pipeline:
 		bpnf.close()
 
 		# creating combined DSPSR plots
-		dspsr_diags=rglob(sumdir, "*_diag.png")
+		dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 		if len(dspsr_diags) > 0:
 			log.info("Creating DSPSR summary diagnostic plots...")
 			if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
@@ -374,7 +375,7 @@ class Pipeline:
 		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
 		tar_list=[]
 		for ext in self.archive_exts:
-			ext_list=rglob(sumdir, ext)
+			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
 		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.archive_prefix, data_code, self.archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 		self.execute(cmd, log, workdir=sumdir)
@@ -448,7 +449,7 @@ class Pipeline:
 	       	        montage_cmd="montage -background none -pointsize 10.2 "
 	       	        montage_cmd_pdf="montage -geometry 100% -adjoin -tile 1x1 -pointsize 12 "
                 	chif=open("%s/chi-squared.txt" % (sumdir), 'w')
-     	       	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof")
+     	       	        psr_bestprofs=rglob(sumdir, "*.pfd.bestprof", 3)
 			if len(psr_bestprofs) > 0:
 				# check first if all available *bestprof files are those created without mask. If so, then allow to make
 				# a diagnostic combined plot using prepfold plots without a mask
@@ -465,8 +466,7 @@ class Pipeline:
 					     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
 					     # on a wrong-formed string applying int()
                       		  		cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
-					except Exception:
-						continue
+					except: continue
                	                	curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
       	               	        	chi_val = 0.0
                         		cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
@@ -549,7 +549,7 @@ class Pipeline:
 
 		# creating combined DSPSR plots
 		if not cmdline.opts.is_skip_dspsr:
-			dspsr_diags=rglob(sumdir, "*_diag.png")
+			dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 			if len(dspsr_diags) > 0:
 				log.info("Creating DSPSR summary diagnostic plots...")
 				if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
@@ -596,7 +596,7 @@ class Pipeline:
 		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
 		tar_list=[]
 		for ext in self.archive_exts:
-			ext_list=rglob(sumdir, ext)
+			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
 		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.archive_prefix, data_code, self.archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 		self.execute(cmd, log, workdir=sumdir)
@@ -907,7 +907,7 @@ If your pipeline run calls prepfold you might need to remove it from your parfil
 		tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
 		tar_list=[]
 		for ext in self.extensions:
-			ext_list=rglob(self.curdir, ext)
+			ext_list=rglob(self.curdir, ext, 3)
 			tar_list.extend(ext_list)
 		tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
 		tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
@@ -1137,7 +1137,7 @@ If your pipeline run calls prepfold you might need to remove it from your parfil
 
 			# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
 			if not cmdline.opts.is_nofold:
-				psr_bestprofs=rglob(self.outdir, "*.pfd.bestprof")
+				psr_bestprofs=rglob(self.outdir, "*.pfd.bestprof", 3)
 				if len(psr_bestprofs) > 0:
 					self.log.info("Reading chi-squared values and adding to chi-squared.txt...")
 					# also preparing montage command to create combined plot
@@ -1157,8 +1157,7 @@ If your pipeline run calls prepfold you might need to remove it from your parfil
 						     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
 						     # on a wrong-formed string applying int()
 							cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
-						except Exception:
-							continue
+						except: continue
 						curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
 						chi_val = 0.0
 						thumbs.append(thumbfile)
