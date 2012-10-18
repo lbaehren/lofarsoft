@@ -78,7 +78,7 @@ if (APPLE)
   set (PYCRTOOLS_LINKER_FLAGS "-fPIC")
 else (APPLE)
   set (PYCRTOOLS_CXX_FLAGS "")
-  set (PYCRTOOLS_LINKER_FLAGS "-fPIC -shared -Wl")
+  set (PYCRTOOLS_LINKER_FLAGS "-fPIC -shared -Wl -llofardal")
 endif (APPLE)
 
 if (PYCRTOOLS_WITH_COMPILER_WARNINGS)
