@@ -272,7 +272,7 @@ endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PyCRTools)
 ##__________________________________________________________
 ##                                      Package dependencies
 
-add_dependencies (pycrtools dal1 casacore fftw3 gsl tmf num_util)
+add_dependencies (pycrtools dal1 dal casacore fftw3 gsl tmf num_util)
 
 if (PYCRTOOLS_WITH_AERA)
   add_dependencies (pycrtools aera)
