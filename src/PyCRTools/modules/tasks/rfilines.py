@@ -81,6 +81,41 @@ def dirtyChannelsFromPhaseSpreads(spreads, verbose=False):
         
     return dirtyChannels
 
+def getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays):
+    """
+    Scan the array of time differences (between measured phases and the modeled incoming wave)
+    for presence of offsets that are a multiple of 5 ns.
+    Note: due to the modulo-2pi from the phases, only small multiples (effectively +/- 1) can be 
+    reliably corrected.
+    
+    Input stationStartIndex contains the starting points in the array for each station.
+    interStationDelays are subtracted here.
+    
+    Returns array oneSampleShifts, containing integer # samples by which the data is shifted. 
+    So when it returns [0, 0, 1, 0, -1, ...] a positive number means that the data has to be advanced 1 sample
+    i.e. sample 0 <-- sample 1
+    Negative number the other way round.
+    
+    (NB. check!)
+    
+    """
+    
+    n = len(timeDiff)
+    delays = np.zeros(n)
+    oneSampleShifts = np.zeros(n)
+    nofStations = len(stationStartIndex) - 1
+    for i in range(nofStations):
+        start = stationStartIndex[i]
+        end = stationStartIndex[i+1]
+        for j in range(start, end):
+            #delays[j] = timeDiff[j] - interStationDelays[i]
+            thisDelay = timeDiff[j] - interStationDelays[i]
+            if abs(thisDelay) > 3:  # 3 ns threshold to call it a glitch
+                oneSampleShifts[j] = int(round(thisDelay / 5)) 
+    
+    return oneSampleShifts
+
+
 class rfilines(tasks.Task):
     """
     **Description:**
@@ -120,12 +155,14 @@ class rfilines(tasks.Task):
         nofchannels = {default: -1, doc: "nof channels", output:True},
         medians = {default: None, doc: "Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1.", output: True},
         dirtychannels = {default: None, doc: "Output array of dirty channels, based on stability of relative phases from consecutive data blocks. Deviations from uniform-randomness are quite small, unless there is an RF transmitter present at a given frequency.", output:True},
+        oneSampleShifts = {default: None, doc: "Output array containing the 5 ns-shifts per antenna, if they occur. Output contains integer number of samples the data is shifted. To correct for it, shift data _forward_ by this number of samples.", output: True},
         phase_average = {default: None, doc: "Output array of average phases for each antenna, per frequency channel, dim = e.g. 48 x 4097", output: True},
         strongestDirection = {default: None, doc: "Output list [az, el] with the direction of the strongest transmitter", output: True},
         strongestFrequency = {default: None, doc: "The frequency with the smallest phaseRMS, from the range specified in the freq_range parameter", output: True},
         bestPhaseRMS = {default: None, doc: "PhaseRMS for the best frequency", output: True},
         timestamp = {default: None, doc: "Unix timestamp of input file(s)", output: True},
         average_spectrum = {default: None, doc: "Output median over antennas of averaged spectrum (over blocks)", output: True},
+        status = {default: None, doc: "Output status string. ", output: True}, 
 #        results=p_(lambda self:gatherresults(self.topdir, self.maxspread, self.antennaSet),doc="Results dict containing cabledelays_database, antenna positions and names"),
 #        positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
 #        antid = p_(lambda self:obtainvalue(self.results,"antid"), doc="hArray containing strings of antenna ids"),
@@ -462,7 +499,6 @@ class rfilines(tasks.Task):
             dirtyspectrum = np.zeros(len(logspectrum))
             dirtyspectrum += np.float('nan') # min(logspectrum)
             dirtyspectrum[self.dirtychannels] = logspectrum[self.dirtychannels]
-            import pdb; pdb.set_trace()
             plt.plot(x, dirtyspectrum, 'x', c = 'r', markersize=8)
             plt.title('Median-average spectrum of all antennas, with flagging')
             plt.xlabel('Frequency [MHz]')
@@ -534,11 +570,12 @@ class rfilines(tasks.Task):
                 self.plot_finish(filename=self.plot_name + "-avg-measuredphases",filetype=self.filetype)
 
             phaseDiff = averagePhasePerAntenna - modelphases
+
+            nanosecondPhase = twopi * freq * 1.0e-9
+            timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
             
             if self.doplot:
                 plt.figure()
-                nanosecondPhase = twopi * freq * 1.0e-9
-                timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
                 
                 plt.plot(timeDiff, label='Measured - expected phase')
 
@@ -626,7 +663,7 @@ class rfilines(tasks.Task):
             
             nanosecondPhase = twopi * freq * 1.0e-9
             timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
-            
+
             interStationDelays = np.zeros(nofStations)
             refdelay = 0.0
             if self.doplot:
@@ -652,10 +689,18 @@ class rfilines(tasks.Task):
             for i in range(nofStations):
                 print '%s: %2.3f ns' % (f["STATION_LIST"][i], interStationDelays[i])
 
+            self.oneSampleShifts = getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays)
+            timeDiff_glitches = np.zeros(len(timeDiff)) + np.float('nan')
+            timeDiff_fixed = timeDiff - 5.0 * self.oneSampleShifts
+            for i in range(len(timeDiff)): # separate fixed data, real data and glitches
+                if timeDiff[i] != timeDiff_fixed[i]:
+                    timeDiff_glitches[i] = timeDiff[i]
+                                
+#            timeDiff -= self.oneSampleShifts * 5.0
             #interStationDelays -= interStationDelays[0]
             if self.doplot:
-                plt.plot(timeDiff, 'o-', c = 'b', label='Measured - expected phase')
-
+                plt.plot(timeDiff_fixed, 'o-', c = 'b', label = 'Measured - expected phase')
+                plt.plot(timeDiff_glitches, 'o-', c = 'r', label='5 ns shifts found')
                 #plt.figure()
                 rms_phase = phaseRMS.toNumpy()[:, bestchannel]
                 plt.plot(rms_phase, 'r', label='RMS phase noise')
@@ -668,6 +713,8 @@ class rfilines(tasks.Task):
                 cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
 
         # set output params
+#        self.oneSampleShifts = getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays)
+#        print self.oneSampleShifts
         self.strongestFrequency = freqs[bestchannel]
         #self.strongestDirection = [fitaz / deg2rad, fitel / deg2rad]
         self.bestPhaseRMS = medians[bestchannel]
