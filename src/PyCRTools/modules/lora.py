@@ -53,6 +53,9 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     import os
     import time
 
+    # Create output
+    loradata={}
+    
     # Make sure directory ends with "/"
     datadir=datadir.rstrip("/")+"/"
 
@@ -82,6 +85,9 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
                 return None
     else:
         filename=lora_second
+     
+    loradata["lora_datafile"] = datadir + filename    
+    loradata["lora_ldf"] = datadir + filename[:-4]+".png" 
     file=open(datadir+filename)
     lines=file.readlines()
     file.close()
@@ -92,7 +98,7 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     # Coreuncertainties and Moliere radius have been added later
     reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)','CoreE(X)','CoreE(Y)','Moliere_rad(m)']
     len_firstline = len(firstline)
-    loradata={}
+    
     if len_firstline != 10:
         if len_firstline != 9:
             if len_firstline != 7:
