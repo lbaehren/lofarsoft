@@ -1079,6 +1079,12 @@ CLK line will be removed from the parfile!" % (parfile,))
 						# waiting for dspsr to finish
 						self.waiting_list("dspsr", dspsr_popens)
 
+						# zapping channels...
+						self.log.info("Zapping channels using median smoothed difference algorithm...")
+						for psr in self.psrs:  # pulsar list is empty if --nofold is used
+							cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+
 						# scrunching in frequency
 						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
 						for psr in self.psrs:  # pulsar list is empty if --nofold is used
@@ -1419,14 +1425,13 @@ class CVUnit(PipeUnit):
 						# removing corrupted freq channels
 						total_chan = self.tab.nrSubbands * self.nrChanPerSub
 						if self.nrChanPerSub > 1:
-							self.log.info("Zapping every %d channel and using median smoothed difference algorithm..." % (self.nrChanPerSub))
-							cmd="paz -z \"%s\" -r -m %s_%s.ar" % \
+							self.log.info("Zapping every %d channel..." % (self.nrChanPerSub))
+							cmd="paz -z \"%s\" -m %s_%s.ar" % \
 								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
-						else:
-							self.log.info("Zapping channels using median smoothed difference algorithm...")
-							cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
+						self.log.info("Zapping channels using median smoothed difference algorithm...")
+						cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
 
 						# removing ar-files from dspsr for every frequency split
 						if not cmdline.opts.is_debug:
@@ -1664,6 +1669,9 @@ class CVUnit(PipeUnit):
 							cmd="paz -z \"%s\" -m %s_%s.ar" % \
 								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
+						self.log.info("Zapping channels using median smoothed difference algorithm...")
+						cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
 
 						# removing files created by dspsr for each freq channel
 						if not cmdline.opts.is_debug:
