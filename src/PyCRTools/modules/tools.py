@@ -1,9 +1,21 @@
 """
-Various function that are handy for cr physics analysis.
+Various function that are handy for cr physics analysis and more.
 """
 
 import numpy as np
 from pytmf import deg2rad
+from pytmf import date2jd
+
+def strdate2jd(strdate):
+    """Transforms a date on string form ('2012-01-25 21:11:54') to julian day.
+    """
+    import re
+    
+    date_all = [int(a) for a in re.findall(r'\w+',strdate)]
+    date = [date_all[0],date_all[1], float(date_all[2])+date_all[3]/24.+date_all[4]/(24*60.)+date_all[5]/(24.*60*60)]
+    utc = date2jd(date[0],date[1],date[2])
+
+    return utc
 
 # Converts spherical theta, phi to kartesian (x,y,z) vector
 def toVector(phi, theta, degrees = True):# in degrees
