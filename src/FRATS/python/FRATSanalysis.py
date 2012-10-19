@@ -108,7 +108,7 @@ def numberBeams(triggermsgDBlist):
         for k,v in m.iteritems():
             v['beam']=num
 
-def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False):
+def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bReturnArray=False):
     """
     Trigger messages are stored in a log file, made by the writetriggermessages program. These can be read in by this function. The underlying format is:
     
@@ -148,7 +148,6 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False):
         ft=open(filename)
     data=ft.read()
 # the data will be put in a dictionary, with a number for the trigger number and different properties
-    trmsg=dict()
 # the format in which the data is stored 
     fmt='<3q4i2f2i1f1i'
     if newVersion:
@@ -164,31 +163,43 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False):
             fmt='3L4i2f2i4f2i'
         fmtlen=struct.calcsize(fmt)
 
+    nofmsg=len(data)/fmtlen
+    if bReturnArray:
+        dtype=[('time',int),('utc_second',int),('utc_nanosecond',int),('length',int),('sample',int),('block',int),('subband',int),('sum',float),('max',float),('obsID',int),('beam',int),('DM',float),('SBaverage',float),('SBstddev',float),('Threshold',float),('nrFlaggedChannels',float),('nrFlaggedSamples',float)]
+        trmsg=np.zeros((nofmsg),dtype=dtype)
+    else:
+        trmsg=dict()
+
 # read in all triggermessage (size is total datasize/ size per trigger) and code them according to the definition from FRATcoincidence.h
-    for i in range(len(data)/fmtlen):
-        msg=struct.unpack(fmt,data[i*fmtlen:(i+1)*fmtlen])
-        trmsg[i]=dict()
-        trmsg[i]['time']=msg[0]
-        trmsg[i]['utc_second']=msg[1]
-        trmsg[i]['utc_nanosecond']=msg[2]
-        trmsg[i]['length']=msg[3]
-        trmsg[i]['sample']=msg[4]
-        trmsg[i]['block']=msg[5]
-        trmsg[i]['subband']=msg[6]
-        trmsg[i]['sum']=msg[7]
-        trmsg[i]['max']=msg[8]
-        trmsg[i]['obsID']=msg[9]
-        trmsg[i]['beam']=msg[10]
-        trmsg[i]['DM']=msg[11]
-        if newVersion:
-            trmsg[i]['SBaverage']=msg[12]
-            trmsg[i]['SBstddev']=msg[13]
-            trmsg[i]['Threshold']=msg[14]
-            trmsg[i]['nrFlaggedChannels']=msg[15]
-            trmsg[i]['nrFlaggedSamples']=msg[16]
-        if(msg[-1]==0x65):
-            trmsg[i]['magic']=msg[-1]
+    for i in range(nofmsg):
+        if bReturnArray:
+            trmsg[i]=struct.unpack(fmt,data[i*fmtlen:(i+1)*fmtlen])
+        else:
+            msg=struct.unpack(fmt,data[i*fmtlen:(i+1)*fmtlen])
+            trmsg[i]=dict()
+            trmsg[i]['time']=msg[0]
+            trmsg[i]['utc_second']=msg[1]
+            trmsg[i]['utc_nanosecond']=msg[2]
+            trmsg[i]['length']=msg[3]
+            trmsg[i]['sample']=msg[4]
+            trmsg[i]['block']=msg[5]
+            trmsg[i]['subband']=msg[6]
+            trmsg[i]['sum']=msg[7]
+            trmsg[i]['max']=msg[8]
+            trmsg[i]['obsID']=msg[9]
+            trmsg[i]['beam']=msg[10]
+            trmsg[i]['DM']=msg[11]
+            if newVersion:
+                trmsg[i]['SBaverage']=msg[12]
+                trmsg[i]['SBstddev']=msg[13]
+                trmsg[i]['Threshold']=msg[14]
+                trmsg[i]['nrFlaggedChannels']=msg[15]
+                trmsg[i]['nrFlaggedSamples']=msg[16]
+            if(msg[-1]==0x65):
+                trmsg[i]['magic']=msg[-1]
 # return the dictionary
+    if bReturnArray:
+        trmsg.sort(order='time')
     return trmsg
 
 def filterTriggers(trmsg,subband, keyword,strictKeywordchecking=True):
@@ -431,6 +442,8 @@ def derivedParameters(par,DM=DM):
     par['alldelaysPerDM']=dd.freq_to_delay(1,par['freq'],par['timeresolution'])
     par['nrdivs']=len(par['startchannels'])
     par['nrstreams']=par['nrdivs']
+    par['streamindex']=np.arange(par['nrfreqs']).reshape(par['nrstreams'],par['nrfreqs']/par['nrstreams'])
+    par['sidx']=par['streamindex']
 
 def copyPart(par,DM,sample):
     """ Cuts out part of the data from its location on helios around "sample" for the
@@ -1075,4 +1088,25 @@ def addmsg(msg,msgnew):
     for k,v in msgnew.iteritems():
         msg[k-firstk+nextk]=v
 
+def setlabels(myplt,size,title='',xlabel='',ylabel=''):
+    myplt.xticks(fontsize=size)
+    myplt.yticks(fontsize=size)
+    myplt.title(title,fontsize=size)
+    myplt.xlabel(xlabel,fontsize=size)
+    myplt.ylabel(ylabel,fontsize=size)
+
+def RFIcalcBadSamples(data,cutlevel,subdiv=4,reqsubdiv=2):
+    (sa,ch)=data.shape
+    chdiv=ch/subdiv
+    collapsedData=np.transpose(np.sum(data.reshape(sa,subdiv,chdiv),axis=2))
+    collapsedDataSort=np.copy(collapsedData)
+    avdiv=np.average(collapsedDataSort[:,sa/10:sa-sa/10],axis=1)
+    stddiv=np.std(collapsedDataSort[:,sa/10:sa-sa/10],axis=1)
+    level=avdiv+cutlevel*stddiv
+    index=np.arange(sa)
+    flagsa=[index[collapsedData[i]>level[i]] for i in range(subdiv)]
+    return flagsa    
+
         
+
+     
