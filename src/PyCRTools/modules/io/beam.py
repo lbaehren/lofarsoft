@@ -336,7 +336,7 @@ class BeamData(IOInterface):
             frequency_range = range(spec_len)
             modulus = self['NCHUNKS']*self['BEAM_NBLOCKS']  
     
-            real_offset = cr.hArray(int,len(self['DM_OFFSET'][0]),self['DM_OFFSET'][0])
+            real_offset = cr.hArray(int,spec_len,self['DM_OFFSET'][0])
     
             cr.hAdd(real_offset,block)
             cr.hModulus(real_offset,modulus)
@@ -351,10 +351,11 @@ class BeamData(IOInterface):
 
             #Addding phase correction to DM offsets.
             weights_dm = self.empty('FFT_DATA')
-            phases_dm=cr.hArray(float,weights_dm,fill=0)
+            phases_dm = cr.hArray(float,weights_dm.shape()[1],fill=0)
             cr.hDelayToPhase(phases_dm,self['BEAM_FREQUENCIES'],self['DM_OFFSET'][1])  #Using this form of delay2phase since have delays as func. of freq.
-            weights_dm.phasetocomplex(phases_dm)
-#            data[...].mul(weights_dm[...])
+            weights_dm[0].phasetocomplex(phases_dm)
+            weights_dm[1:] = weights_dm[0]
+            data[...].mul(weights_dm[...])
 
         #Adding extra calibration delay between stations.
         if np.any(self['CAL_DELAY']):
