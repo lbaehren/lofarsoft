@@ -762,12 +762,14 @@ class PipeUnit:
                 	status=os.popen(cmd).readlines()
 			if np.size(status)>0:
 				self.log.warning("WARNING: Par-file %s has PSRB keyword that can cause prepfold to crash!\n\
-If your pipeline run calls prepfold you might need to change PSRB to PSRJ.")
+If your pipeline run calls prepfold you might need to change PSRB to PSRJ." % (parfile,))
 			cmd="grep 'CLK' %s" % (parfile,)
                 	status=os.popen(cmd).readlines()
 			if np.size(status)>0:
 				self.log.warning("WARNING: Par-file %s has CLK keyword that can cause prepfold to crash!\n\
-If your pipeline run calls prepfold you might need to remove it from your parfile.")
+CLK line will be removed from the parfile!" % (parfile,))
+				cmd="sed -i '/^CLK/d' %s" % (parfile,)
+				self.execute(cmd, log, is_os=True)
 
 
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
@@ -1039,8 +1041,10 @@ If your pipeline run calls prepfold you might need to remove it from your parfil
 							psr2=re.sub(r'[BJ]', '', psr)
 							# first running prepfold with mask (if --norfi was not set)
 							if not cmdline.opts.is_norfi:
-								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par %s/%s.par -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
-									(psr, self.outdir, psr2, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, self.output_prefix)
+								# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
+								# I suppose it happens because name of the file is TOO long for Tempo
+								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
+									(psr, psr2, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, self.output_prefix)
 								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 								prepfold_popens.append(prepfold_popen)
 								time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish 
@@ -1048,8 +1052,10 @@ If your pipeline run calls prepfold you might need to remove it from your parfil
 							# running prepfold without mask
 							if not cmdline.opts.is_norfi: output_stem="_nomask"
 							else: output_stem=""
-							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par %s/%s.par -nsub %d -n 256 -fine -nopdsearch -o %s_%s%s %s.fits" % \
-								(psr, self.outdir, psr2, prepfold_nsubs, psr, self.output_prefix, output_stem, self.output_prefix)
+							# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
+							# I suppose it happens because name of the file is TOO long for Tempo
+							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -nsub %d -n 256 -fine -nopdsearch -o %s_%s%s %s.fits" % \
+								(psr, psr2, prepfold_nsubs, psr, self.output_prefix, output_stem, self.output_prefix)
 							prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 							prepfold_popens.append(prepfold_popen)
 							time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish 
