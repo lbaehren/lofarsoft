@@ -769,7 +769,7 @@ If your pipeline run calls prepfold you might need to change PSRB to PSRJ." % (p
 				self.log.warning("WARNING: Par-file %s has CLK keyword that can cause prepfold to crash!\n\
 CLK line will be removed from the parfile!" % (parfile,))
 				cmd="sed -i '/^CLK/d' %s" % (parfile,)
-				self.execute(cmd, log, is_os=True)
+				self.execute(cmd, self.log, is_os=True)
 
 
 	def execute(self, cmd, workdir=None, shell=False, is_os=False):
