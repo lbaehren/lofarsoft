@@ -37,7 +37,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <th>Moliere radius (m)</th>
     </tr>
     <xsl:for-each select="/elements/event">
-      <xsl:if test="status='CR_FOUND' or status='CR_ANALYZED'">
+      <xsl:if test="status='CR_FOUND' or status='CR_ANALYZED' or status='CR_PHYSICS_PROCESSING'">
       <xsl:choose>
          <xsl:when test="lora/@good_reconstruction">
            <tr class="highlight">
