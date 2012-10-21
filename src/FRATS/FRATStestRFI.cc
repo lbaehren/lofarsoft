@@ -577,12 +577,14 @@ int main (int argc,
 			float stepDM=atof(argv[argcounter]);
 			argcounter++;
 			float endDM=atof(argv[argcounter]);
-			nDMs = int(endDM-firstDM)/stepDM;
-			cout << "dispersion measure: " ;
+            float nDMsf = (endDM-firstDM)/stepDM;
+            cout << firstDM << " " << stepDM << " " << endDM << " " << (endDM-firstDM)/stepDM << endl;
+			nDMs = (int) nDMsf+1;
+			cout << "dispersion measure ("<< nDMs <<"): " ;
 			DMvalues.resize(nDMs);
 			for(int i=0;i<nDMs;i++){
 			    DMvalues[i]=firstDM+i*stepDM;
-			cout << " " << DMvalues[i];
+                cout << " " << DMvalues[i];
 			}		
             cout << endl;	
 		} else if(topic == "-freq"){
@@ -877,9 +879,10 @@ if(doFlagging){
 // Calculate bad samples, by summing in time over a quarter of the bandwidth
 // samples that are more than cutlevel*sigma above average in at least 2 of the quarters are flagged
         nrFlaggedSamples=RFIcleaner.calcBadSamples(4); // cutlevel = 4 sigma
-        if(verbose){
+        //if(verbose){
+            
             RFIcleaner.printBadSamples();
-        }
+        //}
         RFIcleaner.cleanSamples("1"); // replace by 1
         RFIcleaner.writeBadSamples(fsfile, blockNr); // write bad samples to file
 
@@ -976,7 +979,7 @@ if(doFlagging){
 					pulsenr++;
 				}
                 // output dedispersed timeseries, if number of DMs is less than 3. NOTE: make this configurable?
-                if(nDMs <3){
+                if(nDMs <=3){
 						stringstream pulselogfn;
 						pulselogfn << pulsedir << "/dedisptimeseries_" << SBTs[sc][DMcounter]->itsDM << "_" << sc << ".log";
 						string pulselogfilename;

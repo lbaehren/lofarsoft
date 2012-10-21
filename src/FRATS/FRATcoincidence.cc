@@ -433,7 +433,7 @@ namespace FRAT {
 			    return false; 
 			} else {
 				itsFoundTriggers="";
-				itsBlockNumber++;				
+				itsBlockNumber=sequenceNumber;
                 if(verbose){
                     std::cout << "Processing block " << sequenceNumber << std::endl;
                 }
@@ -781,7 +781,7 @@ namespace FRAT {
 			    return false; 
 			} else {
 				itsFoundTriggers="";
-				itsBlockNumber++;
+				itsBlockNumber=sequenceNumber;
 			    if(verbose){	
                     std::cout << "Processing block " << sequenceNumber << std::endl;
                 }
@@ -1650,7 +1650,7 @@ Save timeseries (append)
 
             if ( method == "1" ) {
                 #ifdef _OPENMP
-                    #pragma omp parallel for 
+                    #pragma omp parallel for private(ch,choffset)
                 #else
                 #endif // _OPENMP
                 for(int i=0; i<badChans.size(); i++){
@@ -1662,7 +1662,7 @@ Save timeseries (append)
                 }
             } else if ( method == "0" ) {
                 #ifdef _OPENMP
-                    #pragma omp parallel for 
+                    #pragma omp parallel for private(ch)
                 #else
                 #endif // _OPENMP
                 for(int i=0; i<badChans.size(); i++){
@@ -1681,7 +1681,7 @@ Save timeseries (append)
                     choffset=-1;
                 }
                 #ifdef _OPENMP
-                    #pragma omp parallel for 
+                    #pragma omp parallel for private(ch)
                 #else
                 #endif // _OPENMP
                 for(int i=0; i<badChans.size(); i++){
@@ -1708,7 +1708,7 @@ Save timeseries (append)
             int ch;                
             int choffset;
             #ifdef _OPENMP
-                #pragma omp parallel for 
+                #pragma omp parallel for private(ch,choffset)
             #else
             #endif // _OPENMP
             for(int ch=0; ch<itsNrChannels; ch+=itsChansPerSubband){
@@ -1735,13 +1735,16 @@ Save timeseries (append)
 
                 
         bool RFIcleaning::cleanSamples(std::string method){
+            cerr << " cleaning new block " << itsNrSamples << endl;
+            cerr.flush();
             int sam;
             int samoffset=-3;
 
             #ifdef _OPENMP
-                #pragma omp parallel for 
+                #pragma omp parallel for private(sam)
             #else
             #endif // _OPENMP
+        
             for(int i=0; i<badSamples.size(); i++){
    //             validsamples--;                
                 sam=badSamples[i];
@@ -1751,14 +1754,20 @@ Save timeseries (append)
                     samoffset=-3;
                 }
                 if( sam < itsNrSamples ){
-                    
+                    cerr << " cleaning sample " << sam << " " << badSamples[i] << " " << i << " " << method << endl;
+                    cerr.flush();
                     for(int ch=0; ch<itsNrChannels ; ch++){ 
                         if ( method == "1" ) {
+                            if(ch==0){
+                                cerr << "Flagging method 1";
+                            }
                             *(itsDataStart+sam*itsNrChannels+ch)=1.0;
                         } else if (method == "previous" ) {
                             *(itsDataStart+sam*itsNrChannels+ch)=*(itsDataStart+(sam+samoffset)*itsNrChannels+ch);
-                        }
+                        } 
                     }
+                    cerr << endl;
+                    cerr.flush();
                 }
             }
             return true;
@@ -1767,9 +1776,9 @@ Save timeseries (append)
         bool RFIcleaning::printBadSamples(){
             cout << " Bad samples " ;
             for(int i=0; i<badSamples.size(); i++){
-                cout << badSamples[i] << " ";
+                cerr << badSamples[i] << " ";
             }
-            cout << endl;
+            cerr << endl;
             return true;  
         }
 
