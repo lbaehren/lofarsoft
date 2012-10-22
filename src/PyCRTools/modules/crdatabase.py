@@ -50,7 +50,7 @@ class CRDatabase(object):
         self.settings = Settings(self.db)
 
         # Database version applied in this module
-        self.db_required_version = 3
+        self.db_required_version = 4
         self.__updateDatabase()
 
         # Path settings
@@ -153,6 +153,7 @@ class CRDatabase(object):
         self.__updateDatabase_v0_to_v1()
         self.__updateDatabase_v1_to_v2()
         self.__updateDatabase_v2_to_v3()
+        self.__updateDatabase_v3_to_v4()
 
 
     def addParameterName(self, grouptype, parametername):
@@ -427,10 +428,10 @@ class CRDatabase(object):
 
 
     def __updateDatabase_v2_to_v3(self):
-        """Update database from version 1 to version 2.
+        """Update database from version 2 to version 3.
 
         The database is only updated if the version of the database is
-        1 and the required version is larger than the database version.
+        2 and the required version is larger than the database version.
 
         List of changes:
         - Added locking of database.
@@ -444,7 +445,7 @@ class CRDatabase(object):
             print "Upgrading database to version {0}...".format(db_version_post)
 
             # Add parameters for cr_physics pipeline
-            print "  Adding additional parameters for cr_physics pipeline..." # DEBUG
+            print "  Adding additional parameters for cr_physics pipeline..."
             sql = ""
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "plotfiles")
             sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "crp_average_direction")
@@ -460,6 +461,37 @@ class CRDatabase(object):
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
             self.db.execute("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
+
+
+    def __updateDatabase_v3_to_v4(self):
+        """Update database from version 3 to version 4.
+
+        The database is only updated if the version of the database is
+        3 and the required version is larger than the database version.
+
+        List of changes:
+        - Added new lora keywords to event parameters:
+          - lora_datafile
+          - lora_ldf
+        """
+        db_version_pre = 3
+        db_version_post = 4
+
+        if ((self.settings.db_version == db_version_pre) and
+            (self.db_required_version >= db_version_post)):
+
+            print "Upgrading database to version {0}...".format(db_version_post)
+
+            # Add parameters for cr_physics pipeline
+            print "  Adding additional parameters for cr_physics pipeline..."
+            sql_list= []
+            sql_list.append("ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "lora_datafile"))
+            sql_list.append("ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "lora_ldf"))
+
+            # Upgrade the database version number.
+            print "  Updating database version number..." # DEBUG
+            sql_list.append("UPDATE main.settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
+            self.db.executelist(sql_list)
 
 
     def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, order="e.timestamp"):
