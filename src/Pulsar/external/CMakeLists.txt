@@ -491,7 +491,8 @@ add_dependencies (ssps_install ssps_build ssps_unpack)
 ##
 ## ==============================================================================
 
-set (psrcat_version "V1.32")
+#set (psrcat_version "V1.32")
+set (psrcat_version "V1.43")
 set (psrcat_name "psrcat-${psrcat_version}")
 set (psrcat_directory "psrcat/psrcat-${psrcat_version}")
 
