@@ -424,6 +424,14 @@ class CMDLine:
                         	        if log != None: log.info(msg)
                                 	else: print msg
 
+	# updating cmdline default parameters based on obtained info about Observation
+	# such as, number of frequency splits
+	def cmdline.update_default_values(self, obs, log=None):
+		if self.opts.first_freq_split >= obs.nsplits: self.opts.first_freq_split = 0
+		if self.opts.nsplits == -1: self.opts.nsplits = obs.nsplits
+		if self.opts.first_freq_split + self.opts.nsplits > obs.nsplits:
+			self.opts.nsplits -= (self.opts.first_freq_split + self.opts.nsplits - obs.nsplits)
+
 	# print summary of all set input parameters
 	def print_summary(self, cep2, obs, log=None):
 		if log != None:

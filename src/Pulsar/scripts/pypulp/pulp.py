@@ -123,6 +123,9 @@ if __name__ == "__main__":
 			obs=cPickle.load(obsfd)
 			obsfd.close()
 
+		# updating cmdline default parameters based on obtained info about Observation
+		# such as, number of frequency splits
+		cmdline.update_default_values(obs, log)
 		# printing info about observation
 		obs.print_info(log)
 
