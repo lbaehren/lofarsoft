@@ -1369,8 +1369,8 @@ class Event(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def writeFast(self, recursive=True, parameters=True):
-        """Write event information to the database in a faster buffered way.
+    def update(self, recursive=True, parameters=True):
+        """Update event information to the database in a faster buffered way.
 
         **Properties**
 
@@ -1381,7 +1381,7 @@ class Event(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Event.writeFast() - Add implementation
+        # TEST: Event.update() - Add implementation
 
         if self._db:
             sql_list = self.__getUpdateSql(recursive, parameters)
@@ -1781,8 +1781,8 @@ class Datafile(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def writeFast(self, recursive=True, parameters=True):
-        """Write datafile information to the database in a faster buffered way.
+    def update(self, recursive=True, parameters=True):
+        """Update datafile information to the database in a faster buffered way.
 
         **Properties**
 
@@ -1793,7 +1793,7 @@ class Datafile(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Datafile.writeFast() - Add implementation
+        # TEST: Datafile.update() - Add implementation
 
         if self._db:
             sql_list = self.__getUpdateSql(recursive, parameters)
@@ -2163,8 +2163,8 @@ class Station(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def writeFast(self, recursive=True, parameters=True):
-        """Write station information to the database in a faster buffered way.
+    def update(self, recursive=True, parameters=True):
+        """Update station information to the database in a faster buffered way.
 
         **Properties**
 
@@ -2175,7 +2175,7 @@ class Station(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Station.writeFast() - Add implementation
+        # TEST: Station.update() - Add implementation
 
         if self._db:
             sql_list = self.__getUpdateSql(recursive, parameters)
@@ -2543,8 +2543,8 @@ class Polarization(object):
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def writeFast(self, parameters=True):
-        """Write polarization information to the database in a faster buffered way.
+    def update(self, parameters=True):
+        """Update polarization information to the database in a faster buffered way.
 
         **Properties**
 
@@ -2554,7 +2554,7 @@ class Polarization(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Polarization.writeFast() - Add implementation
+        # TEST: Polarization.update() - Add implementation
 
         if self._db:
             sql_list = self.__getUpdateSql(parameters)
