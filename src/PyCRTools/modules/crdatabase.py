@@ -650,7 +650,11 @@ class CRDatabase(object):
             datafileIDs = [r[0] for r in results]
             # TEST: CRDatabase.__getDeleteEventSql() - Remove Datafiles
             for datafileID in datafileIDs:
-                sql_list.append(self.__getDeleteDatafileSql(datafileID))
+                sql_list += self.__getDeleteDatafileSql(datafileID)
+
+        # TEST: CRDatabase.__getDeleteEventSql() - Delete extries from event_datafile table
+        sql = "DELETE FROM main.event_datafile WHERE eventID={0};".format(eventID)
+        sql_list.append(sql)
 
         return sql_list
 
@@ -798,7 +802,11 @@ class CRDatabase(object):
             stationIDs = [r[0] for r in results]
             # TEST: CRDatabase.__getDeleteDatafileSql() - Remove Stations
             for stationID in stationIDs:
-                sql_list.append(self.__getDeleteStationSql(stationID))
+                sql_list += self.__getDeleteStationSql(stationID)
+
+        # TEST: CRDatabase.__getDeleteDatafileSql() - Delete entries from datafile_station table
+        sql = "DELETE FROM main.datafile_station WHERE datafileID={0};".format(datafileID)
+        sql_list.append(sql)
 
         return sql_list
 
@@ -950,7 +958,11 @@ class CRDatabase(object):
             polarizationIDs = [r[0] for r in results]
             # TEST: CRDatabase.__getDeleteStationSql() - Remove Polarizations
             for polarizationID in polarizationIDs:
-                sql_list.append(self.__getDeletePolarizationSql(polarizationID))
+                sql_list += self.__getDeletePolarizationSql(polarizationID)
+
+        # TEST: CRDatabase.__getDeleteStationSql() - Delete entries from station_polarization table.
+        sql = "DELETE FROM main.station_polarization WHERE stationID={0};".format(stationID)
+        sql_list.append(sql)
 
         return sql_list
 
