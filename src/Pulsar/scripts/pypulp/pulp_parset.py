@@ -612,6 +612,12 @@ class Observation:
 		# calculate the number of frequency splits
 		self.nsplits = int(self.nrSubbands / self.nrSubsPerFileCS)
 		if self.nrSubbands % self.nrSubsPerFileCS != 0: self.nsplits += 1
+		# changing cmdline split-related options in the _copy_ of Cmdline class
+		if cmdline.opts.first_freq_split >= self.nsplits: cmdline.opts.first_freq_split = 0
+		if cmdline.opts.nsplits == -1: cmdline.opts.nsplits = self.nsplits
+		if cmdline.opts.first_freq_split + cmdline.opts.nsplits > self.nsplits:
+			cmdline.opts.nsplits -= (cmdline.opts.first_freq_split + cmdline.opts.nsplits - self.nsplits)
+
 
 		# Getting the sample clock
 		cmd="grep Observation.sampleClock %s" % (self.parset,)
