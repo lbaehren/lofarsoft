@@ -22,29 +22,37 @@ class Database(object):
         and read from memory.
         """
         self._filename = filename
-        self._db = sqlite3.connect(self._filename, timeout = 60, isolation_level = "DEFERRED")
+        self._timeout = 60
+        self._isolation_level = "DEFERRED"
+
+        self._db = None
 
 
-    def open(self, filename=""):
+    def open(self, filename="", isolation_level=None):
         """Open an SQLite database.
 
         **Properties**
 
-        ============ =======================================================
-        Parameter    Description
-        ============ =======================================================
-        *filename*   Filename of the database.
-        ============ =======================================================
+        ================== =======================================================
+        Parameter          Description
+        ================== =======================================================
+        *filename*         Filename of the database.
+        *isolation_level*  Type of connection
+        ================== =======================================================
 
         When the filename is ``:memory:`` the database is written to
         and read from memory.
         """
-        self._db.close()
+        if self._db:
+            self._db.close()
 
         if filename != "":
             self._filename = filename
 
-        self._db = sqlite3.connect(self._filename, timeout = 60, isolation_level = "DEFERRED")
+        if not isolation_level:
+            isolation_level = self._isolation_level
+
+        self._db = sqlite3.connect(self._filename, timeout=self._timeout, isolation_level=isolation_level)
 
 
     def close(self):
@@ -91,7 +99,7 @@ class Database(object):
         =========  =======================================================
         """
         if not self._db:
-            self.open()
+            self.open(isolation_level="IMMEDIATE")
 
         cursor = self._db.cursor()
 
@@ -113,8 +121,9 @@ class Database(object):
         *sql*      SQL statement to execute.
         =========  =======================================================
         """
+
         if not self._db:
-            self.open()
+            self.open(isolation_level=None)
 
         cursor = self._db.cursor()
 
