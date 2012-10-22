@@ -1413,8 +1413,6 @@ class Event(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Event.update() - Add implementation
-
         if self._db:
             sql_list = self.__getUpdateSql(recursive, parameters)
 
@@ -1438,7 +1436,6 @@ class Event(object):
         """
         sql_list = []
 
-        # TEST: Event.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the event information
@@ -1825,8 +1822,6 @@ class Datafile(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Datafile.update() - Add implementation
-
         if self._db:
             sql_list = self.__getUpdateSql(recursive, parameters)
 
@@ -1850,7 +1845,6 @@ class Datafile(object):
         """
         sql_list = []
 
-        # TEST: Datafile.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the datafile information
@@ -2207,8 +2201,6 @@ class Station(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Station.update() - Add implementation
-
         if self._db:
             sql_list = self.__getUpdateSql(recursive, parameters)
 
@@ -2232,7 +2224,6 @@ class Station(object):
         """
         sql_list = []
 
-        # TEST: Station.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the station information
@@ -2586,8 +2577,6 @@ class Polarization(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
-        # TEST: Polarization.update() - Add implementation
-
         if self._db:
             sql_list = self.__getUpdateSql(parameters)
 
@@ -2610,7 +2599,6 @@ class Polarization(object):
         """
         sql_list = []
 
-        # TEST: Polarization.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the station information
