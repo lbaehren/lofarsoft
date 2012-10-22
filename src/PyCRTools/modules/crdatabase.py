@@ -586,6 +586,54 @@ class CRDatabase(object):
             return None
 
 
+    def deleteEvent(self, id=0):
+        """Delete an event and its underlying information objects from
+        the database.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested event.
+        =========  ====================================
+        """
+        # TODO: CRDatabase.deleteEvent() - Add implementation
+
+        sql_list = []
+
+        # TODO: CRDatabase.deleteEvent() - Check existence of eventID
+        # TODO: CRDatabase.deleteEvent() - Remove Event with eventID
+        # TODO: CRDatabase.deleteEvent() - Remove EventParameters with EventID
+        # TODO: CRDatabase.deleteEvent() - Get list of DatafileIDs
+        # TODO: CRDatabase.deleteEvent() - Remove Datafiles
+
+        # TEST: CRDatabase.deleteEvent() - Execute the list of SQL statements.
+        if self.db and sql_list:
+            self.db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        raise NotImplementedError("Functionality needs to be implemented.")
+
+
+    def __getDeleteEventSql(self, id=0):
+        """Get a list of SQL statements to delete the event
+        information from the database.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested event.
+        =========  ====================================
+        """
+        # TODO: CRDatabase.__getDeleteEventSql() - Add implementation
+
+        raise NotImplementedError("Functionality needs to be implemented.")
+
+
     def getDatafileIDs(self, eventID=None, filename=None, status=None, order=""):
         """Return a list of datafileIDs satifying the values of this
         functions arguments.
@@ -663,6 +711,58 @@ class CRDatabase(object):
             return Datafile(self.db, id=id)
         else:
             return none
+
+
+    def deleteDatafile(self, id=0):
+        """Delete a datafile and its underlying information objects from
+        the database.
+
+        **Properties**
+
+        =========  ========================================================
+        Parameter  Description
+        =========  ========================================================
+        *id*       id of the requested datafile entry in the database.
+        =========  ========================================================
+        """
+        # TODO: CRDatabase.deleteDatafile() - Add implementation
+
+        sql_list = []
+
+        # TODO: CRDatabase.deleteDatafile() - Check existence of datafileID
+        # TODO: CRDatabase.deleteDatafile() - Remove Datafile with datafileID
+        # TODO: CRDatabase.deleteDatafile() - Remove DatafileParameters with datafileID
+        # TODO: CRDatabase.deleteDatafile() - Get list of StationIDs
+        # TODO: CRDatabase.deleteDatafile() - Remove Stations
+
+        # TEST: CRDatabase.deleteDatafile() - Execute the list of SQL statements.
+        if self.db and sql_list:
+            self.db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        raise NotImplementedError("Functionality needs to be implemented.")
+
+
+    def __getDeleteDatafileSql(self, id=0):
+        """Get a list of SQL statements to delete the datafile
+        information from the database.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested event.
+        =========  ====================================
+        """
+        # TODO: CRDatabase.__getDeleteDatafileSql() - Add implementation
+
+        sql_list = []
+
+        return sql_list
+
+        raise NotImplementedError("Functionality needs to be implemented.")
 
 
     def getStationIDs(self, eventID=None, datafileID=None, stationname=None, status=None, order="s.stationname"):
@@ -746,6 +846,58 @@ class CRDatabase(object):
             return Station(self.db, id=id)
         else:
             return none
+
+
+    def deleteStation(self, id=0):
+        """Delete a station and its underlying information objects from
+        the database.
+
+        **Properties**
+
+        =========  ========================================================
+        Parameter  Description
+        =========  ========================================================
+        *id*       id of the requested station entry in the database.
+        =========  ========================================================
+        """
+        # TODO: CRDatabase.deleteStation() - Add implementation
+
+        sql_list = []
+
+        # TODO: CRDatabase.deleteStation() - Check existence of stationID
+        # TODO: CRDatabase.deleteStation() - Remove Station with stationID
+        # TODO: CRDatabase.deleteStation() - Remove StationParameters with stationID
+        # TODO: CRDatabase.deleteStation() - Get list of PolarizationIDs
+        # TODO: CRDatabase.deleteStation() - Remove Polarizations
+
+        # TEST: CRDatabase.deleteStation() - Execute the list of SQL statements.
+        if self.db and sql_list:
+            self.db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        raise NotImplementedError("Functionality needs to be implemented.")
+
+
+    def __getDeleteStationSql(self, id=0):
+        """Get a list of SQL statements to delete the station
+        information from the database.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested event.
+        =========  ====================================
+        """
+        # TODO: CRDatabase.__getDeleteStationSql() - Add implementation
+
+        sql_list = []
+
+        return sql_list
+
+        raise NotImplementedError("Functionality needs to be implemented.")
 
 
     def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None, order=""):
@@ -835,6 +987,56 @@ class CRDatabase(object):
             return Polarization(self.db, id=id)
         else:
             return none
+
+
+    def deletePolarization(self, id=0):
+        """Delete a polarization and its underlying information objects from
+        the database.
+
+        **Properties**
+
+        =========  ========================================================
+        Parameter  Description
+        =========  ========================================================
+        *id*       id of the requested polarization entry in the database.
+        =========  ========================================================
+        """
+        # TODO: CRDatabase.deletePolarization() - Add implementation
+
+        sql_list = []
+
+        # TODO: CRDatabase.deletePolarization() - Remove Polarization with polarizationID
+        # TODO: CRDatabase.deletePolarization() - Remove Polarization with polarizationID
+        # TODO: CRDatabase.deletePolarization() - Remove PolarizationParameters with polarizationID
+
+        # TEST: CRDatabase.deletePolarization() - Execute the list of SQL statements.
+        if self.db and sql_list:
+            self.db.executelist(sql_list)
+        else:
+            raise ValueError("Unable to read from database: no database was set.")
+
+        raise NotImplementedError("Functionality needs to be implemented.")
+
+
+    def __getDeletePolarizationSql(self, id=0):
+        """Get a list of SQL statements to delete the polarization
+        information from the database.
+
+        **Properties**
+
+        =========  ====================================
+        Parameter  Description
+        =========  ====================================
+        *id*       id of the requested event.
+        =========  ====================================
+        """
+        # TODO: CRDatabase.__getDeletePolarizationSql() - Add implementation
+
+        sql_list = []
+
+        return sql_list
+
+        raise NotImplementedError("Functionality needs to be implemented.")
 
 
     def isLocked(self):
@@ -1210,6 +1412,14 @@ class BaseParameter(object):
             sql_list.append(sql)
 
         return sql_list
+
+
+    def getDeleteSql(self):
+        """Get a list of SQL statements to delete the parameter
+        information from the database."""
+        # TODO: BaseParameter.getDeleteSql() - Add implementation
+
+        raise NotImplementedError("Functionality needs to be implemented.")
 
 
     def pickle_parameter(self, value):
