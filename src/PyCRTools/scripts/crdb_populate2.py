@@ -75,7 +75,7 @@ class CRDatabasePopulator(object):
             print "Datafile is already in the database."
             return
 
-        # Retrieve new IDs for database entries
+        # Retrieve new IDs for database entries (eventID is determined using the createEventID method)
         for tableName in ['datafile', 'station', 'polarization']:
             sql = "SELECT max({0}ID) FROM main.{0}s;".format(tableName)
             records = self.db.select(sql)
@@ -83,8 +83,6 @@ class CRDatabasePopulator(object):
                 self.newID[tableName] = int(records[0][0]) + 1
             else:
                 self.newID[tableName] = 1
-            # self.ID[tableName] = self.newID[tableName]
-
 
         # ______________________________________________________________________________
         #                                                                       Datafile
@@ -96,7 +94,7 @@ class CRDatabasePopulator(object):
         self.sqlList.append(sql)
 
         # Write datafile parameters to list of SQL statements
-        # Disabled as there are at the moment no station parameters
+        # => Disabled as there are at the moment no station parameters
         # if options.parameters:
         #     datafileParameters = CRParameter(ID=self.ID['datafile'], parentname='datafile')
         #     sql = datafileParameters.writeSql()
@@ -144,7 +142,7 @@ class CRDatabasePopulator(object):
             self.sqlList.append(sql)
 
             # Write station parameters to list of SQL statements
-            # Disabled as there are at the moment no station parameters
+            # => Disabled as there are at the moment no station parameters
             # if options.parameters:
             #     stationParameters = CRParameter(ID=self.ID['station'], parentname='station')
             #     sql = stationparameters.writeSql()
@@ -204,10 +202,28 @@ class CRDatabasePopulator(object):
         result = timestamp_0
 
         if timestamp:
-            result = int(timestamp) - timestamp_0
+            result = int(timestamp - timestamp_0)
             print "Timestamp={0} -> EventID={1}".format(timestamp, result)
         else:
             raise ValueError("No timestamp provided.")
+
+        # EventID Validation:
+
+        # TEST: CRDatabasePopulator.createEventID() - Check for negative value
+        if result < 0:
+            raise ValueError("Invalid EventID value (< 0), probably due to invalid timestamp (={0}).".format(timestamp))
+
+        # Remark: Should there also be a check for timestamps/eventIDs
+        # which differ only by one second? Due to small differences of
+        # timestamps from different stations this can cause the
+        # creation of two event s that occur on the boundary of a
+        # second.
+
+        # TEST: CRDatabasePopulator.createEventID() - Check for duplicate value
+        sql = "SELECT eventID FROM main.events WHERE eventID={0}".format(result)
+        records = self.db.select(sql)
+        if len(records) > 0:
+            raise ValueError("Event with ID={0} already exists.".format(result))
 
         return result
 
