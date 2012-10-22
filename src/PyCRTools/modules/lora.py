@@ -86,8 +86,8 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     else:
         filename=lora_second
      
-    loradata["lora_datafile"] = datadir + filename    
-    loradata["lora_ldf"] = datadir + filename[:-4]+".png" 
+    loradata["datafile"] = datadir + filename    
+    loradata["ldf"] = datadir + filename[:-4]+".png" 
     file=open(datadir+filename)
     lines=file.readlines()
     file.close()
