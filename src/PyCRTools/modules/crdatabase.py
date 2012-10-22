@@ -1161,7 +1161,7 @@ class BaseParameter(object):
         self._db.insert(sql)
 
 
-    def getUpdateSql(self):
+    def __getUpdateSql(self):
         """Get a list of SQL statements to update the parameter
         information in the database.
         """
@@ -1384,14 +1384,14 @@ class Event(object):
         # TEST: Event.writeFast() - Add implementation
 
         if self._db:
-            sql_list = self.getUpdateSql(recursive, parameters)
+            sql_list = self.__getUpdateSql(recursive, parameters)
 
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getUpdateSql(self, recursive=True, parameters=True):
+    def __getUpdateSql(self, recursive=True, parameters=True):
         """Get a list of SQL statements to update the event
         information in the database.
 
@@ -1406,7 +1406,7 @@ class Event(object):
         """
         sql_list = []
 
-        # TEST: Event.getUpdateSql() - Add implementation
+        # TEST: Event.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the event information
@@ -1415,13 +1415,13 @@ class Event(object):
 
                 # Add the event parameters
                 if parameters:
-                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_sublist = self.parameter.__getUpdateSql()
                     sql_list += sql_sublist
 
                 # Add underlying structures (datafiles)
                 if recursive:
                     for datafile in self.datafiles:
-                        sql_sublist = datafile.getUpdateSql(recursive, parameters)
+                        sql_sublist = datafile.__getUpdateSql(recursive, parameters)
                         sql_list += sql_sublist
             else:
                 raise ValueError("No records found for EventID={0}".format(self._id))
@@ -1796,14 +1796,14 @@ class Datafile(object):
         # TEST: Datafile.writeFast() - Add implementation
 
         if self._db:
-            sql_list = self.getUpdateSql(recursive, parameters)
+            sql_list = self.__getUpdateSql(recursive, parameters)
 
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getUpdateSql(self, recursive=True, parameters=True):
+    def __getUpdateSql(self, recursive=True, parameters=True):
         """Get a list of SQL statements to update the datafile
         information in the database.
 
@@ -1818,7 +1818,7 @@ class Datafile(object):
         """
         sql_list = []
 
-        # TEST: Datafile.getUpdateSql() - Add implementation
+        # TEST: Datafile.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the datafile information
@@ -1827,13 +1827,13 @@ class Datafile(object):
 
                 # Add the datafile parameters
                 if parameters:
-                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_sublist = self.parameter.__getUpdateSql()
                     sql_list += sql_sublist
 
                 # Add underlying structures (stations)
                 if recursive:
                     for station in self.stations:
-                        sql_sublist = station.getUpdateSql(recursive, parameters)
+                        sql_sublist = station.__getUpdateSql(recursive, parameters)
                         sql_list += sql_sublist
             else:
                 raise ValueError("No records found for datafileID={0}".format(self._id))
@@ -2178,14 +2178,14 @@ class Station(object):
         # TEST: Station.writeFast() - Add implementation
 
         if self._db:
-            sql_list = self.getUpdateSql(recursive, parameters)
+            sql_list = self.__getUpdateSql(recursive, parameters)
 
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getUpdateSql(self, recursive=True, parameters=True):
+    def __getUpdateSql(self, recursive=True, parameters=True):
         """Get a list of SQL statements to update the station
         information in the database.
 
@@ -2200,7 +2200,7 @@ class Station(object):
         """
         sql_list = []
 
-        # TEST: Station.getUpdateSql() - Add implementation
+        # TEST: Station.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the station information
@@ -2209,13 +2209,13 @@ class Station(object):
 
                 # Add the station parameters
                 if parameters:
-                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_sublist = self.parameter.__getUpdateSql()
                     sql_list += sql_sublist
 
                 # Add underlying structures (polarizations)
                 if recursive:
                     for polarization in self.polarizations:
-                        sql_sublist = polarization.getUpdateSql(parameters)
+                        sql_sublist = polarization.__getUpdateSql(parameters)
                         sql_list += sql_sublist
             else:
                 raise ValueError("No records found for stationID={0}".format(self._id))
@@ -2557,14 +2557,14 @@ class Polarization(object):
         # TEST: Polarization.writeFast() - Add implementation
 
         if self._db:
-            sql_list = self.getUpdateSql(parameters)
+            sql_list = self.__getUpdateSql(parameters)
 
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
 
-    def getUpdateSql(self, parameters=True):
+    def __getUpdateSql(self, parameters=True):
         """Get a list of SQL statements to update the polarization
         information in the database.
 
@@ -2578,7 +2578,7 @@ class Polarization(object):
         """
         sql_list = []
 
-        # TEST: Polarization.getUpdateSql() - Add implementation
+        # TEST: Polarization.__getUpdateSql() - Add implementation
         if self._db:
             if self._inDatabase:
                 # Add the station information
@@ -2587,7 +2587,7 @@ class Polarization(object):
 
                 # Add the polarization parameters
                 if parameters:
-                    sql_sublist = self.parameter.getUpdateSql()
+                    sql_sublist = self.parameter.__getUpdateSql()
                     sql_list += sql_sublist
             else:
                 raise ValueError("No records found for polarizationID={0}".format(self._id))
