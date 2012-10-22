@@ -271,9 +271,8 @@ event["crp_average_direction"] = average_direction
 # Beamform with all stations
 
 # Compute LDF and footprint
-
-core = list(stations[0].polarization['0']["pulse_core_lora"])+[0]
-core_uncertainties = stations[0].polarization['0']["pulse_coreuncertainties_lora"].toNumpy()
+core = list(event["lora_core"])
+core_uncertainties = event["lora_coreuncertainties"].toNumpy()
 direction_uncertainties = [3.,3.,0]
 
 ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, timelags = all_station_pulse_delays, core_uncertainties = core_uncertainties, signals = all_station_pulse_peak_amplitude, direction_uncertainties = direction_uncertainties, ldf_enable = True, footprint_enable = True, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+str(options.id)+"-")
