@@ -598,22 +598,21 @@ class CRDatabase(object):
         *id*       id of the requested event entry in the database.
         =========  ========================================================
         """
-        # TEST: CRDatabase.deleteEvent() - Add implementation
-
         sql_list = []
         eventID = int(id)
 
-        # TEST: CRDatabase.deleteEvent() - Check existence of eventID
+        # Check existence of eventID
         sql = "SELECT COUNT(eventID) FROM main.events WHERE eventID={0};".format(eventID)
         results = self.db.select(sql)
         if len(results) > 0:
-            sql_list.append(self.__getDeleteEventSql(eventID))
+            sql_list += (self.__getDeleteEventSql(eventID))
         else:
             raise ValueError("No event available with ID={0}.".format(eventID))
 
-        # TEST: CRDatabase.deleteEvent() - Execute the list of SQL statements.
-        if self.db and sql_list:
-            print sql_list # self.db.executelist(sql_list)
+        # Execute the list of SQL statements.
+        if self.db:
+            if sql_list:
+                self.db.executelist(sql_list, verbose=True)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -630,29 +629,27 @@ class CRDatabase(object):
         *id*       id of the requested event.
         =========  ====================================
         """
-        # TEST: CRDatabase.__getDeleteEventSql() - Add implementation
-
         sql_list = []
         eventID = int(id)
 
-        # TEST: CRDatabase.__getDeleteEventSql() - Remove Event with eventID
+        # Remove Event with eventID
         sql = "DELETE FROM main.events WHERE eventID={0};".format(eventID)
         sql_list.append(sql)
 
-        # TEST: CRDatabase.__getDeleteEventSql() - Remove EventParameters with EventID
+        # Remove EventParameters with EventID
         sql = "DELETE FROM main.eventparameters WHERE eventID={0};".format(eventID)
         sql_list.append(sql)
 
-        # TEST: CRDatabase.__getDeleteEventSql() - Get list of DatafileIDs
+        # Get list of DatafileIDs
         sql = "SELECT datafileID FROM main.event_datafile WHERE eventID={0};".format(eventID)
         results = self.db.select(sql)
         if len(results) > 0:
             datafileIDs = [r[0] for r in results]
-            # TEST: CRDatabase.__getDeleteEventSql() - Remove Datafiles
+            # emove Datafiles
             for datafileID in datafileIDs:
                 sql_list += self.__getDeleteDatafileSql(datafileID)
 
-        # TEST: CRDatabase.__getDeleteEventSql() - Delete extries from event_datafile table
+        # Delete extries from event_datafile table
         sql = "DELETE FROM main.event_datafile WHERE eventID={0};".format(eventID)
         sql_list.append(sql)
 
@@ -750,22 +747,21 @@ class CRDatabase(object):
         *id*       id of the requested datafile entry in the database.
         =========  ========================================================
         """
-        # TEST: CRDatabase.deleteDatafile() - Add implementation
-
         sql_list = []
         datafileID = int(id)
 
-        # TEST: CRDatabase.deleteDatafile() - Check existence of datafileID
+        # Check existence of datafileID
         sql = "SELECT COUNT(datafileID) FROM main.datafiles WHERE datafileID={0};".format(datafileID)
         results = self.db.select(sql)
         if len(results) > 0:
-            sql_list.append(self.__getDeleteDatafileSql(datafileID))
+            sql_list += self.__getDeleteDatafileSql(datafileID)
         else:
             raise ValueError("No datafile available with ID={0}.".format(eventID))
 
-        # TEST: CRDatabase.deleteDatafile() - Execute the list of SQL statements.
-        if self.db and sql_list:
-            print sql_list # self.db.executelist(sql_list)
+        # Execute the list of SQL statements.
+        if self.db:
+            if sql_list:
+                self.db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -782,29 +778,27 @@ class CRDatabase(object):
         *id*       id of the requested datafile.
         =========  ====================================
         """
-        # TEST: CRDatabase.__getDeleteDatafileSql() - Add implementation
-
         sql_list = []
         datafileID = int(id)
 
-        # TEST: CRDatabase.__getDeleteDatafileSql() - Remove Datafile with datafileID
+        # Remove Datafile with datafileID
         sql = "DELETE FROM main.datafiles WHERE datafileID={0};".format(datafileID)
         sql_list.append(sql)
 
-        # CRDatabase.__getDeleteDatafileSql() - Remove DatafileParameters with datafileID
-        # sql = "DELETE FROM main.datafileparameters WHERE datafileID={0};".format(datafileID)
-        # sql_list.append(sql)
+        # Remove DatafileParameters with datafileID
+        sql = "DELETE FROM main.datafileparameters WHERE datafileID={0};".format(datafileID)
+        sql_list.append(sql)
 
-        # TEST: CRDatabase.__getDeleteDatafileSql() - Get list of StationIDs
+        # Get list of StationIDs
         sql = "SELECT stationID FROM main.datafile_station WHERE datafileID={0};".format(datafileID)
         results = self.db.select(sql)
         if len(results) > 0:
             stationIDs = [r[0] for r in results]
-            # TEST: CRDatabase.__getDeleteDatafileSql() - Remove Stations
+            # Remove Stations
             for stationID in stationIDs:
                 sql_list += self.__getDeleteStationSql(stationID)
 
-        # TEST: CRDatabase.__getDeleteDatafileSql() - Delete entries from datafile_station table
+        # Delete entries from datafile_station table
         sql = "DELETE FROM main.datafile_station WHERE datafileID={0};".format(datafileID)
         sql_list.append(sql)
 
@@ -906,22 +900,21 @@ class CRDatabase(object):
         *id*       id of the requested station entry in the database.
         =========  ========================================================
         """
-        # TEST: CRDatabase.deleteStation() - Add implementation
-
         sql_list = []
         stationID = int(id)
 
-        # TEST: CRDatabase.deleteStation() - Check existence of stationID
+        # Check existence of stationID
         sql = "SELECT COUNT(stationID) FROM main.stations WHERE stationID={0};".format(stationID)
         results = self.db.select(sql)
         if len(results) > 0:
-            sql_list.append(self.__getDeleteStationSql(stationID))
+            sql_list += self.__getDeleteStationSql(stationID)
         else:
             raise ValueError("No station available with ID={0}.".format(stationID))
 
-        # TEST: CRDatabase.deleteStation() - Execute the list of SQL statements.
-        if self.db and sql_list:
-            print sql_list # self.db.executelist(sql_list)
+        # Execute the list of SQL statements.
+        if self.db:
+            if sql_list:
+                self.db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -938,29 +931,27 @@ class CRDatabase(object):
         *id*       id of the requested station entry in the database.
         =========  ========================================================
         """
-        # TEST: CRDatabase.__getDeleteStationSql() - Add implementation
-
         sql_list = []
         stationID = int(id)
 
-        # TEST: CRDatabase.__getDeleteStationSql() - Remove Station with stationID
+        # Remove Station with stationID
         sql = "DELETE FROM main.stations WHERE stationID={0};".format(stationID)
         sql_list.append(sql)
 
-        # CRDatabase.__getDeleteStationSql() - Remove StationParameters with stationID
-        # sql = "DELETE FROM main.stationparameters WHERE stationID={0};".format(stationID)
-        # sql_list.append(sql)
+        # Remove StationParameters with stationID
+        sql = "DELETE FROM main.stationparameters WHERE stationID={0};".format(stationID)
+        sql_list.append(sql)
 
-        # TEST: CRDatabase.__getDeleteStationSql() - Get list of PolarizationIDs
-        sql = "SELECTpolarizationID FROM main.station_polarization WHERE stationID={0};".format(stationID)
+        # Get list of PolarizationIDs
+        sql = "SELECT polarizationID FROM main.station_polarization WHERE stationID={0};".format(stationID)
         results = self.db.select(sql)
         if len(results) > 0:
             polarizationIDs = [r[0] for r in results]
-            # TEST: CRDatabase.__getDeleteStationSql() - Remove Polarizations
+            # Remove Polarizations
             for polarizationID in polarizationIDs:
                 sql_list += self.__getDeletePolarizationSql(polarizationID)
 
-        # TEST: CRDatabase.__getDeleteStationSql() - Delete entries from station_polarization table.
+        # Delete entries from station_polarization table.
         sql = "DELETE FROM main.station_polarization WHERE stationID={0};".format(stationID)
         sql_list.append(sql)
 
@@ -1068,22 +1059,21 @@ class CRDatabase(object):
         *id*       id of the requested polarization entry in the database.
         =========  ========================================================
         """
-        # TEST: CRDatabase.deletePolarization() - Add implementation
-
         sql_list = []
         polarizationID = int(id)
 
-        # TEST: CRDatabase.deletePolarization() - Check existence of polarizationID
+        # Check existence of polarizationID
         sql = "SELECT COUNT(polarizationID) FROM main.polarizations WHERE polarizationID={0};".format(polarizationID)
         results = self.db.select(sql)
         if len(results) > 0:
-            sql_list.append(self.__getDeletePolarizationSql(polarizationID))
+            sql_list += self.__getDeletePolarizationSql(polarizationID)
         else:
             raise ValueError("No polarization available with ID={0}.".format(polarizationID))
 
-        # TEST: CRDatabase.deletePolarization() - Execute the list of SQL statements.
-        if self.db and sql_list:
-            print sql_list # self.db.executelist(sql_list)
+        # Execute the list of SQL statements.
+        if self.db:
+            if sql_list:
+                self.db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -1100,16 +1090,14 @@ class CRDatabase(object):
         *id*       id of the requested event.
         =========  ====================================
         """
-        # TEST: CRDatabase.__getDeletePolarizationSql() - Add implementation
-
         sql_list = []
         polarizationID = int(id)
 
-        # TEST: CRDatabase.__getDeletePolarizationSql() - Remove Polarization with polarizationID
+        # Remove Polarization with polarizationID
         sql = "DELETE FROM main.polarizations WHERE polarizationID={0};".format(polarizationID)
         sql_list.append(sql)
 
-        # TEST: CRDatabase.__getDeletePolarizationSql() - Remove PolarizationParameters with polarizationID
+        # Remove PolarizationParameters with polarizationID
         sql = "DELETE FROM main.polarizationparameters WHERE polarizationID={0};".format(polarizationID)
         sql_list.append(sql)
 
@@ -1494,9 +1482,7 @@ class BaseParameter(object):
     def __getDeleteSql(self):
         """Get a list of SQL statements to delete the parameter
         information from the database."""
-        # TEST: BaseParameter.__getDeleteSql() - Add implementation
-
-        sql = "DELETE FROM {0} WHERE {1}={2}".format(self._tablename, self._id_label, self._id)
+        sql = "DELETE FROM {0} WHERE {1}={2};".format(self._tablename, self._id_label, self._id)
 
         return sql
 
