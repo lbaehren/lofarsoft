@@ -220,6 +220,7 @@ for station in stations:
         p["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist]
 
         p.status = "OK"
+        p.write()
 
     except Exception as e:
         print 80 * "-"
@@ -231,6 +232,7 @@ for station in stations:
         p = station.polarization['xyz']
 
         p.status = "BAD"
+        p.write()
 
 # Create list of event level plots
 plotlist = []
