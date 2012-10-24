@@ -8,7 +8,7 @@ import numpy as np
 from numpy import sin, cos, tan, arctan2, sqrt, pi
 import matplotlib.pyplot as plt # want to have plotting in here?
 from scipy.optimize import brute, fmin
-import sys 
+import sys
 
 c = 299792458.0 # speed of light in m/s - air has n ~ 1.0003; and cos(2 degrees) ~ 1 / 1.0003... needed?
 twopi = 2 * pi
@@ -26,51 +26,51 @@ def GPSplusOffset(startingGPS, offsetXYZ):
 
     Warning: approximating the Earth as a sphere, error up to 0.3 % is possible!
     However, xyz distances are consistent with greatCircleDistance when using the same Earth radius in both functions.
-    
+
     Required arguments:
 
-    =========== =================================================
-    Parameter   Description
-    =========== =================================================
+    ============= =================================================
+    Parameter     Description
+    ============= =================================================
     *startingGPS* tuple/array/list ``(long, lat)`` in degrees;
     *offsetXYZ*   array/list ``[x, y, z]``.
-    =========== =================================================
+    ============= =================================================
     """
     R_earth = 6367449 * 1.000# meters; see Wikipedia on Geographic Coordinate System
     metersPerDegree = 111132.954 * 1.000 # in latitude; ignoring nonspherical components
-    
+
     long = startingGPS[0]
     lat = startingGPS[1]
-    
+
     x = offsetXYZ[0]
     y = offsetXYZ[1]
-    
+
     outLat = lat + y / metersPerDegree
     outLong = long + x / (metersPerDegree * cos(lat * deg2rad))
-    
+
     return (outLong, outLat)
 
 def greatCircleDistance(gps1, gps2):
     """
     Calculate the distance along a great-circle, between 2 GPS points (long, lat) in degrees N, E
     Distance in meters.
-    
+
     Taken from: http://www.movable-type.co.uk/scripts/latlong.html
     """
-    
+
     lat1 = gps1[1] * deg2rad; lat2 = gps2[1] * deg2rad
     long1 = gps1[0] * deg2rad; long2 = gps2[0] * deg2rad
-    
+
     delta_lat = lat2 - lat1
     delta_long = long2 - long1
-    
+
     a = sin(delta_lat / 2)**2 + cos(lat1) * cos(lat2) * sin(delta_long / 2)**2
     b = 2 * arctan2(sqrt(a), sqrt(1 - a))
     R_earth = 6367449 * 1.000
     distance = R_earth * b
-    
+
     return distance
-    
+
 def directionFromThreeAntennas(positions, times):
     """
     Given three antenna positions, and (pulse) arrival times for each antenna,
@@ -96,7 +96,7 @@ def directionFromThreeAntennas(positions, times):
     """
 
     p1 = np.array(positions[0:3])
-    
+
     p2 = np.array(positions[3:6])
     p3 = np.array(positions[6:9]) # yes, for 10 antennas we'd write it differently...
     t1 = times[0]; t2 = times[1]; t3 = times[2]
@@ -132,7 +132,7 @@ def directionFromThreeAntennas(positions, times):
 
     # Which gives the incoming-signal vector in the rotated coord. frame as (A, B, C).
     # C is free in this coord. system, but follows from imposing length 1 on the signal vector,
-    # consistent with (ct)^2 = x^2 + y^2 + z^2. 
+    # consistent with (ct)^2 = x^2 + y^2 + z^2.
     square = A*A + B*B
     if square < 1:
         C = np.sqrt(1 - square) # Note! TWO solutions, +/- sqrt(...). No constraints apart from elevation > 0 in the end result - otherwise both can apply.
@@ -156,7 +156,7 @@ def directionFromThreeAntennas(positions, times):
     error += abs(r-1.0)  # Make sure the normalized vector is really normalized, if not take it as error
     signal /= r
     signal2 /= r
-    
+
     # Now get az, el from x, y, z...
     x = signal[0]; y = signal[1]; z = signal[2]
 
@@ -234,22 +234,22 @@ def phasesFromDirection(positions, direction, freq, nowrap = False):
 def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
     """
     Get time delays for a radio signal travelling from GPS point ``gps`` to antennas at ``positions``.
-    The antenna ids are needed for identifying the station it belongs to. 
+    The antenna ids are needed for identifying the station it belongs to.
 
     Required arguments:
 
-    =========== =================================================
-    Parameter   Description
-    =========== =================================================
-    *gps*       array / list / tuple ``(long, lat)``
-    *positions* ``(np-array x1, y1, z1, x2, y2, z2, ...)``
-    *antids*    Array or list of antenna ids 
+    ============ =================================================
+    Parameter    Description
+    ============ =================================================
+    *gps*        array / list / tuple ``(long, lat)``
+    *positions*  ``(np-array x1, y1, z1, x2, y2, z2, ...)``
+    *antids*     Array or list of antenna ids
     *antennaset* e.g. 'LBA_OUTER'
-    =========== =================================================
+    ============ =================================================
     """
-    
+
     from pycrtools import metadata as md
-    
+
     if isinstance(antids[0], basestring):
         stationIDs = np.array([int(x) for x in antids]) / 1000000
     else:
@@ -266,12 +266,12 @@ def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
         thisGPS = GPSplusOffset(stationGPS, thisposition) # stationGPS[i] if variable...
 #        gpspositions[i] = thisGPS
         timedelays[i] = greatCircleDistance(gps, thisGPS)
-    
+
     timedelays -= timedelays[0]
     timedelays /= c
-    
+
     return timedelays
-    
+
 def timeDelaysFromDirectionAndDistance(positions, direction):
     """
     Get time delays for antennas at given position for a given direction and distance.
@@ -301,18 +301,18 @@ def timeDelaysFromDirectionAndDistance(positions, direction):
     phi = halfpi - direction[0] # warning, 90 degree? -- Changed to az = 90_deg - phi
     theta = halfpi - direction[1] # theta as in standard spherical coords, while el=90 means zenith...
     R = direction[2]
-    
+
     cartesianDirection = np.array([sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)])
     cartesianSourcePoint = R * cartesianDirection
     referenceTime = (1/c) * np.linalg.norm(cartesianSourcePoint) # the time delay at position (0, 0, 0)
-    
+
     timeDelays = np.zeros(n)
     for i in range(n):
         thisPosition = np.array(positions[3*i:3*(i+1)])
         distanceVector = cartesianSourcePoint - thisPosition
-        
+
         timeDelays[i] = (1/c) * np.linalg.norm(distanceVector) - referenceTime # check accuracy!
-        
+
     return timeDelays
 
 
@@ -386,25 +386,25 @@ def phaseAverage(phases):
     The length of the sum vector can be used as a measure of the variance in the phases.
     Here we just output the average.
     """
-    
+
     phaseAvg = np.angle(np.sum(np.exp(1j * phases)))
-    
+
     return phaseAvg
 
 def phaseErrorFromDifference(deltaPhi, freq, allowOutlierCount = 0):
     # Calculate phase error given two arrays of phases
     # mean phase difference is subtracted
     mu = phaseAverage(deltaPhi)
-    
+
     msePerPhase = ( 2.0 / (freq*twopi) * sin( (deltaPhi - mu) / 2 )) ** 2
-    
+
     if allowOutlierCount != 0:
 #        import pdb; pdb.set_trace()
         sortedAntennas = msePerPhase.argsort() # lists antennas
         msePerPhase = msePerPhase[sortedAntennas]
         #print 'Worst antennas: '
         #print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
-        msePerPhase[len(msePerPhase) - allowOutlierCount:] = 0.0 # zero out the worst ones 
+        msePerPhase[len(msePerPhase) - allowOutlierCount:] = 0.0 # zero out the worst ones
 
     mse = np.average(msePerPhase)
 
@@ -416,21 +416,21 @@ def phaseError(az, el, pos, phases, freq, allowOutlierCount=0):
     calcTimes = timeDelaysFromDirection(pos, (az, el))
     calcTimes -= calcTimes[0] # same phase ref imposed
     calcPhases = (twopi * freq) * calcTimes
-        
+
     # wrap around into [-pi, pi]? Not strictly needed as the sin^2 function will do that...
     deltaPhi = (phases - phases[0]) - calcPhases # measured 'phases' and expected 'calcPhases' at the same reference phase
     # mu = (1.0/N) * np.sum( 2.0/(freq * twopi) * sin(deltaPhi/2) ) # check; uses same procedure as for 'mse' above.
     mu = phaseAverage(deltaPhi)
-    
+
     msePerAntenna = ( 2.0/(freq * twopi) * sin( (deltaPhi - mu)/2) ) ** 2 # periodicity 2-pi in deltaPhi needed!
-    
+
     if allowOutlierCount != 0:
 #        import pdb; pdb.set_trace()
         sortedAntennas = msePerAntenna.argsort() # lists antennas
         msePerAntenna = msePerAntenna[sortedAntennas]
         #print 'Worst antennas: '
         #print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
-        msePerAntenna[len(msePerAntenna) - allowOutlierCount:] = 0.0 # zero out the worst ones 
+        msePerAntenna[len(msePerAntenna) - allowOutlierCount:] = 0.0 # zero out the worst ones
 
     mse = np.average(msePerAntenna)
 
@@ -452,7 +452,7 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
     *times*     Times as in the other functions
     =========== =================================================
     """
-    
+
     N = len(times)
     calcTimes = timeDelaysFromDirectionAndDistance(pos, (az, el, R))
     timeOffsets = times - calcTimes
@@ -467,8 +467,8 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
         # as we operate on a sorted list, we only need to discard the last 'removeCount' entries...
         mu = np.mean(timeOffsets[0:-removeCount]) # average only over used entries
         timeOffsetsSqr = timeOffsets * timeOffsets
-        mse = 1.0 / (N - removeCount) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu*mu 
-    
+        mse = 1.0 / (N - removeCount) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu*mu
+
     return mse * c * c
 
 
@@ -527,7 +527,7 @@ def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 
     # this can probably be done better by Scipy (brute). But for now this is easy and it works...
     elevations = np.arange(elSteps) * (90.0 / elSteps)
     azimuths = np.arange(azSteps) * (360.0 / azSteps)
-    
+
     if showImage:
         imarray = np.zeros((elSteps, azSteps))
     elstep = 0
@@ -546,9 +546,9 @@ def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 
                 imarray[elSteps - 1 - elstep, azstep] = badness # hack to get elevations shown bottom to top as 0.0 - 90.0
             azstep += 1
         elstep += 1
-    
+
     if showImage:
-        plt.imshow(imarray, cmap=plt.cm.hot_r,extent=(0, 360.0, 0.0, 90.0)) 
+        plt.imshow(imarray, cmap=plt.cm.hot_r,extent=(0, 360.0, 0.0, 90.0))
         plt.ylabel("Elevation [deg]")
         plt.xlabel("Azimuth [deg]")
         plt.title("Phase error [ns^2] as function of incoming direction")
@@ -837,7 +837,7 @@ def timeDelayAzElStandard(position, az, el):
 
     Returns time delays in seconds.
     """
-    
+
     # Calculate Cartesian direction
     x = -1.0 * np.cos(el) * np.sin(az)
     y = np.cos(el) * np.cos(az)
@@ -882,7 +882,7 @@ def findDirectionFminAzElStandard(positions, delays):
     North and Elevation *el* measured positive from 0 at the horizon to pi/2
     at zenith.
     """
-    
+
     def inner(params):
         az, el = params
         return np.sum(np.square(timeDelayAzElStandard(positions, az, el)-delays))
