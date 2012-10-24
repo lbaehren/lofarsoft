@@ -152,17 +152,19 @@ class rfilines(tasks.Task):
         direction_resolution = {default: [1, 5], doc: "Resolution in degrees [az, el] for direction search"},
         directionFromAllStations = {default: False, doc: "Set True if you want to use all stations together to calculate the incoming direction. Otherwise, it is done per station and the results are averaged. "},
         freq_range = {default: [30, 70], doc: "Frequency range in which to search for calibration sources"}, 
+        # OUTPUT CHANNELS:
         nofchannels = {default: -1, doc: "nof channels", output:True},
         medians = {default: None, doc: "Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1.", output: True},
         dirtychannels = {default: None, doc: "Output array of dirty channels, based on stability of relative phases from consecutive data blocks. Deviations from uniform-randomness are quite small, unless there is an RF transmitter present at a given frequency.", output:True},
         oneSampleShifts = {default: None, doc: "Output array containing the 5 ns-shifts per antenna, if they occur. Output contains integer number of samples the data is shifted. To correct for it, shift data _forward_ by this number of samples.", output: True},
+        interStationDelays = {default: None, doc: "Output dict containing station name - delay value pairs.", output: True},
+        calibrationStatus = {default: None, doc: "Output status string. ", output: True},         
         phase_average = {default: None, doc: "Output array of average phases for each antenna, per frequency channel, dim = e.g. 48 x 4097", output: True},
         strongestDirection = {default: None, doc: "Output list [az, el] with the direction of the strongest transmitter", output: True},
         strongestFrequency = {default: None, doc: "The frequency with the smallest phaseRMS, from the range specified in the freq_range parameter", output: True},
         bestPhaseRMS = {default: None, doc: "PhaseRMS for the best frequency", output: True},
         timestamp = {default: None, doc: "Unix timestamp of input file(s)", output: True},
         average_spectrum = {default: None, doc: "Output median over antennas of averaged spectrum (over blocks)", output: True},
-        status = {default: None, doc: "Output status string. ", output: True}, 
 #        results=p_(lambda self:gatherresults(self.topdir, self.maxspread, self.antennaSet),doc="Results dict containing cabledelays_database, antenna positions and names"),
 #        positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
 #        antid = p_(lambda self:obtainvalue(self.results,"antid"), doc="hArray containing strings of antenna ids"),
@@ -206,11 +208,7 @@ class rfilines(tasks.Task):
         print '[rfilines] Processing files: '
         print filelist
         f = cr.open(filelist, blocksize = self.blocksize)
-        #f = open('/Users/acorstanje/triggering/CR/L29590_D20110714T174749.986Z_CS005_R000_tbb.h5')
-        #f = open('/Users/acorstanje/triggering/CR/L43181_D20120120T191949.209Z_CS003_R000_tbb.h5')
-#        f = open('/Users/acorstanje/triggering/CR/L40797_D20111228T200122.223Z_CS007_R000_tbb.h5')
-        #f = open('/Users/acorstanje/triggering/CR/L57524_D20120428T050021.699Z_CS030_R000_tbb.h5')
-        #f = open('/Users/acorstanje/triggering/CR/L44792_D20120204T002716.906Z_CS003_R000_tbb.h5')
+
         # select channels with polarisation 'self.pol'
         if self.antennaselection:
             selected_dipoles = [x for x in f["DIPOLE_NAMES"] if (int(x) % 2 == self.pol) and ((int(x) % 100) / 2 in self.antennaselection)]
@@ -326,74 +324,7 @@ class rfilines(tasks.Task):
                 plt.ylabel('Power [a.u.]')
                 plt.figure(1)
 
-            # s[...].maxpos()
-            #f["FREQUENCY_DATA"][5058]
-            #f["FREQUENCY_DATA"][4538]
-            
-            # Get phases from spectrum
-#            phases = cr.hArray(float, dimensions = spectrum) # dim. 48 x 4096 typically; N_ant x N_freqs
-            # has to be recreated here because they are all stored into 'phaseblocks' list
-#            cr.hComplexToPhase(phases, spectrum)
-            # Apply calibration phases
-            #phases -= calphases
-            # subtract reference phase, which is phases[0, ...]
-
-#            phaseRef = hArray(phases[0].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
-#            phases -= phaseRef
-#            for i in range(1, self.nofchannels):
-#                phases[i, ...] -= phases[0, ...] # any way to do this without loop?
                 
-#            phases[0, ...] = 0.0
-            # wrap phases again into [-pi, pi]
-#            cr.hPhaseWrap(phases, phases) # make that an in-place function in mMath...
-            
-#            phaseblocks.append(phases)
-                   
-#        phaseSum = hArray(float, dimensions = phaseblocks[0]) # dim. N_ant x N_freq (e.g. 48 x 4096)
-#        wrapped = hArray(float, dimensions = phaseSum)
-#        phaseRMS = hArray(float, dimensions = phaseSum) # RMS per antenna per freq channel
-#        phizero = phaseblocks[0] # subtract that from all phases; then wrap, then add to sum, then average, then add phi[0] again, then wrap... Done! Hope it works.
-#        n = 0
-#        for phases in phaseblocks:
-#            print 'Mean: Doing block %d' % n
-#            n += 1
-            # do this without loop! Also RMS. Then, no RAM storage of all the spectra is needed!
-            # Calculate mean: first calculate sum, then wrap everything into (-pi, pi), then... ???
-#            wrapped.copy(phases)
-#            wrapped -= phizero
-#            cr.hPhaseWrap(wrapped, wrapped)
-            
-#            phaseSum += wrapped
-        
-#        phaseAvg = phaseSum / len(phaseblocks)
-#        phaseAvg += phizero
-#        cr.hPhaseWrap(phaseAvg, phaseAvg)
-        
-        #linephase_avg.copy(phaseAvg[..., 1111])
-        #linephase.copy(phaseblocks[0][..., 1111]) doesnt work!
-        
-        #HACK 
-#        phaseAvg = phaseblocks[10]
-
-        # now do RMS. Sum (phi - mu)^2 where phi - mu is wrapped first
-#        n = 0
-#        for phases in phaseblocks:
-#            print 'RMS: doing block %d' % n
-#            n += 1
-#            wrapped = phases - phaseAvg
-#            cr.hPhaseWrap(wrapped, wrapped)
-#            wrapped.square()
-#            phaseRMS += wrapped
-            
-#        phaseRMS /= (len(phaseblocks) - 1)
-#        phaseRMS.sqrt()
-        
-        # to numpy for transpose, then take median RMS over antennas
-        # Median is resistant to outliers and gives a good indication of the line phase quality over all antennas
-        # that's all we need from it.
-        
-        # HACK
-        
         nblocks -= skippedblocks
         print 'nblocks = %d' % nblocks
         if nblocks == 0:
@@ -450,21 +381,6 @@ class rfilines(tasks.Task):
         self.average_spectrum = cr.hArray(y)
 #        import pdb; pdb.set_trace()
         print ' Spectrum is highest at channel %d, log-value = %f' % (y.argmax(), np.log(y.max()))
-
-#        if self.testplots:
-#            plt.figure()
-            # test against one block at one line, make figure
-#            linephase_avg = hArray(float, dimensions=[self.nofchannels])
-#            linephase = hArray(float, dimensions = [self.nofchannels])
-            
-#            for i in range(self.nofchannels):
-#                linephase_avg[i] = phaseAvg[i, bestchannel]
-#            plt.plot(linephase_avg.toNumpy(), c='r')
-                
-#            for block in phaseblocks:
-#                for j in range(self.nofchannels):
-#                    linephase[j] = block[j, bestchannel]
-#                plt.plot(linephase.toNumpy())
 
         if self.testplots:
             # test phase of one antenna in consecutive data blocks, show in plot versus block nr.
@@ -533,7 +449,6 @@ class rfilines(tasks.Task):
         
         print '---'
 #        print phaseAvg
-#        import pdb; pdb.set_trace()
         
         allpositions = f["ANTENNA_POSITIONS"].toNumpy()
         azSteps = int(360 / self.direction_resolution[0])
@@ -686,7 +601,9 @@ class rfilines(tasks.Task):
             # Subtract reference station-delay
             timeDiff -= refdelay   
             print '--- Inter-station delays: ---'
+            self.interStationDelays = {}
             for i in range(nofStations):
+                self.interStationDelays[stationlist[i]] = interStationDelays[i] # write to Task output param
                 print '%s: %2.3f ns' % (f["STATION_LIST"][i], interStationDelays[i])
 
             self.oneSampleShifts = getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays)
@@ -719,85 +636,8 @@ class rfilines(tasks.Task):
         #self.strongestDirection = [fitaz / deg2rad, fitel / deg2rad]
         self.bestPhaseRMS = medians[bestchannel]
         self.timestamp = f["TIME"][0]
-                
-"""                       
-
-                    
-
-            y = phases.toNumpy()
-            y = np.angle(y)
-            y += calphases # subtract phases from delay calibration metadata (needs a + sign, why?)
-            
-            ph[i] = y[27] # just to print differences across blocks for one antenna
-            y -= y[self.pol] # subtract reference phase y[0] or y[1] (polarisation)
-            
-            wrapped = y - twopi * (y / twopi).round() # wrap into [-pi, +pi]
-          
-            # NB. Cannot average sequence of phases just like that; when having e.g. phi = +/- pi + noise, 
-            # a spurious term -/+ k (2pi / n) will come in, depending on the number of phase wraps k (i.e. on noise). 
-            # Therefore, force consecutive phases to have abs-difference < pi
-            if n > 0:
-                wrapped -= twopi * ((wrapped - lastwrapped) / twopi).round()
-            measuredphases[i] = np.copy(wrapped)
-            
-            averagePhasePerAntenna += wrapped[self.pol::2]
-            n+=1
-
-            if self.doplot:
-                plt.plot(wrapped[self.pol::2])
-
-            lastwrapped = np.copy(wrapped) # for disambiguating phases around wrapping points +/- pi (+ noise)
-
-            delta = y[32] - y[0]
-            print 'Block %d: test phase = %f, maxx = %f, stddev = %f' % (i, delta -  2*np.pi * round(delta / (2*np.pi)), maxx, stdx) # crude test for phase stability
-
-        averagePhasePerAntenna /= n
-        #averagePhasePerAntenna = wrapped[polarisation::2] # hack, averaging may be ambiguous with the 2-pi wraparound (?)
-
-        if self.doplot:
-            plt.figure()
-            plt.plot(np.unwrap(ph))
-            plt.title('Unwrapped phase of one antenna from consecutive blocks')
-            plt.ylabel('Phase [rad]')
-            plt.xlabel('block nr.')
-
-        # find direction of this source; plot image to check quality of fit.
-
-        print 'Find direction of source based on averaged phases per antenna...'
-        allpositions = f["ANTENNA_POSITIONS"].toNumpy()
-        positions = allpositions[self.pol::2].ravel() # only pol 'polarisation'
-        # NB. Indexing to the end is done by thisArray[start::step] !
-        
-        azSteps = int(360 / self.direction_resolution[0])
-        elSteps = int(90 / self.direction_resolution[1])
-        (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(positions, averagePhasePerAntenna, freq, azSteps = azSteps, elSteps = elSteps, showImage = self.doplot, verbose = True)
-
-        print 'Best fit az = %f, el = %f' % (fitaz / deg2rad, fitel / deg2rad)
-        print 'Phase error = %f' % minPhaseError
-
-        modelphases = sf.phasesFromDirection(positions, (fitaz, fitel), freq)
-        modelphases -= modelphases[0]
-        modelphases = sf.phaseWrap(modelphases) # have to wrap again as we subtracted the ref. phase
-        phaseDiff = averagePhasePerAntenna - modelphases
- 
-        rms_phase = measuredphases.std(axis=0) / np.sqrt(n)
-
-        if self.doplot:
-            plt.figure()
-            plt.plot(modelphases, label='Modeled phases (plane wave)')
-            plt.plot(averagePhasePerAntenna, label='Avg. measured phases')
-            plt.legend()
-
-            plt.figure()
-            plt.plot(sf.phaseWrap(phaseDiff), label='Measured - expected phase')
-
-            #plt.figure()
-            plt.plot(rms_phase[self.pol::2], 'r', label='RMS phase noise')
-            plt.plot( - rms_phase[self.pol::2], 'r')
-            nanosecondPhase = twopi * freq * 1.0e-9
-            plt.title('Phase difference between measured and best-fit modeled phase\n1 ns = %1.3f rad' % nanosecondPhase)
-            plt.ylabel('Phase [rad]')
-            plt.xlabel('Antenna number (RCU/2)')
-            plt.legend()
-              
-"""                    
+        if self.interStationDelays:
+            self.calibrationStatus = "OK"
+        else:
+            self.calibrationStatus = "BAD" # fix: apply real criterium with maximum allowed phase error etc.
+      
