@@ -1107,6 +1107,79 @@ def RFIcalcBadSamples(data,cutlevel,subdiv=4,reqsubdiv=2):
     flagsa=[index[collapsedData[i]>level[i]] for i in range(subdiv)]
     return flagsa    
 
-        
+
+def getTimeseriesPar(directory,DMindex=0,DMvalue=False):
+    par=obsParameters(directory) 
+    DM=par['DMrange'][DMindex] 
+    timeseries=loadTimeseries(directory,DM)
+    trmsg=loadTriggerMsg(directory,bReturnArray=True,newVersion=True)
+    return (timeseries,DM,par,trmsg)        
+
+def plotTimeseries(timeseries,DM,par,trmsg=None,integrationlength=1,centraltime=0,window=0,trmsgoffset=15,offset=30,saveplot=None,legend=False,bTimeInSeconds=False,bMsgAllLengths=False,plotTimeseries=True):
+    """ Plot timeseries within a certain timewindow.
+
+    * timeseries *  list of numpy arrays with the dedispersed data for each stream
+    * DM         *  DM for which this range is obtained
+    * par        *  Parameters with which the data was dedispersed.
+    * trmsg  *       numpy array with trigger message (msg=fa.loadTriggerMsg(mydir,newVersion=True,bReturnArray=True)
+    These first three values can be replaced by *fa.getTimeseriesPar(mydir)
+    
+    * integration length * Over how many samples should the data be integrated. \
+    This works with a running sum (boxcar profile)
+    * central time * central time of plotting
+    * window *       how much samples to plot at each side. If 0, plot of full data
+    * trmsgoffset *  how much above the data should trigger messages be plotted
+    * offset *       offset between the streams
+    * saveplot *     Not yet working
+    * legend *       Not yet working
+    * bTimeInSeconds * Plot time axis in seconds (else will be plotted in samples)
+    * bMsgAllLengths * Plot triggermessages for all integration lengths
+    * plotTimeseries * If set to False, you can easily plot all the trigger messages
+
+    """
+    print "WARNING, overwriting derived parameters for the new DM"
+    ts=np.copy(timeseries)
+    derivedParameters(par,DM)
+    reftime=par['sa']*par['stb'] # samples per block time startblock
+    delays=par['delays']
+    length=len(ts[0])
+    toutall=[]
+    if length>1 and plotTimeseries:
+        for i in range(len(ts)):
+            print i,
+            tout=np.zeros(len(ts[i])-integrationlength+1)
+            for k in range(integrationlength-1):
+                print k,max(tout)
+                tout+=ts[i][k:-integrationlength+k+1]
+            tout+=ts[i][integrationlength-1:]
+            toutall.append(tout)
+    else:
+        toutall=ts
+    
+    if bTimeInSeconds:
+        unit=par['timeresolution']
+        plt.xlabel('Time (seconds)')
+    else:
+        unit=1
+        plt.xlabel('Time (samples)')
+    timeaxis=makeTimeAxes(reftime,delays,length-integrationlength,unit)
+    #return timeaxis,toutall
+    plt.ylabel('Power')
+    plt.title('Timeseries, DM='+str(DM)+', L='+str(integrationlength))
+
+    if type(trmsg)==type(np.zeros(1)):
+        trmsg=trmsg[np.abs(trmsg['DM']-DM)<0.5*min(np.diff(par['DMrange']))]
+        if not bMsgAllLengths:
+            trmsg=trmsg[trmsg['length']==integrationlength]
+        if window>0:
+            trmsg=trmsg[trmsg['time']<centraltime+window]
+            trmsg=trmsg[trmsg['time']>centraltime-window]
+        [plt.plot(trmsg['time'],offset*trmsg['subband']+trmsgoffset+par['ch']*par['nrCSB']*integrationlength,'*')]
+        plt.title('Timeseries and trigger messages, DM='+str(DM)+', L='+str(integrationlength))
+    if plotTimeseries:
+        if window>0: 
+            [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
+        else:
+            [plt.plot(t,s+num*offset) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]        
 
      
