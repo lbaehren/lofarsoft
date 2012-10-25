@@ -20,14 +20,15 @@ Set some parameters "by hand", such as:
  - FarField
 
 """
-filename=LOFARSOFT+"/data/lofar/trigger-2010-04-15/triggered-pulse-2010-04-15-RS205.h5"
-stationname="RS205"
+filename = '/Users/acorstanje/triggering/triggertest_14mrt2012/L52169_D20120314T123105.222Z_CS301_R000_tbb.h5'
+#filename=LOFARSOFT+"/data/lofar/trigger-2010-04-15/triggered-pulse-2010-04-15-RS205.h5"
+stationname="CS301"
 phase_center_in=[0., 0., 0.]
-azRange=[180., 360., 10.]
-elRange=[0., 60., 5.]
+azRange=[180., 360., 2.]
+elRange=[0., 60., 2.]
 distsRange=[10., 50., 100., 500., 1000.]
 fixedDist=200.
-FarField=False
+FarField=True
 
 #------------------------------------------------------------------------
 
@@ -38,23 +39,27 @@ ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=128) #fittype="POLY" o
 ws["numin"]=12 #MHz
 ws["numax"]=82 #MHz
 
-cr=ws["datafile"]
 
-cr["blocksize"] = 512
-cr["block"] = 128
+cr = open(filename)
+#cr=ws["datafile"]
+
+blocksize = 512
+cr["BLOCKSIZE"] = blocksize
+cr["BLOCK"] = 128
+ndipoles = cr["NOF_DIPOLE_DATASETS"]
 """
 
 Now we read in the raw time series data as well as the Frequencies and
 Time value arrays.
 
 """
-cr_time=cr["Time"].setUnit("\\mu","s")
+cr_time=hArray(cr["TIME"]).setUnit("\\mu","s")
 
 #ws["frequency"]=cr["Frequency"]
 # Attention don't do this here when later using it in caluclating
 #phases that require seconds and Hz as units
 
-cr_efield=cr["Fx"].setPar("xvalues",cr_time)
+cr_efield=cr["TIMESERIES_DATA"].setPar("xvalues",cr_time)
 
 """
 
@@ -62,7 +67,10 @@ As a next step we create an empty vector to hold the Fourierspectrum
 of the data
 
 """
-ws["fft"]=cr["emptyFFT"].setPar("xvalues",ws["frequency"])
+ws["fft"] = hArray(complex,[ndipoles,blocksize/2+1],name="FFT",par=dict(logplot="y"),units="arb. units")
+
+
+#ws["fft"]=cr["EmptyFFT"].setPar("xvalues",ws["frequency"])
 """
 
 and then make the Fourier transform followed by a reordering of the
