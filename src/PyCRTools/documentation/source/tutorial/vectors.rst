@@ -1,8 +1,8 @@
 .. _vectors:
 
-*******
+
 Vectors
-*******
+=======
 
 
 Some basics

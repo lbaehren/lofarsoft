@@ -1,8 +1,8 @@
 .. _plotting:
 
-**************
+
 Basic plotting
-**************
+==============
 
 In order to plot the data we use the :mod:`matplotlib` package. This
 can be loaded by using the following command::
@@ -16,7 +16,7 @@ the :class:`hArrays`.
 
 
 Matplotlib
-==========
+----------
 
 .. [under construction]
 
@@ -65,7 +65,7 @@ needs to be logarithmic.
 
 
 Plotting using the :class:`hArray` plotting methods
-===================================================
+---------------------------------------------------
 
 Another way of producing plots is to use the plot method of the
 :class:`hArray` class::

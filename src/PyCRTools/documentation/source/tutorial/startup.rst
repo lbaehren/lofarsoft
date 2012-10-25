@@ -1,8 +1,7 @@
 .. _startup:
 
-***********
 Starting up
-***********
+===========
 
 To work with the PyCRTools package it first has to be loaded. This can
 be done by starting Python or iPython and type the following at the

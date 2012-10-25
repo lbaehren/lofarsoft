@@ -1,8 +1,8 @@
 .. _fileio:
 
-********
+
 File I/O
-********
+========
 
 
 Opening and closing a file

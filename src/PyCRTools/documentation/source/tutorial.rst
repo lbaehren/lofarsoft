@@ -14,3 +14,4 @@ This tutorial will get you started with the PyCRTools package.
     tutorial/arrays
     tutorial/fileio
     tutorial/plotting
+

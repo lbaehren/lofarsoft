@@ -1,8 +1,7 @@
 .. _arrays:
 
-******
 Arrays
-******
+======
 
 While the basic underlying data structures are plain STL vectors, in
 many cases, however, one has to deal with multi-dimensional data. For
