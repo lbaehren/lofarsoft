@@ -39,7 +39,7 @@ class Noise(Task):
         """Run the task.
         """
 
-        for i in self.nantennas:
+        for i in range(self.nantennas):
 
             # Compute Shapiro-Wilk test for normality
             self.shapiro.append(shapiro(self.timeseries_data[i]))
