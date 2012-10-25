@@ -22,10 +22,6 @@
 #ifndef CR_PIPELINE_CORE_H
 #define CR_PIPELINE_CORE_H
 
-#define PYCRTOOLS_WITH_NUMPY
-#define PYCRTOOLS_WITH_CASA
-#define PYCRTOOLS_WITH_GSL
-
 // ________________________________________________________________________
 //                                            Standard library header files
 

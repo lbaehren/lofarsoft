@@ -10,6 +10,19 @@ cmake_minimum_required (VERSION 2.8)
 ##
 ## ==============================================================================
 
+option (PYCRTOOLS_ENABLE_TESTING         "Enable testing for the PyCRTools?"                         YES )
+option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?"         YES )
+option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO )
+option (PYCRTOOLS_WITH_DEBUG_SYMBOLS     "Compile PyCRTools with debug symbols?"                     YES )
+option (PYCRTOOLS_WITH_OPTIMIZATIONS     "Compile PyCRTools with optimization flags turned on?"      YES )
+option (PYCRTOOLS_WITH_RUNTIME_WARNINGS  "Compile PyCRTools with runtime warnings enabled?"          YES )
+option (PYCRTOOLS_WITH_AERA              "Compile PyCRTools with AERA data support?"                 NO )
+option (PYCRTOOLS_WITH_CASACORE          "Compile PyCRTools with CASACore support?"                  YES )
+option (PYCRTOOLS_WITH_DAL1              "Compile PyCRTools with DAL1 support?"                      YES )
+option (PYCRTOOLS_WITH_FFTW              "Compile PyCRTools with FFTW support?"                      YES )
+option (PYCRTOOLS_WITH_GSL               "Compile PyCRTools with GSL support?"                       YES )
+option (PYCRTOOLS_WITH_NUMPY             "Compile PyCRTools with Numpy support?"                     YES )
+
 if (NOT LUS_SOURCE_DIR)
   find_path (LUS_SOURCE_DIR devel_common/cmake/LUS_CMakeSettings.cmake
     PATHS
