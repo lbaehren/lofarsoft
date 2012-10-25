@@ -10,5 +10,5 @@ This tutorial will get you started with the PyCRTools package.
     :maxdepth: 2
 
     tutorial/startup
-..    tutorial/vectors
+    tutorial/vectors
 ..    tutorial/arrays
