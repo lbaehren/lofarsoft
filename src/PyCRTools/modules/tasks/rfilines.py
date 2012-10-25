@@ -136,6 +136,7 @@ class rfilines(tasks.Task):
     parameters=dict(
         #event={default:None, doc:"Event data filename (.h5), or list of files"},
         filefilter={default:None,doc:"File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "},
+        filelist = {default: None, doc: "List of filenames in one event. "},
         outputDataFile = {default: None, doc: "Optional: output text file where results can be written."},
         batch = {default: False, doc: "Suppress plot display when set to True."},
         doplot = {default:True, doc:"Produce output plots"},
@@ -149,6 +150,7 @@ class rfilines(tasks.Task):
         nofblocks = {default:100, doc: "Max. number of blocks to process"},
 #        smooth_width = {default: 16, doc: "Smoothing window for FFT, for determining base level (cheap way of doing what AverageSpectrum class does)"},
         referenceTransmitterGPS = {default: None, doc: "GPS [long, lat] in degrees (N, E is positive) for a known transmitter. Typically used when tuning to a known frequency. The Smilde tower is at (6.403565, 52.902671)."},
+        correctOneSampleShifts = {default: False, doc: "Automatically correct for +/- 5 ns shifts in the data. Only works correctly if the direction fit / the reference transmitter GPS is good. Output is in oneSampleShifts list."},
         direction_resolution = {default: [1, 5], doc: "Resolution in degrees [az, el] for direction search"},
         directionFromAllStations = {default: False, doc: "Set True if you want to use all stations together to calculate the incoming direction. Otherwise, it is done per station and the results are averaged. "},
         freq_range = {default: [30, 70], doc: "Frequency range in which to search for calibration sources"}, 
@@ -185,7 +187,9 @@ class rfilines(tasks.Task):
 
         twopi = 2 * np.pi
         deg2rad = twopi / 360.0
-        
+        if self.filelist and self.filefilter:
+            raise RuntimeError("Both filelist and filefilter given; provide only one of them")
+                
         if not self.doplot and self.testplots:
             print 'Warning: setting self.testplots to False because self.doplot = False'
             self.testplots = False
@@ -193,7 +197,10 @@ class rfilines(tasks.Task):
         # Hopefully reducing the long I/O processing time (?)
 #        bytes_read = open(self.event, "rb").read()
         
-        filelist = cr.listFiles(self.filefilter)
+        if self.filelist:
+            filelist = self.filelist
+        else:
+            filelist = cr.listFiles(self.filefilter)
         superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007"]
         if len(filelist) == 1:
             print 'There is only 1 file'
@@ -606,7 +613,10 @@ class rfilines(tasks.Task):
                 self.interStationDelays[stationlist[i]] = interStationDelays[i] # write to Task output param
                 print '%s: %2.3f ns' % (f["STATION_LIST"][i], interStationDelays[i])
 
-            self.oneSampleShifts = getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays)
+            if self.correctOneSampleShifts:
+                self.oneSampleShifts = getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays)
+            else:
+                self.oneSampleShifts = np.zeros(len(timeDiff))
             timeDiff_glitches = np.zeros(len(timeDiff)) + np.float('nan')
             timeDiff_fixed = timeDiff - 5.0 * self.oneSampleShifts
             for i in range(len(timeDiff)): # separate fixed data, real data and glitches
