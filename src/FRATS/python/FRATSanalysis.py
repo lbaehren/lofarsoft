@@ -306,6 +306,8 @@ def loadTimeseries(directory='',DM=DM):
     if len(directory) > 0 and directory[-1]!='/':
         directory+='/'
     dfiles=glob.glob(directory+'dedisp*'+str(DM)+'*')
+    assert len(dfiles)<10,"please check if file order is correct for ..."+str(["..."+f[-15:] for f in dfiles])
+        
     ts=[np.fromfile(f,'float32') for f in dfiles]
     return ts
 
@@ -1110,12 +1112,22 @@ def RFIcalcBadSamples(data,cutlevel,subdiv=4,reqsubdiv=2):
 
 def getTimeseriesPar(directory,DMindex=0,DMvalue=False):
     par=obsParameters(directory) 
-    DM=par['DMrange'][DMindex] 
-    timeseries=loadTimeseries(directory,DM)
-    trmsg=loadTriggerMsg(directory,bReturnArray=True,newVersion=True)
-    return (timeseries,DM,par,trmsg)        
 
-def plotTimeseries(timeseries,DM,par,trmsg=None,integrationlength=1,centraltime=0,window=0,trmsgoffset=15,offset=30,saveplot=None,legend=False,bTimeInSeconds=False,bMsgAllLengths=False,plotTimeseries=True):
+    DM=par['DMrange'][DMindex] 
+    if DMvalue:
+        DM=[a for a in par['DMrange'] if np.abs(a-DMvalue) < 0.5*np.min(np.diff(par['DMrange']))][0]
+    derivedParameters(par,DM)
+    timeseries=loadTimeseries(directory,str(round(DM,2)))
+    assert len(timeseries)==par['nrstreams'],"Not loading correct number of timeseries"
+    trmsg=loadTriggerMsg(directory,bReturnArray=True,newVersion=True)
+    av=loadAverage(len(par['DMrange']),par['nrstreams'],directory)
+    std=loadStddev(len(par['DMrange']),par['nrstreams'],directory)
+    DMav=[a for a in av.keys() if np.abs(a-DM) < 0.5*np.min(np.diff(av.keys()))][0]
+    av=av[DMav]
+    std=std[DMav]
+    return (timeseries,DM,par,trmsg,av,std)        
+
+def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationlength=1,centraltime=0,window=0,trmsgoffset=15,offset=30,saveplot=None,legend=False,bTimeInSeconds=False,bMsgAllLengths=False,plotTimeseries=True,plotThreshold=False):
     """ Plot timeseries within a certain timewindow.
 
     * timeseries *  list of numpy arrays with the dedispersed data for each stream
@@ -1138,6 +1150,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,integrationlength=1,centraltime=
 
     """
     print "WARNING, overwriting derived parameters for the new DM"
+    mycolors=['r','g','b','k','y','m','c','0.5']
     ts=np.copy(timeseries)
     derivedParameters(par,DM)
     reftime=par['sa']*par['stb'] # samples per block time startblock
@@ -1167,6 +1180,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,integrationlength=1,centraltime=
     plt.ylabel('Power')
     plt.title('Timeseries, DM='+str(DM)+', L='+str(integrationlength))
 
+
     if type(trmsg)==type(np.zeros(1)):
         trmsg=trmsg[np.abs(trmsg['DM']-DM)<0.5*min(np.diff(par['DMrange']))]
         if not bMsgAllLengths:
@@ -1178,8 +1192,28 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,integrationlength=1,centraltime=
         plt.title('Timeseries and trigger messages, DM='+str(DM)+', L='+str(integrationlength))
     if plotTimeseries:
         if window>0: 
-            [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
+            [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
         else:
-            [plt.plot(t,s+num*offset) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]        
+            [plt.plot(t,s+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]        
+    if plotThreshold and av and std:
+        Threshold=[avv*integrationlength+np.sqrt(integrationlength)*par['tl']*stdd for avv,stdd in zip(av.values(),std.values())]
+        T2=[convertArrayBar(t,par['sa']) for t in Threshold]
+        if window>0: 
+            [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]
+        else:
+            [plt.plot(t,s+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]        
+        
+
+def convertArrayBar(t,elem):
+    t2=np.zeros((elem,)+t.shape)        
+    nrelem=elem*t.shape[0]
+    t2[:]=t
+    return t2.transpose().reshape(nrelem)#t2.shape[0]*t2.shape[1])
+    
+
+
+
+         
+
 
      
