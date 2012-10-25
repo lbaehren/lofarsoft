@@ -39,18 +39,18 @@ class Noise(Task):
         """Run the task.
         """
 
+        s = self.timeseries_data.toNumpy()
+
         for i in range(self.nantennas):
 
             # Compute Shapiro-Wilk test for normality
-            self.shapiro.append(shapiro(self.timeseries_data[i]))
+            self.shapiro.append(shapiro(s[i]))
 
         if self.save_plots:
 
             # Histograms
             for i in self.plot_antennas:
                 plt.clf()
-
-                s = self.timeseries_data.toNumpy()
 
                 plt.hist(s[i], self.nbins, color='g')
 
