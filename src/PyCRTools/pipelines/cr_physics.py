@@ -203,6 +203,9 @@ for station in stations:
         # Get pulse strength
         pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-", plotlist = [], plot_antennas = [0, 1, 2])
 
+        # Do noise characterization
+        noise = cr.trun("Noise", timeseries_data = xyz_timeseries_data, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
+
         # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
         time_delays += float(block * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
