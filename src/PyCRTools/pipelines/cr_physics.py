@@ -220,7 +220,7 @@ for station in stations:
         p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
         p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
         p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
-        p["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist]
+        p["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
 
         p.status = "OK"
         p.write()
