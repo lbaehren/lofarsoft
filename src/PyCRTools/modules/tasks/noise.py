@@ -9,7 +9,7 @@ from pycrtools.grid import CoordinateGrid
 import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
-from scipy.stats.mstats import normaltest
+from scipy.stats import normaltest
 
 class Noise(Task):
     """Noise characterization.
