@@ -178,6 +178,7 @@ class TABeam:
                                            # self.location - is just a list of keys
 		self.assigned_files=[]     # list of assigned files from the parset file (for this particular beam)
 					   # we use this to check its number against the actual number of present files
+		self.is_data_available = True # flag that tells whether rawdata available or not for this beam
 		self.nrSubbands = nrSubbands # duplicating number of subbands from parent SAP
 		self.numfiles=0            # number of all files for this beam (sum of rawfiles for each node)
 
@@ -231,12 +232,12 @@ class TABeam:
 		if cmdline.opts.is_locate_rawdata: nodeslist=si.alive_nodes
 		else: nodeslist=root.nodeslist
 		if len(nodeslist) > 0:
-                	cexeclocus=si.cexec_nodes[nodeslist[0]]
-                	if len(nodeslist) > 1:
-                        	for s in nodeslist[1:]:
-                       	        	cexeclocus += ",%s" % (si.cexec_nodes[s].split(":")[1])
+       	        	cexeclocus=si.cexec_nodes[nodeslist[0]]
+               		if len(nodeslist) > 1:
+                       		for s in nodeslist[1:]:
+					cexeclocus += ",%s" % (si.cexec_nodes[s].split(":")[1])
 			cmd="%s %s 'ls -1 %s/%s/%s_SAP%03d_B%03d_S*_bf.raw' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, cexeclocus, si.rawdir, root.id, root.id, sapid, self.tabid)
-                	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+       	        	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 			for l in range(len(cexec_output)):
 				if re.match("^-----", cexec_output[l]) is not None:
 					loc=cexec_output[l].split(" ")[1]
@@ -265,16 +266,17 @@ class TABeam:
 			# list of all nodes
 			self.location=self.rawfiles.keys()
 			if len(self.location) == 0:
+				self.is_data_available = False
 				msg="No data available for beam %d:%d" % (self.parent_sapid, self.tabid)
 				if log != None: log.warning(msg)
 				else: print msg
-
-			# getting the total number of files available
-			for loc in self.location:
-				self.numfiles += len(self.rawfiles[loc])
+			else:
+				# getting the total number of files available
+				for loc in self.location:
+					self.numfiles += len(self.rawfiles[loc])
 
 		# Now getting the list of assigned files for this beam from the Parset file
-        	cmd="grep %s_SAP%03d_B%03d %s | awk '{print $3}' - | tr -d '[]'" % (root.id, sapid, self.tabid, parset,)
+       		cmd="grep %s_SAP%03d_B%03d %s | awk '{print $3}' - | tr -d '[]'" % (root.id, sapid, self.tabid, parset,)
 		status=os.popen(cmd).readlines()
 		if np.size(status)>0:
 			self.assigned_files=[el for el in status[0][:-1].split(",") if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), el)]
@@ -286,6 +288,7 @@ class TABeam:
 				self.assigned_files=tmp_assigned_files
 		# Now checking that the number of available files is the same as assigned number
 		if self.numfiles != np.size(self.assigned_files):
+			self.is_data_available = False
 			missing_files=self.assigned_files[:]
 			# checking first what files are missing
 			for loc in self.location:
@@ -294,14 +297,31 @@ class TABeam:
 				msg="This is weird... There are should be at least one file missing..."	
 				if log != None: log.warning(msg)
 				else: print msg
-			msg="Error: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (self.numfiles, np.size(self.assigned_files), sapid, self.tabid)
+			msg="Warning: The number of available files (%d) is less than assigned (%d) for the beam %d:%d!" % (self.numfiles, np.size(self.assigned_files), sapid, self.tabid)
 			if len(missing_files) > 0:
 				msg += "\n[Missing files]: %s" % (",".join(missing_files))
 			if len(missing_nodes) > 0:
 				msg += "\n[Missing nodes]: %s" % (",".join(missing_nodes))
-			if log != None: log.error(msg)
+			if log != None: log.warning(msg)
 			else: print msg
-			quit(1)
+
+		# if tab.location is empty we still have to fill it based on where the processed data are, because Pipeine _needs_ to know
+		# on what nodes to start processing even if it is only for re-doing plots...
+		# So, we try to look for log-file for the particular beam to determine the locus node
+		if len(self.location) == 0:
+			cmd="%s locus:0-99 hoover:0-1 'ls -1 %s_*/%s_*/%s_sap%03d_beam%04d.log' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, root.id, sapid, self.tabid)
+       		        cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+			loc=""
+			for l in range(len(cexec_output)):
+				if re.match("^-----", cexec_output[l]) is not None:
+					loc=cexec_output[l].split(" ")[1]
+				else: # it means that we found the file and loc know has the locus node name where processed data are
+					self.location.append(loc)
+					break
+			if loc=="":
+				msg="Warning: Neither raw or even processed data available for beam %d:%d" % (self.parent_sapid, self.tabid)
+				if log != None: log.warning(msg)
+				else: print msg
 
 
 # Class Observation with info from the parset file
@@ -391,6 +411,15 @@ class Observation:
                 	# it means that this keyword exist and we can extract the info
                 	self.startdate=status[0][:-1].split(" = ")[-1]
 			self.starttime = self.startdate.split(" ")[1]
+			# checking if startdate is after Jan 27, 2012 or not. If not throw the error
+			c1 = time.strptime(self.startdate, "%Y-%m-%d %H:%M:%S")
+			c2 = time.strptime("2012-01-27 00:00:00", "%Y-%m-%d %H:%M:%S")
+			if time.mktime(c1) < time.mktime(c2):
+				msg="The observation was before Jan 27, 2012. Python version of pulsar pipeline can be run\n\
+only for observations that were taken after this date"
+				if log!=None: log.error(msg)
+				else: print msg
+				quit(1)
 
 		# Getting the Duration
 		cmd="grep Observation.stopTime %s | tr -d \\'" % (self.parset,)

@@ -12,6 +12,7 @@ import logging
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
 import psr_utils as pu
+import parfile
 from pulp_parset import Observation, radial_distance, find_pulsars
 from pulp_usercmd import CMDLine, check_pulsars
 from pulp_sysinfo import CEP2Info
@@ -52,6 +53,10 @@ class Pipeline:
                         sapid=int(beam.split(":")[0])
                         tabid=int(beam.split(":")[1])
                         tab = obs.saps[sapid].tabs[tabid]
+
+			# checking if location (locus node) of raw data or at least processed data is known
+			# If not, then skip this beam
+			if len(tab.location) == 0: continue
 
 			if not tab.is_coherent:
 				unit = ISUnit(obs, cep2, cmdline, tab, log)
@@ -343,15 +348,18 @@ class Pipeline:
                 # either "CS", "IS", "CV", ..
                 data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
 
-		# create beam_process_node.txt file
-		log.info("Creating the beam_process_node.txt file...")
-                bpnf=open("%s/beam_process_node.txt" % (sumdir), 'w')
-		for unit in [u for u in self.units if u.summary_node == sumnode]: 
-			for node in unit.tab.location:
-				for rf in unit.tab.rawfiles[node]:
-					bpnf.write("%s %s%s\n" % \
-					(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
-		bpnf.close()
+		# create beam_process_node.txt file (this is only if file does not exist or it is empty)
+		beam_process_node_file="%s/beam_process_node.txt" % (sumdir)
+		if not os.path.exists(beam_process_node_file) or os.path.getsize(beam_process_node_file) == 0:
+			log.info("Creating the beam_process_node.txt file...")
+        	        bpnf=open(beam_process_node_file, 'w')
+			for unit in [u for u in self.units if u.summary_node == sumnode]: 
+				for node in unit.tab.location:
+					if node in unit.tab.rawfiles:
+						for rf in unit.tab.rawfiles[node]:
+							bpnf.write("%s %s%s\n" % \
+							(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
+			bpnf.close()
 
 		# creating combined DSPSR plots
 		dspsr_diags=rglob(sumdir, "*_diag.png", 3)
@@ -496,15 +504,18 @@ class Pipeline:
         	        		montage_cmd_pdf += "combined.pdf"
 					self.execute(montage_cmd_pdf, log, workdir=sumdir)
 
-		# create beam_process_node.txt file
-		log.info("Creating the beam_process_node.txt file...")
-                bpnf=open("%s/beam_process_node.txt" % (sumdir), 'w')
-		for unit in [u for u in self.units if u.summary_node == sumnode]: 
-			for node in unit.tab.location:
-				for rf in unit.tab.rawfiles[node]:
-					bpnf.write("%s %s%s\n" % \
-					(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
-		bpnf.close()
+		# create beam_process_node.txt file (this is only if file does not exist or it is empty)
+		beam_process_node_file="%s/beam_process_node.txt" % (sumdir)
+		if not os.path.exists(beam_process_node_file) or os.path.getsize(beam_process_node_file) == 0:
+			log.info("Creating the beam_process_node.txt file...")
+        	        bpnf=open(beam_process_node_file, 'w')
+			for unit in [u for u in self.units if u.summary_node == sumnode]: 
+				for node in unit.tab.location:
+					if node in unit.tab.rawfiles:
+						for rf in unit.tab.rawfiles[node]:
+							bpnf.write("%s %s%s\n" % \
+							(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
+			bpnf.close()
 
 		# creating TA heatmaps 
 		# only when folding, and only if pulsars are set from the command line, or 'parset' or 'sapfind' or 'sapfind3' keywords are used (or
@@ -872,6 +883,22 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join([fu.pid for fu in popen_list if fu.poll() is not None])))
 			raise Exception
 
+	def power_of_two(self, value):
+		"""
+		Returns the closest power of two value to the input value (from the low side)
+		"""
+		return int(math.pow(2, math.floor(math.log(value)/math.log(2))))
+
+	def get_best_nbins(self, parf):
+		"""
+		Calculates the best number of bins for folding based on the period value from the parfile (parf)
+		and sampling interval (tsamp)
+		"""
+		ephem=parfile.psr_par(parf)
+		nbins=self.power_of_two(int(math.floor(ephem.P0*1000.0/self.sampling)))
+		if nbins > 1024: return 1024
+		else: return nbins
+
 	def lcd(self, low, high):
 		"""
 		Calculates the lowest common denominator of 'high' value between 'low' and 'high'
@@ -970,24 +997,27 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.execute(cmd)
 
 			# if we run the whole processing and not just plots
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_nodecode:
 				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
         		        	                          # also we need to moint locus nodes that we need
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
 					input_files=[]
 					for loc in self.tab.location:
-						# first "mounting" corresponding locus node
-						uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
-						input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-						process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-						process.communicate()
-#						input_file="%s/%s_SAP%03d_B%03d_S*_bf.raw" % (input_dir, obs.id, self.sapid, self.tabid)
-#						input_files.extend(glob.glob(input_file))
-						input_file=["%s/%s/%s" % (input_dir, obs.id, f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
-						input_files.extend(input_file)
+						if loc in self.tab.rawfiles:
+							# first "mounting" corresponding locus node
+							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
+							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
+							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+							process.communicate()
+#							input_file="%s/%s_SAP%03d_B%03d_S*_bf.raw" % (input_dir, obs.id, self.sapid, self.tabid)
+#							input_files.extend(glob.glob(input_file))
+							input_file=["%s/%s/%s" % (input_dir, obs.id, f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
+							input_files.extend(input_file)
 					input_file=" ".join(input_files)
 				else:
-					input_file=" ".join(self.tab.rawfiles[cep2.current_node])
+					if cep2.current_node in self.tab.rawfiles:
+						input_file=" ".join(self.tab.rawfiles[cep2.current_node])
+					else: input_file=""
 #					input_file=glob.glob("%s/%s/%s_SAP%03d_B%03d_S*_bf.raw" % (cep2.rawdir, obs.id, obs.id, self.sapid, self.tabid))[0]
 
 				self.log.info("Input data: %s" % (input_file))
@@ -1039,23 +1069,25 @@ CLK line will be removed from the parfile!" % (parfile,))
 						prepfold_popens=[]  # list of prepfold Popen objects
 						for psr in self.psrs:   # pulsar list is empty if --nofold is used
 							psr2=re.sub(r'[BJ]', '', psr)
+							prepfold_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
 							# first running prepfold with mask (if --norfi was not set)
-							if not cmdline.opts.is_norfi:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
 								# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
 								# I suppose it happens because name of the file is TOO long for Tempo
-								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -nsub %d -n 256 -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s.fits" % \
-									(psr, psr2, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, self.output_prefix)
+								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s %s.fits" % \
+									(psr, psr2, prepfold_nbins, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, cmdline.opts.prepfold_extra_opts, self.output_prefix)
 								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 								prepfold_popens.append(prepfold_popen)
 								time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish 
                                                                               # with temporary files lile resid2.tmp otherwise it can interfere with next prepfold call
 							# running prepfold without mask
-							if not cmdline.opts.is_norfi: output_stem="_nomask"
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)): 
+								output_stem="_nomask"
 							else: output_stem=""
 							# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
 							# I suppose it happens because name of the file is TOO long for Tempo
-							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -nsub %d -n 256 -fine -nopdsearch -o %s_%s%s %s.fits" % \
-								(psr, psr2, prepfold_nsubs, psr, self.output_prefix, output_stem, self.output_prefix)
+							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -o %s_%s%s %s %s.fits" % \
+								(psr, psr2, prepfold_nbins, prepfold_nsubs, psr, self.output_prefix, output_stem, cmdline.opts.prepfold_extra_opts, self.output_prefix)
 							prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 							prepfold_popens.append(prepfold_popen)
 							time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish 
@@ -1071,8 +1103,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 						dspsr_popens=[] # list of dspsr Popen objects
 						for psr in self.psrs: # pulsar list is empty if --nofold is used
 							psr2=re.sub(r'[BJ]', '', psr)
-							cmd="dspsr -E %s/%s.par %s %s -b 256 -fft-bench -O %s_%s -K -A -L 60 -t %d %s.fits" % \
-								(self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, self.output_prefix)
+							cmd="dspsr -E %s/%s.par %s %s -fft-bench -O %s_%s -K -A -L 60 -t %d %s %s.fits" % \
+								(self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, self.output_prefix)
 							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 							dspsr_popens.append(dspsr_popen)
 
@@ -1361,34 +1393,36 @@ class CVUnit(PipeUnit):
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
 					input_files=[]
 					for loc in self.tab.location:
-						# first "mounting" corresponding locus node
-						uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
-						input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-						process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-						process.communicate()
-						# dspsr needs all polarizations S* files to be in the current directory together with h5 files,
-						# so we have to make soft links to input files
+						if loc in self.tab.rawfiles:
+							# first "mounting" corresponding locus node
+							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
+							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
+							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+							process.communicate()
+							# dspsr needs all polarizations S* files to be in the current directory together with h5 files,
+							# so we have to make soft links to input files
+							self.log.info("Making links to input files in the current directory...")
+							for f in self.tab.rawfiles[loc]:
+								# links to the *.raw files
+								cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
+								self.execute(cmd, workdir=self.curdir)
+								# links to the *.h5 files
+								cmd="ln -sf %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
+								self.execute(cmd, workdir=self.curdir)
+							input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
+							input_files.extend(input_file)
+				else:
+					if cep2.current_node in self.tab.rawfiles:
+						# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
 						self.log.info("Making links to input files in the current directory...")
-						for f in self.tab.rawfiles[loc]:
+						for f in self.tab.rawfiles[cep2.current_node]:
 							# links to the *.raw files
-							cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
+							cmd="ln -sf %s ." % (f)
 							self.execute(cmd, workdir=self.curdir)
 							# links to the *.h5 files
-							cmd="ln -sf %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
+							cmd="ln -sf %s.h5 ." % (f.split(".raw")[0])
 							self.execute(cmd, workdir=self.curdir)
-						input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
-						input_files.extend(input_file)
-				else:
-					# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
-					self.log.info("Making links to input files in the current directory...")
-					for f in self.tab.rawfiles[cep2.current_node]:
-						# links to the *.raw files
-						cmd="ln -sf %s ." % (f)
-						self.execute(cmd, workdir=self.curdir)
-						# links to the *.h5 files
-						cmd="ln -sf %s.h5 ." % (f.split(".raw")[0])
-						self.execute(cmd, workdir=self.curdir)
-					input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
+						input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
 
@@ -1412,9 +1446,9 @@ class CVUnit(PipeUnit):
 						# loop on frequency splits
 						for ii in range(len(s0_files)):
 							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
-							cmd="dspsr -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d -U minX%d %s" % \
+							cmd="dspsr -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d -U minX%d %s %s" % \
 								(cmdline.opts.tsubint, verbose, self.outdir, psr2, \
-								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.maxram, s0_files[ii])
+								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.maxram, cmdline.opts.dspsr_extra_opts, s0_files[ii])
 							self.execute(cmd, workdir=self.curdir)
 
 						# running psradd to add all freq channels together
@@ -1548,27 +1582,29 @@ class CVUnit(PipeUnit):
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
 					input_files=[]
 					for loc in self.tab.location:
-						# first "mounting" corresponding locus node
-						uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
-						input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-						process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-						process.communicate()
-						# bf2puma2 assumes all polarizations S* files to be in the current directory, so we have to
-						# make soft links to input files
-						self.log.info("Making links to input files in the current directory...")
-						for f in self.tab.rawfiles[loc]:
-							cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
-							self.execute(cmd, workdir=self.curdir)
-						input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
-						input_files.extend(input_file)
+						if loc in self.tab.rawfiles:
+							# first "mounting" corresponding locus node
+							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
+							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
+							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+							process.communicate()
+							# bf2puma2 assumes all polarizations S* files to be in the current directory, so we have to
+							# make soft links to input files
+							self.log.info("Making links to input files in the current directory...")
+							for f in self.tab.rawfiles[loc]:
+								cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
+								self.execute(cmd, workdir=self.curdir)
+							input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
+							input_files.extend(input_file)
 				else:
-					# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
-					self.log.info("Making links to input files in the current directory...")
-					for f in self.tab.rawfiles[cep2.current_node]:
-						# links to the *.raw files
-						cmd="ln -sf %s ." % (f)
-						self.execute(cmd, workdir=self.curdir)
-					input_files=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[cep2.current_node]]
+					if cep2.current_node in self.tab.rawfiles:
+						# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
+						self.log.info("Making links to input files in the current directory...")
+						for f in self.tab.rawfiles[cep2.current_node]:
+							# links to the *.raw files
+							cmd="ln -sf %s ." % (f)
+							self.execute(cmd, workdir=self.curdir)
+						input_files=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[cep2.current_node]]
 
 				self.log.info("Input data: %s" % ("\n".join(input_files)))
 
@@ -1637,9 +1673,9 @@ class CVUnit(PipeUnit):
 							dspsr_popens=[] # list of dspsr Popen objects
 							for cc in range(bb, bb+self.nrChanPerSub):
 								input_file=bf2puma_outfiles[cc]
-								cmd="dspsr -m %s -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_SB%s -t %d %s" % \
+								cmd="dspsr -m %s -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_SB%s -t %d %s %s" % \
 									(obsmjd, cmdline.opts.tsubint, verbose, self.outdir, psr2, psr, self.output_prefix, \
-										input_file.split("_SB")[1], cmdline.opts.nthreads, input_file)
+										input_file.split("_SB")[1], cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, input_file)
 								dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 								dspsr_popens.append(dspsr_popen)
 								# running the single-pulse analysis

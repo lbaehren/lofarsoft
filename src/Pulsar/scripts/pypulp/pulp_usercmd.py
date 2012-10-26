@@ -43,6 +43,9 @@ class CMDLine:
         def __init__(self, version=""):
 		self.prg = sys.argv[0]
 		self.options = sys.argv[1:]  # storing original cmd line
+		# if option has spaces then we protect it with quotes
+		for ii in range(len(self.options)):
+			if ' ' in self.options[ii]: self.options[ii] = '"' + self.options[ii] + '"'
 		self.version = version
 		self.psrs = []  # list of pulsars to fold
 		self.beams = [] # list of beams to process
@@ -100,10 +103,16 @@ class CMDLine:
                            help="specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
         	self.cmd.add_option('--locate-rawdata', action="store_true", dest='is_locate_rawdata',
                            help="search for input raw data in all alive nodes instead of using the list of nodes from the parset file", default=False)
+        	self.cmd.add_option('--skip-check-rawdata', action="store_true", dest='is_skip_check_rawdata',
+                           help="skip checking at all if rawdata are present on the locus nodes", default=False)
         	self.cmd.add_option('--log-append', action="store_true", dest='is_log_append',
                            help="optional parameter to append log output to already existent log files. Default is overwrite", default=False)
         	self.cmd.add_option('--nthreads', dest='nthreads', metavar='#THREADS',
                            help="number of threads for all dspsr calls. Default: %default", default=2, type='int')
+        	self.cmd.add_option('--dspsr-extra-opts', dest='dspsr_extra_opts', metavar='STRING',
+                           help="specify extra additional options for Dspsr command", default="", type='str')
+        	self.cmd.add_option('--prepfold-extra-opts', dest='prepfold_extra_opts', metavar='STRING',
+                           help="specify extra additional options for Prepfold command", default="", type='str')
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python and intermediate data files are not deleted", default=False)
         	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',
@@ -200,14 +209,18 @@ class CMDLine:
 			else: print msg
 			quit(1)
 	
-		# when do only summaries then ignore --del optioni if given, otherwise 
+		# when do only summaries (or plots-only or --nodecode) then ignore --del option if given, otherwise 
 		# everything will be deleted and if raw data are already erased then we are screwed
-		if self.opts.is_summary and self.opts.is_delete:
+		if (self.opts.is_summary or self.opts.is_plots_only or self.opts.is_nodecode) and self.opts.is_delete:
 			self.opts.is_delete = False
-			msg="***\n*** Warning: You give --del with --summary, deleting of previous results will be ignored and\n\
-*** and new summary results will be overwritten.\n***"
+			msg="***\n*** Warning: You give --del with one of other options (--summary or --plots-only or --nodecode).\n\
+*** Deleting of previous results will be ignored and new results will be overwritten.\n***"
 			if log != None: log.warning(msg)
 			else: print msg
+
+		# set to ignore checking for rawdata if one of the flags below is true:
+		if self.opts.is_summary or self.opts.is_plots_only or self.opts.is_nodecode:
+			self.opts.is_skip_check_rawdata = True
 
 		# checking that if --beams used then beams are specified correctly
 		# we have this complicated "if" because we used --beams to pass summary locus node when --summary and --local
@@ -380,49 +393,54 @@ class CMDLine:
                                         self.beams.append(beam)
 
                 # now we are checking if raw data are available for beams we want to process
-		if not self.opts.is_summary:
-                	msg="Checking if all data/nodes are available for user-specified beams..."
-	                if log != None: log.info(msg)
-        	        else: print msg
+		if  not self.opts.is_skip_check_rawdata:
+	               	msg="Checking if all raw data/nodes are available for user-specified beams..."
+        	        if log != None: log.info(msg)
+       	        	else: print msg
 
-                	# if some TABs have raw data in several locations
-                	# we also need to check if hoover nodes are up
-                	avail_hoover_nodes=list(set(cep2.hoover_nodes).intersection(set(cep2.alive_nodes)))
+	               	# if some TABs have raw data in several locations
+        	       	# we also need to check if hoover nodes are up
+               		avail_hoover_nodes=list(set(cep2.hoover_nodes).intersection(set(cep2.alive_nodes)))
 
 	                excluded_beams_id=[]
-        	        for ii in range(len(self.beams)):
-                	        sapid=int(self.beams[ii].split(":")[0])
-                        	tabid=int(self.beams[ii].split(":")[1])
-    	                    	tab = obs.saps[sapid].tabs[tabid]
-        	                if len(tab.location) > 0:
-                	                # if here, it means node is available for this beam
-                        	        if len(tab.location) > 1 and len(avail_hoover_nodes) != len(cep2.hoover_nodes):
-                                	        loc=""
-                                        	if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
-                	                        if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
-                        	                if loc != "":
-                                	                excluded_beams_id.append(ii)
-                                        	        msg="Hoover node %s is not available for the beam %d:%d [#locations = %d] - excluded" % (loc, sapid, tabid, len(tab.location))
-                                                	if log != None: log.warning(msg)
-        	                                        else: print msg
-                	        else: # no data available
-                        	        excluded_beams_id.append(ii)
-                	                msg="No data available for the beam %d:%d - excluded" % (sapid, tabid)
-                        	        if log != None: log.warning(msg)
-                                	else: print msg
+       		        for ii in range(len(self.beams)):
+               		        sapid=int(self.beams[ii].split(":")[0])
+                       		tabid=int(self.beams[ii].split(":")[1])
+				tab = obs.saps[sapid].tabs[tabid]
+				# checking if for this beam we already know that either node is down or files are missing
+				if not tab.is_data_available: 
+					excluded_beams_id.append(ii)
+					continue
+				if len(tab.location) > 0:
+					# if here, it means node is available for this beam
+                	                if len(tab.location) > 1 and len(avail_hoover_nodes) != len(cep2.hoover_nodes):
+                        	       	        loc=""
+                                	       	if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
+						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
+						if loc != "":
+        	                                        excluded_beams_id.append(ii)
+                	                       	        msg="Hoover node %s is not available for the beam %d:%d [#locations = %d] - excluded" % (loc, sapid, tabid, len(tab.location))
+                        	                       	if log != None: log.warning(msg)
+							else: print msg
+	               	        else: # no data available
+        	               	        excluded_beams_id.append(ii)
+               		                msg="No data available for the beam %d:%d - excluded" % (sapid, tabid)
+                       		        if log != None: log.warning(msg)
+                               		else: print msg
+
 	                # now giving summary of excluded beams and deleted them from the list
-        	        if len(excluded_beams_id) > 0:
-                	        msg="Excluded beams [%d]: %s" % (len(excluded_beams_id), ", ".join([self.beams[id] for id in excluded_beams_id]))
-                        	if log != None: log.info(msg)
+       		        if len(excluded_beams_id) > 0:
+               		        msg="Excluded beams [%d]: %s" % (len(excluded_beams_id), ", ".join([self.beams[id] for id in excluded_beams_id]))
+                       		if log != None: log.info(msg)
 				else: print msg
-        	                # deleting these excluded beams from the cmdline.beams list
-                	        for id in reversed(excluded_beams_id):
-                        	        del(self.beams[id])
+       		                # deleting these excluded beams from the cmdline.beams list
+               		        for id in reversed(excluded_beams_id):
+                       		        del(self.beams[id])
 	                else:
-        	                if len(self.beams) > 0:
-                	                msg="All data/nodes are available"
-                        	        if log != None: log.info(msg)
-                                	else: print msg
+       		                if len(self.beams) > 0:
+               		                msg="All data/nodes are available"
+                       		        if log != None: log.info(msg)
+                               		else: print msg
 
 	# updating cmdline default parameters based on obtained info about Observation
 	# such as, number of frequency splits
@@ -499,8 +517,12 @@ class CMDLine:
 					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
 					log.info("Subdyn.py = %s" % ((self.opts.is_skip_subdyn == False and self.opts.is_norfi == False) and "yes" or "no"))
 					log.info("Prepfold = %s" % (self.opts.is_skip_prepfold and "no" or "yes"))
+					if self.opts.prepfold_extra_opts != "" and not self.opts.is_skip_prepfold:
+						log.info("Prepfold user extra options: %s" % (self.opts.prepfold_extra_opts))
 					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or \
 						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
+					if self.opts.dspsr_extra_opts != "" and not self.opts.is_skip_dspsr:
+						log.info("DSPSR user extra options: %s" % (self.opts.dspsr_extra_opts))
 					if not self.opts.is_skip_dspsr:
 						log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
 					if obs.CV: log.info("rmfit = %s" % (self.opts.is_skip_rmfit and "no" or "yes"))
