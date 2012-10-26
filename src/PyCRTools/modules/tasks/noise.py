@@ -9,7 +9,7 @@ from pycrtools.grid import CoordinateGrid
 import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
-from scipy.stats import shapiro
+from scipy.stats.mstats import normaltest
 
 class Noise(Task):
     """Noise characterization.
@@ -23,41 +23,56 @@ class Noise(Task):
             doc = "Number of antennas." ),
         nbins = dict( default = 100,
             doc = "Number of bins for histogram." ),
-        shapiro = dict ( default = [],
-            doc = "Results of Shapiro-Wilk test for normality." ),
-        save_plots = dict( default = False,
-            doc = "Store plots" ),
+        p_value = dict( default = 0.05,
+            doc = "p value for normality test, everything above this value is regarded as matching a normal distribution." ),
+        normaltest_results = dict( default = [],
+            doc = "Results of D’Agostino and Pearson’s test for normality." ),
+        suspect_antennas = dict( default = [],
+            doc = "Antennas for which the noise is found not to be drawn from a normal distribution (e.g p_value to small)." ),
         plot_prefix = dict( default = "",
             doc = "Prefix for plots" ),
         plotlist = dict( default = [],
             doc = "List of plots" ),
-        plot_antennas = dict( default = lambda self : range(self.nantennas),
-            doc = "Antennas to create plots for." ),
+        plot_only_suspect_antennas = dict( default = True,
+            doc = "Plot only those antennas that are suspect." ),
     )
 
     def run(self):
         """Run the task.
         """
 
+        # Convert data to numpy
         s = self.timeseries_data.toNumpy()
+
+        # Now compute some basic noise statistics
+        self.mean = np.mean(s, axis=0)
+        self.std = np.std(s, axis=0)
 
         for i in range(self.nantennas):
 
-            # Compute Shapiro-Wilk test for normality
-            self.shapiro.append(shapiro(s[i]))
+            # Compute D’Agostino and Pearson’s test for normality
+            norm = normaltest(s[i])
 
-        if self.save_plots:
+            self.normaltest_results.append(norm)
+            
+            if norm[1] < self.p_value:
+                self.suspect_antennas.append(i)
 
-            # Histograms
-            for i in self.plot_antennas:
-                plt.clf()
+        # Histograms
+        if self.plot_only_suspect_antennas:
+            antennas = self.suspect_antennas
+        else:
+            antennas = range(self.nantennas)
 
-                plt.hist(s[i], self.nbins, color='g')
+        for i in antennas:
+            plt.clf()
 
-                p = self.plot_prefix + "noise_histogram_antenna-{0:d}.png".format(i)
+            plt.hist(s[i], self.nbins, color='g')
 
-                plt.title("Noise histogram for antenna {0:d}".format(i))
-                plt.savefig(p)
+            p = self.plot_prefix + "noise_histogram_antenna-{0:d}.png".format(i)
 
-                self.plotlist.append(p)
+            plt.title(r"Noise histogram for antenna {0:d}, $\mu={1:f}, \sigma={2:f}$".format(i, self.mean[i], self.std[i]))
+            plt.savefig(p)
+
+            self.plotlist.append(p)
 
