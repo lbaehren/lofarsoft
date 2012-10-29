@@ -1075,6 +1075,14 @@ namespace FRAT {
             fsfile->write((const char*)&itsSBstdevVector[0], size2 * sizeof(itsSBstdevVector[0]));
         }
 
+        bool SubbandTrigger::writeOffset(ofstream * fsfile){
+            fsfile->write((const char*)&itsDM, sizeof(itsDM));
+            fsfile->write((const char*)&itsStreamID, sizeof(itsStreamID));
+            int size2=dedispersionoffset.size();
+            fsfile->write((const char*)&size2, sizeof(size2));
+            fsfile->write((const char*)&dedispersionoffset[0], size2 * sizeof(dedispersionoffset[0]));
+        }
+
         bool SubbandTrigger::makeplotDedispBlock(string pulselogfilename){
             std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out | std::ios::app | std::ios::binary);
             if(itsBlockNumber<1){

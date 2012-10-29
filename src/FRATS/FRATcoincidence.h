@@ -318,6 +318,7 @@ namespace FRAT {
               // write standard deviation and average from buffer to file
               bool writeStdDev(ofstream * fsfile);
               bool writeAverage(ofstream * fsfile);
+              bool writeOffset(ofstream * fsfile);
               // set observation ID in triggermessage, NOTE check if this is true
               bool setObsid(int obsID);
               // dispersion measure used for dedispersing the data

@@ -757,6 +757,7 @@ int main (int argc,
 	string sqrtimeseriesfilename=pulsedir+"/sqrtimeseries.log";
 	string avfilename=pulsedir+"/average.log";
 	string stdfilename=pulsedir+"/stddev.log";
+    string offsetfilename=pulsedir+"/offset.log";
     
     ofstream * fcfile = new ofstream;
     fcfile->open(flaggedchansfilename.c_str(), ios::binary  | ios::out);
@@ -770,12 +771,21 @@ int main (int argc,
     avfile->open(avfilename.c_str(), ios::binary  | ios::out);
     ofstream * stdfile = new ofstream;
     stdfile->open(stdfilename.c_str(), ios::binary  | ios::out);
+    ofstream * offsetfile = new ofstream;
+    offsetfile->open(offsetfilename.c_str(), ios::binary  | ios::out);
 	ofstream triggerlogfile;
 	ofstream alltriggerlogfile;
 	//logfile.open(logfilename.c_str());
 	triggerlogfile.open(triggerlogfilename.c_str());
 	alltriggerlogfile.open(alltriggerlogfilename.c_str(),ios::out | ios::app);
-	
+
+    //writing offsets to file	
+    for(int DMcounter=0; DMcounter<nDMs; DMcounter++){
+        for(int fc2=0;fc2<nstreams;fc2++){
+            	SBTs[fc2][DMcounter]->writeOffset(offsetfile);
+        }
+    }
+    offsetfile->close();
     // used for reading files        
 	unsigned num;
 	fpos_t pos;
