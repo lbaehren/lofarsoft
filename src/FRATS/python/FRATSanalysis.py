@@ -935,6 +935,26 @@ def loadAverage(nrDMs,nrStreams,directory,filename='average.log'):
             datadict[DMr][stream]=np.fromfile(f,'float32',nr)
     return datadict
 
+def loadOffset(nrDMs,nrStreams,directory,filename='offset.log'):
+    """ load standard deviation of each block
+        * nrDMs *  number of DMs on which the trigger is run and thus for which an average exists
+        * nrStreams * number of streams, that all have a seperate overage.
+        * directory * directory where the file is stored
+        * filename *  name of file
+    
+        returns dictionary with averages for each DM and stream 
+    """ 
+    f=open(directory+'/'+filename)
+    f.seek(0)
+    datadict=dict()
+    for DM in range(nrDMs):
+        for st in range(nrStreams):
+            (DMr,stream,nr)=struct.unpack('fii',f.read(12))
+            if DMr not in datadict.keys():
+                datadict[DMr]=dict()
+            datadict[DMr][stream]=np.fromfile(f,'int32',nr)
+    return datadict
+
 def loadStddev(nrDMs,nrStreams,directory,filename='stddev.log'):
     """ load standard deviation of each block
         * nrDMs *  number of DMs on which the trigger is run and thus for which an average exists
