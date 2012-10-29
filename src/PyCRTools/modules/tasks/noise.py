@@ -26,7 +26,7 @@ class Noise(Task):
         p_value = dict( default = 0.05,
             doc = "p value for normality test, everything above this value is regarded as matching a normal distribution." ),
         normaltest_results = dict( default = [],
-            doc = "Results of D’Agostino and Pearson’s test for normality." ),
+            doc = "Results of D'Agostino and Pearson's test for normality." ),
         suspect_antennas = dict( default = [],
             doc = "Antennas for which the noise is found not to be drawn from a normal distribution (e.g p_value to small)." ),
         plot_prefix = dict( default = "",
@@ -50,11 +50,11 @@ class Noise(Task):
 
         for i in range(self.nantennas):
 
-            # Compute D’Agostino and Pearson’s test for normality
+            # Compute D'Agostino and Pearson's test for normality
             norm = normaltest(s[i])
 
             self.normaltest_results.append(norm)
-            
+
             if norm[1] < self.p_value:
                 self.suspect_antennas.append(i)
 
