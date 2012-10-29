@@ -347,7 +347,7 @@ namespace FRAT {
 			  float itsReferenceFreq; // compared to which frequency is data move
 			  int itsReferenceTime; // relative time to the reference frequency
               
-			  unsigned int itsSequenceNumber; // block number
+			  int itsSequenceNumber; // block number
 			  int itsBlockNumber; // block number
 			  //int itsStartBlock;
 			  std::vector<float> DeDispersedBuffer; // ringbuffer of dedispersed data, also with partial sum 

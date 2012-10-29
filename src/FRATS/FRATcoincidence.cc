@@ -112,7 +112,7 @@ namespace FRAT {
 			trigBuffer[last].next = FRAT_TASK_BUFFER_LENGTH;
 			
 			trigBuffer[newindex].SBnr     = trigger.subband;
-			// trigBuffer[newindex].SeqNr     = trigger.itsSeqNr;
+			// trigBuffer[newindex].SeqNr     = trigger.fitsSeqNr;
 			trigBuffer[newindex].Time      = trigger.time;
 			trigBuffer[newindex].SampleNr  = trigger.sample;
 			trigBuffer[newindex].Sum       = trigger.sum;
@@ -433,6 +433,7 @@ namespace FRAT {
 			    return false; 
 			} else {
 				itsFoundTriggers="";
+                //itsSequenceNumber==sequenceNumber;
 				itsBlockNumber=sequenceNumber;
                 if(verbose){
                     std::cout << "Processing block " << sequenceNumber << std::endl;
@@ -450,6 +451,7 @@ namespace FRAT {
 					//std::cout << std::endl << " time " << time ;
 					// totaltime=itsSequenceNumber*itsNrSamples+time;
                     totaltime++;
+
 					rest=totaltime%itsBufferLength;
                     channeltimeindex+=itsTotNrChannels; // increase index for each sample by the number of values on the channel axis
                     channelindex=channeltimeindex+itsStartChannel+itsNrChannels; // move to the highest frequency of this band. Then count downwards.
@@ -1096,7 +1098,7 @@ namespace FRAT {
 			//pulselogfile.width(11);
             //printf("SeqNr, NrSam, BufLen, SumDeDispSize %i %i %i %i ",itsSequenceNumber, itsNrSamples, itsBufferLength, buflen);
             //pulselogfile.precision(10);
-            if(intstart>itsNrSamples){
+            if(intstart>=itsNrSamples){
                 pulselogfile.write((char*) &DeDispersed[intstart-itsNrSamples], itsNrSamples*sizeof(float));
             } else {
                 int offset=itsNrSamples-intstart;

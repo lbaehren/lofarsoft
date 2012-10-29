@@ -34,6 +34,7 @@ def dedispersionShift(data,dr,DM,markboundary):
     (sa,ch)=data.shape
     temparray=np.zeros(sa,data.dtype)
     offsets=-1*np.round(delays)
+    print offsets
     for c in range(ch):
         offset=offsets[c]
         sab=sa-offset
@@ -41,10 +42,33 @@ def dedispersionShift(data,dr,DM,markboundary):
         temparray[0:sab]=data[offset:,c]
         temparray[sab:]=data[0:offset,c]
         data[:,c]=temparray
+
+
+def dedispersionToTimeseries(data,startChan,nChan,offsets,dr,DM):
+    endChan=startChan+nChan
+    #delays=dedispersion.freq_to_delay(DM,dr.par['frequencies'][startChan:startChan+nChan],dr.par['timeresolution'])
+    (sa,ch)=data.shape
+    temparray=np.zeros(sa,data.dtype)
+    #offsets=-1*np.round(delays)
     
-def divideBaseline(data):
-    baseline=np.average(data,axis=0)
-    data/=baseline
+    for c in range(nChan):
+        offset=offsets[c]
+        sab=sa-offset
+        saa=offset
+        temparray[offset:]+=data[0:sa-offset,startChan+c]
+    return temparray
+
+    
+def divideBaseline(data,blocksize=None):
+    if not blocksize:
+        baseline=np.average(data,axis=0)
+        data/=baseline
+    else:
+        nblocks=data.shape[0]/blocksize
+        for b in range(nblocks):
+            baseline=np.average(data[b*blocksize:(b+1)*blocksize],axis=0)
+            data[b*blocksize:(b+1)*blocksize]/=baseline
+
 
 def dataToFits(data,dr,fitsname,overwrite):
     import pyfits
@@ -124,6 +148,7 @@ parser.add_option("-a","--savefits",action="store_true",dest="savefits",default=
 parser.add_option("-w","--overwritefits",action="store_true",dest="overwritefits",default=False)
 parser.add_option("-f","--fitsname",type="string",default="temp.fits")
 parser.add_option("-m","--beam",type="int",default=2)
+parser.add_option("-c","--chPerSB",type="int",default=None,dest='chPerSB')
 parser.add_option("-R","--flagrfi",action="store_true",default=False,dest="flagrfi")
 parser.add_option("-D","--rfidir",type="string",dest="rfidir",default=None)
 parser.add_option("--DM","--dedisperse",type=float,dest="DM",default=None)
@@ -194,7 +219,7 @@ muteindex=index[stdNorm>av+cutlevel*std1]
 print "Available for interactive use: data and dr (datareader) with dr.par for parameters"
 
 if options.dividebaseline:
-    divideBaseline(data) 
+    divideBaseline(data,blocksize) 
     flagmethod=1
 else:
     flagmethod="average"
@@ -207,6 +232,10 @@ if options.flagrfi:
     else:
         flagChannels(data,rfidir,startblock,blocksize,flagmethod)
         flagSamples(data,rfidir,startblock,blocksize,flagmethod)
+        if not options.chPerSB:
+            print "WARNING, not flagging 0-th channel of the subband. Please specify -c" 
+        else:
+            data[:,np.arange(0,data.shape[1],options.chPerSB)]=1
 
 if options.DM:
     dedispersionShift(data,dr,options.DM,markboundary=True)
