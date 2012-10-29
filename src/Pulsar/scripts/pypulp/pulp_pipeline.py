@@ -1103,8 +1103,9 @@ CLK line will be removed from the parfile!" % (parfile,))
 						dspsr_popens=[] # list of dspsr Popen objects
 						for psr in self.psrs: # pulsar list is empty if --nofold is used
 							psr2=re.sub(r'[BJ]', '', psr)
-							cmd="dspsr -E %s/%s.par %s %s -fft-bench -O %s_%s -K -A -L 60 -t %d %s %s.fits" % \
-								(self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, self.output_prefix)
+							dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
+							cmd="dspsr -b %d -E %s/%s.par %s %s -fft-bench -O %s_%s -K -A -L 60 -t %d %s %s.fits" % \
+								(dspsr_nbins, self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, self.output_prefix)
 							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 							dspsr_popens.append(dspsr_popen)
 
@@ -1443,11 +1444,12 @@ class CVUnit(PipeUnit):
 					for psr in self.psrs:
 						self.log.info("Running dspsr for pulsar %s..." % (psr))
 						psr2=re.sub(r'[BJ]', '', psr)
+						dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
 						# loop on frequency splits
 						for ii in range(len(s0_files)):
 							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
-							cmd="dspsr -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d -U minX%d %s %s" % \
-								(cmdline.opts.tsubint, verbose, self.outdir, psr2, \
+							cmd="dspsr -b %d -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d -U minX%d %s %s" % \
+								(dspsr_nbins, cmdline.opts.tsubint, verbose, self.outdir, psr2, \
 								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.maxram, cmdline.opts.dspsr_extra_opts, s0_files[ii])
 							self.execute(cmd, workdir=self.curdir)
 
@@ -1668,13 +1670,14 @@ class CVUnit(PipeUnit):
 					for psr in self.psrs:
 						self.log.info("Running dspsr for pulsar %s..." % (psr))
 						psr2=re.sub(r'[BJ]', '', psr)
+						dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
 						for bb in range(0, len(bf2puma_outfiles), self.nrChanPerSub):
 							self.log.info("For %s" % (", ".join(bf2puma_outfiles[bb:bb+self.nrChanPerSub])))
 							dspsr_popens=[] # list of dspsr Popen objects
 							for cc in range(bb, bb+self.nrChanPerSub):
 								input_file=bf2puma_outfiles[cc]
-								cmd="dspsr -m %s -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_SB%s -t %d %s %s" % \
-									(obsmjd, cmdline.opts.tsubint, verbose, self.outdir, psr2, psr, self.output_prefix, \
+								cmd="dspsr -m %s -b %d -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_SB%s -t %d %s %s" % \
+									(obsmjd, dspsr_nbins, cmdline.opts.tsubint, verbose, self.outdir, psr2, psr, self.output_prefix, \
 										input_file.split("_SB")[1], cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, input_file)
 								dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 								dspsr_popens.append(dspsr_popen)
