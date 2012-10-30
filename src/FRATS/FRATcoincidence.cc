@@ -600,7 +600,7 @@ namespace FRAT {
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
                             //trigger.width=length;
                         }     
-                        if(time==itsNrSamples-1){
+                        if(time==itsNrSamples-1 && itsBlockNumber>21){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                             utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -612,7 +612,7 @@ namespace FRAT {
 
                         }
                     }
-                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>5){
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>21 && time!=0){
                         // send trigger
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -658,7 +658,7 @@ namespace FRAT {
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
                             //trigger.width=length;
                         }     
-                        if(time==itsNrSamples-1){
+                        if(time==itsNrSamples-1 && itsBlockNumber>21){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                             utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -670,7 +670,7 @@ namespace FRAT {
 
                         }
                     }
-                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>5){
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>21 && time!=0){
                         // send trigger
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -753,7 +753,7 @@ namespace FRAT {
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
                             //trigger.width=length;
                         }     
-                        if(time==itsNrSamples-1){
+                        if(time==itsNrSamples-1 && itsBlockNumber>21){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                             utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -765,7 +765,7 @@ namespace FRAT {
 
                         }
                     }
-                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>5){
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>21 && time!=0){
                         // send trigger
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
