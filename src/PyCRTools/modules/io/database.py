@@ -23,7 +23,7 @@ class Database(object):
         """
         self._filename = filename
         self._timeout = 60
-        self._isolation_level = "DEFERRED"
+        self._isolation_level = "DEFERRED" # Default isolation level
 
         self._db = None
 
@@ -37,7 +37,7 @@ class Database(object):
         Parameter          Description
         ================== =======================================================
         *filename*         Filename of the database.
-        *isolation_level*  Type of connection
+        *isolation_level*  Type of isolation level for the connection.
         ================== =======================================================
 
         When the filename is ``:memory:`` the database is written to
@@ -156,6 +156,19 @@ class Database(object):
 
 
     def executelist(self, sql_list=[], blocksize=128, verbose=False):
+        """Execute a list of SQL statements.
+
+        **Properties**
+
+        ===========  ======================================================================
+        Parameter    Description
+        ===========  ======================================================================
+        *sql_list*   List of SQL commands to process.
+        *blocksize*  Maximum size of a block os SQL commands that gets processed
+                     in one go. Longer lists are split in multiple blocks [default=128].
+        *verbose*    Boolean that [default=False].
+        ===========  ======================================================================
+        """
         i_block = 1
         n_block = 1
 
@@ -167,6 +180,8 @@ class Database(object):
         if sql_list:
             sql_block = "BEGIN TRANSACTION;\n"
             for sql_statement in sql_list:
+                if sql_statement[-1] != ';':
+                    sql_statement += ';'
                 sql_block += sql_statement + "\n"
                 i_block += 1
                 if i_block > blocksize:
