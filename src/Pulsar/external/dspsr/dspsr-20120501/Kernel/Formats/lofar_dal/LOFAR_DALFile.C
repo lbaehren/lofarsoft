@@ -302,16 +302,18 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 
   // getting the sampling time
   Attribute<double> sTime = beam.samplingTime();
-  if (sTime.exists())
+  if (sTime.exists()) {
     cerr << "samplingTime=" << setprecision(20) << sTime.get() << endl;
-  else
-    cerr << "samplingTime undefined" << endl;
+    info.set_rate (1./sTime.get());
+    cerr << "[ set rate to " << setprecision(20) << 1./sTime.get() << " Hz]" << endl;
+  }
+  else cerr << "samplingTime undefined" << endl;
 
   // getting the channel width
   Attribute<double> rate = beam.channelWidth();
   if (rate.exists()) {
     cerr << "channel Width=" << setprecision(20) << rate.get() << " Hz" << endl;
-    info.set_rate (rate.get());
+//    info.set_rate (rate.get());
   }
   else cerr << "channel Width undefined" << endl;
 
