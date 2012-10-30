@@ -15,19 +15,20 @@ debug_mode = False
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
-    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath=""):
+    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath="", create=False):
         """Initialisation of the CRDatabase object.
 
         **Properties**
 
-        ============= ===============================================
+        ============= ===================================================================
         Parameter     Description
-        ============= ===============================================
+        ============= ===================================================================
         *filename*    filename of the database.
         *datapath*    path where the datafiles are stored.
         *resultspath* path where the results are stored.
         *lorapath*    path where the LORA information is stored.
-        ============= ===============================================
+        *create*      force the creation of the database or assume it has been created.
+        ============= ===================================================================
 
         If *datapath* is an empty string the ''data'' directory of
         the directory in which the database file is located is used.
@@ -44,14 +45,16 @@ class CRDatabase(object):
 
         # Initialize database structure
         self.db.open()
-        self.__createDatabase()
+        if create:
+            self.__createDatabase()
 
         # Settings
         self.settings = Settings(self.db)
 
         # Database version applied in this module
         self.db_required_version = 4
-        self.__updateDatabase()
+        if create:
+            self.__updateDatabase()
 
         # Path settings
         self.basepath = os.path.dirname(self.filename)
