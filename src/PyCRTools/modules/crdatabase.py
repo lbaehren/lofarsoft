@@ -1545,6 +1545,34 @@ class Event(object):
     * *status*: the status of the event.
     * *datafiles*: a list of datafile information objects (:class:`Datafile`) associated with this event.
     * *parameter*: a dictionary of optional parameters with additional information for this specific event.
+      The database supports the following parameter keywords:
+
+      *crp_average_direction*,
+      *lora_10_nsec*,
+      *lora_azimuth*,
+      *lora_core*,sss
+      *lora_core_x*,
+      *lora_core_y*,
+      *lora_coree_x*,
+      *lora_coree_y*,
+      *lora_coreuncertainties*,
+      *lora_datafile*,
+      *lora_detectorid*,
+      *lora_direction*,
+      *lora_elevation*,
+      *lora_energy*,
+      *lora_energy_ev*,
+      *lora_ldf*,
+      *lora_moliere*,
+      *lora_moliere_rad_m*,
+      *lora_nsecs*,
+      *lora_particle_density__m2*,
+      *lora_posx*,
+      *lora_posy*,
+      *lora_posz*,
+      *lora_time*,
+      *lora_utc_time_secs*,
+      *plotfiles*.
     """
 
     def __init__(self, db=None, id=0):
@@ -1677,7 +1705,7 @@ class Event(object):
 
 
     def update(self, recursive=True, parameters=True):
-        """Update event information to the database in a faster buffered way.
+        """Update event information to the database in a buffered (=faster) way.
 
         **Properties**
 
@@ -2086,7 +2114,7 @@ class Datafile(object):
 
 
     def update(self, recursive=True, parameters=True):
-        """Update datafile information to the database in a faster buffered way.
+        """Update datafile information to the database in a buffered (=faster) way.
 
         **Properties**
 
@@ -2342,6 +2370,10 @@ class Station(object):
     * *status*: the status of the station.
     * *polarizations*: a list of polarization information objects (:class:`Polarization`) stored in this station.
     * *parameter*: a dictionary of optional parameters with additional information for this specific station.
+      The database supports the following parameter keyword:
+
+      *crp_pulse_direction*.
+
     """
 
     def __init__(self, db=None, id=0):
@@ -2465,7 +2497,7 @@ class Station(object):
 
 
     def update(self, recursive=True, parameters=True):
-        """Update station information to the database in a faster buffered way.
+        """Update station information to the database in a buffered (=faster) way.
 
         **Properties**
 
@@ -2730,6 +2762,86 @@ class Polarization(object):
     * *status*: the status of the polarization.
     * *resultsfile*: the name of the resultsfile, where all the results from the pipeline are stored.
     * *parameter*: a dictionary of optional parameters. This contains also resulting information from the pipeline.
+      The database supports the following parameter keywords:
+
+      *antenna_positions_array_xyz_m*,
+      *antenna_positions_rf*,
+      *antenna_positions_station_xyz_m*,
+      *antenna_set*,
+      *antennas*,
+      *antennas_final_cable_delays*,
+      *antennas_flagged_delays*,
+      *antennas_residual_cable_delays*,
+      *antennas_spectral_power*,
+      *antennas_timeseries_npeaks*,
+      *antennas_timeseries_rms*,
+      *antennas_with_peaks*,
+      *antennas_with_strong_pulses*,
+      *bad_antennas*,
+      *block*,
+      *blocksize*,
+      *crp_itrf_antenna_positions*,
+      *crp_polarization_angle*,
+      *crp_pulse_delays*,
+      *crp_pulse_peak_amplitude*,
+      *crp_rms*,
+      *crp_stokes*,
+      *data_length*,
+      *data_length_ms*,
+      *delay_quality_error*,
+      *dipole_calibration_delay_applied*,
+      *dirty_channels*,
+      *filedir*,
+      *filename*,
+      *frequency_range*,
+      *nantennas_with_strong_pulses*,
+      *ndipoles*,
+      *nof_dipole_datasets*,
+      *npeaks_found*,
+      *nyquist_zone*,
+      *pipeline_version*,
+      *plotfiles*,
+      *polarization*,
+      *pulse_core_lora*,
+      *pulse_coreuncertainties_lora*,
+      *pulse_direction*,
+      *pulse_direction_delta_delays_final*,
+      *pulse_direction_delta_delays_start*,
+      *pulse_direction_lora*,
+      *pulse_direction_planewave*,
+      *pulse_end_sample*,
+      *pulse_energy_lora*,
+      *pulse_height*,
+      *pulse_height_incoherent*,
+      *pulse_height_rms*,
+      *pulse_location*,
+      *pulse_moliere_lora*,
+      *pulse_normalized_height*,
+      *pulse_start_sample*,
+      *pulse_time_ms*,
+      *pulses_absolute_arrivaltime*,
+      *pulses_maxima_x*,
+      *pulses_maxima_y*,
+      *pulses_power_snr*,
+      *pulses_refant*,
+      *pulses_sigma*,
+      *pulses_strength*,
+      *pulses_timelags_ns*,
+      *sample_frequency*,
+      *sample_interval*,
+      *sample_number*,
+      *station_antennas_homogeneity_factor*,
+      *station_spectral_power*,
+      *station_timeseries_npeaks*,
+      *station_timeseries_rms*,
+      *status*,
+      *svn_revision*,
+      *telescope*,
+      *time*,
+      *timeseries_power_mean*,
+      *timeseries_power_rms*,
+      *timeseries_raw_rms*,
+      *timeseries_rms*.
     """
 
     def __init__(self, db=None, id=0):
@@ -2842,7 +2954,7 @@ class Polarization(object):
 
 
     def update(self, parameters=True):
-        """Update polarization information to the database in a faster buffered way.
+        """Update polarization information to the database in a buffered (=faster) way.
 
         **Properties**
 
