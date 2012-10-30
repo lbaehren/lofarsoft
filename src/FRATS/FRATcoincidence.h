@@ -85,6 +85,7 @@ struct triggerEvent {
     float Threshold;
     int nrFlaggedChannels;
     int nrFlaggedSamples;
+//    int width;
 };
 
 

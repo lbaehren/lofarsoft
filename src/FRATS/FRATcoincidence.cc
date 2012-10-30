@@ -569,7 +569,7 @@ namespace FRAT {
 	    } else {
             itsFoundTriggers="";
             //blocksum =0.0;
-
+            int nextTriggerTimeOffset=1;
             if(IntegrationLength==1){ // make this == 1
                 //# no need to buffer
                 for(int time=0; time<itsNrSamples; time++){
@@ -579,39 +579,49 @@ namespace FRAT {
                     subsum=DeDispersed[rest];
                     if(subsum>TriggerThreshold) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
-                   //     if(totaltime+itsReferenceTime-trigger.time>5){
-                            //new trigger
-                            //trigger.average[fc]/=triggerlength[fc];
+                        if(trigger.length==IntegrationLength && trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && time!=0){
+                            // Next sample, same length
+                            //trigger.width++;
+                            nextTriggerTimeOffset++;
+                            if(subsum>trigger.sum) { // new maximum
+                                trigger.sum=subsum;
+                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                                trigger.time=totaltime+itsReferenceTime;
+                                trigger.sample=time;
+                                nextTriggerTimeOffset=1;
+                            }
+                        } else {
+                            // new trigger
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
                             trigger.sum=subsum;
                             trigger.length=IntegrationLength;
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                        
-                 /*       }
-                        else{
-                            //old trigger, or trigger accross blocks
-                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-                            trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                            if(subsum>trigger.sum){
-                                trigger.sum=subsum;
-                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                            } //calculate maximum
-                */
-                //        }
-                //    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5){
-                        //trigger.utc_second=10000;
+                            //trigger.width=length;
+                        }     
+                        if(time==itsNrSamples-1){
+                            // send trigger at last sample of block, as it's overwritten next
+                            utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                            utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                            trigger.utc_second=itsStarttime_utc_sec+utc_second;
+                            trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
+                            //if(!nosend){
+                            SendTriggerMessage(trigger);
+                            nextTriggerTimeOffset=1;
+
+                        }
+                    }
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>5){
+                        // send trigger
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                        //std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
-                        // Change trigger max to value in standard deviations.
-                        //trigger.max=(trigger.sum-SBaverage)/SBstdev;
                         //if(!nosend){
                         SendTriggerMessage(trigger);
                         triggerMessages.push_back(trigger);
+                        nextTriggerTimeOffset=1;
                     }
 
                 } // for time
@@ -625,45 +635,51 @@ namespace FRAT {
                     } else {
                         subsum=DeDispersed[rest]+DeDispersed[itsBufferLength-1];
                     } 
-                    if(subsum>TriggerThreshold && itsBlockNumber>5) {
+                    if(subsum>TriggerThreshold) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
-                    //    if(totaltime+itsReferenceTime-trigger.time>5){
-                            //new trigger
-                            //trigger.average[fc]/=triggerlength[fc];
+                        if(trigger.length==IntegrationLength && trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && time!=0){
+                            // Next sample, same length
+                            //trigger.width++;
+                            nextTriggerTimeOffset++;
+                            if(subsum>trigger.sum) { // new maximum
+                                trigger.sum=subsum;
+                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                                trigger.time=totaltime+itsReferenceTime;
+                                trigger.sample=time;
+                                nextTriggerTimeOffset=1;
+                            }
+                        } else {
+                            // new trigger
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
                             trigger.sum=subsum;
                             trigger.length=IntegrationLength;
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
-                            trigger.max=(subsum-SBaverage)/SBstdev;
-                        
-                   //     }
-                   /*     else{
-                            //old trigger, or trigger accross blocks
-                            trigger.sum+=subsum;
-                            trigger.length++;
-                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-                            trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                            if(subsum>trigger.max){
-                                trigger.sum=subsum;
-                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                            } //calculate maximum
+                            trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                            //trigger.width=length;
+                        }     
+                        if(time==itsNrSamples-1){
+                            // send trigger at last sample of block, as it's overwritten next
+                            utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                            utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                            trigger.utc_second=itsStarttime_utc_sec+utc_second;
+                            trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
+                            //if(!nosend){
+                            SendTriggerMessage(trigger);
+                            nextTriggerTimeOffset=1;
+
                         }
-                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5 && trigger.time>0){
-                        //trigger.utc_second=10000;
-                   */   unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
-                        unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                        if(verbose){
-                            std::cout << "verbose " << verbose << endl;
-                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
-                        }
+                    }
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>5){
+                        // send trigger
+                        utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                        utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
-                        // Change trigger max to value in standard deviations.
-                        //trigger.max=(trigger.max-SBaverage)/SBstdev;
                         //if(!nosend){
                         SendTriggerMessage(trigger);
                         triggerMessages.push_back(trigger);
+                        nextTriggerTimeOffset=1;
                     }
 
                 } // for time
@@ -714,44 +730,51 @@ namespace FRAT {
                         }
                     }
 
-                    if(subsum>TriggerThreshold && itsBlockNumber > 5) {
+                    if(subsum>TriggerThreshold) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
-                //        if(totaltime+itsReferenceTime-trigger.time>5){
-                            //new trigger
-                            //trigger.average[fc]/=triggerlength[fc];
+                        if(trigger.length==IntegrationLength && trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && time!=0){
+                            // Next sample, same length
+                            //trigger.width++;
+                            nextTriggerTimeOffset++;
+                            if(subsum>trigger.sum) { // new maximum
+                                trigger.sum=subsum;
+                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
+                                trigger.time=totaltime+itsReferenceTime;
+                                trigger.sample=time;
+                                nextTriggerTimeOffset=1;
+                            }
+                        } else {
+                            // new trigger
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
                             trigger.sum=subsum;
                             trigger.length=IntegrationLength;
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                /*        }
-                        else{
-                            //old trigger, or trigger accross blocks
-                            //trigger[fc].time=totaltime+fc*channels_p*STRIDE; //correction for dispersion
-                            trigger.time=totaltime+itsReferenceTime; //correction for dispersion fc* removed
-                            if(subsum>trigger.max){
-                                trigger.sum=subsum;
-                                trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                            } //calculate maximum
+                            //trigger.width=length;
+                        }     
+                        if(time==itsNrSamples-1){
+                            // send trigger at last sample of block, as it's overwritten next
+                            utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                            utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
+                            trigger.utc_second=itsStarttime_utc_sec+utc_second;
+                            trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
+                            //if(!nosend){
+                            SendTriggerMessage(trigger);
+                            nextTriggerTimeOffset=1;
+
                         }
-                        
-                    } else if(totaltime+itsReferenceTime-trigger.time==5 && itsBlockNumber>5 && trigger.time>0){
-                        //trigger.utc_second=10000;
-                 */     unsigned long int utc_second=(unsigned long int) trigger.time*itsTimeResolution;
-                        unsigned long int utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
-                        if(verbose){
-                            std::cout << "verbose " << verbose << endl;
-                            std::cout << "Time since start " << trigger.time*itsTimeResolution << " " << utc_second << " " << utc_nanosecond << " ";
-                        }
+                    }
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>5){
+                        // send trigger
+                        utc_second=(unsigned long int) trigger.time*itsTimeResolution;
+                        utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
                         trigger.utc_second=itsStarttime_utc_sec+utc_second;
                         trigger.utc_nanosecond=itsStarttime_utc_ns+utc_nanosecond;
-                        // Change trigger max to value in standard deviations.
-                        //trigger.max=(trigger.max-SBaverage)/SBstdev;
-                        
                         //if(!nosend){
                         SendTriggerMessage(trigger);
                         triggerMessages.push_back(trigger);
+                        nextTriggerTimeOffset=1;
                     }
 
                 } // for time
