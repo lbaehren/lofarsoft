@@ -91,60 +91,48 @@ class CRDatabase(object):
         """
 
         if self.db:
+            sql_list = []
             # Event table
-            sql = "CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT);")
 
             # Event parameters table
-            sql = "CREATE TABLE IF NOT EXISTS main.eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Datafile table
-            sql = "CREATE TABLE IF NOT EXISTS main.datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT);")
 
             # Datafile parameters table
-            sql = "CREATE TABLE IF NOT EXISTS main.datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Stations table
-            sql = "CREATE TABLE IF NOT EXISTS main.stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT);")
 
             # Station parameters table
-            sql = "CREATE TABLE IF NOT EXISTS main.stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Polarizations table
-            sql = "CREATE TABLE IF NOT EXISTS main.polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT);")
 
             # Polarization parameters table
-            sql = "CREATE TABLE IF NOT EXISTS main.polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # event_datafile table (linking events to datafiles)
-            sql = "CREATE TABLE IF NOT EXISTS main.event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE);")
 
             # datafile_station table (linking datafiles to stations)
-            sql = "CREATE TABLE IF NOT EXISTS main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE);")
 
             # station_polarization table (linking stations to polarizations)
-            sql = "CREATE TABLE IF NOT EXISTS main.station_polarization (stationID INTEGER NOT NULL, polarizationID INTEGER NOT NULL UNIQUE)"
-            self.db.execute(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.station_polarization (stationID INTEGER NOT NULL, polarizationID INTEGER NOT NULL UNIQUE);")
 
             # settings table
-            sql = """
-            CREATE TABLE IF NOT EXISTS main.settings (key TEXT NOT NULL UNIQUE, value TEXT);
-            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');
-            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');
-            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('lorapath', '');
-            INSERT OR IGNORE INTO main.settings (key, value) VALUES ('db_version', '0');
-            """
-            self.db.executescript(sql)
+            sql_list.append("CREATE TABLE IF NOT EXISTS main.settings (key TEXT NOT NULL UNIQUE, value TEXT);")
+            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');")
+            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');")
+            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('lorapath', '');")
+            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('db_version', '0');")
 
+            self.db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
@@ -241,7 +229,6 @@ class CRDatabase(object):
         for _id in id_list:
             sql_list.append("INSERT INTO {0}parameters_new ({1}) VALUES ({2});".format(tablename, transfer_keys[_id], transfer_values[_id]))
         if debug_mode: print "      . executing sql statements..." # DEBUG
-        self.db.executelist(sql_list)
 
         # Rename new polarizationparameters table
         if debug_mode: print "    Renaming new table (replacing old table)..." # DEBUG
@@ -446,17 +433,19 @@ class CRDatabase(object):
 
             # Add parameters for cr_physics pipeline
             print "  Adding additional parameters for cr_physics pipeline..."
-            sql = ""
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "plotfiles")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("event", "crp_average_direction")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("station", "crp_pulse_direction")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_itrf_antenna_positions")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_pulse_delays")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_pulse_peak_amplitude")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_rms")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_stokes")
-            sql += "ALTER TABLE {0}parameters ADD COLUMN {1} TEXT;".format("polarization", "crp_polarization_angle")
-            self.db.executescript(sql)
+            sql_list = []
+            parameter_list =  [["event", "plotfiles"],
+                               ["event", "crp_average_direction"],
+                               ["station", "crp_pulse_direction"],
+                               ["polarization", "crp_itrf_antenna_positions"],
+                               ["polarization", "crp_pulse_delays"],
+                               ["polarization", "crp_pulse_peak_amplitude"],
+                               ["polarization", "crp_rms"],
+                               ["polarization", "crp_stokes"],
+                               ["polarization", "crp_polarization_angle"]]
+            for t,p in parameter_list:
+                sql_list.append("ALTER TABLE {0}parameters ADD COLUMN {1} TEXT".format(t,p))
+            self.db.executelist(sql_list)
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
