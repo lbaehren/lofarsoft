@@ -15,12 +15,12 @@ import re
 # return value is True (psr is good), or False (psr is bad)
 def check_pulsars(psr, cmdline, cep2, log=None):
 	if psr not in cmdline.psrbs and psr not in cmdline.psrjs:
-		msg="warning: Pulsar %s is not in the catalog: '%s'! Checking for par-file..." % (psr, cep2.psrcatalog)
+		msg="Warning: Pulsar %s is not in the catalog: '%s'! Checking for par-file..." % (psr, cep2.psrcatalog)
 		if log != None: log.warning(msg)
 		# checking if par-file exist
 		if cmdline.opts.parfile != "":
 			if os.path.exists(cmdline.opts.parfile): 
-				msg="Found parfile '%s'. Continue..." % (parfile)
+				msg="Found parfile '%s'. Continue..." % (cmdline.opts.parfile)
 				if log != None: log.info(msg)
 				return True
 			else: 
