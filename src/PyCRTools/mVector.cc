@@ -3,7 +3,7 @@
  *                                                                        *
  *  Copyright (c) 2010                                                    *
  *                                                                        *
- *  Martin van den Akker <martinva@astro.ru.nl>                           *
+ *  Martin van den Akker <m.vandenakker@astro.ru.nl>                      *
  *  Heino Falcke <h.falcke@astro.ru.nl>                                   *
  *                                                                        *
  *  This library is free software: you can redistribute it and/or modify  *
