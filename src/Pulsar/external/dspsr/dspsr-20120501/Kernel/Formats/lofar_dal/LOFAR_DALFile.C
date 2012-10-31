@@ -78,8 +78,14 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 
   cerr << endl << "*****************" << endl << endl;
 
-  // getting  the instance of first SAP 
-  BF_SubArrayPointing sap = bf_file->subArrayPointing (0);
+  // getting  the instance of SAP 
+  // checking all SAPs if they exist to pick the right one (if there will be two SAPs in one file, only
+  // the first one will be picked up)
+  unsigned index;
+  for (index=0; index<nsap.get(); index++) {
+    if (bf_file->subArrayPointing(index).exists()) break;
+  }
+  BF_SubArrayPointing sap = bf_file->subArrayPointing(index);
 
   Attribute<unsigned> nbeam = sap.nofBeams();
   if (nbeam.exists())
@@ -90,7 +96,11 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   cerr << endl << "*****************" << endl << endl;
 
   // getting the instance of first TA beam in the SAP
-  BF_BeamGroup beam = sap.beam (0);
+  // checking all TABs in the SAP if they exist in the file until the first one that exists is found
+  for (index=0; index<nbeam.get(); index++) {
+    if (sap.beam(index).exists()) break;
+  }
+  BF_BeamGroup beam = sap.beam(index);
 
   // getting the center frequency of the beam
   Attribute<double> freq2 = beam.beamFrequencyCenter();
