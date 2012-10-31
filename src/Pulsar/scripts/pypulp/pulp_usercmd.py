@@ -136,6 +136,8 @@ class CMDLine:
                            help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
         	self.groupCS.add_option('--skip-prepfold', action="store_true", dest='is_skip_prepfold',
                            help="optional parameter to turn off running prepfold part of the pipeline", default=False)
+        	self.groupCS.add_option('--with-dal', action="store_true", dest='is_with_dal',
+                           help="use dspsr directly to read raw data instead of 2bf2fits. No PRESTO routines though...", default=False)
 		self.cmd.add_option_group(self.groupCS)
 		# adding CV extra options
 	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")

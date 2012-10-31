@@ -974,6 +974,14 @@ CLK line will be removed from the parfile!" % (parfile,))
 
 	# main processing function
 	def run(self, obs, cep2, cmdline, log):
+		# if we are not using dspsr directly to read *.h5 files
+		if not cmdline.opts.is_with_dal:
+			self.run_nodal(obs, cep2, cmdline, log)
+		else:
+			self.run_dal(obs, cep2, cmdline, log)
+
+	# main run function to use 2bf2fits for conversion
+	def run_nodal(self, obs, cep2, cmdline, log):
 		try:
 			self.log = log
 			self.logfile = cep2.get_logfile().split("/")[-1]		
@@ -1237,6 +1245,181 @@ CLK line will be removed from the parfile!" % (parfile,))
 				# waiting for subdyn to finish
 				self.waiting("subdyn.py", subdyn_popen)
 
+			# waiting for pdmp to finish
+			if not cmdline.opts.is_plots_only:
+				if not cmdline.opts.is_skip_dspsr:
+					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
+						self.waiting_list("pdmp", pdmp_popens)
+						# when pdmp is finished do extra actions with files...
+						for psr in self.psrs:
+							cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
+							self.execute(cmd, is_os=True)
+							cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
+							self.execute(cmd, is_os=True)
+							# reading new DM from the *.per file
+							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
+							if np.size(newdm) > 1: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm[-1], psr, self.output_prefix)
+							else: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+
+			# finishing off the processing...
+			self.finish_off(obs, cep2, cmdline)
+
+		except Exception:
+			self.log.exception("Oops... 'run' function for %s%s has crashed!" % (obs.FE and "FE/" or "", self.code))
+			self.kill()
+			sys.exit(1)
+
+		# kill all open processes
+		self.kill()
+		self.procs = []
+		# remove reference to PulpLogger class from processing unit
+		self.log = None
+		# remove references to Popen processes
+		self.parent = None
+
+	# main run function using dspsr to directly read *.h5 files
+	def run_dal(self, obs, cep2, cmdline, log):
+		try:
+			self.log = log
+			self.logfile = cep2.get_logfile().split("/")[-1]		
+			self.start_time=time.time()	
+
+			# start logging
+			self.log.info("%s SAP=%d TAB=%d %s(%s%s Stokes: %s)    UTC start time is: %s  @node: %s" % \
+				(obs.id, self.sapid, self.tabid, obs.FE and ", ".join(self.tab.stationList) + " " or "", obs.FE and "FE/" or "", self.code, \
+				self.stokes, time.asctime(time.gmtime()), cep2.current_node))
+
+			# Re-creating root output directory
+			cmd="mkdir -m 775 -p %s" % (self.outdir)
+			self.execute(cmd)
+
+			# creating Par-file in the output directory or copying existing one
+			if not cmdline.opts.is_nofold: 
+				self.get_parfile(cmdline, cep2)
+
+			# Creating curdir dir
+			cmd="mkdir -m 775 -p %s" % (self.curdir)
+			self.execute(cmd)
+
+			# if not just making plots...
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_nodecode:
+				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
+        	        	                          # also we need to moint locus nodes that we need
+					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
+					input_files=[]
+					for loc in self.tab.location:
+						if loc in self.tab.rawfiles:
+							# first "mounting" corresponding locus node
+							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
+							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
+							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+							process.communicate()
+							# dspsr needs all polarizations S* files to be in the current directory together with h5 files,
+							# so we have to make soft links to input files
+							self.log.info("Making links to input files in the current directory...")
+							for f in self.tab.rawfiles[loc]:
+								# links to the *.raw files
+								cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
+								self.execute(cmd, workdir=self.curdir)
+								# links to the *.h5 files
+								cmd="ln -sf %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
+								self.execute(cmd, workdir=self.curdir)
+							input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
+							input_files.extend(input_file)
+					input_file=" ".join(input_files)
+				else:
+					if cep2.current_node in self.tab.rawfiles:
+						# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
+						self.log.info("Making links to input files in the current directory...")
+						for f in self.tab.rawfiles[cep2.current_node]:
+							# links to the *.raw files
+							cmd="ln -sf %s ." % (f)
+							self.execute(cmd, workdir=self.curdir)
+							# links to the *.h5 files
+							cmd="ln -sf %s.h5 ." % (f.split(".raw")[0])
+							self.execute(cmd, workdir=self.curdir)
+						input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
+						input_file=" ".join(input_files)
+					else: input_file=""
+
+				self.log.info("Input data: %s" % (input_file))
+
+			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
+			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
+
+			total_chan = self.tab.nrSubbands*self.nrChanPerSub
+
+			# if we run the whole processing and not just plots
+			if not cmdline.opts.is_plots_only:
+				if not cmdline.opts.is_nofold:	
+					if not cmdline.opts.is_skip_dspsr:
+						zapstr=""
+						if self.nrChanPerSub > 1:
+							zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
+						verbose="-q"
+						if cmdline.opts.is_debug: verbose="-v"
+						dspsr_popens=[] # list of dspsr Popen objects
+						for psr in self.psrs: # pulsar list is empty if --nofold is used
+							psr2=re.sub(r'[BJ]', '', psr)
+							dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
+							cmd="dspsr -b %d -E %s/%s.par %s %s -fft-bench -O %s_%s -K -A -L 60 -t %d %s %s" % \
+								(dspsr_nbins, self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, input_file)
+							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
+							dspsr_popens.append(dspsr_popen)
+
+						# waiting for dspsr to finish
+						self.waiting_list("dspsr", dspsr_popens)
+
+						# zapping channels...
+						self.log.info("Zapping channels using median smoothed difference algorithm...")
+						for psr in self.psrs:  # pulsar list is empty if --nofold is used
+							cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+
+						# scrunching in frequency
+						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
+						for psr in self.psrs:  # pulsar list is empty if --nofold is used
+							cmd="pam --setnchn %d -m %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+
+			# running extra Psrchive programs, pam, pav,pdmp, etc... 
+			# these programs should be run quick, so run them one by one
+
+			if not cmdline.opts.is_skip_dspsr:
+				# first, calculating the proper max divisor for the number of subbands
+#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
+				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
+				# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
+				pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
+				for psr in self.psrs:  # pulsar list is empty if --nofold is used
+					# creating DSPSR diagnostic plots
+					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
+                	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+                        	             (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+                                	      psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+
+			if not cmdline.opts.is_plots_only:
+				if not cmdline.opts.is_skip_dspsr:
+					# now running pdmp without waiting...
+					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
+						self.log.info("Running pdmp...")
+						pdmp_popens=[]  # list of pdmp Popen objects	
+						for psr in self.psrs:
+							cmd="pdmp -mc %d -mb 128 -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
+								(self.tab.nrSubbands, psr, self.output_prefix, psr, self.output_prefix)
+							pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
+							pdmp_popens.append(pdmp_popen)
+		
 			# waiting for pdmp to finish
 			if not cmdline.opts.is_plots_only:
 				if not cmdline.opts.is_skip_dspsr:
@@ -1578,7 +1761,7 @@ class CVUnit(PipeUnit):
 			self.execute(cmd)
 
 			# if not just making plots...
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_nodecode:
 				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
         	        	                          # also we need to moint locus nodes that we need
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
