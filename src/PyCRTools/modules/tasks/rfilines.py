@@ -60,7 +60,7 @@ def getLines(dirtychannels, blocksize_wanted, blocksize_used):
 def dirtyChannelsFromPhaseSpreads(spreads, verbose=False):
     length = len(spreads)
     sorted = np.sort(spreads)
-    # Sorted plot will have many entries below the uniform-random value of 1.81. 
+    # Sorted plot will have many entries below the uniform-random value of sqrt(2). 
     # They correspond to the RFI lines. Circumvent taking standard-deviation and peak-detection
     # by estimating the (noise) spread using the higher half of the data
     # then have a criterion of > 3x noise to make an RF-line detection.
@@ -138,7 +138,7 @@ class rfilines(tasks.Task):
         filefilter={default:None,doc:"File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "},
         filelist = {default: None, doc: "List of filenames in one event. "},
         outputDataFile = {default: None, doc: "Optional: output text file where results can be written."},
-        batch = {default: False, doc: "Suppress plot display when set to True."},
+        #batch = {default: False, doc: "Suppress plot display when set to True."},
         doplot = {default:True, doc:"Produce output plots"},
         testplots = {default: False, doc: "Produce testing plots for calibration on RF lines"},
         pol={default:0,doc:"0 or 1 for even or odd polarization"},
@@ -160,6 +160,8 @@ class rfilines(tasks.Task):
         dirtychannels = {default: None, doc: "Output array of dirty channels, based on stability of relative phases from consecutive data blocks. Deviations from uniform-randomness are quite small, unless there is an RF transmitter present at a given frequency.", output:True},
         oneSampleShifts = {default: None, doc: "Output array containing the 5 ns-shifts per antenna, if they occur. Output contains integer number of samples the data is shifted. To correct for it, shift data _forward_ by this number of samples.", output: True},
         interStationDelays = {default: None, doc: "Output dict containing station name - delay value pairs.", output: True},
+        maxPhaseError = {default: 1.0, doc: "Maximum allowed phase error in ns^2 (added from all antennas) to call it a good fit and set calibrationStatus to 'OK'."},
+        phaseError = {default: None, doc: "Phase error for the first station in the list. Used to check if the fit is good, e.g. when using fixed reference transmitter", output: True},
         calibrationStatus = {default: None, doc: "Output status string. ", output: True},         
         phase_average = {default: None, doc: "Output array of average phases for each antenna, per frequency channel, dim = e.g. 48 x 4097", output: True},
         strongestDirection = {default: None, doc: "Output list [az, el] with the direction of the strongest transmitter", output: True},
@@ -201,7 +203,7 @@ class rfilines(tasks.Task):
             filelist = self.filelist
         else:
             filelist = cr.listFiles(self.filefilter)
-        superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007"]
+        superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007", "CS021"]
         if len(filelist) == 1:
             print 'There is only 1 file'
             filelist = filelist[0]
@@ -261,15 +263,6 @@ class rfilines(tasks.Task):
         print 'Processing %d blocks of length %d' % (nblocks, self.blocksize)
         averagePhasePerAntenna = np.zeros(self.nofchannels / 2) # do one polarisation; officially: look them up in channel ids!
         n = 0
-        # Line selection happens automatically using phase-stability measure (RMS)
-#        if type(self.lines) == type([]):
-#            fchannel = self.lines[0] # known strong transmitter channel for this event (may vary +/- 5 channels?)
-#        elif self.lines: # either list or number assumed
-#            fchannel = self.lines
-#        freq = freqs[fchannel]
-#        calphases = (twopi * freq) * caldelays
-
-        #measuredphases = np.zeros((nblocks, self.nofchannels))
         phaseblocks = [] # list of arrays of phases (over N freq channels) per antenna
         
         fftdata = f.empty("FFT_DATA")
@@ -386,7 +379,6 @@ class rfilines(tasks.Task):
         print ' Median phase-sigma is lowest (i.e. best phase stability) at channel %d, value = %f' % (bestchannel, medians[bestchannel])
         y = np.median(avgspectrum.toNumpy(), axis=0)
         self.average_spectrum = cr.hArray(y)
-#        import pdb; pdb.set_trace()
         print ' Spectrum is highest at channel %d, log-value = %f' % (y.argmax(), np.log(y.max()))
 
         if self.testplots:
@@ -412,8 +404,8 @@ class rfilines(tasks.Task):
             plt.xlabel('Frequency channel')
             plt.ylabel('Blue: log-spectral power [adc units]\nRed: RMS phase stability [rad]')
         
+            # move to testplots?
             self.plot_finish(filename=self.plot_name + "-avgspectrum_phaseRMS",filetype=self.filetype)
-
     
             # plot dirty channels into spectrum plot, in red
             x = f["FREQUENCY_DATA"].toNumpy() * 1e-6
@@ -427,7 +419,16 @@ class rfilines(tasks.Task):
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('log-spectral power [adc units]')
             self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
-        
+            
+            # Plot cleaned spectrum for inspection
+            plt.figure() 
+            cleanedspectrum = np.copy(logspectrum)
+            cleanedspectrum[self.dirtychannels] = np.float('nan')
+            plt.plot(x, cleanedspectrum, c = 'b')
+            plt.title('Median-average spectrum of all antennas, cleaned')
+            plt.xlabel('Frequency [MHz]')
+            plt.ylabel('log-spectral power [adc units]')
+            
         if self.testplots:
             # diagnostic test, plot avg phase, also plot all / many individual measured phases
             # at the frequency that gives the best phase stability
@@ -579,9 +580,11 @@ class rfilines(tasks.Task):
             averagePhasePerAntenna = phaseAvg.toNumpy()[:, bestchannel] # now for all antennas
             
             phaseDiff = averagePhasePerAntenna - modelphases
-            phaseError = sf.phaseErrorFromDifference(phaseDiff[0:stationStartIndex[1]], freq, allowOutlierCount = 8)
+            phaseError = sf.phaseErrorFromDifference(phaseDiff[0:stationStartIndex[1]], freq, allowOutlierCount = 4)
             
             print 'Phase error for first station: %3.3f' % phaseError
+            self.phaseError = phaseError
+            self.calibrationStatus = "OK" if phaseError < self.maxPhaseError else "BAD"
             
             nanosecondPhase = twopi * freq * 1.0e-9
             timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
@@ -627,7 +630,8 @@ class rfilines(tasks.Task):
             #interStationDelays -= interStationDelays[0]
             if self.doplot:
                 plt.plot(timeDiff_fixed, 'o-', c = 'b', label = 'Measured - expected phase')
-                plt.plot(timeDiff_glitches, 'o-', c = 'r', label='5 ns shifts found')
+                if self.correctOneSampleShifts:
+                    plt.plot(timeDiff_glitches, 'o-', c = 'r', label='5 ns shifts found')
                 #plt.figure()
                 rms_phase = phaseRMS.toNumpy()[:, bestchannel]
                 plt.plot(rms_phase, 'r', label='RMS phase noise')
@@ -636,8 +640,12 @@ class rfilines(tasks.Task):
                 plt.ylabel('Time difference from phase [ns]')
                 plt.xlabel('Antenna number (RCU/2)')
                 plt.legend()
-                        
+                
+                self.plot_finish(filename=self.plot_name + "-calibration-phases",filetype=self.filetype)
+
                 cr.trerun("PlotAntennaLayout","0", positions = f["ANTENNA_POSITIONS"], colors = cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time",plotlegend=True)
+                
+                self.plot_finish(filename = self.plot_name + "-calibration-layout", filetype=self.filetype)
 
         # set output params
 #        self.oneSampleShifts = getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays)
@@ -646,8 +654,4 @@ class rfilines(tasks.Task):
         #self.strongestDirection = [fitaz / deg2rad, fitel / deg2rad]
         self.bestPhaseRMS = medians[bestchannel]
         self.timestamp = f["TIME"][0]
-        if self.interStationDelays:
-            self.calibrationStatus = "OK"
-        else:
-            self.calibrationStatus = "BAD" # fix: apply real criterium with maximum allowed phase error etc.
-      
+        print self.interStationDelays
