@@ -823,7 +823,7 @@ void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
   CIter Minv_it = Minv;
   CIter M_it = M;
 
-  const double det = M_it[0] * M_it[3] + M_it[1] * M_it[2];
+  const HComplex det = M_it[0] * M_it[3] + M_it[1] * M_it[2];
 
   Minv_it[0] = M_it[3] / det;
   Minv_it[1] = -1.0 * M_it[1] / det;
