@@ -2180,16 +2180,19 @@ int main( int argc, char **argv )
   
 
     printf("This is a %s obs at %f MHz (clock=%d subbandFirst=%d totalnrchannels=%d)\n", subintdata.instrument, lowerBandFreq, clockparam, subbandFirst, totalnrchannels);
-    if (lowerBandFreq < 150.0 && lowerBandFreq > 100.0 && clockparam == 200) {
-      lowerBandEdge = 100.0;
+
+    if (clockparam == 200) {
       bw = 100.0;
-    }else if(clockparam == 160) {
-      bw = 80;
-      lowerBandEdge = 160.0;
-    }else {
-      lowerBandEdge = 0.0;
-      bw = 100.0;
+      if (lowerBandFreq >= 200.0) lowerBandEdge = 200.0;
+      else if (lowerBandFreq < 200.0 && lowerBandFreq >= 100.0) lowerBandEdge = 100.0;
+      else lowerBandEdge = 0.0;
+    } else { // 160 MHz clock
+      bw = 80.0;
+      if (lowerBandFreq >= 160.0) lowerBandEdge = 160.0;
+      else if (lowerBandFreq < 160.0 && lowerBandFreq >= 80.0) lowerBandEdge = 80.0;
+      else lowerBandEdge = 0.0;
     }
+
     subband_width = bw / nsubbands;
     /*    printf("XXXXX %f = %f / %d\n", subband_width, bw, nsubbands); */
     lofreq = (double) lowerBandEdge + (subbandFirst*subband_width) - (subband_width/(2*CHANNELS));
