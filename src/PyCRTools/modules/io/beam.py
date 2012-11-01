@@ -24,7 +24,6 @@ class BeamData(IOInterface):
     def __init__(self, filename, chunk=0, block=0,dm=0):
         """Constructor.
         """
-
         # Useful to do unit conversion
         self.__conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
 
@@ -244,7 +243,7 @@ class BeamData(IOInterface):
         return self['BEAM_FREQUENCIES']
 
     def getNchunks(self):
-        """Find the maximum number of blocks beetwen the beams. Analogue to MAXIMUM_READ_LENGTH in tbb.py.
+        """Find the maximum number of blocks beetwen the beams. Analogous to MAXIMUM_READ_LENGTH in tbb.py.
         WARNING: Note that NCHUNKS is also used as the modulus (for wrapping) when using DM>0.
         """
         
@@ -387,6 +386,7 @@ class BeamData(IOInterface):
 
         raise NotImplementedError
 
+        # NOTE: Need to add a dependency on the nyquist zone used:if nyquist=2 then need to use an array with twice the dimensions, notes will be available in Beam_tools.ccBeams
         chunk=cr.asval(chunk)
 
         if chunk<0:
