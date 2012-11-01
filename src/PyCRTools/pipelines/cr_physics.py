@@ -1,6 +1,11 @@
 """CR pipeline.
 """
 
+import logging
+
+# Log everything, and send it to stderr.
+logging.basicConfig(level=logging.DEBUG)
+
 import matplotlib
 matplotlib.use("Agg")
 
@@ -50,10 +55,9 @@ combined_rms = []
 
 for station in stations:
 
+    logging.debug("processing station "+station)
+
     try:
-        print 80 * "-"
-        print station
-        print 80 * "-"
 
         # Open file
         f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
@@ -226,16 +230,15 @@ for station in stations:
         p.write()
 
     except Exception as e:
-        print 80 * "-"
-        print "Error occured when processing station", station.stationname
-        print 80 * "-"
-        print e
-        print 80 * "-"
+
+        logging.exception("unexpected error occured when processing station "+station)
 
         p = station.polarization['xyz']
 
         p.status = "BAD"
         p.write()
+
+    logging.debug("finishing station "+station)
 
 # Create list of event level plots
 plotlist = []
