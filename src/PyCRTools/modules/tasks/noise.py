@@ -44,6 +44,9 @@ class Noise(Task):
         # Convert data to numpy
         s = self.timeseries_data.toNumpy()
 
+        # Compensate for updating bug in tasks
+        self.nantennas = s.shape[0]
+
         # Now compute some basic noise statistics
         self.mean = np.mean(s, axis=0)
         self.std = np.std(s, axis=0)
