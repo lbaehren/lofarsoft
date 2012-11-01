@@ -67,7 +67,9 @@ class AntennaResponse(Task):
         for i, f in enumerate(self.frequencies):
             cr.hGetJonesMatrix(self.jones_matrix[i], f, 90.0 - self.direction[1], self.direction[0], cvt, cvp, fstart, fstep, fn, tstart, tstep, tn, pstart, pstep, pn)
 
-            if not self.backwards:
+        print "inverting Jones matrix"
+        if not self.backwards:
+            for i in range(self.frequencies):
                 cr.hInvertComplexMatrix(self.inverse_jones_matrix[i], self.jones_matrix[i], 2)
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
