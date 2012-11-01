@@ -24,10 +24,11 @@ cr.tasks.task_write_parfiles = False
 
 # Parse commandline options
 parser = OptionParser()
-parser.add_option("-i", "--id", type="int", help="Event ID", default=1)
-parser.add_option("-d", "--database", default="cr.db", help="Filename of database")
-parser.add_option("-o", "--output-dir", default="./", help="Output directory")
-parser.add_option("--maximum_nof_iterations", default = 5, help="Maximum number of iterations in antenna pattern unfolding loop.")
+parser.add_option("-i", "--id", type="int", help="event ID", default=1)
+parser.add_option("-d", "--database", default="cr.db", help="filename of database")
+parser.add_option("-o", "--output-dir", default="./", help="output directory")
+parser.add_option("-s", "--station", action="append", help="only process given station")
+parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
 
 (options, args) = parser.parse_args()
 
@@ -52,6 +53,10 @@ for f in event.datafiles:
 combined_antenna_positions = []
 combined_pulse_peak_amplitude = []
 combined_rms = []
+
+# Process only given stations if explicitly requested
+if options.station:
+    stations = options.station
 
 for station in stations:
 
