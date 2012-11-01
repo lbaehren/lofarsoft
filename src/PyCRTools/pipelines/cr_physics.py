@@ -55,10 +55,10 @@ combined_pulse_peak_amplitude = []
 combined_rms = []
 
 # Process only given stations if explicitly requested
-if options.station:
-    stations = options.station
-
 for station in stations:
+
+    if options.station and station.stationname not in options.station:
+        continue
 
     logging.debug("processing station "+station.stationname)
 
