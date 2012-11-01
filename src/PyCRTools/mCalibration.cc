@@ -796,3 +796,40 @@ void HFPP_FUNC_NAME (const CIter C, const CIter C_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Invert 2 x 2 matrix
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hInvertComplexMatrix2D
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(Minv)()("Inverse matrix (can be the same as the input to save memory).")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(M)()("Matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
+    const CIter M, const CIter M_end)
+{
+  // Sanity checks
+  if (std::distance(Minv, Minv_end) != 4 || std::distance(M, M_end) != 4)
+  {
+    throw PyCR::ValueError("Matrices are not 2D.");
+  }
+
+  CIter Minv_it = Minv;
+  CIter M_it = M;
+
+  const double det = M_it[0] * M_it[3] + M_it[1] * M_it[2];
+
+  Minv_it[0] = M_it[3] / det;
+  Minv_it[1] = -1.0 * M_it[1] / det;
+  Minv_it[2] = M_it[2] / det;
+  Minv_it[3] = -1.0 * M_it[0] / det;
+}
+
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
