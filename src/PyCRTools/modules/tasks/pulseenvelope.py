@@ -20,7 +20,7 @@ class PulseEnvelope(Task):
 
     parameters = dict(
         timeseries_data = dict( default = None,
-            doc = "Timeseries data." ),
+            doc = "Timeseries data for all antennas,  hArray of shape: [nAntennas,nSamples]" ),
         nantennas = dict( default = lambda self : self.timeseries_data.shape()[0],
             doc = "Number of antennas." ),
         pulse_start = dict( default = 0,
@@ -36,7 +36,7 @@ class PulseEnvelope(Task):
         window_width = dict( default = lambda self : self.window_end - self.window_start,
             doc = "Width of full window." ),
         resample_factor = dict( default = 1,
-            doc = "Resample factor." ),
+            doc = "Factor with which the timeseries will be resampled, needs to be integer > 0" ),
         window_width_resampled = dict( default = lambda self : self.window_width * self.resample_factor,
             doc = "Width of pulse window after resampling." ),
         timeseries_data_resampled = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.window_width_resampled)),
@@ -68,7 +68,7 @@ class PulseEnvelope(Task):
         delays = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
             doc = "Delays corresponding to the position of the maximum of the envelope relative to the first antenna." ),
         nsigma = dict( default = 3,
-            doc = "Number of standard deviations that pulse needs to be above noise level." ),
+            doc = "Number of standard deviations that pulse needs to be above noise level in order to be accepted as found." ),
         antennas_with_significant_pulses = dict( default = lambda self : [i for i in range(self.nantennas) if self.snr[i] > self.nsigma],
             doc = "Indices of antennas with pulses more than nsigma above the noise limit." ),
         save_plots = dict( default = False,
