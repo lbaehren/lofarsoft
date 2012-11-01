@@ -51,6 +51,7 @@ class Noise(Task):
         self.mean = np.mean(s, axis=0)
         self.std = np.std(s, axis=0)
 
+        self.suspect_antennas = []
         for i in range(self.nantennas):
 
             # Compute D'Agostino and Pearson's test for normality
