@@ -55,7 +55,7 @@ combined_rms = []
 
 for station in stations:
 
-    logging.debug("processing station "+station)
+    logging.debug("processing station "+station.stationname)
 
     try:
 
@@ -231,14 +231,14 @@ for station in stations:
 
     except Exception as e:
 
-        logging.exception("unexpected error occured when processing station "+station)
+        logging.exception("unexpected error occured when processing station "+station.stationname)
 
         p = station.polarization['xyz']
 
         p.status = "BAD"
         p.write()
 
-    logging.debug("finishing station "+station)
+    logging.debug("finishing station "+station.stationname)
 
 # Create list of event level plots
 plotlist = []
