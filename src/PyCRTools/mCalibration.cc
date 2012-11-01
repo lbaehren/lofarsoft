@@ -827,8 +827,8 @@ void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
 
   Minv_it[0] = M_it[3] / det;
   Minv_it[1] = -1.0 * M_it[1] / det;
-  Minv_it[2] = M_it[2] / det;
-  Minv_it[3] = -1.0 * M_it[0] / det;
+  Minv_it[2] = -1.0 * M_it[2] / det;
+  Minv_it[3] = M_it[0] / det;
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
