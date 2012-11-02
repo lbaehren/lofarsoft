@@ -1768,8 +1768,6 @@ Save timeseries (append)
 
                 
         bool RFIcleaning::cleanSamples(std::string method){
-            cerr << " cleaning new block " << itsNrSamples << endl;
-            cerr.flush();
             int sam;
             int samoffset=-3;
 
@@ -1787,20 +1785,13 @@ Save timeseries (append)
                     samoffset=-3;
                 }
                 if( sam < itsNrSamples ){
-                    cerr << " cleaning sample " << sam << " " << badSamples[i] << " " << i << " " << method << endl;
-                    cerr.flush();
                     for(int ch=0; ch<itsNrChannels ; ch++){ 
                         if ( method == "1" ) {
-                            if(ch==0){
-                                cerr << "Flagging method 1";
-                            }
                             *(itsDataStart+sam*itsNrChannels+ch)=1.0;
                         } else if (method == "previous" ) {
                             *(itsDataStart+sam*itsNrChannels+ch)=*(itsDataStart+(sam+samoffset)*itsNrChannels+ch);
                         } 
                     }
-                    cerr << endl;
-                    cerr.flush();
                 }
             }
             return true;

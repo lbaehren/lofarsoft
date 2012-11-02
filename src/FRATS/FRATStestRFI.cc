@@ -889,10 +889,10 @@ if(doFlagging){
 // Calculate bad samples, by summing in time over a quarter of the bandwidth
 // samples that are more than cutlevel*sigma above average in at least 2 of the quarters are flagged
         nrFlaggedSamples=RFIcleaner.calcBadSamples(4); // cutlevel = 4 sigma
-        //if(verbose){
+        if(verbose){
             
             RFIcleaner.printBadSamples();
-        //}
+        }
         RFIcleaner.cleanSamples("1"); // replace by 1
         RFIcleaner.writeBadSamples(fsfile, blockNr); // write bad samples to file
 
