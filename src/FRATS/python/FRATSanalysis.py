@@ -1230,10 +1230,22 @@ def convertArrayBar(t,elem):
     t2[:]=t
     return t2.transpose().reshape(nrelem)#t2.shape[0]*t2.shape[1])
     
+def filterUniqueTime(t12):
+    t12b=np.copy(t12)
+    i1=0
+    for s in range(8):
+        t12s=t12[t12['subband']==s]
+        for l in list(set(t12['length'])):
+            t12sl=t12s[t12s['length']==l]
+            timedif=np.diff(t12sl['time']); 
+            i2=i1+len(t12sl[timedif>1]); print i1,i2
+            t12b[i1:i2]=t12sl[timedif>1]
+            i1=i2
+            print i1,i2
+    return t12b[0:i2]
 
 
-
-         
+             
 
 
      
