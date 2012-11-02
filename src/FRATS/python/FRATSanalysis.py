@@ -135,6 +135,7 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bRetu
     trmsg[i]['Threshold']
     trmsg[i]['nrFlaggedSamples']
     trmsg[i]['nrFlaggedChannels']
+    trmsg[i]['width']
 
         
 
@@ -152,6 +153,8 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bRetu
     fmt='<3q4i2f2i1f1i'
     if newVersion:
         fmt='<3q4i2f2i4f2i'
+        if newVersion==3:
+            fmt='<3q4i2f2i4f4i'
     #magic=struct.unpack('i',data[0:4])
     #if(magic==0x65):
     #    fmt=fmt+'i'
@@ -161,11 +164,17 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bRetu
         fmt='3L4i2f2i1f'
         if newVersion:
             fmt='3L4i2f2i4f2i'
+            if newVersion==3:
+                fmt='3L4i2f2i4f4i'
+
         fmtlen=struct.calcsize(fmt)
 
+    print fmt, len(data), newVersion
     nofmsg=len(data)/fmtlen
     if bReturnArray:
-        dtype=[('time',int),('utc_second',int),('utc_nanosecond',int),('length',int),('sample',int),('block',int),('subband',int),('sum',float),('max',float),('obsID',int),('beam',int),('DM',float),('SBaverage',float),('SBstddev',float),('Threshold',float),('nrFlaggedChannels',float),('nrFlaggedSamples',float)]
+        dtype=[('time',int),('utc_second',int),('utc_nanosecond',int),('length',int),('sample',int),('block',int),('subband',int),('sum',float),('max',float),('obsID',int),('beam',int),('DM',float),('SBaverage',float),('SBstddev',float),('Threshold',float),('nrFlaggedChannels',float),('nrFlaggedSamples',float)]#,('width',int)]
+        if newVersion==3:
+            dtype=[('time',int),('utc_second',int),('utc_nanosecond',int),('length',int),('sample',int),('block',int),('subband',int),('sum',float),('max',float),('obsID',int),('beam',int),('DM',float),('SBaverage',float),('SBstddev',float),('Threshold',float),('nrFlaggedChannels',float),('nrFlaggedSamples',float),('width',int),('magic',int)]
         trmsg=np.zeros((nofmsg),dtype=dtype)
     else:
         trmsg=dict()
@@ -195,6 +204,7 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bRetu
                 trmsg[i]['Threshold']=msg[14]
                 trmsg[i]['nrFlaggedChannels']=msg[15]
                 trmsg[i]['nrFlaggedSamples']=msg[16]
+                #trmsg[i]['width']=msg[17]
             if(msg[-1]==0x65):
                 trmsg[i]['magic']=msg[-1]
 # return the dictionary

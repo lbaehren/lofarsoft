@@ -1002,12 +1002,13 @@ namespace FRAT {
 				
 				dedispersionoffset[channel]=(int)offset;
 			}
-            minBlockNumber=(int) (dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
+            minBlockNumber=(dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
             if(minBlockNumber<0) {
                 minBlockNumber=-minBlockNumber+2;
             } else {
                 minBlockNumber+=2;
             }
+             
 
 			float freqA=itsReferenceFreq+0.5*itsFreqResolution;
 			float freqB=itsStartFreq+0.5*itsFreqResolution;
@@ -1032,12 +1033,14 @@ namespace FRAT {
 				
 				dedispersionoffset[channel]=(int)offset;
 			}
-            minBlockNumber=(int) (dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
+            minBlockNumber=(dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
             if(minBlockNumber<0) {
                 minBlockNumber=-minBlockNumber+2;
             } else {
                 minBlockNumber+=2;
             }
+
+            cout << endl << "minBlocknumber for DM, stream " << itsDM << " " << itsStreamID << " = " << minBlockNumber <<  " " << dedispersionoffset[0] << " " << dedispersionoffset[itsNrChannels-1] << " " << itsNrSamples << endl;
 			float freqA=FREQvalues[0];//itsReferenceFreq+0.5*itsChannelsPerSubband*itsFreqResolution;
 			float freqB=FREQvalues[itsStartChannel];//+0.5*itsChannelsPerSubband*itsFreqResolution;
             freqA/=1e9;
