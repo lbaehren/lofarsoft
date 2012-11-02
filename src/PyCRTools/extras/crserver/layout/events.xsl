@@ -81,7 +81,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       </xsl:if>
     </xsl:for-each>
   </table>
-  <table>
+  <table class="sortable">
     <caption id="all" class="parameters">All events</caption>
     <tr>
       <th>Id</th>
