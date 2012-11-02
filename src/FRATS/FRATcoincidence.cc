@@ -581,7 +581,7 @@ namespace FRAT {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
                         if(trigger.length==IntegrationLength && trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && time!=0){
                             // Next sample, same length
-                            //trigger.width++;
+                            trigger.width++;
                             nextTriggerTimeOffset++;
                             if(subsum>trigger.sum) { // new maximum
                                 trigger.sum=subsum;
@@ -598,9 +598,9 @@ namespace FRAT {
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                            //trigger.width=length;
+                            trigger.width=IntegrationLength;
                         }     
-                        if(time==itsNrSamples-1 && itsBlockNumber>21){
+                        if(time==itsNrSamples-1 && itsBlockNumber>minBlockNumber){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                             utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -612,7 +612,7 @@ namespace FRAT {
 
                         }
                     }
-                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>21 && time!=0){
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>minBlockNumber && time!=0){
                         // send trigger
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -639,7 +639,7 @@ namespace FRAT {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
                         if(trigger.length==IntegrationLength && trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && time!=0){
                             // Next sample, same length
-                            //trigger.width++;
+                            trigger.width++;
                             nextTriggerTimeOffset++;
                             if(subsum>trigger.sum) { // new maximum
                                 trigger.sum=subsum;
@@ -656,9 +656,9 @@ namespace FRAT {
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                            //trigger.width=length;
+                            trigger.width=IntegrationLength;
                         }     
-                        if(time==itsNrSamples-1 && itsBlockNumber>21){
+                        if(time==itsNrSamples-1 && itsBlockNumber>minBlockNumber){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                             utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -670,7 +670,7 @@ namespace FRAT {
 
                         }
                     }
-                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>21 && time!=0){
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>minBlockNumber && time!=0){
                         // send trigger
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -734,7 +734,7 @@ namespace FRAT {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
                         if(trigger.length==IntegrationLength && trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && time!=0){
                             // Next sample, same length
-                            //trigger.width++;
+                            trigger.width++;
                             nextTriggerTimeOffset++;
                             if(subsum>trigger.sum) { // new maximum
                                 trigger.sum=subsum;
@@ -751,9 +751,9 @@ namespace FRAT {
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
-                            //trigger.width=length;
+                            trigger.width=IntegrationLength;
                         }     
-                        if(time==itsNrSamples-1 && itsBlockNumber>21){
+                        if(time==itsNrSamples-1 && itsBlockNumber>minBlockNumber){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                             utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -765,7 +765,7 @@ namespace FRAT {
 
                         }
                     }
-                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>21 && time!=0){
+                    else if(trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && trigger.length==IntegrationLength && itsBlockNumber>minBlockNumber && time!=0){
                         // send trigger
                         utc_second=(unsigned long int) trigger.time*itsTimeResolution;
                         utc_nanosecond=(unsigned long int) (fmod(trigger.time*itsTimeResolution,1)*1e9);
@@ -1004,9 +1004,9 @@ namespace FRAT {
 			}
             minBlockNumber=(int) (dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
             if(minBlockNumber<0) {
-                minBlockNumber=-minBlockNumber+1;
+                minBlockNumber=-minBlockNumber+2;
             } else {
-                minBlockNumber+=1;
+                minBlockNumber+=2;
             }
 
 			float freqA=itsReferenceFreq+0.5*itsFreqResolution;
@@ -1032,6 +1032,12 @@ namespace FRAT {
 				
 				dedispersionoffset[channel]=(int)offset;
 			}
+            minBlockNumber=(int) (dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
+            if(minBlockNumber<0) {
+                minBlockNumber=-minBlockNumber+2;
+            } else {
+                minBlockNumber+=2;
+            }
 			float freqA=FREQvalues[0];//itsReferenceFreq+0.5*itsChannelsPerSubband*itsFreqResolution;
 			float freqB=FREQvalues[itsStartChannel];//+0.5*itsChannelsPerSubband*itsFreqResolution;
             freqA/=1e9;

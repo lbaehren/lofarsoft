@@ -85,7 +85,7 @@ struct triggerEvent {
     float Threshold;
     int nrFlaggedChannels;
     int nrFlaggedSamples;
-//    int width;
+    int width;
 };
 
 
@@ -350,6 +350,7 @@ namespace FRAT {
               
 			  int itsSequenceNumber; // block number
 			  int itsBlockNumber; // block number
+
 			  //int itsStartBlock;
 			  std::vector<float> DeDispersedBuffer; // ringbuffer of dedispersed data, also with partial sum 
               // over the channels
