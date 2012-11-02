@@ -18,11 +18,13 @@ class Noise(Task):
 
     parameters = dict(
         timeseries_data = dict( default = None,
-            doc = "Timeseries data." ),
+            doc = "Timeseries data, hArray [NAntennas, samples]" ),
         nantennas = dict( default = lambda self : self.timeseries_data.shape()[0],
             doc = "Number of antennas." ),
         nbins = dict( default = 100,
             doc = "Number of bins for histogram." ),
+        histrange = dict(default = (-5,5),
+            doc = "Range of histogram to be plotted."),    
         p_value = dict( default = 0.05,
             doc = "p value for normality test, everything above this value is regarded as matching a normal distribution." ),
         normaltest_results = dict( default = [],
@@ -71,7 +73,7 @@ class Noise(Task):
         for i in antennas:
             plt.clf()
 
-            plt.hist(s[i], self.nbins, color='g')
+            plt.hist(s[i], bins = self.nbins, range = self.histrange, color='g')
 
             p = self.plot_prefix + "noise_histogram_antenna-{0:d}.png".format(i)
 
