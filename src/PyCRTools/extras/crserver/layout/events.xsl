@@ -23,19 +23,28 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <li><a href="/events">All events</a></li>
       </ul>
   </nav>
-  <table class="sortable">
+  <script type="text/javascript" src="layout/gs_sortable.js"></script>
+  <script type="text/javascript">
+  <!--
+  var TSort_Data = new Array ('good_events', 'i', 'd', 's', 'f', 'f', 'f', 'f', 'f', 'f');
+  tsRegister();
+  // -->
+  </script> 
+  <table id="good_events">
     <caption id="good">Good events</caption>
-    <tr>
-      <th>Id</th>
-      <th>Timestamp</th>
-      <th>Event status</th>
-      <th>Energy (eV)</th>
-      <th>Core x (m)</th>
-      <th>Core y (m)</th>
-      <th>Azimuth (deg)</th>
-      <th>Elevation (deg)</th>
-      <th>Moliere radius (m)</th>
-    </tr>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Timestamp</th>
+        <th>Event status</th>
+        <th>Energy (eV)</th>
+        <th>Core x (m)</th>
+        <th>Core y (m)</th>
+        <th>Azimuth (deg)</th>
+        <th>Elevation (deg)</th>
+        <th>Moliere radius (m)</th>
+      </tr>
+    </thead>
     <xsl:for-each select="/elements/event">
       <xsl:if test="status='CR_FOUND' or status='CR_ANALYZED' or status='CR_PHYSICS_PROCESSING'">
       <xsl:choose>
