@@ -392,3 +392,66 @@ void HFPP_FUNC_NAME(const NIter out, const NIter out_end, const NIter in, const 
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//-----------------------------------------------------------------------
+//$DOCSTRING: Resample input vector to output vector length using FFTW
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFFTWDownsample
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HNumber)(out)()("Output vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(in)()("Input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Note that using the FFT to resample assumes the signal to be periodic.
+*/
+template <class NIter>
+void HFPP_FUNC_NAME(const NIter out, const NIter out_end, const NIter in, const NIter in_end)
+{
+  const int Nin = std::distance(in, in_end);
+  const int Nout = std::distance(out, out_end);
+  const int buffer_size = Nin;
+
+  // allocate 
+  fftw_complex * tmp_fd = (fftw_complex*)fftw_malloc((Nin/2+1)*sizeof(fftw_complex));
+  double * buffer = (double*)fftw_malloc(buffer_size*sizeof(double));
+  
+  // create fftw plans
+  fftw_plan fft_plan = fftw_plan_dft_r2c_1d(Nin, buffer, tmp_fd, FFTW_ESTIMATE);
+  fftw_plan ifft_plan = fftw_plan_dft_c2r_1d(Nout, tmp_fd, buffer, FFTW_ESTIMATE);
+  
+  // zero out tmp_fd
+  memset(tmp_fd, 0, (Nout/2+1)*sizeof(fftw_complex));
+  
+  // copy data from input array
+  memcpy(buffer, &(*in), Nin * sizeof(double));
+
+  // execute the plans (forward then reverse)
+  fftw_execute_dft_r2c(fft_plan, buffer, tmp_fd);
+  
+  memset(tmp_fd+(Nout/2 + 1), 0, (Nin - (Nout/2+1))*sizeof(fftw_complex));
+  
+  fftw_execute_dft_c2r(ifft_plan, tmp_fd, buffer);
+  
+  // Copy data to output array
+  memcpy(&(*out), buffer, Nout * sizeof(double));
+
+  // Compensate for normalization
+  NIter out_it = out;
+  while (out_it != out_end)
+  {
+    *out_it = *out_it / Nin;
+    out_it++;
+  }
+
+  // cleanup
+  fftw_destroy_plan(fft_plan);
+  fftw_destroy_plan(ifft_plan);
+  fftw_free(tmp_fd);
+  fftw_free(buffer);
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
