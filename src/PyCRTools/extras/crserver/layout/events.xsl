@@ -23,14 +23,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <li><a href="/events">All events</a></li>
       </ul>
   </nav>
-  <script type="text/javascript" src="layout/gs_sortable.js"></script>
-  <script type="text/javascript">
-  <!--
-  var TSort_Data = new Array ('good_events', 'i', 'd', 's', 'f', 'f', 'f', 'f', 'f', 'f');
-  tsRegister();
-  // -->
-  </script> 
-  <table id="good_events">
+  <table class="sortable">
     <caption id="good">Good events</caption>
     <thead>
       <tr>
