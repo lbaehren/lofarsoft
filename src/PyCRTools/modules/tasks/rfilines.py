@@ -68,9 +68,23 @@ def dirtyChannelsFromPhaseSpreads(spreads, verbose=False):
     noise = sorted[length * 0.95] - sorted[length / 2] # value at 95 percentile minus median
     
     dirtyChannels = np.where(spreads < medianSpread - 3*noise)[0]
+    
+    # extend dirty channels by one entry to each side
+    extDirtyChannels = []
+    for i in range(len(spreads)):
+        if i in dirtyChannels:
+            if i-1 not in dirtyChannels:
+                extDirtyChannels.append(i-1)
+            extDirtyChannels.append(i)
+            if i+1 not in dirtyChannels:
+                extDirtyChannels.append(i+1)
+    
     print 'Median spread = %f' % medianSpread
     print 'Noise = %f' % noise
     print 'There are %d dirty channels' % len(dirtyChannels)
+    dirtyChannels = np.array(extDirtyChannels)
+    print 'There are %d dirty channels when extended by 1 channel to either side' % len(dirtyChannels)
+    
     if verbose:       
         plt.figure()
         plt.plot(sorted)
