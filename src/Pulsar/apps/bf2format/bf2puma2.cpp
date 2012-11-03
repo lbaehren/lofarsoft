@@ -252,7 +252,7 @@ public:
 	uint32_t PNUM;
 
 	char *DATE;
-	int SUBBLIST[248];
+	int SUBBLIST[488];
 
 	uint32_t filter_low_freq;
 
@@ -1176,8 +1176,8 @@ void writer::readParset()
 {
 // Determine observing epoch:
 	string tmp = "Observation.startTime";
-	tmp = getKeyVal(tmp);
-	memcpy(DATE, tmp.c_str(), tmp.size());
+	string tmp2 = getKeyVal(tmp);
+	memcpy(DATE, tmp2.c_str(), tmp2.size());
 	mjdcalc();
 	if (verb)
 		cout << "DATE = " << tmp << endl;
@@ -1185,9 +1185,9 @@ void writer::readParset()
 // VLAD, 17.10.2012 - Determine the filter used and it's low freq, e.g. 110-190, or 210-250, etc
 //        string tmp = "Observation.bandFilter"; 
         tmp = "Observation.bandFilter"; 
-	tmp = getKeyVal(tmp).substr(4, 3);
-	if (tmp[2] == '_') tmp = getKeyVal(tmp).substr(4, 2);
-        filter_low_freq = atoi(tmp.c_str());
+	tmp2 = getKeyVal(tmp).substr(4, 3);
+	if (tmp2[2] == '_') tmp2 = getKeyVal(tmp).substr(4, 2);
+        filter_low_freq = atoi(tmp2.c_str());
 	if (verb)
 		cout << " BAND FILTER LOW FREQUENCY = " << filter_low_freq << endl;
 
@@ -1254,7 +1254,7 @@ void writer::readParset()
 // Load list of subbands:
 
 	tmp = "Observation.subbandList";
-	tmp = getKeyVal(tmp);
+	tmp2 = getKeyVal(tmp);
 
 	int jj = 0;
 	int nc = 1;
@@ -1270,7 +1270,7 @@ void writer::readParset()
 
 		while (1)
 		{
-			mychar = tmp.substr(nc, ic);
+			mychar = tmp2.substr(nc, ic);
 			lastchar = mychar.substr(mychar.size() - 1, 1);
 
 			if (lastchar == ".") // parse first subband of subrange
@@ -1324,7 +1324,7 @@ void writer::readParset()
 	if(PNUM > 1) 
 	{
 		int nbb = 0;
-		while (nbb<min(PNSUB,NSUBBANDS - _the_part*PNSUB + 1))
+		while (nbb<min(PNSUB,NSUBBANDS - _the_part*PNSUB))
 		{
 			SUBBLIST[nbb] = SUBBLIST[_the_part*PNSUB+nbb];
 			nbb++;
