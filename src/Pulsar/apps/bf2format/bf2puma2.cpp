@@ -29,6 +29,10 @@
 //                     for a specific time block.  Scale so that the outer
 //                     fraction P is outside the range of int8_t and is written
 //                     as flag value F (normally -128).
+// 2012 Oct 17  VLAD - code updated to be used for all possible filters and antennas
+// 2012 Nov 04  VLAD - code polished to decrease the memory leaks (problems with freeing
+//                     many of std::strings..
+
 #include <stdint.h>
 
 /* restrict
@@ -217,6 +221,10 @@ public:
 	writer(const char* &base, char* &hdr, char* &pset, uint32_t &part) :
 			sample_block_offset(0xFFFFFFFFU), blocksamples(0)
 	{
+		DATE=(char *)malloc(255);
+		if (!DATE) { cout << "Error allocating memory for DATE!" << endl; exit(1); }
+		memset(DATE, 0, 255);
+
 		passFilenames(base, hdr, pset);
 		passPart(part);
 		readParset();
@@ -243,10 +251,9 @@ public:
 	uint32_t PNSUB;
 	uint32_t PNUM;
 
+	char *DATE;
 	int SUBBLIST[248];
 
-	string DATE;
-	string ANTENNA;
 	uint32_t filter_low_freq;
 
 private:
@@ -264,8 +271,10 @@ private:
 	size_t sample_block_offset;
 	samp_t* restrict blocksamples;
 };
+
 writer::~writer()
 {
+	free (DATE);
 	free(blocksamples);
 }
 
@@ -302,10 +311,16 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-	char* rawfname = 0;
-	const char* basename = 0;
-	char* hdrFilename = 0;
-	char* psetFilename = 0;
+//	char* rawfname = 0;
+	char * rawfname = (char *)malloc(255);
+	memset(rawfname, 0, 255);
+//	const char* basename = 0;
+//	char* hdrFilename = 0;
+	char* hdrFilename = (char *)malloc(255);
+	memset(hdrFilename, 0, 255);
+//	char* psetFilename = 0;
+	char* psetFilename = (char *)malloc(255);
+	memset(psetFilename, 0, 255);
 	int scale_all_time_blocks_together = 0;
 	float cutoff_fraction = 0.0f;
 
@@ -318,7 +333,8 @@ int main(int argc, char** argv)
 		{
 			if (ia + 1 < argc)
 			{
-				rawfname = argv[ia + 1];
+//				rawfname = argv[ia + 1];
+				strcpy(rawfname, argv[ia + 1]);
 			}
 			else
 			{
@@ -331,7 +347,8 @@ int main(int argc, char** argv)
 		{
 			if (ia + 1 < argc)
 			{
-				hdrFilename = argv[ia + 1];
+//				hdrFilename = argv[ia + 1];
+				strcpy(hdrFilename, argv[ia + 1]);
 			}
 			else
 			{
@@ -344,7 +361,8 @@ int main(int argc, char** argv)
 		{
 			if (ia + 1 < argc)
 			{
-				psetFilename = argv[ia + 1];
+//				psetFilename = argv[ia + 1];
+				strcpy(psetFilename, argv[ia + 1]);
 			}
 			else
 			{
@@ -422,45 +440,43 @@ int main(int argc, char** argv)
 	}
         //L44652_SAP000_B000_S1_P001_bf.raw
         string prefix = string(rawfname).substr(0,18);
-        basename = prefix.c_str();
 	string suffix = string(rawfname).substr(21);
 	
-
 	string filenameX0_str = prefix + "_S0" + suffix;
 	string filenameX1_str = prefix + "_S1" + suffix;
 	string filenameY0_str = prefix + "_S2" + suffix;
 	string filenameY1_str = prefix + "_S3" + suffix;
 
-	const char* filenameX0 = filenameX0_str.c_str();
-	const char* filenameX1 = filenameX1_str.c_str();
-	const char* filenameY0 = filenameY0_str.c_str();
-	const char* filenameY1 = filenameY1_str.c_str();
+//	const char* filenameX0 = filenameX0_str.c_str();
+//	const char* filenameX1 = filenameX1_str.c_str();
+//	const char* filenameY0 = filenameY0_str.c_str();
+//	const char* filenameY1 = filenameY1_str.c_str();
 
-	FILE * pfileX0;
-	FILE * pfileX1;
-	FILE * pfileY0;
-	FILE * pfileY1;
+	FILE *pfileX0;
+	FILE *pfileX1;
+	FILE *pfileY0;
+	FILE *pfileY1;
 
-	pfileX0 = fopen(filenameX0, "rb");
+	pfileX0 = fopen(filenameX0_str.c_str(), "rb");
 	if (pfileX0 == NULL)
 	{
 		fputs("File error", stderr);
 		exit(1);
 	}
-	pfileX1 = fopen(filenameX1, "rb");
+	pfileX1 = fopen(filenameX1_str.c_str(), "rb");
 	if (pfileX1 == NULL)
 	{
 		fputs("File error", stderr);
 		exit(1);
 	}
 
-	pfileY0 = fopen(filenameY0, "rb");
+	pfileY0 = fopen(filenameY0_str.c_str(), "rb");
 	if (pfileY0 == NULL)
 	{
 		fputs("File error", stderr);
 		exit(1);
 	}
-	pfileY1 = fopen(filenameY1, "rb");
+	pfileY1 = fopen(filenameY1_str.c_str(), "rb");
 	if (pfileY1 == NULL)
 	{
 		fputs("File error", stderr);
@@ -469,6 +485,7 @@ int main(int argc, char** argv)
 
 	uint32_t partno = atoi(string(rawfname).substr(23,3).c_str());
 
+	const char* basename = prefix.c_str();
 	writer puma2data(basename, hdrFilename, psetFilename, partno);
 
 
@@ -1121,6 +1138,14 @@ int main(int argc, char** argv)
 		cout << "Closing output files: " << endl;
 	puma2data.filesClose();
 
+	free (ReXJV);
+	free (ImXJV);
+	free (ReYJV);
+	free (ImYJV);
+	free (rawfname);
+	free (hdrFilename);
+	free (psetFilename);
+
 	return 0;
 }
 
@@ -1149,30 +1174,20 @@ void writer::passPart(unsigned int &part)
 
 void writer::readParset()
 {
-
-// Determine the type of antenna:
-	vector<string> tmps;
-	tmps.push_back("Observation.antennaArray");
-	tmps.push_back("Observation.antennaSet");
-
-	ANTENNA = "UNKNOWN";
-	for (unsigned int it = 0; it < tmps.size(); it++)
-	{
-		string key = getKeyVal(tmps[it]).substr(0, 3);
-		if (key == "HBA" || key == "LBA")
-		{
-			ANTENNA = key;
-			break;
-		}
-	}
+// Determine observing epoch:
+	string tmp = "Observation.startTime";
+	tmp = getKeyVal(tmp);
+	memcpy(DATE, tmp.c_str(), tmp.size());
+	mjdcalc();
 	if (verb)
-		cout << " ANTENNA TYPE = " << ANTENNA << endl;
+		cout << "DATE = " << tmp << endl;
 
 // VLAD, 17.10.2012 - Determine the filter used and it's low freq, e.g. 110-190, or 210-250, etc
-        string tmp = "Observation.bandFilter"; 
-	string value = getKeyVal(tmp).substr(4, 3);
-	if (value[2] == '_') value = getKeyVal(tmp).substr(4, 2);
-        filter_low_freq = atoi(value.c_str());
+//        string tmp = "Observation.bandFilter"; 
+        tmp = "Observation.bandFilter"; 
+	tmp = getKeyVal(tmp).substr(4, 3);
+	if (tmp[2] == '_') tmp = getKeyVal(tmp).substr(4, 2);
+        filter_low_freq = atoi(tmp.c_str());
 	if (verb)
 		cout << " BAND FILTER LOW FREQUENCY = " << filter_low_freq << endl;
 
@@ -1239,7 +1254,7 @@ void writer::readParset()
 // Load list of subbands:
 
 	tmp = "Observation.subbandList";
-	string mystring = getKeyVal(tmp);
+	tmp = getKeyVal(tmp);
 
 	int jj = 0;
 	int nc = 1;
@@ -1255,7 +1270,7 @@ void writer::readParset()
 
 		while (1)
 		{
-			mychar = mystring.substr(nc, ic);
+			mychar = tmp.substr(nc, ic);
 			lastchar = mychar.substr(mychar.size() - 1, 1);
 
 			if (lastchar == ".") // parse first subband of subrange
@@ -1335,21 +1350,11 @@ void writer::readParset()
 	free(blocksamples);
 	blocksamples = reinterpret_cast<samp_t*restrict>(malloc(sizeof(samp_t)*SAMPLES));
 
-// Determine observing epoch:
-	tmp = "Observation.startTime";
-	DATE = getKeyVal(tmp).c_str();
-
-	mjdcalc();
-	cout << "DATE = " << DATE << endl;
-
 // determine the sample block offset within the loops for
 // writePuMa2Block.  This is the number of subbands times the
 // number of channels per subband, times the number of words
 // per complex voltage
 	sample_block_offset = size_t(NSUBBANDS) * NCHANNELS;
-
-
-
 }
 
 void writer::filesInit()
@@ -1551,7 +1556,8 @@ void writer::writeHeader(unsigned int &isub, unsigned int &ichan)
 		}
 		else if (line.substr(0, 9) == "UTC_START")
 		{
-			line = "UTC_START " + DATE.substr(1, 19);
+			string tmp = DATE;
+			line = "UTC_START " + tmp.substr(1, 19);
 		}
 		else if (line.substr(0, 2) == "BW")
 		{
@@ -1563,6 +1569,7 @@ void writer::writeHeader(unsigned int &isub, unsigned int &ichan)
 			the_tsamp << setprecision(8) << (1.0 / CLOCKRES) * NCHANNELS;
 			line = "TSAMP " + the_tsamp.str().substr();
 		}
+		cout << line << endl;
 
 		strncat(buf, (line + "\n").c_str(), HEADER_SIZE - strlen(buf) - 1);
 		if (headerfile.eof())
@@ -1650,14 +1657,15 @@ string writer::getKeyVal(string &key)
 
 double writer::mjdcalc()
 {
+	string tmp = DATE;
 
-	int yy = atoi(DATE.substr(1, 4).c_str());
-	int mm = atoi(DATE.substr(6, 2).c_str());
-	int dd = atoi(DATE.substr(9, 2).c_str());
+	int yy = atoi(tmp.substr(1, 4).c_str());
+	int mm = atoi(tmp.substr(6, 2).c_str());
+	int dd = atoi(tmp.substr(9, 2).c_str());
 
-	int hh = atoi(DATE.substr(12, 2).c_str());
-	int mi = atoi(DATE.substr(15, 2).c_str());
-	int ss = atoi(DATE.substr(18, 2).c_str());
+	int hh = atoi(tmp.substr(12, 2).c_str());
+	int mi = atoi(tmp.substr(15, 2).c_str());
+	int ss = atoi(tmp.substr(18, 2).c_str());
 
 	int m, y, ia, ib, ic;
 	double jd, mjd0;
