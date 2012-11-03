@@ -1569,7 +1569,6 @@ void writer::writeHeader(unsigned int &isub, unsigned int &ichan)
 			the_tsamp << setprecision(8) << (1.0 / CLOCKRES) * NCHANNELS;
 			line = "TSAMP " + the_tsamp.str().substr();
 		}
-		cout << line << endl;
 
 		strncat(buf, (line + "\n").c_str(), HEADER_SIZE - strlen(buf) - 1);
 		if (headerfile.eof())
