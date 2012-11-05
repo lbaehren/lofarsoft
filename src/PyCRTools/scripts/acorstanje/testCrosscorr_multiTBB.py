@@ -15,15 +15,30 @@ Created by Arthur Corstanje, Apr. 2012
 """
 
 from pycrtools import hArray
+from pycrtools import srcfind as sf
 import pycrtools as cr
 import pycrtools.tasks as tasks
 import os
 from pycrtools.tasks.shortcuts import *
 from pycrtools import metadata as md
+
 import numpy as np
+from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 from datetime import datetime
 from pycrtools import xmldict
+
+deg2rad = np.pi / 180
+
+def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0):
+    # Quality function for simplex search 
+    az = direction[0]
+    el = direction[1]
+    R = 1000.0 / direction[2] # using 1/R as parameter - curvature dependence is on 1/R to lowest order; will work better in simplex search.
+    mse = sf.mseWithDistance(az, el, R, pos, times, outlierThreshold, allowOutlierCount)
+    print 'Evaluated direction: az = %f, el = %f, R = %f: MSE = %f' % (az / deg2rad, el / deg2rad, R, mse)
+
+    return mse
 
 eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110714T174749.986Z'
 #eventdir = '/Users/acorstanje/triggering/CR/testRFIevent'
@@ -95,7 +110,7 @@ stations = gatherresults(eventdir)
 # - all calibration delays, and (station) clock offsets for those ids
 # - array of all reference offsets per antenna id. (starting point of timeseries array)
 
-pol = 0 # later do both together
+pol = 1 # later do both together
 
 filefilter = '/Users/acorstanje/triggering/CR/*.986Z*.h5'
 filelist = cr.listFiles(filefilter)
@@ -121,11 +136,15 @@ blocksize = firstDataset["BLOCKSIZE"]
 pulse_samplenr = firstDataset["pulse_start_sample"]
 
 f = cr.open(filelist, blocksize = 65536) # need to cut out timeseries around pulse
+# select only even/odd antennas according to 'pol'
+selected_dipoles = [x for x in f["DIPOLE_NAMES"] if int(x) % 2 == pol]
+f["SELECTED_DIPOLES"] = selected_dipoles
+antennaPositions = f["ANTENNA_POSITIONS"]
 
 timeseries = f.empty("TIMESERIES_DATA")
 
 # get timeseries data with pulse, then cut out a region around the pulse.
-cutoutSize = 2048
+cutoutSize = 512
 f.getTimeseriesData(timeseries, block = block)
 nofChannels = timeseries.shape()[0]
 cutoutTimeseries = hArray(float, dimensions = [nofChannels, cutoutSize])
@@ -135,6 +154,130 @@ cutoutTimeseries[...].copy(timeseries[..., start:end])
 y = cutoutTimeseries.toNumpy()
 plt.plot(y[0])
 plt.plot(y[140])
+
+refant = firstDataset["pulses_refant"]
+sample_interval = 5.0e-9
+# is the index of the ref antenna also in the full list of antids / antpos
+
+# now cross correlate all channels in full_timeseries, get relative times
+crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", cutoutTimeseries, oversamplefactor=32)
+
+#And determine the relative offsets between them
+maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot = True, plotend=5, sampleinterval = sample_interval / crosscorr.oversamplefactor, peak_width = 11, splineorder = 3, refant = refant)
+
+#print startTimes
+#print maxima_cc.lags
+
+# plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
+
+plt.figure()
+hArray(maxima_cc.lags).plot()
+
+# Plot arrival times, do plane-wave fit, plot residuals wrt plane wave
+arrivaltime = hArray(maxima_cc.lags)
+times = arrivaltime.toNumpy()
+positions = antennaPositions.toNumpy().ravel()
+
+# HACK out outlying values
+arrivaltime[206] = 0.0
+
+# Apply calibration delays (per antenna)
+arrivaltime -= hArray(f["DIPOLE_CALIBRATION_DELAY"])
+# Apply sub-sample inter-station clock offsets (LOFAR)
+subsampleOffsets = f["SUBSAMPLE_CLOCK_OFFSET"]
+# Apply inter-station delays from RFIlines Task
+# Assuming ordering CS002, 3, 4, 5, 7 for this event (sorted alphabetically)
+#import pdb; pdb.set_trace()
+# Hack values in here
+subsampleOffsets[1] -= 0.11e-9
+subsampleOffsets[2] -= -1.30e-9
+subsampleOffsets[3] -= -1.32e-9
+subsampleOffsets[4] -= 0.71e-9
+
+stationList = f["STATION_LIST"]
+print stationList
+stationStartIndex = f["STATION_STARTINDEX"]
+for i in range(len(subsampleOffsets)):
+    arrivaltime[stationStartIndex[i]:stationStartIndex[i+1]] -= subsampleOffsets[i]
+    # Sign + or - ???
+
+#plt.figure()
+#arrivaltime.plot()
+#plt.title('Arrival times, matched with offsets per station (check!)')
+
+# now make footprint plot of all arrival times
+loradir = '/Users/acorstanje/triggering/CR/LORA'
+# first show originally derived arrival times
+fptask_orig = cr.trerun("plotfootprint", "0", colormap = 'jet', filefilter = eventdir, loradir = loradir, plotlora=False, plotlorashower=False, pol=pol) # no parameters set...
+plt.title('Footprint using original cr_event arrival times')
+plt.figure()
+# now our arrival times and antenna positions
+
+fptask = cr.trerun("plotfootprint", "1", colormap = 'jet', filefilter = eventdir, positions = antennaPositions, arrivaltime=1.0e9*arrivaltime, loradir = loradir, plotlora=False, plotlorashower=False, pol=pol) # no parameters set...
+plt.title('Footprint using crosscorrelated arrival times')
+delta = arrivaltime - 1.0e-9 * fptask_orig.arrivaltime
+delta -= delta.mean()
+plt.figure()
+fptask_delta = cr.trerun("plotfootprint", "2", colormap = 'jet', filefilter = eventdir, positions = antennaPositions, arrivaltime=1.0e9*delta, loradir = loradir, plotlora=False, plotlorashower=False, pol=pol) # no parameters set...
+plt.title('Footprint of difference between cr_event and full-cc method')
+plt.figure()
+delta.plot()
+plt.title('Difference between plotfootprint / cr_event arrival times\nand full crosscorrelation times')
+
+# Do plane-wave direction fit on full arrivaltimes
+# Fit pulse direction
+print 'Do plane wave fit on full arrival times (cross correlations here)...'
+direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antennaPositions, timelags = arrivaltime, verbose=True)
+
+plt.figure()
+direction_fit_plane_wave.residual_delays.plot()
+plt.title('Residual delays after plane wave fit')
+
+print 'Do plane wave fit on stored arrival times, from plotfootprint...'
+direction_fit_plane_wave_orig = cr.trun("DirectionFitPlaneWave", positions = fptask_orig.positions, timelags = 1.0e-9 * fptask_orig.arrivaltime, verbose=True)
+
+plt.figure()
+direction_fit_plane_wave_orig.residual_delays.plot()
+plt.title('Residual delays after plane wave fit\n to plotfootprint timelags')
+
+residu = direction_fit_plane_wave.residual_delays.toNumpy()
+#import pdb; pdb.set_trace()
+residu[np.where(abs(residu) > 100e-9)] = 0.0 # hack
+residu -= residu.mean()
+residu[np.where(abs(residu) > 15e-9)] = np.float('nan') # hack
+
+residu[np.argmax(residu)] = 0.0
+residu[np.argmin(residu)] = 0.0
+residu -= min(residu)
+
+plt.figure()
+# now the good one: difference between measured arrival times and plane wave fit!
+fptask_delta = cr.trerun("plotfootprint", "3", colormap = 'jet', filefilter = eventdir, positions=antennaPositions, arrivaltime=hArray(1.0e9*residu), power = 140, loradir = loradir, plotlora=False, plotlorashower=False, pol=pol) # no parameters set...
+plt.title('Footprint of residual delays w.r.t. planewave fit')
+
+
+# Simplex fit point source...
+(az, el) = direction_fit_plane_wave.meandirection_azel # check
+startPosition = (az, el, 1.0) # 1.0 means R = 1000.0 ...
+print 'Doing simplex search for minimum MSE...'
+optimum = fmin(mseMinimizer, startPosition, (positions, times, 0, 12), xtol=1e-5, ftol=1e-5, full_output=1)
+#raw_input('Done simplex search.')
+
+simplexDirection = optimum[0]
+simplexMSE = optimum[1]
+simplexDirection[2] = 1000.0 / simplexDirection[2] # invert again to get R
+(simplexAz, simplexEl, simplexR) = simplexDirection
+
+print '-----'
+print 'Simplex search: '
+print 'Best MSE: %f; best direction = (%f, %f, %f)' % (simplexMSE, simplexAz / deg2rad, simplexEl / deg2rad, simplexR)
+msePlanar = sf.mseWithDistance(simplexAz, simplexEl, 1.0e6, positions, times, allowOutlierCount = 12)
+print 'Best MSE for R = 10^6 (approx. planar): %f' % msePlanar
+print '-----'
+# get the calculated delays according to this plane wave
+#simplexDirection[2] = 4000.0
+bestfitDelays = sf.timeDelaysFromDirectionAndDistance(positions, simplexDirection)
+
 
 
 """
