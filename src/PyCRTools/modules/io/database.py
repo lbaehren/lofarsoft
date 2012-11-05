@@ -84,6 +84,8 @@ class Database(object):
 
         cursor.close()
 
+        self.close()
+
         return newID
 
 
@@ -106,6 +108,8 @@ class Database(object):
         cursor.execute(sql)
         records = cursor.fetchall()
         cursor.close()
+
+        self.close()
 
         return records
 
@@ -132,6 +136,8 @@ class Database(object):
 
         cursor.close()
 
+        self.close()
+
 
     def executescript(self, sql=""):
         """Execute a series of SQL statements.
@@ -153,6 +159,8 @@ class Database(object):
         self._db.commit()
 
         cursor.close()
+
+        self.close()
 
 
     def executelist(self, sql_list=[], blocksize=128, verbose=False):
@@ -200,6 +208,8 @@ class Database(object):
             self._db.commit()
 
         cursor.close()
+
+        self.close()
 
 
     def writescript(self, filename, sql_script):
