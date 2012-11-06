@@ -144,7 +144,7 @@ antennaPositions = f["ANTENNA_POSITIONS"]
 timeseries = f.empty("TIMESERIES_DATA")
 
 # get timeseries data with pulse, then cut out a region around the pulse.
-cutoutSize = 512
+cutoutSize = 256
 f.getTimeseriesData(timeseries, block = block)
 nofChannels = timeseries.shape()[0]
 cutoutTimeseries = hArray(float, dimensions = [nofChannels, cutoutSize])
@@ -160,7 +160,7 @@ sample_interval = 5.0e-9
 # is the index of the ref antenna also in the full list of antids / antpos
 
 # now cross correlate all channels in full_timeseries, get relative times
-crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", cutoutTimeseries, oversamplefactor=32)
+crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", cutoutTimeseries, oversamplefactor=64)
 
 #And determine the relative offsets between them
 maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot = True, plotend=5, sampleinterval = sample_interval / crosscorr.oversamplefactor, peak_width = 11, splineorder = 3, refant = refant)
@@ -204,6 +204,8 @@ for i in range(len(subsampleOffsets)):
 #plt.figure()
 #arrivaltime.plot()
 #plt.title('Arrival times, matched with offsets per station (check!)')
+times = arrivaltime.toNumpy()
+positions = antennaPositions.toNumpy().ravel()
 
 # now make footprint plot of all arrival times
 loradir = '/Users/acorstanje/triggering/CR/LORA'
@@ -260,7 +262,7 @@ plt.title('Footprint of residual delays w.r.t. planewave fit')
 (az, el) = direction_fit_plane_wave.meandirection_azel # check
 startPosition = (az, el, 1.0) # 1.0 means R = 1000.0 ...
 print 'Doing simplex search for minimum MSE...'
-optimum = fmin(mseMinimizer, startPosition, (positions, times, 0, 12), xtol=1e-5, ftol=1e-5, full_output=1)
+optimum = fmin(mseMinimizer, startPosition, (positions, times, 0, 4), xtol=1e-5, ftol=1e-5, full_output=1)
 #raw_input('Done simplex search.')
 
 simplexDirection = optimum[0]
@@ -271,13 +273,29 @@ simplexDirection[2] = 1000.0 / simplexDirection[2] # invert again to get R
 print '-----'
 print 'Simplex search: '
 print 'Best MSE: %f; best direction = (%f, %f, %f)' % (simplexMSE, simplexAz / deg2rad, simplexEl / deg2rad, simplexR)
-msePlanar = sf.mseWithDistance(simplexAz, simplexEl, 1.0e6, positions, times, allowOutlierCount = 12)
+msePlanar = sf.mseWithDistance(simplexAz, simplexEl, 1.0e6, positions, times, allowOutlierCount = 4)
 print 'Best MSE for R = 10^6 (approx. planar): %f' % msePlanar
 print '-----'
 # get the calculated delays according to this plane wave
 #simplexDirection[2] = 4000.0
 bestfitDelays = sf.timeDelaysFromDirectionAndDistance(positions, simplexDirection)
 
+residu = times - bestfitDelays
+#import pdb; pdb.set_trace()
+#residu[np.where(abs(residu) > 100e-9)] = 0.0 # hack
+residu -= residu.mean()
+#residu[np.where(abs(residu) > 15e-9)] = np.float('nan') # hack
+
+residu[np.argmax(residu)] = 0.0
+residu[np.argmin(residu)] = 0.0
+residu[np.argmax(residu)] = 0.0
+residu[np.argmin(residu)] = 0.0
+#residu -= min(residu)
+
+plt.figure()
+# now the good one: difference between measured arrival times and plane wave fit!
+fptask_delta = cr.trerun("plotfootprint", "4", colormap = 'jet', filefilter = eventdir, positions=antennaPositions, arrivaltime=hArray(1.0e9*residu), power = 140, loradir = loradir, plotlora=False, plotlorashower=False, pol=pol) # no parameters set...
+plt.title('Footprint of residual delays w.r.t. point source fit')
 
 
 """
