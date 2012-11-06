@@ -96,14 +96,15 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
     firstline=lines[0].strip('/').split()
     secondline=lines[1].strip('/').split()
     # Coreuncertainties and Moliere radius have been added later
-    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)','CoreE(X)','CoreE(Y)','Moliere_rad(m)']
+    reference=['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)','CoreE(X)','CoreE(Y)','Moliere_rad(m)','ElevaErr', 'AziErr', 'EnergyErr(eV)' ]
     len_firstline = len(firstline)
     
-    if len_firstline != 10:
-        if len_firstline != 9:
-            if len_firstline != 7:
-                print "Check LORA file format, update version ?!"
-                assert False
+    if len_firstline != 13:
+        if len_firstline != 10:
+            if len_firstline != 9:
+                if len_firstline != 7:
+                    print "Check LORA file format, update version ?!"
+                    assert False
     for (a,b,c) in zip(firstline,reference[0:len_firstline],secondline):
         # "Check if data format is still as defined"
         assert a==b
@@ -132,11 +133,13 @@ def loraInfo(lora_second,datadir="/data/VHECR/LORAtriggered/LORA/",checkSurround
         loradata["coreuncertainties"]=cr.hArray([loradata["CoreE(X)"],loradata["CoreE(Y)"],0],name="shower core uncertainties from lora",unit="m")
     else:
         loradata["coreuncertainties"]=cr.hArray([-1.,-1.,0.],name="shower core uncertainties default",unit="m")
-    if len_firstline == 10:
+    
+    if len_firstline >= 10:
         loradata["moliere"]=loradata['Moliere_rad(m)']
     else:
         loradata["moliere"]=-1
-
+    
+    
     loradata_cleankeys = {}
     for key in loradata.keys():
         cleankey = re.sub('\W', '_', key)
