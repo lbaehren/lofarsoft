@@ -59,6 +59,7 @@ class Database(object):
         """Close the SQLite database."""
         if self._db:
             self._db.close()
+            self._db = None
 
 
     def insert(self, sql=""):
