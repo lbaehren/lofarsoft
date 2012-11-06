@@ -26,41 +26,10 @@ def convert(fromvalue,totype):
             return pytmf.spherical2cartesian(r,pi2-fromvalue["el"],pi2-fromvalue["az"])
 
 
-def revisionnr(filedir):
-    """
-
-    """
-    import subprocess
-
-    revision_nr = 0
-    process = None
-
-    lofarsoft = os.environ["LOFARSOFT"]
-    uses_svn = os.path.exists(lofarsoft+"/.svn")
-    uses_git = os.path.exists(lofarsoft+"/.git")
-
-    print "filedir: %s" %(filedir)
-
-    if (uses_svn):
-        process = subprocess.Popen(["svn","info",filedir],stdout=subprocess.PIPE)
-    elif(uses_git):
-        process = subprocess.Popen(["git","svn","info"], stdout=subprocess.PIPE, cwd=filedir)
-
-    if (process):
-        lines = process.stdout.readlines()
-        for line in lines:
-            if "Revision" in line:
-                revision_nr = int(line.split()[1])
-
-    return revision_nr
-
-
-
 LOFARSOFT=os.environ["LOFARSOFT"]
 PYCRBIN=LOFARSOFT+"/release/bin/python/"
 PYCR=LOFARSOFT+"/src/PyCRTools/scripts/"
 PYP=LOFARSOFT+"/src/PyCRTools/"
-PYCRREVNR=revisionnr(PYP)
 
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecond.h5"
 filename_lofar_onesecond=LOFARSOFT+"/data/lofar/RS307C-readfullsecondtbb1.h5"
