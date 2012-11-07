@@ -31,7 +31,7 @@ class FindRFI(Task):
         fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, 1, 1, 1, cr.fftw_flags.MEASURE),
             doc = "Forward plan for FFTW, by default use a plan that works over all antennas at once and is measured for spead because this is applied many times." ),
         bad_antennas = dict( default = [],
-            "Antennas found to be bad." ),
+            doc = "Antennas found to be bad." ),
         good_antennas = dict( default = lambda self : [name for name in self.f["SELECTED_DIPOLES"] if name not in self.bad_antennas],
             "Antennas found to be good." ),
         dirty_channels = dict( default = [],
