@@ -33,7 +33,7 @@ class FindRFI(Task):
         bad_antennas = dict( default = [],
             doc = "Antennas found to be bad." ),
         good_antennas = dict( default = lambda self : [name for name in self.f["SELECTED_DIPOLES"] if name not in self.bad_antennas],
-            "Antennas found to be good." ),
+            doc = "Antennas found to be good." ),
         dirty_channels = dict( default = [],
             doc = "List of channels found to contain RFI" ),
         save_plots = dict( default = False,
