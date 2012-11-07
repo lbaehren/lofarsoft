@@ -67,6 +67,12 @@ for station in stations:
         # Open file
         f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
 
+        # Find RFI and bad antennas
+        rfi = cr.trun("FindRFI", f = f, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
+
+        print rfi.dirty_channels
+        print rfi.good_antennas
+
         # Set reference polarization to the one that had the best pulse
         h0 = 0
         h1 = 0
