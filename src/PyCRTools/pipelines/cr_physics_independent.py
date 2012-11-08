@@ -33,6 +33,7 @@ parser.add_option("-o", "--output-dir", default="./", help="output directory")
 parser.add_option("-l", "--lora_logfile", default="./LORA/LORAtime4", help="Name of LORA logfile with timestamps.")
 parser.add_option("-s", "--station", action="append", help="only process given station")
 parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
+parser.add_option("--maximum_angular_diff", default = 0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
 
 (options, args) = parser.parse_args()
 
@@ -204,6 +205,15 @@ for station in stations:
             direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions = antenna_positions, timelags = pulse_envelope.delays, good_antennas = pulse_envelope.antennas_with_significant_pulses,reference_antenna = pulse_envelope.refant, verbose=True)
 
             pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
+
+            # Check for convergence of iterative direction fitting loop
+            if n > 0:
+                angular_diff = np.rad2deg(tools.spaceAngle( np.deg2rad((90-last_direction[1])), np.deg2rad((90-last_direction[0])), np.deg2rad((90-pulse_direction[1])), np.deg2rad((90-pulse_direction[0]))))
+                
+                if angular_diff < options.maximum_angular_diff:
+                    direction_fit_converged = True
+
+            last_direction = pulse_direction
 
             n += 1
             if direction_fit_converged:
