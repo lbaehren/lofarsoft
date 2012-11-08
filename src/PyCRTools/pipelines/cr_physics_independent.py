@@ -111,8 +111,8 @@ for station in stations:
             rp = '1'
 
         # Create FFTW plans
-        fftplan = cr.FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
-        invfftplan = cr.FFTWPlanManyDftC2r(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+        fftplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+        invfftplan = cr.FFTWPlanManyDftC2r(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
@@ -188,7 +188,7 @@ for station in stations:
 
             # Get timeseries data
             cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
-            timeseries_data /= blocksize
+            timeseries_data /= options.blocksize
 
             # Calculate delays
             pulse_envelope = cr.trun("PulseEnvelope", timeseries_data = timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
@@ -219,7 +219,7 @@ for station in stations:
                 break
 
         # Project polarization onto x,y,z frame
-        xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, blocksize))
+        xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, options.blocksize))
         cr.hProjectPolarizations(xyz_timeseries_data[0:3*nantennas:3,...], xyz_timeseries_data[1:3*nantennas:3,...], xyz_timeseries_data[2:3*nantennas:3,...], timeseries_data[0:2*nantennas:2,...], timeseries_data[1:2*nantennas:2,...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
 
         # Get Stokes parameters
@@ -233,7 +233,7 @@ for station in stations:
 
         # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
-        time_delays += float(block_number_lora * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
+        time_delays += float(block_number_lora * options.blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
 
         # Get xyz-polarization instance
         p = station.polarization['xyz']
