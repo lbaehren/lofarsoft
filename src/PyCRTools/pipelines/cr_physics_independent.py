@@ -49,6 +49,10 @@ event = crdb.Event(db = db, id = options.id)
 event.status = "CR_PHYSICS_PROCESSING"
 event.write(recursive=False, parameters=False)
 
+# Create FFTW plans
+fftplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+invfftplan = cr.FFTWPlanManyDftC2r(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+
 # Loop over all stations in event
 stations = []
 for f in event.datafiles:
@@ -109,10 +113,6 @@ for station in stations:
             rp = '0'
         else:
             rp = '1'
-
-        # Create FFTW plans
-        fftplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
-        invfftplan = cr.FFTWPlanManyDftC2r(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
@@ -185,6 +185,7 @@ for station in stations:
             antenna_response = cr.trun("AntennaResponse", instrumental_polarization = fft_data, frequencies = frequencies, direction = pulse_direction)
 
             # Get timeseries data
+            print options.blocksize, timeseries_data.shape(), antenna_response.on_sky_polarizations.shape()
             cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
             timeseries_data /= options.blocksize
 
