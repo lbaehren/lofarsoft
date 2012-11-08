@@ -45,21 +45,6 @@ start = time.clock()
 # Get event from database
 event = crdb.Event(db = db, id = options.id)
 
-# Read LORA information
-try:
-    logging.debug("reading LORA data")
-
-    (tbb_starttime_sec, tbb_starttime_nsec) = lora.nsecFromSec(tbb_starttime, logfile = lora_logfile)
-
-    (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_starttime_sec, tbb_starttime_nsec, tbb_starttime, tbb_samplenumber, blocksize = options.blocksize)
-except Exception:
-
-    logging.exception("could not read LORA data")
-
-    sys.exit(1)
-
-logging.debug("have LORA data")
-
 # Set the event status
 event.status = "CR_PHYSICS_PROCESSING"
 event.write(recursive=False, parameters=False)
@@ -85,6 +70,24 @@ for station in stations:
 
         # Open file
         f = cr.open(station.datafile.settings.datapath+'/'+station.datafile.filename)
+
+        # Read LORA information
+        tbb_time = f["TIME"][0]
+        tbb_sample_number = max(f["SAMPLE_NUMBER"])
+        
+        try:
+            logging.debug("reading LORA data")
+        
+            (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile = lora_logfile)
+        
+            (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_time_sec, tbb_time_nsec, tbb_time, tbb_sample_number, blocksize = options.blocksize)
+        except Exception:
+        
+            logging.exception("could not get expected block number from LORA data for station "+station.stationname)
+        
+            continue
+        
+        logging.debug("have LORA data")
 
         # Find RFI and bad antennas
         findrfi = cr.trun("FindRFI", f = f, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
@@ -144,7 +147,7 @@ for station in stations:
         fft_data.mul(weights)
 
         # Get expected galactic noise strength
-        galactic_noise = cr.trun("GalacticNoise", timestamp = f["TIME"][0])
+        galactic_noise = cr.trun("GalacticNoise", timestamp = tbb_time)
 
         # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
         antennas_spectral_power = dict(zip(
