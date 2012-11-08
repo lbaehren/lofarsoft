@@ -27,7 +27,7 @@ cr.tasks.task_write_parfiles = False
 # Parse commandline options
 parser = OptionParser()
 parser.add_option("-i", "--id", type="int", help="event ID", default=1)
-parser.add_option("-s", "--blocksize", type="int", default=2**16)
+parser.add_option("-b", "--blocksize", type="int", default=2**16)
 parser.add_option("-d", "--database", default="cr.db", help="filename of database")
 parser.add_option("-o", "--output-dir", default="./", help="output directory")
 parser.add_option("-l", "--lora_logfile", default="./LORA/LORAtime4", help="Name of LORA logfile with timestamps.")
