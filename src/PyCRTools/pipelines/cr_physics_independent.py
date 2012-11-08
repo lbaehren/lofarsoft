@@ -149,18 +149,18 @@ for station in stations:
         # Get expected galactic noise strength
         galactic_noise = cr.trun("GalacticNoise", timestamp = tbb_time)
 
-        # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
-        antennas_spectral_power = dict(zip(
-            station.polarization['0']["antennas"].values()+station.polarization['1']["antennas"].values(),
-            station.polarization['0']["antennas_spectral_power"]+station.polarization['1']["antennas_spectral_power"]
-            ))
-
-        antennas_spectral_power_correction = cr.hArray([antennas_spectral_power[k] for k in selected_dipoles])
-
-        # Correct to expected level
-        cr.hInverse(antennas_spectral_power_correction)
-        cr.hMul(antennas_spectral_power_correction, galactic_noise.galactic_noise)
-        cr.hMul(fft_data[...], antennas_spectral_power_correction[...])
+#        # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
+#        antennas_spectral_power = dict(zip(
+#            station.polarization['0']["antennas"].values()+station.polarization['1']["antennas"].values(),
+#            station.polarization['0']["antennas_spectral_power"]+station.polarization['1']["antennas_spectral_power"]
+#            ))
+#
+#        antennas_spectral_power_correction = cr.hArray([antennas_spectral_power[k] for k in selected_dipoles])
+#
+#        # Correct to expected level
+#        cr.hInverse(antennas_spectral_power_correction)
+#        cr.hMul(antennas_spectral_power_correction, galactic_noise.galactic_noise)
+#        cr.hMul(fft_data[...], antennas_spectral_power_correction[...])
 
         # Get timeseries data
         timeseries_data = f.empty("TIMESERIES_DATA")
@@ -175,8 +175,6 @@ for station in stations:
 
         # Get first estimate of pulse direction
         pulse_direction = station.polarization[rp]["pulse_direction"]
-
-        fft = fft_data.toNumpy()
 
         # Start direction fitting loop
         n = 0
