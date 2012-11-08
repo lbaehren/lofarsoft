@@ -187,12 +187,12 @@ for station in stations:
 
         beamformed_timeseries = cr.hArray(float, dimensions = (1, options.blocksize))
 
+        cr.hFFTWExecutePlan(beamformed_timeseries, minibeamformer.beamformed_fft, invfftplan)
+        beamformed_timeseries /= options.blocksize
+
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
 
         station["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_bf.plotlist]
-
-        cr.hFFTWExecutePlan(beamformed_timeseries, minibeamformer.beamformed_fft, invfftplan)
-        beamformed_timeseries /= options.blocksize
 
         # Start direction fitting loop
         n = 0
