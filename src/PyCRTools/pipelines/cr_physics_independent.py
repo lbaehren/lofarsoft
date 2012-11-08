@@ -185,7 +185,14 @@ for station in stations:
         # Beamform in LORA direction
         minibeamformer = cr.trun("MiniBeamformer", fft_data = fft_data, frequencies = frequencies, antpos = antenna_positions, direction = pulse_direction)
 
-        print minibeamformer.beamformed_fft
+        beamformed_timeseries = cr.hArray(float, dimensions = (self.blocksize, ))
+
+        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
+
+        station["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_bf.plotlist]
+
+        cr.hFFTWExecutePlan(beamformed_timeseries, minibeamformer.beamformed_fft, invfftplan)
+        beamformed_timeseries /= options.blocksize
 
         # Start direction fitting loop
         n = 0
