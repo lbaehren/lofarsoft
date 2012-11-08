@@ -182,6 +182,11 @@ for station in stations:
         # Get first estimate of pulse direction
         pulse_direction = station.polarization[rp]["pulse_direction"]
 
+        # Beamform in LORA direction
+        minibeamformer = trun("MiniBeamformer", fft_data = fft_data, frequencies = frequencies, antpos = antenna_positions, direction = pulse_direction)
+
+        print minibeamformer.beamformed_fft
+
         # Start direction fitting loop
         n = 0
         direction_fit_converged = False
