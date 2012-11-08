@@ -91,9 +91,13 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
         vtype=basetype(Type)
         vec=Vector(Type.vec())
     elif (type(vtype) in hAllListTypes):  # List or Vector
-        vtype=type(Type[0])
-        vec=type2vector(vtype)
-        vec.extend(Type)
+        if len(vtype) == 0:
+            vtype = int
+            size = 0
+        else:
+            vtype=type(Type[0])
+            vec=type2vector(vtype)
+            vec.extend(Type)
     elif type(vtype) == np.ndarray:  # Numpy ndarray
         if vtype.dtype == np.dtype('float'):
             vec = FloatVec()
