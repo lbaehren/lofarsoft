@@ -185,7 +185,7 @@ for station in stations:
         # Beamform in LORA direction
         minibeamformer = cr.trun("MiniBeamformer", fft_data = fft_data, frequencies = frequencies, antpos = antenna_positions, direction = pulse_direction)
 
-        beamformed_timeseries = cr.hArray(float, dimensions = (self.blocksize, ))
+        beamformed_timeseries = cr.hArray(float, dimensions = (options.blocksize, ))
 
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
 
