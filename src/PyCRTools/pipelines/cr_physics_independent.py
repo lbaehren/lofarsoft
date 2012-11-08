@@ -78,7 +78,7 @@ for station in stations:
         try:
             logging.debug("reading LORA data")
         
-            (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile = lora_logfile)
+            (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile = options.lora_logfile)
         
             (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_time_sec, tbb_time_nsec, tbb_time, tbb_sample_number, blocksize = options.blocksize)
         except Exception:
