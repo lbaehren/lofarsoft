@@ -93,6 +93,7 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
     elif (type(vtype) in hAllListTypes):  # List or Vector
         if len(vtype) == 0:
             vtype = int
+            vec = type2vector(vtype)
             size = 0
         else:
             vtype=type(Type[0])
