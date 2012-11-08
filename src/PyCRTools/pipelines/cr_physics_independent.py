@@ -189,7 +189,6 @@ for station in stations:
             antenna_response = cr.trun("AntennaResponse", instrumental_polarization = fft_data, frequencies = frequencies, direction = pulse_direction)
 
             # Get timeseries data
-            print options.blocksize, timeseries_data.shape(), antenna_response.on_sky_polarization.shape()
             cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
             timeseries_data /= options.blocksize
 
