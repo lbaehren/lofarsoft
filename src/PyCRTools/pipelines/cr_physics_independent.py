@@ -135,7 +135,8 @@ for station in stations:
         frequencies = cr.hArray(f["FREQUENCY_DATA"])
 
         # Flag dirty channels (from RFI excission)
-        fft_data[..., findrfi.dirty_channels] = 0
+#        fft_data[..., findrfi.dirty_channels] = 0
+        fft_data[..., [0, ]] = 0
 
         # Apply calibration delays
         try:
