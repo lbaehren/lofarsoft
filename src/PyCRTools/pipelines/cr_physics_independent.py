@@ -89,9 +89,6 @@ for station in stations:
         # Find RFI and bad antennas
         findrfi = cr.trun("FindRFI", f = f, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
 
-        print findrfi.dirty_channels
-        print findrfi.good_antennas
-
         # Set reference polarization to the one that had the best pulse
         h0 = 0
         h1 = 0
@@ -110,36 +107,27 @@ for station in stations:
         else:
             rp = '1'
 
-        # Select block containing pulse
-        blocksize = station.polarization[rp]["blocksize"]
-        block = station.polarization[rp]["block"]
-        f["BLOCKSIZE"] = blocksize
-        f["BLOCK"] = block
-
         # Create FFTW plans
         fftplan = cr.FFTWPlanManyDftR2c(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
         invfftplan = cr.FFTWPlanManyDftC2r(blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
         # Select antennas which are marked good for both polarization
-        names = f["DIPOLE_NAMES"]
-        names_good = station.polarization['0']["antennas"].values() + station.polarization['1']["antennas"].values()
+        dipole_names = f["DIPOLE_NAMES"]
 
         selected_dipoles = []
-        for i in range(len(names)/2):
-            if names[2*i] in names_good and names[2*i+1] in names_good:
-                selected_dipoles.extend([names[2*i], names[2*i+1]])
+        for i in range(len(dipole_names)/2):
+            if dipole_names[2*i] in findrfi.good_antennas and dipole_names[2*i+1] in findrfi.good_antennas:
+                selected_dipoles.extend([dipole_names[2*i], dipole_names[2*i+1]])
 
         f["SELECTED_DIPOLES"] = selected_dipoles
 
         # Read FFT data
         fft_data = f.empty("FFT_DATA")
-        f.getFFTData(fft_data, block, False)
+        f.getFFTData(fft_data, block_number_lora, False)
         frequencies = cr.hArray(f["FREQUENCY_DATA"])
 
         # Flag dirty channels (from RFI excission)
-        dirty_channels = list(set(station.polarization['0']["dirty_channels"] + station.polarization['1']["dirty_channels"]))
-
-        fft_data[..., dirty_channels] = 0
+        fft_data[..., findrfi.dirty_channels] = 0
 
         # Apply calibration delays
         try:
@@ -242,7 +230,7 @@ for station in stations:
 
         # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
-        time_delays += float(block * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
+        time_delays += float(block_number_lora * blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
 
         # Get xyz-polarization instance
         p = station.polarization['xyz']
