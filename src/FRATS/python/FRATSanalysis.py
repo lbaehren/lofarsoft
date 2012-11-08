@@ -315,8 +315,19 @@ def loadTimeseries(directory='',DM=DM):
 
     if len(directory) > 0 and directory[-1]!='/':
         directory+='/'
-    dfiles=glob.glob(directory+'dedisp*'+str(DM)+'*')
-    assert len(dfiles)<10,"please check if file order is correct for ..."+str(["..."+f[-15:] for f in dfiles])
+    if type(DM)!=type("string"):
+        if DM%1<1e-6:
+            DMstr=str(int(DM))
+        elif DM%0.1<1e-6:
+            DMstr=str(round(DM,1))
+        elif DM%0.01<1e-6:
+            DMstr=str(round(DM,2))
+        else:
+            DMstr=DM
+    else:
+        DMstr=DM
+    dfiles=glob.glob(directory+'dedisp*'+str(DM)+'_*')
+    #assert len(dfiles)<10,"please check if file order is correct for ..."+str(["..."+f[-15:] for f in dfiles])
         
     ts=[np.fromfile(f,'float32') for f in dfiles]
     return ts
@@ -995,7 +1006,7 @@ def makeTimeAxes(reftime,delays,length,unit=1):
     """
     timeaxes=np.zeros([len(delays),length])
     for num,d in enumerate(delays):
-        timeaxes[num]=np.arange(reftime-d,reftime-d+length*unit,unit)
+        timeaxes[num]=np.arange(reftime-d,reftime-d+length*unit,unit)[0:length]
     return timeaxes
 
 def makeSets(msg,threshold,window):
@@ -1142,16 +1153,18 @@ def RFIcalcBadSamples(data,cutlevel,subdiv=4,reqsubdiv=2):
 
 def getTimeseriesPar(directory,DMindex=0,DMvalue=False):
     par=obsParameters(directory) 
-
-    DM=par['DMrange'][DMindex] 
+    DMvalue=str(DMvalue)
+    
+    DM=par['DM'][DMindex] 
     if DMvalue:
-        DM=[a for a in par['DMrange'] if np.abs(a-DMvalue) < 0.5*np.min(np.diff(par['DMrange']))][0]
+        DM=[a for a in par['DM'] if np.abs(a-float(DMvalue.strip('_'))) < 0.5*np.min(np.diff(par['DM']))][0]
     derivedParameters(par,DM)
-    timeseries=loadTimeseries(directory,str(round(DM,2)))
+#    timeseries=loadTimeseries(directory,str(round(DM,2)))
+    timeseries=loadTimeseries(directory,DMvalue)
     assert len(timeseries)==par['nrstreams'],"Not loading correct number of timeseries"
-    trmsg=loadTriggerMsg(directory,bReturnArray=True,newVersion=True)
-    av=loadAverage(len(par['DMrange']),par['nrstreams'],directory)
-    std=loadStddev(len(par['DMrange']),par['nrstreams'],directory)
+    trmsg=loadTriggerMsg(directory,bReturnArray=True,newVersion=3)
+    av=loadAverage(len(par['DM']),par['nrstreams'],directory)
+    std=loadStddev(len(par['DM']),par['nrstreams'],directory)
     DMav=[a for a in av.keys() if np.abs(a-DM) < 0.5*np.min(np.diff(av.keys()))][0]
     av=av[DMav]
     std=std[DMav]
@@ -1180,12 +1193,13 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
 
     """
     print "WARNING, overwriting derived parameters for the new DM"
-    mycolors=['r','g','b','k','y','m','c','0.5']
+    mycolors=['r','g','b','k','y','m','c','0.5','r','g','b','k','y','m','c','0.5']
     ts=np.copy(timeseries)
     derivedParameters(par,DM)
     reftime=par['sa']*par['stb'] # samples per block time startblock
     delays=par['delays']
-    length=len(ts[0])
+    delays-=max(delays)
+    length=min([len(ts[i]) for i in range(len(ts))])
     toutall=[]
     if length>1 and plotTimeseries:
         for i in range(len(ts)):
@@ -1195,7 +1209,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
                 print k,max(tout)
                 tout+=ts[i][k:-integrationlength+k+1]
             tout+=ts[i][integrationlength-1:]
-            toutall.append(tout)
+            toutall.append(tout[0:length-integrationlength])
     else:
         toutall=ts
     
@@ -1205,8 +1219,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
     else:
         unit=1
         plt.xlabel('Time (samples)')
-    timeaxis=makeTimeAxes(reftime,delays,length-integrationlength,unit)
-    #return timeaxis,toutall
+    timeaxis=makeTimeAxes(reftime+integrationlength-1,delays,length-integrationlength,unit)
     plt.ylabel('Power')
     plt.title('Timeseries, DM='+str(DM)+', L='+str(integrationlength))
 
@@ -1218,20 +1231,22 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
         if window>0:
             trmsg=trmsg[trmsg['time']<centraltime+window]
             trmsg=trmsg[trmsg['time']>centraltime-window]
-        [plt.plot(trmsg['time'],offset*trmsg['subband']+trmsgoffset+par['ch']*par['nrCSB']*integrationlength,'*')]
+        [plt.plot(trmsg['time'],offset*trmsg['subband']+trmsg['sum'],'*')]#trmsgoffset+par['ch']*par['nrCSB']*integrationlength,'*')]
         plt.title('Timeseries and trigger messages, DM='+str(DM)+', L='+str(integrationlength))
     if plotTimeseries:
         if window>0: 
             [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
         else:
+            print [(len(timeaxis),len(toutall)) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
             [plt.plot(t,s+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]        
     if plotThreshold and av and std:
         Threshold=[avv*integrationlength+np.sqrt(integrationlength)*par['tl']*stdd for avv,stdd in zip(av.values(),std.values())]
+        print par['sa']
         T2=[convertArrayBar(t,par['sa']) for t in Threshold]
         if window>0: 
             [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]
         else:
-            [plt.plot(t,s+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]        
+            [plt.plot(t,s[0:len(t)]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]        
         
 
 def convertArrayBar(t,elem):
