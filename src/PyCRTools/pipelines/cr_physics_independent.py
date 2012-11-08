@@ -93,6 +93,10 @@ for station in stations:
         
         logging.debug("have LORA data")
 
+        # Set file parameters to match LORA block
+        f["BLOCKSIZE"] = options.blocksize
+        f["BLOCK"] = block_number_lora
+
         # Find RFI and bad antennas
         findrfi = cr.trun("FindRFI", f = f, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
 
