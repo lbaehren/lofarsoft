@@ -656,7 +656,7 @@ class PipeUnit:
 		self.end_time = 0    # end time (in s)
 		self.total_time = 0  # total time in s 
 		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*"]
+		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*.dat", "*.singlepulse"]
 		self.procdir = "BEAM%d" % (self.tabid)
 
 		# pulsars to fold for this unit
@@ -898,6 +898,17 @@ CLK line will be removed from the parfile!" % (parfile,))
 		nbins=self.power_of_two(int(math.floor(ephem.P0*1000.0/self.sampling)))
 		if nbins > 1024: return 1024
 		else: return nbins
+
+	def get_psr_dm(self, parf):
+		"""
+		Reads parfile and returns pulsar DM
+		"""
+		ephem=parfile.psr_par(parf)
+		dm=0
+		try:
+			dm=ephem.DM
+		except: pass
+		return dm
 
 	def lcd(self, low, high):
 		"""
@@ -1174,6 +1185,55 @@ CLK line will be removed from the parfile!" % (parfile,))
 					if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_prepfold: self.waiting_list("prepfold", prepfold_popens)
 				# we let PULP to continue if prepfold has crashed, as dspsr can run ok, or other instances of prepfold could finish ok as well
 				except: pass
+
+			# if we want to run prepdata to create a time-series and make a list of TOAs
+			if not cmdline.opts.is_plots_only and cmdline.opts.is_single_pulse:	
+				self.log.info("Running single-pulse analysis...")
+				prepdata_popens=[]  # list of prepdata Popen objects
+				for psr in self.psrs:   # pulsar list is empty if --nofold is used
+					psr2=re.sub(r'[BJ]', '', psr)
+					psrdm=self.get_psr_dm("%s/%s.par" % (self.outdir, psr2))
+					# first running prepdata with mask (if --norfi was not set)
+					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
+						cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -mask %s_rfifind.mask -o %s_%s %s.fits" % \
+							(psrdm, self.output_prefix, psr, self.output_prefix, self.output_prefix)
+						prepdata_popen = self.start_and_go(cmd, workdir=self.curdir)
+						prepdata_popens.append(prepdata_popen)
+
+					# running prepdata without mask
+					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)): 
+						output_stem="_nomask"
+					else: output_stem=""
+					cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -o %s_%s%s %s.fits" % \
+						(psrdm, psr, self.output_prefix, output_stem, self.output_prefix)
+					prepdata_popen = self.start_and_go(cmd, workdir=self.curdir)
+					prepdata_popens.append(prepdata_popen)
+
+			# waiting for prepdata to finish
+			try:
+				if not cmdline.opts.is_plots_only and cmdline.opts.is_single_pulse:
+					self.waiting_list("prepdata", prepdata_popens)
+					# after all instances of prepdata are finished we run single_pulse_search.py on created .dat files
+					singlepulse_popens=[]  # list of single_pulse_search.py Popen objects
+					for psr in self.psrs:   # pulsar list is empty if --nofold is used
+						psr2=re.sub(r'[BJ]', '', psr)
+						# first running single_pulse_search.py on .dat file created with the rfifind mask
+						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
+							cmd="single_pulse_search.py -p %s_%s.dat" % (psr, self.output_prefix)
+							singlepulse_popen = self.start_and_go(cmd, workdir=self.curdir)
+							singlepulse_popens.append(singlepulse_popen)
+
+						# running single_pulse_search.py on .dat file created without rfifind mask
+						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)): 
+							output_stem="_nomask"
+						else: output_stem=""
+						cmd="single_pulse_search.py -p %s_%s%s.dat" % (psr, self.output_prefix, output_stem)
+						singlepulse_popen = self.start_and_go(cmd, workdir=self.curdir)
+						singlepulse_popens.append(singlepulse_popen)
+					# now waiting for all instances of single_pulse_search.py to finish
+					self.waiting_list("single_pulse_search.py", singlepulse_popens)
+			# we let PULP to continue if prepdata (or single_pulse_search.py) has crashed, as the rest of the pipeline can finish ok
+			except: pass
 
 			# running convert on prepfold ps to pdf and png
 			if not cmdline.opts.is_nofold:

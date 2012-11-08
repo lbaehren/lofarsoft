@@ -80,7 +80,8 @@ class CMDLine:
         	self.cmd.add_option('--plots-only', action="store_true", dest='is_plots_only', 
                            help="creating diagnostic plots only on processing nodes assuming the data required for plots is there already", default=False)
         	self.cmd.add_option('--single-pulse', action="store_true", dest='is_single_pulse', 
-                           help="running single-pulse analysis in addition to folding a profile (not implemented yet)", default=False)
+                           help="running single-pulse analysis in addition to folding a profile (implemented only \
+                                 for IS/CS data, for CV data only filterbank file will be created on the processing node)", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
                                  TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
@@ -521,6 +522,7 @@ class CMDLine:
 					log.info("Prepfold = %s" % (self.opts.is_skip_prepfold and "no" or "yes"))
 					if self.opts.prepfold_extra_opts != "" and not self.opts.is_skip_prepfold:
 						log.info("Prepfold user extra options: %s" % (self.opts.prepfold_extra_opts))
+					log.info("Single-pulse analysis = %s" % (self.opts.is_single_pulse and "yes" or "no"))
 					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or \
 						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
 					if self.opts.dspsr_extra_opts != "" and not self.opts.is_skip_dspsr:
