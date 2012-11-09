@@ -131,8 +131,8 @@ class PulseEnvelope(Task):
 
                 plt.plot(x, s[i], label = "Signal")
                 plt.plot(x, y[i], label = "Envelope")
-                plt.plot(x, np.zeros(y.shape[1]) + self.rms[0], 'r--', label = "RMS")
-                plt.plot(x, np.zeros(y.shape[1]) - self.rms[0], 'r--')
+                plt.plot(x, np.zeros(y.shape[1]) + self.rms[i], 'r--', label = "RMS")
+                plt.plot(x, np.zeros(y.shape[1]) - self.rms[i], 'r--')
                 plt.annotate("pulse maximum", xy = (x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.peak_amplitude[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
                 p = self.plot_prefix + "pulse_envelope_envelope-{0:d}.png".format(i)
