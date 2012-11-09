@@ -1044,6 +1044,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
+			total_chan = self.tab.nrSubbands*self.nrChanPerSub
+
 			# if we run the whole processing and not just plots
 			if not cmdline.opts.is_plots_only:
 
@@ -1055,7 +1057,6 @@ CLK line will be removed from the parfile!" % (parfile,))
 					self.execute(cmd, workdir=self.curdir)
 
 				# running RFI excision, checking
-				total_chan = self.tab.nrSubbands*self.nrChanPerSub
 				if not cmdline.opts.is_norfi:
 					zapstr=""
 					# we should zap 1st chan as after 2nd polyphase it has junk
@@ -1673,6 +1674,10 @@ class CVUnit(PipeUnit):
 			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
+			#total_chan = self.tab.nrSubbands * self.nrChanPerSub
+			nsubs_eff = min(self.tab.nrSubbands, obs.nrSubsPerFileCS * cmdline.opts.nsplits)
+			total_chan = nsubs_eff * self.nrChanPerSub
+
 			if not cmdline.opts.is_plots_only:
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
 				# we also sort this list by split number
@@ -1702,9 +1707,6 @@ class CVUnit(PipeUnit):
 						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 						self.execute(cmd, workdir=self.curdir)
 						# removing corrupted freq channels
-						#total_chan = self.tab.nrSubbands * self.nrChanPerSub
-						nsubs_eff = min(self.tab.nrSubbands, obs.nrSubsPerFileCS * cmdline.opts.nsplits)
-						total_chan = nsubs_eff * self.nrChanPerSub
 						if self.nrChanPerSub > 1:
 							self.log.info("Zapping every %d channel..." % (self.nrChanPerSub))
 							cmd="paz -z \"%s\" -m %s_%s.ar" % \
@@ -1856,6 +1858,10 @@ class CVUnit(PipeUnit):
 			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
+			#total_chan = self.tab.nrSubbands * self.nrChanPerSub
+			nsubs_eff = min(self.tab.nrSubbands, obs.nrSubsPerFileCS * cmdline.opts.nsplits)
+			total_chan = nsubs_eff * self.nrChanPerSub
+
 			if not cmdline.opts.is_plots_only:
 
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
@@ -1902,9 +1908,6 @@ class CVUnit(PipeUnit):
 
 					verbose="-q"
 					if cmdline.opts.is_debug: verbose="-v"
-					#total_chan = self.tab.nrSubbands * self.nrChanPerSub
-					nsubs_eff = min(self.tab.nrSubbands, obs.nrSubsPerFileCS * cmdline.opts.nsplits)
-					total_chan = nsubs_eff * self.nrChanPerSub
 
 					# running dspsr for every frequency channel. We run it in bunches of number of channels in subband
 					# usually it is 16 which is less than number of cores in locus nodes. But even if it is 32, then it should be OK (I think...)
