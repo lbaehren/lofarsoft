@@ -182,17 +182,24 @@ for station in stations:
         # Get first estimate of pulse direction
         pulse_direction = station.polarization[rp]["pulse_direction"]
 
-        # Beamform in LORA direction
-        minibeamformer = cr.trun("MiniBeamformer", fft_data = fft_data, frequencies = frequencies, antpos = antenna_positions, direction = pulse_direction)
+        # Beamform in LORA direction for both polarizations
+        mb0 = cr.trun("MiniBeamformer", fft_data = fft_data[0:nantennas:2,...], frequencies = frequencies, antpos = antenna_positions, direction = pulse_direction)
+        mb1 = cr.trun("MiniBeamformer", fft_data = fft_data[1:nantennas:2,...], frequencies = frequencies, antpos = antenna_positions, direction = pulse_direction)
 
-        beamformed_timeseries = cr.hArray(float, dimensions = (1, options.blocksize))
+        beamformed_timeseries = cr.hArray(float, dimensions = (2, options.blocksize))
 
-        cr.hFFTWExecutePlan(beamformed_timeseries[0], minibeamformer.beamformed_fft, invfftplan)
+        cr.hFFTWExecutePlan(beamformed_timeseries[0], mb0.beamformed_fft, invfftplan)
+        cr.hFFTWExecutePlan(beamformed_timeseries[1], mb1.beamformed_fft, invfftplan)
+
         beamformed_timeseries /= options.blocksize
 
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
 
-        station["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_bf.plotlist]
+        p0 = station.polarization['0']
+        p1 = station.polarization['1']
+
+        p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
+        p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
 
         # Start direction fitting loop
         n = 0
