@@ -57,6 +57,8 @@ class PulseEnvelope(Task):
             doc = "Signal to noise ratio of pulse maximum." ),
         rms = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
             doc = "RMS of noise." ),
+        mean = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
+            doc = "Mean of noise." ),
         peak_amplitude = dict( default = lambda self : cr.hArray(float, self.nantennas), output = True,
             doc = "Pulse maximum." ),
         maxpos = dict( default = lambda self : cr.hArray(int, self.nantennas), output = True,
@@ -105,7 +107,7 @@ class PulseEnvelope(Task):
         cr.hSqrt(self.envelope)
 
         # Find signal to noise ratio, maximum, position of maximum and rms
-        cr.hMaxSNR(self.snr[...], self.rms[...], self.peak_amplitude[...], self.maxpos[...], self.envelope[...], (self.pulse_start - self.window_start) * int(self.resample_factor), (self.pulse_end - self.window_start) * int(self.resample_factor))
+        cr.hMaxSNR(self.snr[...], self.mean[...], self.rms[...], self.peak_amplitude[...], self.maxpos[...], self.envelope[...], (self.pulse_start - self.window_start) * int(self.resample_factor), (self.pulse_end - self.window_start) * int(self.resample_factor))
 
         # Convert to delay
         self.delays[:] = self.maxpos[:]
@@ -131,8 +133,7 @@ class PulseEnvelope(Task):
 
                 plt.plot(x, s[i], label = "Signal")
                 plt.plot(x, y[i], label = "Envelope")
-                plt.plot(x, np.zeros(y.shape[1]) + self.rms[i], 'r--', label = "RMS")
-                plt.plot(x, np.zeros(y.shape[1]) - self.rms[i], 'r--')
+                plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'r--', label = "RMS")
                 plt.annotate("pulse maximum", xy = (x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.peak_amplitude[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
                 p = self.plot_prefix + "pulse_envelope_envelope-{0:d}.png".format(i)

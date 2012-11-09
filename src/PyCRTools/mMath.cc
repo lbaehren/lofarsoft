@@ -5922,12 +5922,13 @@ void HFPP_FUNC_NAME (const NIter out, const NIter out_end,
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(snr)()("Signal to noise ratio of maximum.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(rms)()("RMS of noise window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HNumber)(max)()("Maximum of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HInteger)(maxpos)()("Position of maximum with respect to signal_start.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_5 (HInteger)(signal_start)()("Start of signal part where to look for maximum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_6 (HInteger)(signal_end)()("End of signal part where to look for maximum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(mean)()("Mean of noise window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(rms)()("RMS of noise window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(max)()("Maximum of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HInteger)(maxpos)()("Position of maximum with respect to signal_start.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_6 (HInteger)(signal_start)()("Start of signal part where to look for maximum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_7 (HInteger)(signal_end)()("End of signal part where to look for maximum.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -5939,21 +5940,20 @@ void HFPP_FUNC_NAME (const NIter out, const NIter out_end,
 */
 template <class IIter, class NIter>
 void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
-                        const NIter rms, const NIter rms_end,
-                        const NIter max, const NIter max_end,
-                        const IIter maxpos, const IIter maxpos_end,
-                        const NIter vec, const NIter vec_end,
-                        const HInteger signal_start, const HInteger signal_end)
+                     const NIter mean, const NIter mean_end,
+                     const NIter rms, const NIter rms_end,
+                     const NIter max, const NIter max_end,
+                     const IIter maxpos, const IIter maxpos_end,
+                     const NIter vec, const NIter vec_end,
+                     const HInteger signal_start, const HInteger signal_end)
 {
-  // Variables
-  double mean = 0;
-
   // Get vector length
   const int n = std::distance(vec, vec_end);
   const int nm = n - (signal_end - signal_start);
   
   // Initialize values
   *snr = 0;
+  *mean = 0;
   *rms = 0;
   *max = 0;
   *maxpos = 0;
@@ -5970,7 +5970,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   // Calculate the mean
   for (int i=0; i<signal_start; i++)
   {
-    mean += *it / nm;
+    *mean += *it / nm;
     it++;
   }
 
@@ -5978,7 +5978,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 
   for (int i=0; i<signal_start; i++)
   {
-    mean += *it / nm;
+    *mean += *it / nm;
     it++;
   }
 
@@ -5986,7 +5986,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   it = vec;
   for (int i=0; i<signal_start; i++)
   {
-    *rms += ((*it - mean) * (*it - mean)) / nm;
+    *rms += ((*it - *mean) * (*it - *mean)) / nm;
     it++;
   }
 
@@ -6006,12 +6006,12 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   // Noise after signal window
   for (int i=signal_end; i<n; i++)
   {
-    *rms += ((*it - mean) * (*it - mean)) / nm;
+    *rms += ((*it - *mean) * (*it - *mean)) / nm;
     it++;
   }
 
   *rms = sqrt(*rms);
-  *snr = (*max - mean) / *rms;
+  *snr = (*max - *mean) / *rms;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
