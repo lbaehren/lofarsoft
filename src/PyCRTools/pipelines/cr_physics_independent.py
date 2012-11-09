@@ -183,8 +183,8 @@ for station in stations:
         pulse_direction = station.polarization[rp]["pulse_direction"]
 
         # Beamform in LORA direction for both polarizations
-        fft_data_0 = cr.hArray(complex, dimensions = (nantennas, options.blocksize))
-        fft_data_1 = cr.hArray(complex, dimensions = (nantennas, options.blocksize))
+        fft_data_0 = cr.hArray(complex, dimensions = (nantennas, options.blocksize / 2 + 1))
+        fft_data_1 = cr.hArray(complex, dimensions = (nantennas, options.blocksize / 2 + 1))
 
         fft_data_0[...].copy(fft_data[0:nantennas:2,...])
         fft_data_1[...].copy(fft_data[1:nantennas:2,...])
