@@ -25,7 +25,7 @@ class PulseEnvelope(Task):
             doc = "Number of antennas." ),
         pulse_start = dict( default = 0,
             doc = "Start of pulse window." ),
-        pulse_end = dict( default = lambda self : self.timeseries_data.shape[1]-1,
+        pulse_end = dict( default = lambda self : self.timeseries_data.shape()[1],
             doc = "End of pulse window." ),
         pulse_width = dict( default = lambda self : self.pulse_end - self.pulse_start,
             doc = "Width of pulse window." ),
