@@ -5945,6 +5945,9 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
                         const NIter vec, const NIter vec_end,
                         const HInteger signal_start, const HInteger signal_end)
 {
+  // Variables
+  double mean = 0;
+
   // Get vector length
   const int n = std::distance(vec, vec_end);
   const int nm = n - (signal_end - signal_start);
@@ -5964,10 +5967,26 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
     throw PyCR::ValueError("[hMaxSNR] signal window out of range.");
   }
 
-  // Noise before signal window
+  // Calculate the mean
   for (int i=0; i<signal_start; i++)
   {
-    *rms += (*it * *it) / nm;
+    mean += *it / nm;
+    it++;
+  }
+
+  it += (signal_end - signal_start);
+
+  for (int i=0; i<signal_start; i++)
+  {
+    mean += *it / nm;
+    it++;
+  }
+
+  // Noise before signal window
+  it = vec;
+  for (int i=0; i<signal_start; i++)
+  {
+    *rms += ((*it - mean) * (*it - mean)) / nm;
     it++;
   }
 
@@ -5987,12 +6006,12 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   // Noise after signal window
   for (int i=signal_end; i<n; i++)
   {
-    *rms += (*it * *it) / nm;
+    *rms += ((*it - mean) * (*it - mean)) / nm;
     it++;
   }
 
   *rms = sqrt(*rms);
-  *snr = *max / *rms;
+  *snr = (*max - mean) / *rms;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
