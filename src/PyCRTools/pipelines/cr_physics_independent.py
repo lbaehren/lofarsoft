@@ -208,7 +208,7 @@ for station in stations:
         p1 = station.polarization['1']
 
         p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
-        p1["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
+        p1["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ]]
 
         # Start direction fitting loop
         n = 0
