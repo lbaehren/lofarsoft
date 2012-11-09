@@ -141,7 +141,7 @@ class PulseEnvelope(Task):
                 plt.xlabel(r"Time ($\mu s$)")
                 plt.ylabel("Voltage (ADU)")
                 plt.legend()
-                plt.title("Pulse envelope for antenna {0:d}".format(i))
+                plt.title("Pulse envelope for antenna {0:d} {1:f} {2:f}".format(i, self.mean[i], self.rms[i]))
                 plt.savefig(p)
 
                 self.plotlist.append(p)
