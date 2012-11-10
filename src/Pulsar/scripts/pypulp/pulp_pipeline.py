@@ -894,18 +894,20 @@ CLK line will be removed from the parfile!" % (parfile,))
 		Calculates the best number of bins for folding based on the period value from the parfile (parf)
 		and sampling interval (tsamp)
 		"""
-		ephem=parfile.psr_par(parf)
-		nbins=self.power_of_two(int(math.floor(ephem.P0*1000.0/self.sampling)))
-		if nbins > 1024: return 1024
-		else: return nbins
+		try:
+			ephem=parfile.psr_par(parf) # there should not be empty lines in the parfile, otherwise psr_par crashes
+			nbins=self.power_of_two(int(math.floor(ephem.P0*1000.0/self.sampling)))
+			if nbins > 1024: return 1024
+			else: return nbins
+		except: return 256
 
 	def get_psr_dm(self, parf):
 		"""
 		Reads parfile and returns pulsar DM
 		"""
-		ephem=parfile.psr_par(parf)
 		dm=0
 		try:
+			ephem=parfile.psr_par(parf)
 			dm=ephem.DM
 		except: pass
 		return dm
