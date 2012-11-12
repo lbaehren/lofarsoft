@@ -220,6 +220,8 @@ for station in stations:
         pulse_start = pulse_search_window_start + pulse_envelope_bf.meanpos - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
         pulse_end = pulse_search_window_start + pulse_envelope_bf.meanpos + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
 
+        print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
+
         # Start direction fitting loop
         n = 0
         direction_fit_converged = False
