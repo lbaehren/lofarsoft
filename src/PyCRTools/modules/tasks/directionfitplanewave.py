@@ -47,10 +47,6 @@ class DirectionFitPlaneWave(tasks.Task):
                               "Residual delays needed to calibrate the array after correction for known cable delays. Will be subtracted from the measured lags (correced for cable delays) or added to the expected. The array will be updated during iteration",
                               unit="s"),
 
-        delta_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Delta Delays"),
-                           "Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",
-                           unit="s"),
-
         total_delays=sc.p_(lambda self:cr.hArray(float,[self.NAnt],name="Total Delays"),
                            "Total instrumental (residual+cable) delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",
                            unit="s"),
@@ -129,11 +125,11 @@ class DirectionFitPlaneWave(tasks.Task):
             # get residuals
             expectedDelays = srcfind.timeDelaysFromDirection(goodpositions, (az, el)) 
             expectedDelays -= expectedDelays[0]
-            self.delta_delays = goodtimes - expectedDelays
+            self.residual_delays = goodtimes - expectedDelays
             # remove > k-sigma outliers and iterate
-            spread = np.std(self.delta_delays)
+            spread = np.std(self.residual_delays)
             k = self.rmsfactor 
-            goodSubset = np.where(abs(self.delta_delays - np.mean(self.delta_delays)) < k * spread)
+            goodSubset = np.where(abs(self.residual_delays - np.mean(self.residual_delays)) < k * spread)
             # gives subset of 'indicesOfGoodAntennas' that is 'good' after this iteration
             if self.verbose:
                 print 'iteration # %d' %niter
@@ -157,16 +153,15 @@ class DirectionFitPlaneWave(tasks.Task):
         # now redo arrays for full antenna set
         expectedDelays = srcfind.timeDelaysFromDirection(positions.ravel(), (az, el)) # need positions as flat 1-D array
         expectedDelays -= expectedDelays[0] # subtract ref ant
-        self.delta_delays = times - expectedDelays
-        self.delta_delays_mean_history = [np.mean(self.delta_delays)] # comply with DirectionFitTriangles, return as list...
-        self.delta_delays_rms_history = [np.std(self.delta_delays)]
-        self.delta_delays = cr.hArray(self.delta_delays)
+        self.residual_delays = times - expectedDelays
+        self.delta_delays_mean_history = [np.mean(self.residual_delays)] # comply with DirectionFitTriangles, return as list...
+        self.delta_delays_rms_history = [np.std(self.residual_delays)]
+        self.residual_delays = cr.hArray(self.residual_delays)
         
-        self.residual_delays = self.delta_delays
         if self.doplot:
             import matplotlib.pyplot as plt
             plt.figure()
-            plt.plot(self.delta_delays)
+            plt.plot(self.residual_delays)
             plt.figure()
-    #        cr.trerun("PlotAntennaLayout","Delsdays",positions = cr.hArray(goodpositions), colors=cr.hArray(self.delta_delays), sizes=100,title="Residuals for plane wave fit",plotlegend=True)            
+    #        cr.trerun("PlotAntennaLayout","Delsdays",positions = cr.hArray(goodpositions), colors=cr.hArray(self.residual_delays), sizes=100,title="Residuals for plane wave fit",plotlegend=True)            
     #        plt.figure()
