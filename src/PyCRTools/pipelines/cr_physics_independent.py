@@ -215,18 +215,26 @@ for station in stations:
         p0 = station.polarization['0']
         p1 = station.polarization['1']
 
+        p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
+        p1["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ]]
+
+        cr_found = False
         if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
+            cr_found = True
             p0.status = "GOOD"
         else:
             p0.status = "BAD"
 
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
+            cr_found = True
             p1.status = "GOOD"
         else:
             p1.status = "BAD"
 
-        p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
-        p1["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ]]
+        # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
+        # in the LORA direction for at least one of the polarizations
+        if not cr_found:
+            continue
 
         # Start direction fitting loop
         n = 0
