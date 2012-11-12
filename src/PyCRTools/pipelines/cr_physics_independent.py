@@ -34,7 +34,8 @@ parser.add_option("-s", "--station", action="append", help="only process given s
 parser.add_option("-a", "--accept_snr", default = 5, help="accept pulses with snr higher than this")
 parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default = 0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
-parser.add_option("--pulse_search_window_width", default = 2**12, help="width of window around expected location for pulse search")
+parser.add_option("--broad_search_window_width", default = 2**12, help="width of window around expected location for first pulse search")
+parser.add_option("--narrow_search_window_width", default = 2**7, help="width of window around expected location for subsequent pulse search")
 parser.add_option("-l", "--lora_directory", default="./", help="directory containing LORA information")
 parser.add_option("--lora_logfile", default="LORAtime4", help="name of LORA logfile with timestamps")
 
@@ -90,8 +91,8 @@ for station in stations:
 
             (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_time_sec, tbb_time_nsec, tbb_time, tbb_sample_number, blocksize = options.blocksize)
 
-            pulse_search_window_start = sample_number_lora - options.pulse_search_window_width / 2
-            pulse_search_window_end = sample_number_lora + options.pulse_search_window_width / 2
+            pulse_search_window_start = sample_number_lora - options.broad_search_window_width / 2
+            pulse_search_window_end = sample_number_lora + options.broad_search_window_width / 2
 
             print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
         except Exception:
@@ -108,24 +109,6 @@ for station in stations:
 
         # Find RFI and bad antennas
         findrfi = cr.trun("FindRFI", f = f, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
-
-        # Set reference polarization to the one that had the best pulse
-        h0 = 0
-        h1 = 0
-        try:
-            h0 = station.polarization['0']["pulse_height_incoherent"]
-        except:
-            pass
-
-        try:
-            h1 = station.polarization['1']["pulse_height_incoherent"]
-        except:
-            pass
-
-        if h0 > h1:
-            rp = '0'
-        else:
-            rp = '1'
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
@@ -183,10 +166,6 @@ for station in stations:
         # Get antennas positions
         antenna_positions = f["ANTENNA_POSITIONS"]
 
-        # Get pulse window
-        pulse_start = station.polarization[rp]["pulse_start_sample"]
-        pulse_end = station.polarization[rp]["pulse_end_sample"]
-
         # Get first estimate of pulse direction
         pulse_direction = list(event["lora_direction"])
 
@@ -236,6 +215,10 @@ for station in stations:
         # in the LORA direction for at least one of the polarizations
         if not cr_found:
             continue
+
+        # Get pulse window
+        pulse_start = pulse_search_window_start + pulse_envelope_bf.meanpos - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
+        pulse_end = pulse_search_window_start + pulse_envelope_bf.meanpos + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
 
         # Start direction fitting loop
         n = 0
