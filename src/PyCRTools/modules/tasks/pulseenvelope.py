@@ -89,7 +89,7 @@ class PulseEnvelope(Task):
         """Run the task.
         """
 
-        if debug:
+        if self.debug:
             print self
 
         # Resample singal
