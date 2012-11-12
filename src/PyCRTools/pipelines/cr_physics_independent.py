@@ -32,7 +32,7 @@ parser.add_option("-d", "--database", default="cr.db", help="filename of databas
 parser.add_option("-o", "--output-dir", default="./", help="output directory")
 parser.add_option("-l", "--lora_logfile", default="./LORA/LORAtime4", help="name of LORA logfile with timestamps")
 parser.add_option("-s", "--station", action="append", help="only process given station")
-parser.add_option("-a", "--accept_snr", default = 5, help"accept pulses with snr higher than this")
+parser.add_option("-a", "--accept_snr", default = 5, help="accept pulses with snr higher than this")
 parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default = 0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
 parser.add_option("--pulse_search_window_width", default = 2**12, help="width of window around expected location for pulse search")
