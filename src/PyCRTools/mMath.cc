@@ -183,6 +183,49 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Return the maximum difference between values in a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hMaxDiff
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Usage:
+  vec.max() -> maximum value
+*/
+template <class Iter>
+IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
+{
+  HNumber min, max;
+
+  Iter it(vec);
+
+  min = *it;
+  max = *it;
+
+  it++;
+  while (it != vec_end)
+  {
+    if (*it > max)
+    {
+      max = *it;
+    }
+    else if (*it < min)
+    {
+      min = *it;
+    }
+
+    it++;
+  }
+
+  return max - min;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 
 //$DOCSTRING: Return the minimum value in a vector.
 //$COPY_TO HFILE START --------------------------------------------------
