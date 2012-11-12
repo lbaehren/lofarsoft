@@ -34,6 +34,7 @@ parser.add_option("-l", "--lora_logfile", default="./LORA/LORAtime4", help="Name
 parser.add_option("-s", "--station", action="append", help="only process given station")
 parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default = 0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
+parser.add_option("--pulse_search_window_width", default = 2**12, help="width of window around expected location for pulse search")
 
 (options, args) = parser.parse_args()
 
@@ -86,6 +87,11 @@ for station in stations:
             (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile = options.lora_logfile)
         
             (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_time_sec, tbb_time_nsec, tbb_time, tbb_sample_number, blocksize = options.blocksize)
+
+            pulse_search_window_start = sample_number_lora - pulse_search_window_width / 2
+            pulse_search_window_end = sample_number_lora + pulse_search_window_width / 2
+
+            print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
         except Exception:
         
             logging.exception("could not get expected block number from LORA data for station "+station.stationname)
@@ -202,7 +208,7 @@ for station in stations:
 
         beamformed_timeseries /= options.blocksize
 
-        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
+        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, pulse_start = pulse_search_window_start, pulse_end = pulse_search_window_end, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
 
         p0 = station.polarization['0']
         p1 = station.polarization['1']

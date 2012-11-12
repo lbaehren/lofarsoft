@@ -121,9 +121,6 @@ class PulseEnvelope(Task):
         # Shift delays to be relative to reference antenna
         self.delays -= self.delays[self.refant]
 
-        print self.mean
-        print self.rms
-
         if self.save_plots:
 
             # Single pulse envelope of first antenna
