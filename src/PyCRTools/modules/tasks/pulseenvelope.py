@@ -89,6 +89,9 @@ class PulseEnvelope(Task):
         """Run the task.
         """
 
+        # Force update all parameters
+        self.update(True)
+
         if self.debug:
             print self.ws
 
