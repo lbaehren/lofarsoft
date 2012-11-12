@@ -51,8 +51,10 @@ start = time.clock()
 event = crdb.Event(db = db, id = options.id)
 
 # Set the event status
-event.status = "CR_PHYSICS_PROCESSING"
+event.status = "CR_PIPELINE_PROCESSING"
 event.write(recursive=False, parameters=False)
+
+cr_found = False
 
 # Create FFTW plans
 fftplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
@@ -198,22 +200,24 @@ for station in stations:
         p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
         p1["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ]]
 
-        cr_found = False
+        cr_found_in_station = False
         if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
-            cr_found = True
+            cr_found_in_station = True
             p0.status = "GOOD"
         else:
             p0.status = "BAD"
 
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
-            cr_found = True
+            cr_found_in_station = True
             p1.status = "GOOD"
         else:
             p1.status = "BAD"
 
         # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
         # in the LORA direction for at least one of the polarizations
-        if not cr_found:
+        if cr_found_in_station:
+            cr_found = True
+        else:
             continue
 
         # Get pulse window
@@ -366,7 +370,10 @@ plotlist.extend(ldf.plotlist)
 event["plotfiles"] = ["/"+p.lstrip("./") for p in plotlist]
 
 # Update event status
-event.status = "CR_ANALYZED"
+if cr_found:
+    event.status = "CR_FOUND"
+else:
+    event.status = "CR_NOT_FOUND"
 event.write()
 
 print "[cr_physics] completed in {0:.3f} s".format(time.clock() - start)
