@@ -63,7 +63,7 @@ class PulseEnvelope(Task):
             doc = "Pulse maximum." ),
         maxpos = dict( default = lambda self : cr.hArray(int, self.nantennas), output = True,
             doc = "Position of pulse maximum relative to *pulse_start*." ),
-        meanpos = dict( default = lambda self : int(cr.hMean(cr.hArray([self.maxpos[i] for i in self.antennas_with_significant_pulses]))),
+        meanpos = dict( default = lambda self : int(cr.hMean(cr.hArray([self.maxpos[i] for i in self.antennas_with_significant_pulses]))[0]),
             doc = "Mean pulse position (in samples)."),
         maxdiff = dict( default = lambda self : cr.hMaxDiff(cr.hArray([self.maxpos[i] for i in self.antennas_with_significant_pulses])),
             doc = "Maximum spread in position (in samples)."),
