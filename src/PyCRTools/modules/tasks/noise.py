@@ -43,6 +43,9 @@ class Noise(Task):
         """Run the task.
         """
 
+        # Force recalculation of all task parameters
+        self.update(True)
+
         # Convert data to numpy
         s = self.timeseries_data.toNumpy()
 
