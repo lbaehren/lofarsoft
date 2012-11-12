@@ -88,8 +88,8 @@ for station in stations:
         
             (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_time_sec, tbb_time_nsec, tbb_time, tbb_sample_number, blocksize = options.blocksize)
 
-            pulse_search_window_start = sample_number_lora - pulse_search_window_width / 2
-            pulse_search_window_end = sample_number_lora + pulse_search_window_width / 2
+            pulse_search_window_start = sample_number_lora - options.pulse_search_window_width / 2
+            pulse_search_window_end = sample_number_lora + options.pulse_search_window_width / 2
 
             print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
         except Exception:
