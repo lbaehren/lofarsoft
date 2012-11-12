@@ -81,11 +81,16 @@ class PulseEnvelope(Task):
             doc = "List of plots" ),
         plot_antennas = dict( default = lambda self : range(self.nantennas),
             doc = "Antennas to create plots for." ),
+        debug = dict( default = False,
+            doc = "Print debug information." ),
     )
 
     def run(self):
         """Run the task.
         """
+
+        if debug:
+            print self
 
         # Resample singal
         cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.window_start:self.window_end])
