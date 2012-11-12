@@ -119,7 +119,6 @@ class FindRFI(Task):
 #            nblocks = min(self.nofblocks, nblocks) # limit to # blocks given in params
         if self.verbose:
             print 'Processing %d blocks of length %d' % (nblocks, self.blocksize)
-               
         incphasemean = cr.hArray(complex, dimensions = self.fft_data) # this leaks memory, per Task instance (?)
         incphase = cr.hArray(complex, dimensions = incphasemean)
         
@@ -172,6 +171,7 @@ class FindRFI(Task):
         if nblocks == 0:
             print 'Error: all blocks have been skipped!'
             # may want to exit here
+        avgspectrum /= float(nblocks) # normalize
         
         incPhaseRMS = cr.hArray(float, dimensions = incphasemean)
 #        incPhaseAvg = hArray(float, dimensions = incphasemean)
@@ -212,13 +212,27 @@ class FindRFI(Task):
         #cr.hFFTWExecutePlan(self.fft_data, self.timeseries_data_resampled, self.fftwplan)
         
         # Get baseline per antenna of the average spectrum
-#        calcbaseline1 = trerun("CalcBaseline",1,averagespectrum_good_antennas,pardict=par,invert=False,HanningUp=False,normalize=False,doplot=0)
+#        pardict = dict(plot_finish = Pause, 
+#                       FitBaseline = dict(ncoeffs=80,numin=30,numax=85,fittype="POLY",splineorder=3),
+#                       CalcBaseline = dict(baseline=False) ) # Make sure baseline is recreated when the task is run a second time
+
+#        print "---> Fit a baseline to the average spectrum"
+#        avgspectrum.xvalues = self.f["FREQUENCY_DATA"]
+#        fitbaseline = cr.trerun("FitBaseline","",avgspectrum, extendfit=0.5,pardict=pardict, frequency = avgspectrum.xvalues, doplot=0)
+
+#        calcbaseline1 = cr.trerun("CalcBaseline",1, avgspectrum,pardict = pardict,invert=False,HanningUp=False,normalize=False,doplot=0)
 #        amplitudes=hArray(copy=calcbaseline1.baseline)
 
         #Get a measure of the total power (actually sqrt thereof)
         #received in each antenna (without RFI) and in the entire
         #station.
-
+        
+        # Sum up power for avg spectrum
+        # Subtract dirty channels
+        antennas_power = cr.hArray(avgspectrum[...].sum() )
+        print antennas_power
+        antennas_power[...] -= cr.hArray(avgspectrum[..., cr.hArray(self.dirty_channels)])
+        print antennas_power
 #        antennas_power=hArray(amplitudes[...].mean())
 
         if self.save_plots:
