@@ -209,6 +209,7 @@ for station in stations:
 
         beamformed_timeseries /= options.blocksize
 
+        # Look for significant pulse in beamformed signal
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, pulse_start = pulse_search_window_start, pulse_end = pulse_search_window_end, nsigma = options.accept_snr, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
 
         p0 = station.polarization['0']
