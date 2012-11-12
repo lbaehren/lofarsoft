@@ -110,7 +110,7 @@ for station in stations:
         f["BLOCK"] = block_number_lora
 
         # Find RFI and bad antennas
-        findrfi = cr.trun("FindRFI", f = f, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-", plotlist = [], nofblocks = 10)
+        findrfi = cr.trun("FindRFI", f = f, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-", plotlist = [], nofblocks = 10, save_plots = True)
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
@@ -216,8 +216,12 @@ for station in stations:
         # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
         # in the LORA direction for at least one of the polarizations
         if cr_found_in_station:
+            station.status = "GOOD"
+
             cr_found = True
         else:
+            station.status = "BAD"
+
             continue
 
         # Get pulse window
