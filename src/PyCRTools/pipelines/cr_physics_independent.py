@@ -314,7 +314,7 @@ for station in stations:
         p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
         p["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
 
-        p.status = "OK"
+        p.status = "GOOD"
         p.write()
 
     except Exception:
