@@ -187,8 +187,8 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMaxDiff
 //-----------------------------------------------------------------------
-#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HNumber)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_FUNCDEF  (HFPP_TEMPLATED_TYPE)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(vec)()("Numeric input vector")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -200,7 +200,7 @@ IterValueType HFPP_FUNC_NAME(const Iter vec,const Iter vec_end)
 template <class Iter>
 IterValueType HFPP_FUNC_NAME(const Iter vec, const Iter vec_end)
 {
-  HNumber min, max;
+  IterValueType min, max;
 
   Iter it(vec);
 
