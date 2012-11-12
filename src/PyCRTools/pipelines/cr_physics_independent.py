@@ -34,6 +34,7 @@ parser.add_option("-s", "--station", action="append", help="only process given s
 parser.add_option("-a", "--accept_snr", default = 5, help="accept pulses with snr higher than this in the beamformed timeseries")
 parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default = 0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
+parser.add_option("--maximum_spread_delays", default = 1e-8, help="maximum remaining spread in delays from a station")
 parser.add_option("--broad_search_window_width", default = 2**12, help="width of window around expected location for first pulse search")
 parser.add_option("--narrow_search_window_width", default = 2**7, help="width of window around expected location for subsequent pulse search")
 parser.add_option("-l", "--lora_directory", default="./", help="directory containing LORA information")
@@ -256,6 +257,11 @@ for station in stations:
 
             pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
+            # Check if fitting was succesful 
+            if direction_fit_plane_wave.fit_failed:
+                print "direction fit failed"
+                break
+
             # Check for convergence of iterative direction fitting loop
             if n > 0:
                 angular_diff = np.rad2deg(tools.spaceAngle( np.deg2rad((90-last_direction[1])), np.deg2rad((90-last_direction[0])), np.deg2rad((90-pulse_direction[1])), np.deg2rad((90-pulse_direction[0]))))
@@ -270,16 +276,14 @@ for station in stations:
                 print "fit converged"
                 station["crp_pulse_direction"] = pulse_direction
                 break
-
+                
+            # Check if maximum number of iterations is reached (will avoid infinite loop)
             if n > options.maximum_nof_iterations:
                 print "maximum number of iterations reached"
                 station["crp_pulse_direction"] = pulse_direction
                 break
-
-            if direction_fit_plane_wave.fit_failed:
-                print "direction fit failed"
-                break
-
+        
+                
         # Project polarization onto x,y,z frame
         xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, options.blocksize))
         cr.hProjectPolarizations(xyz_timeseries_data[0:3*nantennas:3,...], xyz_timeseries_data[1:3*nantennas:3,...], xyz_timeseries_data[2:3*nantennas:3,...], timeseries_data[0:2*nantennas:2,...], timeseries_data[1:2*nantennas:2,...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
@@ -309,7 +313,20 @@ for station in stations:
         p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
         p["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
 
-        p.status = "GOOD"
+
+        if direction_fit_plane_wave.fit_failed:
+            p.status = "BAD"
+            # Add reason that fit failed
+            print "Marked as BAD as plane wave fit failed"
+            
+        elif np.std(direction_fit_plane_wave.residual_delays.toNumpy()) > options.maximum_spread_delays:
+            p.status = "BAD"
+            # Add reason that quality cut for delay spread was applied
+            print "Marked as BAD as spread on residual delays ", np.std(direction_fit_plane_wave.residual_delays.toNumpy()), "exceeds given option"
+                
+        else:
+            p.status = "GOOD"
+                    
         p.write()
 
     except Exception:
