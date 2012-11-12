@@ -30,12 +30,13 @@ parser.add_option("-i", "--id", type="int", help="event ID", default=1)
 parser.add_option("-b", "--blocksize", type="int", default=2**16)
 parser.add_option("-d", "--database", default="cr.db", help="filename of database")
 parser.add_option("-o", "--output-dir", default="./", help="output directory")
-parser.add_option("-l", "--lora_logfile", default="./LORA/LORAtime4", help="name of LORA logfile with timestamps")
 parser.add_option("-s", "--station", action="append", help="only process given station")
 parser.add_option("-a", "--accept_snr", default = 5, help="accept pulses with snr higher than this")
 parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default = 0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
 parser.add_option("--pulse_search_window_width", default = 2**12, help="width of window around expected location for pulse search")
+parser.add_option("-l", "--lora_directory", default="./", help="directory containing LORA information")
+parser.add_option("--lora_logfile", default="LORAtime4", help="name of LORA logfile with timestamps")
 
 (options, args) = parser.parse_args()
 
@@ -85,8 +86,8 @@ for station in stations:
         try:
             logging.debug("reading LORA data")
         
-            (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile = options.lora_logfile)
-        
+            (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile = options.lora_directory + options.lora_logfile)
+
             (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_time_sec, tbb_time_nsec, tbb_time, tbb_sample_number, blocksize = options.blocksize)
 
             pulse_search_window_start = sample_number_lora - options.pulse_search_window_width / 2
@@ -187,7 +188,7 @@ for station in stations:
         pulse_end = station.polarization[rp]["pulse_end_sample"]
 
         # Get first estimate of pulse direction
-        pulse_direction = station.polarization[rp]["pulse_direction"]
+        pulse_direction = list(event["lora_direction"])
 
         # Beamform in LORA direction for both polarizations
         fft_data_0 = cr.hArray(complex, dimensions = (nantennas, options.blocksize / 2 + 1))
