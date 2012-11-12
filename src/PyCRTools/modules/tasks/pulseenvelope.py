@@ -81,80 +81,53 @@ class PulseEnvelope(Task):
             doc = "List of plots" ),
         plot_antennas = dict( default = lambda self : range(self.nantennas),
             doc = "Antennas to create plots for." ),
-        debug = dict( default = False,
-            doc = "Print debug information." ),
     )
 
     def run(self):
         """Run the task.
         """
 
-        # Force update all parameters
+        # Force recalculation of all task parameters
         self.update(True)
 
-        if self.debug:
-            print self.ws
-
         # Resample singal
-        if self.debug:
-            print "resampling"
         cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.window_start:self.window_end])
 
         # Compute FFT
-        if self.debug:
-            print "FFT"
         cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
 
         # Apply Hilbert transform
-        if self.debug:
-            print "Hilbert transform"
         cr.hApplyHilbertTransform(self.fft_data[...])
 
         # Get inverse FFT
-        if self.debug:
-            print "inverse FFT"
         cr.hFFTWExecutePlan(self.hilbertt[...], self.fft_data[...], self.ifftwplan)
         self.hilbertt /= self.window_width_resampled
 
         # Get envelope
-        if self.debug:
-            print "get envelope"
         self.envelope.fill(0)
         cr.hSquareAdd(self.envelope, self.hilbertt)
         cr.hSquareAdd(self.envelope, self.timeseries_data_resampled)
         cr.hSqrt(self.envelope)
 
         # Find signal to noise ratio, maximum, position of maximum and rms
-        if self.debug:
-            print "find max snr"
         cr.hMaxSNR(self.snr[...], self.mean[...], self.rms[...], self.peak_amplitude[...], self.maxpos[...], self.envelope[...], (self.pulse_start - self.window_start) * int(self.resample_factor), (self.pulse_end - self.window_start) * int(self.resample_factor))
 
         # Convert to delay
-        if self.debug:
-            print "converting to delay"
         self.delays[:] = self.maxpos[:]
         self.delays /= (self.sampling_frequency * self.resample_factor)
 
         # Calculate pulse maximum in seconds since start of datafile
-        if self.debug:
-            print "calculating pulse maximum"
         self.pulse_maximum_time[:] = self.window_start # Number of samples before start of upsampled block
         self.pulse_maximum_time /= self.sampling_frequency # Converted to seconds
         self.pulse_maximum_time += self.delays # Add the number of seconds of the pulse in the upsampled block
 
         # Shift delays to be relative to reference antenna
-        if self.debug:
-            print "shifting delays"
         self.delays -= self.delays[self.refant]
 
         if self.save_plots:
-            if self.debug:
-                print "generating plots"
 
             # Single pulse envelope of first antenna
             for i in self.plot_antennas:
-                if self.debug:
-                    print i
                 plt.clf()
 
                 s = self.timeseries_data_resampled.toNumpy()

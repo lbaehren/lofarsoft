@@ -294,7 +294,7 @@ for station in stations:
         stokes_parameters = cr.trun("StokesParameters", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10)
 
         # Get pulse strength
-        pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-", plotlist = [], debug = True)
+        pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-", plotlist = [])
 
         # Do noise characterization
         noise = cr.trun("Noise", timeseries_data = xyz_timeseries_data, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
