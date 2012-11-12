@@ -90,7 +90,7 @@ class PulseEnvelope(Task):
         """
 
         if self.debug:
-            print self
+            print self.ws
 
         # Resample singal
         cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.window_start:self.window_end])
