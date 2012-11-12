@@ -30,8 +30,9 @@ parser.add_option("-i", "--id", type="int", help="event ID", default=1)
 parser.add_option("-b", "--blocksize", type="int", default=2**16)
 parser.add_option("-d", "--database", default="cr.db", help="filename of database")
 parser.add_option("-o", "--output-dir", default="./", help="output directory")
-parser.add_option("-l", "--lora_logfile", default="./LORA/LORAtime4", help="Name of LORA logfile with timestamps.")
+parser.add_option("-l", "--lora_logfile", default="./LORA/LORAtime4", help="name of LORA logfile with timestamps")
 parser.add_option("-s", "--station", action="append", help="only process given station")
+parser.add_option("-a", "--accept_snr", default = 5, help"accept pulses with snr higher than this")
 parser.add_option("--maximum_nof_iterations", default = 5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default = 0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
 parser.add_option("--pulse_search_window_width", default = 2**12, help="width of window around expected location for pulse search")
@@ -208,10 +209,20 @@ for station in stations:
 
         beamformed_timeseries /= options.blocksize
 
-        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, pulse_start = pulse_search_window_start, pulse_end = pulse_search_window_end, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
+        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, pulse_start = pulse_search_window_start, pulse_end = pulse_search_window_end, nsigma = options.accept_snr, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
 
         p0 = station.polarization['0']
         p1 = station.polarization['1']
+
+        if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
+            p0.status = "GOOD"
+        else:
+            p0.status = "BAD"
+
+        if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
+            p1.status = "GOOD"
+        else:
+            p1.status = "BAD"
 
         p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ]]
         p1["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ]]
