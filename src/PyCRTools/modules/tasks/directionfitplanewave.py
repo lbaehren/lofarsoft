@@ -103,15 +103,17 @@ class DirectionFitPlaneWave(tasks.Task):
             goodSubset = np.arange(len(times)) # start with all 'good'
         
         goodcount = len(goodSubset)
-        if goodcount < 3:
-            print "ERROR: too few good antennas for direction fit."
-            self.meandirection = (0, 0, 1)
-            self.fit_failed = True
-            return
 
         niter = 0
         while True:
             niter += 1
+            # if fit only remains with three antennas (or less) it should not be trusted as it always has a solution (fails)
+            if goodcount < 3:
+                print "ERROR: too few good antennas for direction fit."
+                self.meandirection = (0, 0, 1)
+                self.fit_failed = True
+                break
+
             goodpositions = positions[indicesOfGoodAntennas].ravel()
             goodtimes = times[indicesOfGoodAntennas]
             (az, el) = srcfind.directionForHorizontalArray(goodpositions, goodtimes)
@@ -135,6 +137,7 @@ class DirectionFitPlaneWave(tasks.Task):
                 print 'iteration # %d' %niter
                 print 'az = %f, el = %f' % (az*rad2deg, el*rad2deg)
                 print 'good count = %d' % goodcount
+            # if the next iteration has the same number of good antenneas the while loop will be terminated   
             if len(goodSubset[0]) == goodcount:
                 break
             else:                
