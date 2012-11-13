@@ -211,15 +211,18 @@ class FindRFI(Task):
         flagwidth = 1 + self.blocksize / 4096 
         dirty_channels = dirtyChannelsFromPhaseSpreads(medians, flagwidth = flagwidth, testplots=False)
         # if a frequency range was given, flag everything outside the range as 'dirty'
+        
         if self.freq_range:
-            
-            alldirtychannels = []
-            for i in range(len(freqs)):
-                if (i in dirty_channels) or not (self.freq_range[0] < freqs[i] < self.freq_range[1]):
-                    alldirtychannels.append(i)
+            alldirtychannels = [int(ch) for ch in range(len(freqs)) if (ch in dirty_channels) or not (self.freq_range[0] < freqs[ch] < self.freq_range[1])]
+        else:
+            alldirtychannels = [int(ch) for ch in dirty_channels]
+#            alldirtychannels = []
+#            for i in range(len(freqs)):
+#                if (i in dirty_channels) or not (self.freq_range[0] < freqs[i] < self.freq_range[1]):
+#                    alldirtychannels.append(i)
                 # cleaner solution?
-            dirty_channels = alldirtychannels
-        self.dirty_channels = dirty_channels
+#            dirty_channels = alldirtychannels
+        self.dirty_channels = alldirtychannels
         # Get cleaned spectrum per antenna
         cleanedspectrum = cr.hArray(copy = avgspectrum)
 #        import pdb; pdb.set_trace()
