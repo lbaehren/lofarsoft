@@ -130,7 +130,7 @@ for station in stations:
         spectral_window = [i for (i, nu) in enumerate(frequencies) if nu < 30. or nu > 80.]
         
         # Flag dirty channels (from RFI excission)
-        fft_data[..., spectral_window]
+        fft_data[..., spectral_window] = 0
         fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
 
         # Apply calibration delays
