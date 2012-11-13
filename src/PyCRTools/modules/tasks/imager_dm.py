@@ -125,7 +125,7 @@ class ImagerDM(Task):
 
         # Get steps corresponding to mask
         mask = self.mask
-        step = cr.hArray(int, cr.hCountZero(mask))
+        step = cr.hArray(int, list(cr.hCountZero(mask)))
         cr.hMaskToStep(step, mask)
 
         start = time.time()
