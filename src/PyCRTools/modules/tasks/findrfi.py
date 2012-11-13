@@ -112,17 +112,10 @@ class FindRFI(Task):
         if self.filename:
             self.f = cr.open(self.filename, blocksize = self.blocksize) # assume blocksize has been set as well
             
-        #print self.fft_data
-
         nblocks = self.f["MAXIMUM_READ_LENGTH"] / self.blocksize
         if self.nofblocks > 0:
             nblocks = min(nblocks, self.nofblocks) # cap to maximum read length
         
-#        nblocks = min(f["DATA_LENGTH"]) / self.blocksize # Why is this not working?
-#        nblocks -= 5 # HACK -- why needed?
-
-#        if self.nofblocks:
-#            nblocks = min(self.nofblocks, nblocks) # limit to # blocks given in params
         if self.verbose:
             print 'Processing %d blocks of length %d' % (nblocks, self.blocksize)
         incphasemean = cr.hArray(complex, dimensions = self.fft_data) # this leaks memory, per Task instance (?)
@@ -151,8 +144,7 @@ class FindRFI(Task):
             # difference!
             # But no window makes the cleaning less effective... :(
             spectrum = self.fft_data / self.f["BLOCKSIZE"] # normalize back to ADC units
-#            magspectrum[..., 0] = 0.0 # Want to do that here? Debug / test phase handling / div by 0
-#            magspectrum[..., 1] = 0.0
+
             magspectrum.copy(spectrum)
             magspectrum.abs()
 #            magspectrum += 1e-9
@@ -181,14 +173,16 @@ class FindRFI(Task):
         if nblocks == 0:
             print 'Error: all blocks have been skipped!'
             # may want to exit here
+
+        freqs = self.f["FREQUENCY_DATA"].toNumpy() * 1e-6    
         avgspectrum /= float(nblocks) # normalize
         avgspectrum[..., 0] = 0.0
 #        avgspectrum[..., 1] = 0.0 # zero out DC and 1st harmonic (why is 1st harmonic so strong?)
+        # No 1st harmonic cut, probably a Hanning window artifact... preserve power.
         
         self.average_spectrum = cr.hArray(avgspectrum) # hArray to output param
         
         incPhaseRMS = cr.hArray(float, dimensions = incphasemean)
-#        incPhaseAvg = hArray(float, dimensions = incphasemean)
         self.phase_average = cr.hArray(float, dimensions = incphasemean)
         
         cr.hComplexToPhase(self.phase_average, incphasemean)
@@ -215,10 +209,17 @@ class FindRFI(Task):
         # Get 'dirty channels' for output, and to show in plot
         # Extend dirty channels to both sides, especially when having large blocksizes
         flagwidth = 1 + self.blocksize / 4096 
-        dirty_channels = dirtyChannelsFromPhaseSpreads(medians, freq_range = self.freq_range, flagwidth = flagwidth, testplots=False)
+        dirty_channels = dirtyChannelsFromPhaseSpreads(medians, flagwidth = flagwidth, testplots=False)
         # if a frequency range was given, flag everything outside the range as 'dirty'
-        
-
+        if self.freq_range:
+            
+            alldirtychannels = []
+            for i in range(len(freqs)):
+                if (i in dirty_channels) or not (self.freq_range[0] < freqs[i] < self.freq_range[1]):
+                    alldirtychannels.append(i)
+                # cleaner solution?
+            dirty_channels = alldirtychannels
+        self.dirty_channels = dirty_channels
         # Get cleaned spectrum per antenna
         cleanedspectrum = cr.hArray(copy = avgspectrum)
 #        import pdb; pdb.set_trace()
@@ -260,8 +261,8 @@ class FindRFI(Task):
 #        total_power = 2 * cr.hArray(avgspectrum[...].sum() )
         
         self.antennas_cleaned_power = cleaned_power
-        print self.antennas_cleaned_power
-        print ' --- '
+#        print self.antennas_cleaned_power
+#        print ' --- '
 #        print total_power
 #        total_power.sqrt()
 #        print total_power
@@ -277,13 +278,12 @@ class FindRFI(Task):
             # Average spectrum (uncleaned)
             plt.clf()
             # plot dirty channels into spectrum plot, in red
-            x = self.f["FREQUENCY_DATA"].toNumpy() * 1e-6
 #            plt.figure()
-            plt.plot(x, logspectrum, c='b')
+            plt.plot(freqs, logspectrum, c='b')
             dirtyspectrum = np.zeros(len(logspectrum))
             dirtyspectrum += np.float('nan') # min(logspectrum)
             dirtyspectrum[self.dirty_channels] = logspectrum[self.dirty_channels]
-            plt.plot(x, dirtyspectrum, 'x', c = 'r', markersize=8)
+            plt.plot(freqs, dirtyspectrum, 'x', c = 'r', markersize=8)
             plt.title('Median-average spectrum of all antennas, with flagging')
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('log-spectral power [adc units]')
@@ -301,7 +301,7 @@ class FindRFI(Task):
 
             ## Insert plot code here
             log_cleanedspectrum = np.log(median_cleaned_spectrum)
-            plt.plot(x, log_cleanedspectrum, c = 'b')
+            plt.plot(freqs, log_cleanedspectrum, c = 'b')
             plt.title('Median-average spectrum of all antennas, cleaned')
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('log-spectral power [adc units]')
