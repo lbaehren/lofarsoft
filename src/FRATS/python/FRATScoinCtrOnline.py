@@ -5,7 +5,10 @@ import struct
 import time
 import struct
 import numpy as np
-import bfdata as bf
+try:
+    import bfdata as bf
+except ImportError: 
+    from pycrtools import bfdata as bf
 import signal,sys
 import os
 import glob
@@ -21,11 +24,11 @@ parser.add_option("-f","--file",type="string")
 parser.add_option("-w","--window",type="int",default=50)
 parser.add_option("--coinNr",type="int",default=3)
 parser.add_option("--minTriggerDM",type="float",default=0.0)
-parser.add_option("--minDM",type="float",default=2.0)
+parser.add_option("--minDM",type="float",default=5.0)
 parser.add_option("--DMdelay",type="float",default=65000)
 parser.add_option("--nstreams",type="int",default=8)
 parser.add_option("-l","--logfile",type="string")
-parser.add_option("-t","--threshold",type="float",default=5.0)
+parser.add_option("-t","--threshold",type="float",default=5.5)
 parser.add_option("-m","--maxlength",type="int",default=1024)
 parser.add_option("--nosend",action="store_true",dest="nosend",default="False")
 
@@ -61,7 +64,7 @@ mydir=os.path.split(outfilename)[0]
 
 nosend=options.nosend
 if options.logfile:
-    logfile=open(options.logfile,'a')
+    logfile=open(options.logfile,'w')
     logfile.writelines(["new observation started at "+str(time.time())+" "+str(time.strftime("%D %T"))+"\n", \
     "settings: "+" n="+str(n)+ " sa="+str(sa)+" DMdelay="+str(DMdelay)+" w="+str(halfwindow)+" thr="+str(threshold)+"\n"])
     logging=True
@@ -212,14 +215,14 @@ while True:
                 print programname,"L"+str(msg[9]),'SAP00'+str(msg[10]),0,DM,DM,startblock,nblocks
                 print "fa.plotTimeseries(*fa.getTimeseriesPar(\""+mydir+"\",DMvalue="+DMstr+"),integrationlength="+str(msg[3])+",centraltime="+str(msg[0])+",window="+str(par['sa'])+",plotThreshold=True)" 
                 if logging:
-                    logfile.writelines(['Trigger found, not sending='+str(nosend)+', DM='+str(msg[11])+' time='+str(msg[0])+' / '+str(msg[1]) \
+                    logfile.writelines(['Trigger found at'+str(time.time())+' , not sending='+str(nosend)+', DM='+str(msg[11])+' time='+str(msg[0])+' / '+str(msg[1]) \
                 +'s'+str(msg[2])+'ns + coinStreams='+str(mysum)+' strength='+str(msg[8])+' l='+str(msg[3])+' in streams '+ \
                 str(np.arange(nstreams)[trmatrix[DMindex,length,timeindex]|trmatrix[DMindex,length,timeindex+t_offset]])+'\n'])
                     logfile.writelines([str(msg)+'\n'])
                     logfile.writelines([programname+" L"+str(msg[9])+" SAP00"+str(msg[10])+" 0 "+DMstr+" "+DMstr+" "+str(startblock)+" "+str(nblocks)+"\n"])
                     logfile.writelines(["fa.plotTimeseries(*fa.getTimeseriesPar(\""+mydir+"\",DMvalue="+DMstr+"),integrationlength="+str(msg[3])+",centraltime="+str(msg[0])+",window="+str(par['sa'])+",plotThreshold=True)"+"\n"]) 
                     logfile.flush()
-                if True:#not nosend:
+                if True:# and msg[10]>0:#not nosend:
                    print "sending time only to ",sendadress,port2
                    sec=msg[1]
                    nsec=msg[2]

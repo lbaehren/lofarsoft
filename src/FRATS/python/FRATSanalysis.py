@@ -433,7 +433,7 @@ def obsParameters(directory='',file=None):
                             newkeyword=False
     for k in rangekeywords:
         if k in parameters.keys():
-            parameters[k[0:-5]]=np.arange(parameters[k][0],parameters[k][2],parameters[k][1])
+            parameters[k[0:-5]]=np.arange(parameters[k][0],parameters[k][2]+0.0001,parameters[k][1])
     return parameters
 
 def derivedParameters(par,DM=DM):
@@ -1153,11 +1153,12 @@ def RFIcalcBadSamples(data,cutlevel,subdiv=4,reqsubdiv=2):
 
 def getTimeseriesPar(directory,DMindex=0,DMvalue=False):
     par=obsParameters(directory) 
-    DMvalue=str(DMvalue)
+    if DMvalue:
+        DMvalue=str(DMvalue)
     
     DM=par['DM'][DMindex] 
     if DMvalue:
-        DM=[a for a in par['DM'] if np.abs(a-float(DMvalue.strip('_'))) < 0.5*np.min(np.diff(par['DM']))][0]
+        DM=[a for a in par['DM'] if np.abs(a-float(DMvalue.strip('_'))) < 0.5*np.min(np.diff(par['DM'])[np.diff(par['DM'])>0])][0]
     derivedParameters(par,DM)
 #    timeseries=loadTimeseries(directory,str(round(DM,2)))
     timeseries=loadTimeseries(directory,DMvalue)
