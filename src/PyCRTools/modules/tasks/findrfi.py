@@ -27,8 +27,11 @@ def dirtyChannelsFromPhaseSpreads(spreads, flagwidth = 3, testplots=False):
     
     # If needed, the dirty channels have to be 'fattened' to both sides to also cut the flanks 
     # of the spectral lines...
+    # This holds especially when processing large blocks (high spectral resolution) in not-so-long datasets
+    # e.g. 10 blocks of length 65536.
+    # Currently we use a flagwidth of 1 + blocksize / 4096.
     
-    # extend dirty channels to width 'flagwidth' (odd number needed ), to also capture the flanks of 
+    # extend dirty channels to width 'flagwidth' (odd number needed), to also capture the flanks of 
     # spectral lines
     extDirtyChannels = np.zeros(length)
     sideExtension = (flagwidth - 1) / 2
@@ -73,21 +76,24 @@ class FindRFI(Task):
         nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
 #        timeseries_data = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.blocksize)),
 #            doc = "Timeseries data." ),
+        freq_range = dict( default = None, doc = "Frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)" ), 
         fft_data = dict( default = lambda self : cr.hArray(complex, dimensions=(self.nantennas, self.nfreq)),
             doc = "Fourier transform of timeseries_data_resampled." ),
         #fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, 1, 1, 1, cr.fftw_flags.MEASURE),
-        #    doc = "Forward plan for FFTW, by default use a plan that works over all antennas at once and is measured for spead because this is applied many times." ),
+        #    doc = "Forward plan for FFTW, by default use a plan that works over all antennas at once and is measured for speed because this is applied many times." ),
         bad_antennas = dict( default = [],
             doc = "Antennas found to be bad.", output = True ),
         good_antennas = dict( default = lambda self : [name for name in self.f["SELECTED_DIPOLES"] if name not in self.bad_antennas],
             doc = "Antennas found to be good.", output = True ),
         dirty_channels = dict( default = [],
             doc = "List of channels found to contain RFI", output = True ),
-        average_spectrum = dict( default = None, doc = "Average power spectrum, in ADC units, uncleaned (raw data). Median over antennas is taken; dimension = [nfreq].", output = True ),
-        cleaned_spectrum = dict( default = None, doc = "Cleaned power spectrum. Equals average_spectrum, but with dirty_channels set to zero.", output = True ),
+        median_average_spectrum = dict( default = None, doc = "Average power spectrum, in ADC units, uncleaned (raw data). Median over antennas is taken; dimension = [nfreq].", output = True ),
+        median_cleaned_spectrum = dict( default = None, doc = "Cleaned power spectrum. Equals average_spectrum, but with dirty_channels set to zero.", output = True ),
+        average_spectrum = dict( default = None, doc = "Average power spectrum (ADC units) per antenna, uncleaned. Dim = [nantennas, nfreq]", output = True ),
+        cleaned_spectrum = dict( default = None, doc = "Cleaned power spectrum per antenna.", output = True ),
         phase_average = dict( default = None, doc = "Average phases per antenna, per frequency. Can be passed to the RF calibration Task. Dimension = nantennas x nfreq", output = True ),
         median_phase_spreads = dict( default = None, doc = "Median over antennas, of the phase spread measure from all blocks. Dimension = [nfreq]", output = True ),
-        
+        antennas_cleaned_power = dict(default = None, doc = "Cleaned power (sum of squares) from cleaned spectrum, per antenna. ", output = True ),
         save_plots = dict( default = False,
             doc = "Store plots" ),
         plot_prefix = dict( default = "",
@@ -139,7 +145,11 @@ class FindRFI(Task):
 #            x = f["TIMESERIES_DATA"]
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
-            self.f.getFFTData(self.fft_data, block = i, hanning = True)
+            self.f.getFFTData(self.fft_data, block = i, hanning = True) 
+            # Note: No hanning window as we want to measure power from spectrum
+            # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
+            # difference!
+            # But no window makes the cleaning less effective... :(
             spectrum = self.fft_data / self.f["BLOCKSIZE"] # normalize back to ADC units
 #            magspectrum[..., 0] = 0.0 # Want to do that here? Debug / test phase handling / div by 0
 #            magspectrum[..., 1] = 0.0
@@ -172,6 +182,10 @@ class FindRFI(Task):
             print 'Error: all blocks have been skipped!'
             # may want to exit here
         avgspectrum /= float(nblocks) # normalize
+        avgspectrum[..., 0] = 0.0
+#        avgspectrum[..., 1] = 0.0 # zero out DC and 1st harmonic (why is 1st harmonic so strong?)
+        
+        self.average_spectrum = cr.hArray(avgspectrum) # hArray to output param
         
         incPhaseRMS = cr.hArray(float, dimensions = incphasemean)
 #        incPhaseAvg = hArray(float, dimensions = incphasemean)
@@ -183,7 +197,7 @@ class FindRFI(Task):
         incPhaseRMS *= -1 / float(nblocks)
         incPhaseRMS += 1
         incPhaseRMS.sqrt()
-        incPhaseRMS *= np.sqrt(2.0) # check...
+        incPhaseRMS *= np.sqrt(2.0) # check...???
         phaseRMS = incPhaseRMS
                 
         x = phaseRMS.toNumpy()
@@ -195,19 +209,31 @@ class FindRFI(Task):
         
         # Get average spectrum, median over antennas for every freq channel
         y = np.median(avgspectrum.toNumpy(), axis=0)        
-        self.average_spectrum = cr.hArray(y)
+        self.median_average_spectrum = cr.hArray(y)
         logspectrum = np.log(y)
 
         # Get 'dirty channels' for output, and to show in plot
         # Extend dirty channels to both sides, especially when having large blocksizes
         flagwidth = 1 + self.blocksize / 4096 
-        self.dirty_channels = dirtyChannelsFromPhaseSpreads(medians, flagwidth = flagwidth, testplots=False)
+        dirty_channels = dirtyChannelsFromPhaseSpreads(medians, freq_range = self.freq_range, flagwidth = flagwidth, testplots=False)
+        # if a frequency range was given, flag everything outside the range as 'dirty'
+        
 
-        # Get cleaned spectrum
-        cleanedspectrum = np.copy(y)
-        cleanedspectrum[self.dirty_channels] = np.float('nan')
-        self.cleaned_spectrum = cr.hArray(cleanedspectrum)
+        # Get cleaned spectrum per antenna
+        cleanedspectrum = cr.hArray(copy = avgspectrum)
+#        import pdb; pdb.set_trace()
+        cleanedspectrum[..., cr.hArray(self.dirty_channels)] = 0.0 # seems not to work with hArrays as cleanedspectrum[..., cr.hArray(self.dirty_channels)] = 0.0
+#        plt.figure()
+#        plt.plot(np.log(cleanedspectrum.toNumpy()[0]))
+#        plt.plot(np.log(cleanedspectrum.toNumpy()[20]))
+        self.cleaned_spectrum = cleanedspectrum
+        #cleanedspectrum[self.dirty_channels] = np.float('nan')
+#        self.cleaned_spectrum = cr.hArray(cleanedspectrum)
 
+        # Get median cleaned spectrum (over all antennas)
+        median_cleaned_spectrum = np.copy(y)
+        median_cleaned_spectrum[self.dirty_channels] = 0.0
+        self.median_cleaned_spectrum = cr.hArray(median_cleaned_spectrum)
         # Compute FFT
         #cr.hFFTWExecutePlan(self.fft_data, self.timeseries_data_resampled, self.fftwplan)
         
@@ -229,10 +255,21 @@ class FindRFI(Task):
         
         # Sum up power for avg spectrum
         # Subtract dirty channels
-        antennas_power = cr.hArray(avgspectrum[...].sum() )
-        print antennas_power
-        antennas_power[...] -= cr.hArray(avgspectrum[..., cr.hArray(self.dirty_channels)])
-        print antennas_power
+        cleaned_power = 2 * cr.hArray(self.cleaned_spectrum[...].sum() )
+#        dirty_power = 2 * cr.hArray(avgspectrum[...].sum() ) - cleaned_power
+#        total_power = 2 * cr.hArray(avgspectrum[...].sum() )
+        
+        self.antennas_cleaned_power = cleaned_power
+        print self.antennas_cleaned_power
+        print ' --- '
+#        print total_power
+#        total_power.sqrt()
+#        print total_power
+#        cleaned_power.sqrt()
+#        print cleaned_power
+#        print dirty_power
+       # antennas_power[...] -= cr.hArray(avgspectrum[..., cr.hArray(self.dirty_channels)].sum())
+#        print cleaned_power
 #        antennas_power=hArray(amplitudes[...].mean())
 
         if self.save_plots:
@@ -263,8 +300,8 @@ class FindRFI(Task):
 #            plt.clf()
 
             ## Insert plot code here
-            cleanedspectrum = np.log(cleanedspectrum)
-            plt.plot(x, cleanedspectrum, c = 'b')
+            log_cleanedspectrum = np.log(median_cleaned_spectrum)
+            plt.plot(x, log_cleanedspectrum, c = 'b')
             plt.title('Median-average spectrum of all antennas, cleaned')
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('log-spectral power [adc units]')
