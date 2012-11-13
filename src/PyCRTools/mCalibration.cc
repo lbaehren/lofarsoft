@@ -138,6 +138,8 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
+  
+  Convention: pol0 represents the on sky polarization theta, while pol1 represents phi
 
 */
 
@@ -149,6 +151,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
     const NIter pol1, const NIter pol1_end,
     const HNumber az, const HNumber el)
 {
+  
   // Get length of output vector
   const int N = std::distance(pol0, pol0_end);
 
@@ -183,6 +186,100 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
     ++polz_it;
   }
 }
+
+
+//$DOCSTRING: Project on-sky polarizations onto x,y,z.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hProjectPolarizationsInverse
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(pol0)()("Polarization 0.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(pol1)()("Polarization 1.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_0 (HNumber)(polx)()("Polarization X.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(poly)()("Polarization Y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(polz)()("Polarization Z.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HNumber)(az)()("Azimuth with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_6 (HNumber)(el)()("Elevation with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+  
+  Convention: pol0 represents the on sky polarization theta, while pol1 represents phi
+  Theta and phi are not related to the LOFAR antenna being rotated. 
+
+*/
+
+template <class NIter>
+void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
+    const NIter pol1, const NIter pol1_end,
+    const NIter polx, const NIter polx_end,
+    const NIter poly, const NIter poly_end,
+    const NIter polz, const NIter polz_end,
+    const HNumber az, const HNumber el)
+{
+  
+  // Get length of output vector
+  const int N = std::distance(pol0, pol0_end);
+
+  // Sanity checks
+  if (N != std::distance(pol1, pol1_end) || N != std::distance(polx, polx_end) || N != std::distance(poly, poly_end) || N != std::distance(polz, polz_end))
+  {
+    throw PyCR::ValueError("[hProjectPolarizations] input vectors have incompatible sizes.");
+  }
+
+  // Direction in spherical coordinates with +x direction along N-S
+  const double theta = (M_PI / 2) - el;
+  const double phi = az - (M_PI / 4);
+
+  // Get iterators
+  NIter pol0_it = pol0;
+  NIter pol1_it = pol1;
+  NIter polx_it = polx;
+  NIter poly_it = poly;
+  NIter polz_it = polz;
+
+  for (int i=0; i<N; i++)
+  {
+    // Project onto new coordinate frame
+    // Cases are neccessary as the original equation system is overdefined and will get undefined for special cases of phi and theta
+    
+    if (theta == 0. ){
+        *pol0_it = -1.0 * *polx_it;
+        *pol1_it = *poly_it;    
+        }
+    
+    if (theta == M_PI / 2){
+        if (phi == M_PI / 2 || phi == M_PI / 2 * 3.){
+            *pol0_it = -1.0 * *polz_it;
+            *pol1_it = *poly_it;
+            }
+         else {
+            *pol0_it = -1.0 * *polz_it;
+            *pol1_it = -1.0 * *polx_it / sin(theta);
+            }   
+        }
+        
+    if (theta != 0. && theta != M_PI / 2)   {
+        if (phi == M_PI / 2 ||  phi == M_PI / 2 * 3.){
+            *pol0_it = *poly_it / cos(theta);
+            *pol1_it = -1.0 * *polx_it;
+            }
+        else {
+            *pol0_it = -1.0 * *polz_it / sin(theta);
+            *pol1_it = *poly_it/cos(theta) + tan(phi)/tan(theta) * *polz_it;
+            }
+        } 
+
+
+    ++pol0_it;
+    ++pol1_it;
+    ++polx_it;
+    ++poly_it;
+    ++polz_it;
+  }
+}
+
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Calculate Stokes parameters I, Q, U and V
