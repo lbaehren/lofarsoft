@@ -76,7 +76,7 @@ class FindRFI(Task):
         nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
 #        timeseries_data = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.blocksize)),
 #            doc = "Timeseries data." ),
-        freq_range = dict( default = None, doc = "Frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)" ), 
+        freq_range = dict( default = None, doc = "Optional frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)" ), 
         fft_data = dict( default = lambda self : cr.hArray(complex, dimensions=(self.nantennas, self.nfreq)),
             doc = "Fourier transform of timeseries_data_resampled." ),
         #fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, 1, 1, 1, cr.fftw_flags.MEASURE),
@@ -212,7 +212,7 @@ class FindRFI(Task):
         dirty_channels = dirtyChannelsFromPhaseSpreads(medians, flagwidth = flagwidth, testplots=False)
         # if a frequency range was given, flag everything outside the range as 'dirty'
         
-        if self.freq_range:
+        if self.freq_range: # flagged as dirty or outside range
             alldirtychannels = [int(ch) for ch in range(len(freqs)) if (ch in dirty_channels) or not (self.freq_range[0] < freqs[ch] < self.freq_range[1])]
         else:
             alldirtychannels = [int(ch) for ch in dirty_channels]
