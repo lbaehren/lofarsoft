@@ -153,6 +153,7 @@ parser.add_option("-R","--flagrfi",action="store_true",default=False,dest="flagr
 parser.add_option("-D","--rfidir",type="string",dest="rfidir",default=None)
 parser.add_option("--DM","--dedisperse",type=float,dest="DM",default=None)
 parser.add_option("-t","--plot",action="store_true",default=False,dest="bPlot")
+parser.add_option("--ts","--timeseries",action="store_true",default=False,dest="bTimeseries")
 
 
 (options,args)=parser.parse_args()
@@ -179,8 +180,8 @@ dr=bf.BFDataReader(parsetdir+'/'+obsid+'.parset',datadir,True)
 dr.nrsubbands=80
 dr.par['nrsubbands']=80
 dr.h5=True
-totCh=dr.par['nrsubbands']*dr.par['channels']
 dr.setDatatype('coherentstokes')
+totCh=dr.par['nrsubbands']*dr.par['channels']
 # set the blocksize
 dr.setblocksize(blocksize)
 mutech={}
@@ -237,11 +238,28 @@ if options.flagrfi:
         else:
             data[:,np.arange(0,data.shape[1],options.chPerSB)]=1
 
-if options.DM:
+if options.DM and not options.bTimeseries:
     dedispersionShift(data,dr,options.DM,markboundary=True)
 
+if options.DM and options.bTimeseries:
+    par=fa.obsParameters(rfidir)
+    nDMs=len(par['DM'])
+    nrstreams=par['nrstreams']
+    offset=fa.loadOffset(nDMs,nrstreams,rfidir)
+    DM=options.DM
+    chPerBand=par['nrfreqs']/par['nrstreams']
+    ts=[dedispersionToTimeseries(data, i*chPerBand, chPerBand, offsets, dr, DM) for i in range(nrstreams)]
+    reftime=startblock*par['sa']
+    delays=par['delays']
+    length=min([len(t]) for t in ts])
+    ta=fa.makeTimeAxes,reftime,delays,length)
+
+
 if options.bPlot:
-    myplot(data)
+    if not options.bTimeseries:
+        myplot(data)
+    else:
+        [plt.plot(t,s+num*offset) for num,t,s in zip(range(len(ta)),ta,ts)] 
 
 if options.savefits:
     dataToFits(data,dr,options.fitsname,options.overwritefits)
