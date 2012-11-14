@@ -1722,11 +1722,11 @@ class Event(object):
         if self._db:
             # Writing attributes
             if self._inDatabase:        # Update values
-                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper(), str(self.statusmessage.upper())))
+                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()))
                 self._db.execute(sql)
             else:                       # Create new record
                 if 0 == self._id:
-                    sql = "INSERT INTO main.events (timestamp, status) VALUES ({0}, '{1}', '{2}')".format(int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()))
+                    sql = "INSERT INTO main.events (timestamp, status, statusmessage) VALUES ({0}, '{1}', '{2}')".format(int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()))
                 else:
                     sql = "INSERT INTO main.events (eventID, timestamp, status, statusmessage) VALUES ({0}, {1}, '{2}','{3}')".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()))
                 self._id = self._db.insert(sql)
@@ -1783,7 +1783,7 @@ class Event(object):
         if self._db:
             if self._inDatabase:
                 # Add the event information
-                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper(), str(self.statusmessage.upper())))
+                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()))
                 sql_list.append(sql)
 
                 # Add the event parameters
@@ -2519,7 +2519,7 @@ class Station(object):
         if self._db:
             # Write attributes
             if self._inDatabase:
-                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper())))
+                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()))
                 self._db.execute(sql)
             else:
                 if 0 == self._id:
@@ -2580,7 +2580,7 @@ class Station(object):
         if self._db:
             if self._inDatabase:
                 # Add the station information
-                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper())))
+                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()))
                 sql_list.append(sql)
 
                 # Add the station parameters
