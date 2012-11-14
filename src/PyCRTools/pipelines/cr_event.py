@@ -845,10 +845,8 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         antenna_positions=datafile["ANTENNA_POSITIONS"]
 
         results.update(dict(
-            svn_revision=PYCRREVNR,
             BLOCK=block_number,
             BLOCKSIZE=blocksize,
-            pipeline_version=PYCRREVNR,
             antennas=dict(zip(range(ndipoles),good_antennas)),
             bad_antennas=bad_antennas,
             antenna_positions_station_XYZ_m=list(antenna_positions.vec()),
