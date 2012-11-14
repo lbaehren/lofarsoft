@@ -149,6 +149,7 @@ div.img
 div.img img
 {
     display:inline;
+    width:10%;
     margin:3px;
     border:1px solid #ffffff;
 }
