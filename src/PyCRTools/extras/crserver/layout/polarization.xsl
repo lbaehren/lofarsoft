@@ -89,7 +89,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           </div>
         </xsl:for-each>
       </td>
-    <tr>
+    </tr>
   </table>
   <table class="parameters">
     <caption id="parameters">Parameters</caption>
