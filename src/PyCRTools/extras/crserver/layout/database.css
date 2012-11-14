@@ -139,7 +139,7 @@ nav .dropdown:after
 div.img
 {
     margin:2px;
-    border:1px solid #0000ff;
+    border:1px solid #d8d8d8;
     height:auto;
     width:auto;
     float:left;
@@ -156,7 +156,7 @@ div.img img
 
 div.img a:hover img
 {
-    border:1px solid #0000ff;
+    border:1px solid #ffffff;
 }
 
 div.desc
