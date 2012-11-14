@@ -1670,7 +1670,7 @@ class Event(object):
         if self._db:
             if self._inDatabase:
                 # Read attributes
-                sql = "SELECT eventID, timestamp, status FROM main.events WHERE eventID={0}".format(int(self._id))
+                sql = "SELECT eventID, timestamp, status, statusmessage FROM main.events WHERE eventID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
