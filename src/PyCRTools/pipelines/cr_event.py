@@ -355,7 +355,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         if station_info:
             if station_info.polarization:
                 polarization_info = station_info.polarization["%d" %(current_polarization)]
-                polarization_info.status = "CR_EVENT_PROCESSING"
+                polarization_info['cr_event_status'] = "CR_EVENT_PROCESSING"
                 polarization_info.write(recursive=False, parameters=False)
 
         results={}
@@ -392,10 +392,10 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # xmldict.dump(os.path.join(outputdir_with_subdirectories,"results.xml"), results)
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if datafile_info:
-                datafile_info.status = "OPEN FAILED"
+                datafile_info['cr_event_status'] = "OPEN FAILED"
                 datafile_info.write(recursive=False, parameters=False)
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -488,7 +488,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 # Write parameters to database
                 write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                 if polarization_info:
-                    polarization_info.status = "BAD"
+                    polarization_info['cr_event_status'] = "BAD"
                     polarization_info.write(recursive=False, parameters=False)
                 continue
             else:
@@ -532,7 +532,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -548,7 +548,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -577,7 +577,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                     # Write parameters to database
                     write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                     if polarization_info:
-                        polarization_info.status = "BAD"
+                        polarization_info['cr_event_status'] = "BAD"
                         polarization_info.write(recursive=False, parameters=False)
                     if dump_html:
                         finish_file()
@@ -594,7 +594,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 # Write parameters to database
                 write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                 if polarization_info:
-                    polarization_info.status = "BAD"
+                    polarization_info['cr_event_status'] = "BAD"
                     polarization_info.write(recursive=False, parameters=False)
                 if dump_html:
                     finish_file()
@@ -733,7 +733,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -782,7 +782,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 # Write parameters to database
                 write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                 if polarization_info:
-                    polarization_info.status = "BAD"
+                    polarization_info['cr_event_status'] = "BAD"
                     polarization_info.write(recursive=False, parameters=False)
                 if dump_html:
                     finish_file()
@@ -896,7 +896,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -1060,7 +1060,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -1156,7 +1156,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -1227,7 +1227,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -1376,7 +1376,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
             # Write parameters to database
             write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
             if polarization_info:
-                polarization_info.status = "BAD"
+                polarization_info['cr_event_status'] = "BAD"
                 polarization_info.write(recursive=False, parameters=False)
             if dump_html:
                 finish_file()
@@ -1466,7 +1466,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         # Writing results
         write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
         if polarization_info:
-            polarization_info.status = final_status
+            polarization_info['cr_event_status'] = final_status
             polarization_info.write(recursive=False, parameters=False)
 
         if dump_html:
@@ -1486,15 +1486,15 @@ def process_event(event_id=-1):
     """
     if event_id > 0:
         event_info = db_manager.getEvent(id=event_id)
-        event_info.status = "CR_EVENT_PROCESSING"
+        event_info['cr_event_status'] = "CR_EVENT_PROCESSING"
         event_info.write(recursive=False, parameters=False)
         for datafile_info in event_info.datafiles:
             filename_full = os.path.join(datadir, datafile_info.filename)
             process_datafile(filename_full, datafile_info)
         if event_info.is_cr_found():
-            event_info.status = "CR_FOUND"
+            event_info['cr_event_status'] = "CR_FOUND"
         else:
-            event_info.status = "CR_NOT_FOUND"
+            event_info['cr_event_status'] = "CR_NOT_FOUND"
         event_info.write(recursive=False, parameters=False)
 
         event_info.summary()
