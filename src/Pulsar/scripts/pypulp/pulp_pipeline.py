@@ -1178,8 +1178,10 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.log.info("Running pdmp...")
 						pdmp_popens=[]  # list of pdmp Popen objects	
 						for psr in self.psrs:
-							cmd="pdmp -mc %d -mb 128 -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
-								(self.tab.nrSubbands, psr, self.output_prefix, psr, self.output_prefix)
+							psr2=re.sub(r'[BJ]', '', psr)
+							best_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
+							cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
+								(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
 							pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
 							pdmp_popens.append(pdmp_popen)
 		
@@ -1478,8 +1480,10 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.log.info("Running pdmp...")
 						pdmp_popens=[]  # list of pdmp Popen objects	
 						for psr in self.psrs:
-							cmd="pdmp -mc %d -mb 128 -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
-								(self.tab.nrSubbands, psr, self.output_prefix, psr, self.output_prefix)
+							psr2=re.sub(r'[BJ]', '', psr)
+							best_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
+							cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
+								(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
 							pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
 							pdmp_popens.append(pdmp_popen)
 		
