@@ -12,15 +12,15 @@ def myplot(data,doSquare=False):
     ax1.imshow(data[:,:],aspect='auto')
     ax2=fig.add_subplot(222)
     ax2.plot(np.sum(data[:,:],axis=1))
-    ax2.set_xlabel("frequency channel [nr]")
+    ax2.set_xlabel("time sample")
     ax2.set_ylabel("power")
     ax3=fig.add_subplot(223)
     if doSquare:
         ax3.plot(np.sum(np.square(data[:,:]),axis=0))
     else:
         ax3.plot(np.sum(data[:,:],axis=0))
-    ax3.set_xlabel("time sample")
     ax3.set_ylabel("power")
+    ax3.set_xlabel("frequency channel [nr]")
     ax4=fig.add_subplot(224)
     ax4.imshow(np.log(data[:,:]),aspect='auto')
     ax4.set_xlabel("frequency channel [nr]")
@@ -97,6 +97,7 @@ def flagChannels(data,directory,startblock,blocksize,method=1):
     if blocksize != par['sa']:
         raise ValueError("Blocksize incorrect. It should be "+str(par['sa']))
     nofblocks=data.shape[0]/blocksize
+    startblock-=par['stb']
     fc=fa.getFlaggedChannels(directory,channels=par['nrfreqs'])
     fc=fc[startblock:startblock+nofblocks]
     if method=="average":
@@ -104,6 +105,7 @@ def flagChannels(data,directory,startblock,blocksize,method=1):
     else:
         replacevalue=method
     for block in range(nofblocks):
+        print block,blocksize,fc[block]
         data[block*blocksize:(block+1)*blocksize,fc[block]==1]=replacevalue
 
 def flagSamples(data,directory,startblock,blocksize,method=1):
@@ -113,6 +115,7 @@ def flagSamples(data,directory,startblock,blocksize,method=1):
         raise ValueError("Blocksize incorrect. It should be "+str(par['sa']))
     nofblocks=data.shape[0]/blocksize
     fs=fa.getFlaggedSamples(directory,matrixoutput=False)
+    startblock-=par['stb']
     fs=fs[startblock:startblock+nofblocks]
     if method=="average":
         replacevalue=np.average(data)
@@ -147,6 +150,8 @@ parser.add_option("-y","--dividebaseline",action="store_true",dest="dividebaseli
 parser.add_option("-a","--savefits",action="store_true",dest="savefits",default=False)
 parser.add_option("-w","--overwritefits",action="store_true",dest="overwritefits",default=False)
 parser.add_option("-f","--fitsname",type="string",default="temp.fits")
+parser.add_option("--sp","--saveplot",action="store_true",dest="saveplot",default=False)
+parser.add_option("--pn","--plotname",type="string",dest="plotname",default="temp.png")
 parser.add_option("-m","--beam",type="int",default=2)
 parser.add_option("-c","--chPerSB",type="int",default=None,dest='chPerSB')
 parser.add_option("-R","--flagrfi",action="store_true",default=False,dest="flagrfi")
@@ -154,6 +159,10 @@ parser.add_option("-D","--rfidir",type="string",dest="rfidir",default=None)
 parser.add_option("--DM","--dedisperse",type=float,dest="DM",default=None)
 parser.add_option("-t","--plot",action="store_true",default=False,dest="bPlot")
 parser.add_option("--ts","--timeseries",action="store_true",default=False,dest="bTimeseries")
+parser.add_option("--pd","--plotdistance",type=float,dest="plotdistance",default=30)
+parser.add_option("--pw","--plotwindow",type=float,dest="plotwindow",default=0)
+parser.add_option("--pc","--plotcenter",type=float,dest="plotcentertime",default=0)
+parser.add_option("--il","--integrationlength",type=int,dest="integrationlength",default=1)
 
 
 (options,args)=parser.parse_args()
@@ -174,6 +183,13 @@ blocksize=options.blocksize #dr.samples
 nofblocks=options.nofblocks
 startblock=options.startblock
 fileindex=options.beam
+plotwindow=options.plotwindow
+plotcentertime=options.plotcentertime
+integrationlength=options.integrationlength
+if not options.saveplot:
+    plotname=False
+else:
+    plotname=True
 # open a datareader
 dr=bf.BFDataReader(parsetdir+'/'+obsid+'.parset',datadir,True)
 # need to fix some issues, but we circumfent them for MSSS bf data by setting:
@@ -181,6 +197,9 @@ dr.nrsubbands=80
 dr.par['nrsubbands']=80
 dr.h5=True
 dr.setDatatype('coherentstokes')
+if obsid=="L39700":
+    dr.files=[open('/data/L39700/L39700_SAP000_B000_S0_P000_bf.raw')]
+#    dr.nrsubbands=240
 totCh=dr.par['nrsubbands']*dr.par['channels']
 # set the blocksize
 dr.setblocksize(blocksize)
@@ -202,20 +221,20 @@ data=alldata.reshape(shape1[0]*shape1[1],shape1[2])
 
 data1=data.reshape((data.shape[0]/chunksize,chunksize,totCh))
 # sum over the chunks?
-subspec=np.sum(data1,axis=1)
+#subspec=np.sum(data1,axis=1)
 # power of frequency spectrum
-powerspec=np.sum(subspec,axis=0)
-std=np.std(subspec,axis=0)
+#powerspec=np.sum(subspec,axis=0)
+#std=np.std(subspec,axis=0)
 # determine which channels to flag
 # The flagging itself can be done by setting 
-stdNorm=std/powerspec
-stdNormSort=np.copy(stdNorm)
-stdNormSort.sort()
-Lstd=len(stdNormSort)
-av=np.average(stdNormSort[int(0.1*Lstd):int(0.9*Lstd)])
-std1=np.std(stdNormSort[int(0.1*Lstd):int(0.9*Lstd)])
-index=np.arange(0,Lstd)
-muteindex=index[stdNorm>av+cutlevel*std1]
+#stdNorm=std/powerspec
+#stdNormSort=np.copy(stdNorm)
+#stdNormSort.sort()
+#Lstd=len(stdNormSort)
+#av=np.average(stdNormSort[int(0.1*Lstd):int(0.9*Lstd)])
+#std1=np.std(stdNormSort[int(0.1*Lstd):int(0.9*Lstd)])
+#index=np.arange(0,Lstd)
+#muteindex=index[stdNorm>av+cutlevel*std1]
 # flag data
 print "Available for interactive use: data and dr (datareader) with dr.par for parameters"
 
@@ -238,28 +257,50 @@ if options.flagrfi:
         else:
             data[:,np.arange(0,data.shape[1],options.chPerSB)]=1
 
-if options.DM and not options.bTimeseries:
+if options.DM!=None and not options.bTimeseries:
     dedispersionShift(data,dr,options.DM,markboundary=True)
 
-if options.DM and options.bTimeseries:
+if options.DM!=None and options.bTimeseries:
+    print "Making dedispersed timeseries"
     par=fa.obsParameters(rfidir)
+    fa.derivedParameters(par,options.DM)
     nDMs=len(par['DM'])
     nrstreams=par['nrstreams']
-    offset=fa.loadOffset(nDMs,nrstreams,rfidir)
+    offsets=fa.loadOffset(nDMs,nrstreams,rfidir)
     DM=options.DM
+    if DM not in offsets.keys():
+        raise ValueError("Invalid DM, options "+str(offsets.keys()))
     chPerBand=par['nrfreqs']/par['nrstreams']
-    ts=[dedispersionToTimeseries(data, i*chPerBand, chPerBand, offsets, dr, DM) for i in range(nrstreams)]
+    ts=[dedispersionToTimeseries(data, i*chPerBand, chPerBand, offsets[DM][i], dr, DM) for i in range(nrstreams)]
     reftime=startblock*par['sa']
     delays=par['delays']
-    length=min([len(t]) for t in ts])
-    ta=fa.makeTimeAxes,reftime,delays,length)
+    length=min([len(t) for t in ts])
+
+
+
+
+    ta=fa.makeTimeAxes(reftime,delays,length)
+    av=fa.loadAverage(len(par['DM']),par['nrstreams'],rfidir)
+    std=fa.loadStddev(len(par['DM']),par['nrstreams'],rfidir)
+    trmsg=fa.loadTriggerMsg(rfidir,bReturnArray=True,newVersion=3)
+    if DM not in av.keys():
+        raise ValueError("Invalid DM, options "+str(av.keys()))
+    else:
+        av=av[DM]
+        std=std[DM]
+
 
 
 if options.bPlot:
+    mycolors=['r','g','b','k','y','m','c','0.5','r','g','b','k','y','m','c','0.5']
     if not options.bTimeseries:
         myplot(data)
     else:
-        [plt.plot(t,s+num*offset) for num,t,s in zip(range(len(ta)),ta,ts)] 
+        fa.plotTimeseries(ts,DM,par,trmsg,av,std,integrationlength,plotcentertime,plotwindow,offset=options.plotdistance,legend=True,plotThreshold=True)
+    if options.saveplot:
+        print "Figure saved as",options.plotname
+        plt.savefig(options.plotname)
+
 
 if options.savefits:
     dataToFits(data,dr,options.fitsname,options.overwritefits)
