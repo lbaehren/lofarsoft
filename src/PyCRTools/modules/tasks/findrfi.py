@@ -264,6 +264,20 @@ class FindRFI(Task):
 #        total_power = 2 * cr.hArray(avgspectrum[...].sum() )
         
         self.antennas_cleaned_power = cleaned_power
+        
+        # Get bad antennas from outliers in power
+        avg = cleaned_power.mean()
+        sdev = cleaned_power.stddev()[0]
+        if avg - 4*sdev < 0: # FIX! Use sort/median/percentile approach, or just fix lower bound
+            print 'Warning! Spread of cleaned power is too large, mean - 4 sigma < 0'
+            print 'zero-power channels will be missed'
+        outlier_indices = np.argwhere(abs(cleaned_power.toNumpy() - avg) > 4 * sdev).ravel()
+        channel_ids = self.f["SELECTED_DIPOLES"]
+        self.bad_antennas = [channel_ids[i] for i in outlier_indices]
+        print 'There are %d bad channels: ' % len(self.bad_antennas)
+        print self.bad_antennas
+        self.good_antennas = [id for id in channel_ids if id not in self.bad_antennas]
+
 #        print self.antennas_cleaned_power
 #        print ' --- '
 #        print total_power
