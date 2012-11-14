@@ -495,7 +495,7 @@ class CRDatabase(object):
 
         List of changes:
         - Add plotfiles parameter to StationParameters table
-        - Add cr_event_status and cr_event_status_message to all Parameter tables
+        - Add cr_event_status and cr_event_statusmessage to all Parameter tables
         - Add statusmessage to all tables as a keyword
         """
         db_version_pre = 4
