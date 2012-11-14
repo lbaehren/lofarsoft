@@ -77,6 +77,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       </td>
     </tr>
   </table>
+<!--
   <table>
     <caption id="figures">Figures</caption>
     <xsl:for-each select="/elements/figures/figure">
@@ -89,6 +90,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       </tr>
     </xsl:for-each>
   </table>
+-->
   <table class="parameters">
     <caption id="parameters">Parameters</caption>
     <tr>
@@ -105,6 +107,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       </xsl:if>
     </xsl:for-each>
   </table>
+  <h2>Figures</h2>
+  <xsl:for-each select="/elements/figures/figure">
+    <div class="img">
+      <a><xsl:attribute name="href"><xsl:value-of select="path"/></xsl:attribute>
+        <img><xsl:attribute name="src"><xsl:value-of select="path"/></xsl:attribute><xsl:attribute name="alt"><xsl:value-of select="path"/></xsl:attribute></img>
+      </a>
+    </div>
+  </xsl:for-each>
   </body>
   </html>
 </xsl:template>
