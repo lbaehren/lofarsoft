@@ -127,10 +127,9 @@ for station in stations:
         fft_data = f.empty("FFT_DATA")
         f.getFFTData(fft_data, block_number_lora, False)
         frequencies = cr.hArray(f["FREQUENCY_DATA"])
-        spectral_window = [i for (i, nu) in enumerate(frequencies) if nu < 30. or nu > 80.]
         
         # Flag dirty channels (from RFI excission)
-        fft_data[..., spectral_window] = 0
+        fft_data[..., [0,]] = 0 # Make timeseries mean lie at zero
         fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
 
         # Apply calibration delays
