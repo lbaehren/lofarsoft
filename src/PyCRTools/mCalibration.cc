@@ -187,6 +187,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
   }
 }
 
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Project on-sky polarizations onto x,y,z.
 //$COPY_TO HFILE START --------------------------------------------------
@@ -225,7 +226,7 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
   // Sanity checks
   if (N != std::distance(pol1, pol1_end) || N != std::distance(polx, polx_end) || N != std::distance(poly, poly_end) || N != std::distance(polz, polz_end))
   {
-    throw PyCR::ValueError("[hProjectPolarizations] input vectors have incompatible sizes.");
+    throw PyCR::ValueError("[hProjectPolarizationsInverse] input vectors have incompatible sizes.");
   }
 
   // Direction in spherical coordinates with +x direction along N-S
