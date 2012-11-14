@@ -4,6 +4,7 @@ import dedispersion as dd # self-written library for dedispersion, included in p
 import glob
 import matplotlib.pyplot as plt
 import struct
+import os
 from bisect import bisect
 
 DM=26.83
@@ -108,7 +109,7 @@ def numberBeams(triggermsgDBlist):
         for k,v in m.iteritems():
             v['beam']=num
 
-def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bReturnArray=False):
+def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=True,bReturnArray=True,analysedOn32bit=False):
     """
     Trigger messages are stored in a log file, made by the writetriggermessages program. These can be read in by this function. The underlying format is:
     
@@ -152,7 +153,9 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bRetu
 # the format in which the data is stored 
     fmt='<3q4i2f2i1f1i'
     if newVersion:
-        fmt='<3q4i2f2i4f2i'
+        fmt='<3q4i2f2i4f3i'
+        if analysedOn32bit:
+            fmt='<3L4i2f2i4f3i'
         if newVersion==3:
             fmt='<3q4i2f2i4f4i'
     #magic=struct.unpack('i',data[0:4])
@@ -163,7 +166,7 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=False,bRetu
     if len(data)%fmtlen>0:
         fmt='3L4i2f2i1f'
         if newVersion:
-            fmt='3L4i2f2i4f2i'
+            fmt='3L4i2f2i4f3i'
             if newVersion==3:
                 fmt='3L4i2f2i4f4i'
 
@@ -457,7 +460,9 @@ def derivedParameters(par,DM=DM):
     par['timeresolution']=5e-9*1024*par['ch']*par['tInt']
     par['nrfreqs']=len(par['freq'])
     par['startchannels']=range(0,par['nrfreqs'],par['nrCSB']*par['ch'])
+    par['endchannels']=range(par['nrCSB']*par['ch']-1,par['nrfreqs'],par['nrCSB']*par['ch'])
     par['refFreqs']=np.array(par['freq'])[par['startchannels']]
+    par['endFreqs']=np.array(par['freq'])[par['endchannels']]
     par['DMforDelays']=DM
     par['delays']=dd.freq_to_delay(DM,par['refFreqs'],par['timeresolution'])
     par['alldelays']=dd.freq_to_delay(DM,par['freq'],par['timeresolution'])
@@ -956,6 +961,7 @@ def loadAverage(nrDMs,nrStreams,directory,filename='average.log'):
             datadict[DMr][stream]=np.fromfile(f,'float32',nr)
     return datadict
 
+
 def loadOffset(nrDMs,nrStreams,directory,filename='offset.log'):
     """ load standard deviation of each block
         * nrDMs *  number of DMs on which the trigger is run and thus for which an average exists
@@ -1187,7 +1193,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
     * trmsgoffset *  how much above the data should trigger messages be plotted
     * offset *       offset between the streams
     * saveplot *     Not yet working
-    * legend *       Not yet working
+    * legend *       plot legend
     * bTimeInSeconds * Plot time axis in seconds (else will be plotted in samples)
     * bMsgAllLengths * Plot triggermessages for all integration lengths
     * plotTimeseries * If set to False, you can easily plot all the trigger messages
@@ -1226,13 +1232,13 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
 
 
     if type(trmsg)==type(np.zeros(1)):
-        trmsg=trmsg[np.abs(trmsg['DM']-DM)<0.5*min(np.diff(par['DMrange']))]
+        trmsg=trmsg[np.abs(trmsg['DM']-DM)<0.5*min(np.diff(par['DM']))]
         if not bMsgAllLengths:
             trmsg=trmsg[trmsg['length']==integrationlength]
         if window>0:
             trmsg=trmsg[trmsg['time']<centraltime+window]
             trmsg=trmsg[trmsg['time']>centraltime-window]
-        [plt.plot(trmsg['time'],offset*trmsg['subband']+trmsg['sum'],'*')]#trmsgoffset+par['ch']*par['nrCSB']*integrationlength,'*')]
+        [plt.plot(trmsg['time'],offset*trmsg['subband']+trmsg['sum'],'x')]#trmsgoffset+par['ch']*par['nrCSB']*integrationlength,'*')]
         plt.title('Timeseries and trigger messages, DM='+str(DM)+', L='+str(integrationlength))
     if plotTimeseries:
         if window>0: 
@@ -1248,6 +1254,14 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
             [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]
         else:
             [plt.plot(t,s[0:len(t)]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]        
+    if legend:
+        legendentries=[str(round(f/1e6,1))+"-"+str(round(f2/1e6,1))+" MHz" for f,f2 in zip(par['refFreqs'],par['endFreqs'])]
+        if type(trmsg)==type(np.zeros(1)):
+            legendentries=["triggers"]+legendentries
+        plt.legend(legendentries,prop={'size':8,},loc=2)
+    if saveplot:
+        plt.savefig(saveplot)
+
         
 
 def convertArrayBar(t,elem):
@@ -1270,7 +1284,46 @@ def filterUniqueTime(t12):
             print i1,i2
     return t12b[0:i2]
 
+def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ["parsetdir"],datadir=os.environ["FRATS_DATA_DIR"].rstrip("data/"),plotwindow=None,savefig=False,plotdir=False):
+    """ Outputs command of openBFdata.py to make dedispersed timeseries for this trigger message.
+   
+   * msg *   Trigger message
+   * mydir * Directory with saved output (averages, flagged samples etc
+   * prefix * run or python or ipython, to be put before opening the program
+   * extrablock * how many blocks to dedisperse the data for (default 10) 
+   * datadir * Main directory of the data (with the last data/). Default:
+                os.environ["FRATS_DATA_DIR"].rstrip("data/")
+   * plotwindow* How much time to plot to both sides. Default one block
+   * savefig *  save the figure? You can also name it here. If not named, a name will be generated.
+   * plotdir *  directory to put the output. Default is mydir
 
+
+    """
+    if len(msg)==20:
+        (msg_time, msg_utc_second, msg_utc_nanosecond, msg_length, msg_sample, msg_block, msg_subband, msg_sum, msg_max, msg_obsID, msg_beam, msg_DM, msg_SBaverage, msg_SBstddev, msg_Threshold, msg_nrFlaggedChannels, msg_nrFlaggedSamples, msg_width, msg_magic,msg_index)=msg
+    elif len(msg)==19:
+        (msg_time, msg_utc_second, msg_utc_nanosecond, msg_length, msg_sample, msg_block, msg_subband, msg_sum, msg_max, msg_obsID, msg_beam, msg_DM, msg_SBaverage, msg_SBstddev, msg_Threshold, msg_nrFlaggedChannels, msg_nrFlaggedSamples, msg_width, msg_magic)=msg
+    else:
+        raise ValueError("unknown length of msg")
+    par=obsParameters(mydir)
+    derivedParameters(par,DM=msg_DM)
+    totalDelay=round(max(abs(par['delaysPerDM']))*msg_DM/par['sa'])
+    startblock=int(msg[0]/par['sa']-totalDelay-extrablocks/2)
+    nblocks=int(totalDelay+extrablocks)
+    if not plotwindow:
+        plotwindow=par['sa']
+    if savefig:
+        saveoption=" --saveplot "
+        if not plotdir:
+            plotdir=mydir
+        if type(savefig)==type("string"):
+            saveoption+=" --plotname="+str(plotdir)+"/"+str(savefig)
+        else:
+            saveoption+=" --plotname="+plotdir+"/plotstreams_L"+str(msg_obsID)+"_SAP00"+str(msg_beam)+"_DM="+str(msg_DM)+"_time="+str(msg_time)+".png"
+    else:
+        saveoption=""
+    command=prefix+" openBFdata.py -o L"+str(msg_obsID)+" -m "+str(msg_beam)+" -s "+str(startblock)+" -n "+str(nblocks)+" -y -R -D "+mydir+" --ts --DM="+str(msg_DM)+" -c "+str(par['ch'])+" --plot --pc="+str(msg_time)+" --pw="+str(plotwindow)+" --il="+str(msg_length)+" --parsetdir "+parsetdir+" --datadir \""+datadir+"\""+saveoption
+    return command
              
 
 
