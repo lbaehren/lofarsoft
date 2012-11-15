@@ -127,6 +127,7 @@ class FindRFI(Task):
         
         n = 0
         skippedblocks = 0
+        refant = -1 # determine reference antenna from median power; do not rely on antenna 0 being alive...
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
         # have to cut out the block with the pulse... autodetect is best? 
@@ -139,18 +140,35 @@ class FindRFI(Task):
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
             self.f.getFFTData(self.fft_data, block = i, hanning = True) 
-            # Note: No hanning window as we want to measure power from spectrum
+            # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
             # difference!
             # But no window makes the cleaning less effective... :(
             spectrum = self.fft_data / self.f["BLOCKSIZE"] # normalize back to ADC units
+            spectrum[..., 0] = 0.0 # reject DC component
+            # test hack
+#            print spectrum.shape()
+#            if i == 0:
+#                spectrum.fill(0.0)
+            #for j in range(spectrum.shape()[1]):
+            #    spectrum[20, j] = 0.0
+#            import pdb; pdb.set_trace()
+            # end test hack
             magspectrum.copy(spectrum)
             magspectrum.abs()
+            if i == 0: # in first block, determine reference antenna (which channel has median power)
+                magspectrum.square()
+                channel_power = 2 * cr.hArray(magspectrum[...].sum() )                
+                refant = np.argsort(channel_power.toNumpy())[self.nantennas / 2]
+                refant = int(refant) # numpy.int64 causes problems...
+                print 'Taking channel %d as reference antenna' % refant
+                # the index halfway in the sorted array is the channel with median power
+                magspectrum.sqrt()
 #            magspectrum += 1e-9
 
             incphase.copy(spectrum)
             incphase /= (magspectrum + 1.0e-9) # divide abs-magnitude out to get exp(i phi). Avoid div by 0            
-            incphaseRef = cr.hArray(incphase[0].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
+            incphaseRef = cr.hArray(incphase[refant].vec()) # improve? i.e. w/o memory leak. Phases of channel 0 for all freqs
             # Note that this assumes that antenna 0 has valid data...! What to do when it doesn't?
             incphase /= incphaseRef           
             incphase[..., 0] = 1.0 # reject DC component and first harmonic.
@@ -162,7 +180,7 @@ class FindRFI(Task):
             avgspectrum += magspectrum # accumulate average spectrum
 
             if np.isnan(incphase.sum()[0]): # FIX
-                print 'Warning: NaN found! Skipping block'
+                print 'Warning: NaN found! Skipping block (should not happen anymore...!)'
                 skippedblocks += 1 
                 continue
                 
