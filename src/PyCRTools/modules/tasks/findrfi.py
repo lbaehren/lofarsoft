@@ -45,7 +45,7 @@ def dirtyChannelsFromPhaseSpreads(spreads, flagwidth = 3, testplots=False):
     print 'Noise = %f' % noise
     print 'There are %d dirty channels' % len(dirtyChannels)
     dirtyChannels = np.array(extDirtyChannels)
-    print 'There are %d dirty channels when extended by 1 channel to either side' % len(dirtyChannels)
+    print 'There are %d dirty channels when extended by %d channel(s) to either side' % (len(dirtyChannels), (flagwidth - 1) / 2 )
     
     if testplots:       
         plt.figure()
@@ -144,7 +144,6 @@ class FindRFI(Task):
             # difference!
             # But no window makes the cleaning less effective... :(
             spectrum = self.fft_data / self.f["BLOCKSIZE"] # normalize back to ADC units
-
             magspectrum.copy(spectrum)
             magspectrum.abs()
 #            magspectrum += 1e-9
