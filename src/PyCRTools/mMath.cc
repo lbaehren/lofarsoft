@@ -5991,8 +5991,8 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
                      const HInteger signal_start, const HInteger signal_end)
 {
   // Get vector length
-  const int n = std::distance(vec, vec_end);
-  const int nm = n - (signal_end - signal_start);
+  const HInteger n = std::distance(vec, vec_end);
+  const HInteger nm = n - (signal_end - signal_start);
   
   // Initialize values
   *snr = 0;
@@ -6008,26 +6008,26 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   if (signal_start < 0)
   {
     char error_message[256];
-    sprintf(error_message, "[hMaxSNR] signal_start[=%l] < 0", signal_start);
+    sprintf(error_message, "[hMaxSNR] signal_start[=%ld] < 0", signal_start);
     throw PyCR::ValueError(error_message);
   }
 
   if (signal_end < signal_start || signal_end > n)
   {
     char error_message[256];
-    sprintf(error_message, "[hMaxSNR] signal_end[=%l] < signal_start[=%d]", signal_end, signal_start);
+    sprintf(error_message, "[hMaxSNR] signal_end[=%ld] < signal_start[=%ld]", signal_end, signal_start);
     throw PyCR::ValueError(error_message);
   }
 
   if (signal_end > n)
   {
     char error_message[256];
-    sprintf(error_message, "[hMaxSNR] signal_end[=%l] > n=[%d]", signal_end, n);
+    sprintf(error_message, "[hMaxSNR] signal_end[=%ld] > n=[%d]", signal_end, n);
     throw PyCR::ValueError(error_message);
   }
 
   // Calculate the mean
-  for (int i=0; i<signal_start; i++)
+  for (HInteger i=0; i<signal_start; i++)
   {
     *mean += *it / nm;
     it++;
@@ -6035,7 +6035,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 
   it += (signal_end - signal_start);
 
-  for (int i=0; i<signal_start; i++)
+  for (HInteger i=0; i<signal_start; i++)
   {
     *mean += *it / nm;
     it++;
@@ -6043,7 +6043,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 
   // Noise before signal window
   it = vec;
-  for (int i=0; i<signal_start; i++)
+  for (HInteger i=0; i<signal_start; i++)
   {
     *rms += ((*it - *mean) * (*it - *mean)) / nm;
     it++;
@@ -6051,7 +6051,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 
   // Pulse window to find maximum in (should be excluded from RMS)
   *max = *it;
-  for (int i=signal_start; i<signal_end; i++)
+  for (HInteger i=signal_start; i<signal_end; i++)
   {
     if (*it > *max)
     {
@@ -6063,7 +6063,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   }
 
   // Noise after signal window
-  for (int i=signal_end; i<n; i++)
+  for (HInteger i=signal_end; i<n; i++)
   {
     *rms += ((*it - *mean) * (*it - *mean)) / nm;
     it++;
