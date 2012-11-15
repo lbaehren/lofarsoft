@@ -1,4 +1,4 @@
-## Name of the project
+
 project (PyCRTools)
 
 ## Minimum required version of CMake to configure the project
@@ -11,6 +11,7 @@ cmake_minimum_required (VERSION 2.8)
 ## ==============================================================================
 
 option (PYCRTOOLS_ENABLE_TESTING         "Enable testing for the PyCRTools?"                         YES )
+option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP enabled?"         YES )
 option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?"         YES )
 option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO )
 option (PYCRTOOLS_WITH_DEBUG_SYMBOLS     "Compile PyCRTools with debug symbols?"                     YES )
@@ -54,10 +55,13 @@ include (FindSphinx)
 include (FindPython)
 include (FindNumPy)
 include (FindNumUtil)
-include (FindOpenMP)
 include (FindTMF)
 include (FindWCSLIB)
 include (FindCFITSIO)
+
+if (PYCRTOOLS_WITH_OPENMP)
+    include (FindOpenMP)
+endif (PYCRTOOLS_WITH_OPENMP)
 
 ##-------------------------------------------------------------------------------
 ## Testing
@@ -123,12 +127,12 @@ endif (PYCRTOOLS_WITH_OPTIMIZATIONS)
 ##-------------------------------------------------------------------------------
 ## Optional dependencies
 
-if (OPENMP_FOUND)
+if (OPENMP_FOUND AND PYCRTOOLS_WITH_OPENMP)
   message (STATUS "[PyCRTools] OpenMP requested and enabled")
   set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set (PYCRTOOLS_CPP_FLAGS "${PYCRTOOLS_CPP_FLAGS} ${OpenMP_CXX_FLAGS} ")
   set (PYCRTOOLS_LINKER_FLAGS "${PYCRTOOLS_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif (OPENMP_FOUND)
+endif (OPENMP_FOUND AND PYCRTOOLS_WITH_OPENMP)
 
 if (PYCRTOOLS_WITH_AERA)
   include (FindAERA)
