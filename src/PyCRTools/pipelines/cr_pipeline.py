@@ -76,7 +76,9 @@ for station in stations:
     if options.station and station.stationname not in options.station:
         continue
 
-    logging.debug("processing station "+station.stationname)
+    print "*" * 80
+    print "processing station "+station.stationname
+    print "*" * 80
 
     try:
 
@@ -337,7 +339,9 @@ for station in stations:
         p.status = "BAD"
         p.write()
 
-    logging.debug("finishing station "+station.stationname)
+    print "-" * 80
+    print "finishing station "+station.stationname
+    print "-" * 80
 
 # Create list of event level plots
 plotlist = []
