@@ -253,9 +253,6 @@ class FindRFI(Task):
 #        calcbaseline1 = cr.trerun("CalcBaseline",1, avgspectrum,pardict = pardict,invert=False,HanningUp=False,normalize=False,doplot=0)
 #        amplitudes=hArray(copy=calcbaseline1.baseline)
 
-        #Get a measure of the total power (actually sqrt thereof)
-        #received in each antenna (without RFI) and in the entire
-        #station.
         
         # Sum up power for avg spectrum
         # Subtract dirty channels
@@ -266,29 +263,15 @@ class FindRFI(Task):
         self.antennas_cleaned_power = cleaned_power
         
         # Get bad antennas from outliers in power
-        avg = cleaned_power.mean()
-        sdev = cleaned_power.stddev()[0]
-        if avg - 4*sdev < 0: # FIX! Use sort/median/percentile approach, or just fix lower bound
-            print 'Warning! Spread of cleaned power is too large, mean - 4 sigma < 0'
-            print 'zero-power channels will be missed'
-        outlier_indices = np.argwhere(abs(cleaned_power.toNumpy() - avg) > 4 * sdev).ravel()
+        # Instead of the non-robust k-sigma method, take the range to be from 1/2 to 2 times median power.
+        # This has the advantage that it will always catch 0-power channels
+        # and that it is robust for up to 50% - 1 outliers!
+        median_power = cleaned_power.median()[0]
         channel_ids = self.f["SELECTED_DIPOLES"]
-        self.bad_antennas = [channel_ids[i] for i in outlier_indices]
+        self.good_antennas = [channel_ids[i] for i in range(self.nantennas) if (0.5 * median_power < cleaned_power[i] < 2.0 * median_power)]
+        self.bad_antennas = [id for id in channel_ids if id not in self.good_antennas]
         print 'There are %d bad channels: ' % len(self.bad_antennas)
         print self.bad_antennas
-        self.good_antennas = [id for id in channel_ids if id not in self.bad_antennas]
-
-#        print self.antennas_cleaned_power
-#        print ' --- '
-#        print total_power
-#        total_power.sqrt()
-#        print total_power
-#        cleaned_power.sqrt()
-#        print cleaned_power
-#        print dirty_power
-       # antennas_power[...] -= cr.hArray(avgspectrum[..., cr.hArray(self.dirty_channels)].sum())
-#        print cleaned_power
-#        antennas_power=hArray(amplitudes[...].mean())
 
         if self.save_plots:
 
