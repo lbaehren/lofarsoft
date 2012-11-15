@@ -6008,21 +6008,21 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   if (signal_start < 0)
   {
     char error_message[256];
-    sprintf(error_message, "[hMaxSNR] signal_start[=%d] < 0", signal_start);
+    sprintf(error_message, "[hMaxSNR] signal_start[=%l] < 0", signal_start);
     throw PyCR::ValueError(error_message);
   }
 
   if (signal_end < signal_start || signal_end > n)
   {
     char error_message[256];
-    sprintf(error_message, "[hMaxSNR] signal_end[=%d] < signal_start[=%d]", signal_end, signal_start);
+    sprintf(error_message, "[hMaxSNR] signal_end[=%l] < signal_start[=%d]", signal_end, signal_start);
     throw PyCR::ValueError(error_message);
   }
 
   if (signal_end > n)
   {
     char error_message[256];
-    sprintf(error_message, "[hMaxSNR] signal_end[=%d] > n=[%d]", signal_end, n);
+    sprintf(error_message, "[hMaxSNR] signal_end[=%l] > n=[%d]", signal_end, n);
     throw PyCR::ValueError(error_message);
   }
 
