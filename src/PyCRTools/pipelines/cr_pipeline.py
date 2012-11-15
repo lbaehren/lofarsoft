@@ -187,12 +187,18 @@ for station in stations:
         mb0 = cr.trun("MiniBeamformer", fft_data = fft_data_0, frequencies = frequencies, antpos = antenna_positions_one, direction = pulse_direction)
         mb1 = cr.trun("MiniBeamformer", fft_data = fft_data_1, frequencies = frequencies, antpos = antenna_positions_one, direction = pulse_direction)
 
+        print "done with beamforming"
+
         beamformed_timeseries = cr.hArray(float, dimensions = (2, options.blocksize))
+
+        print "calculating inverse FFT"
 
         cr.hFFTWExecutePlan(beamformed_timeseries[0], mb0.beamformed_fft, invfftplan)
         cr.hFFTWExecutePlan(beamformed_timeseries[1], mb1.beamformed_fft, invfftplan)
 
         beamformed_timeseries /= options.blocksize
+
+        print "starting pulse envelope"
 
         # Look for significant pulse in beamformed signal
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, pulse_start = pulse_search_window_start, pulse_end = pulse_search_window_end, nsigma = options.accept_snr, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
