@@ -1593,9 +1593,9 @@ Save timeseries (append)
 // Channel collapse:
         
 
-            int subdiv=4;// subdivisions. into how many parts to split the data
+            int subdiv=8;// subdivisions. into how many parts to split the data
             int reqsubdiv=2; // required subdivisions. how many parts should show a peak
-            int channelsPerPart=itsNrChannels/4;
+            int channelsPerPart=itsNrChannels/subdiv;
             vector<float> collapsedData[subdiv];
             vector<float> collapsedDataSort[subdiv];
             vector<int> badcollapsedSamples;
