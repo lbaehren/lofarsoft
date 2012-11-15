@@ -6005,9 +6005,25 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   NIter it = vec;
 
   // Sanity checks
-  if (signal_start < 0 || signal_end < signal_start || signal_end > n)
+  if (signal_start < 0)
   {
-    throw PyCR::ValueError("[hMaxSNR] signal window out of range.");
+    char error_message[256];
+    sprintf(error_message, "[hMaxSNR] signal_start[=%d] < 0", signal_start);
+    throw PyCR::ValueError(error_message);
+  }
+
+  if (signal_end < signal_start || signal_end > n)
+  {
+    char error_message[256];
+    sprintf(error_message, "[hMaxSNR] signal_end[=%d] < signal_start[=%d]", signal_end, signal_start);
+    throw PyCR::ValueError(error_message);
+  }
+
+  if (signal_end > n)
+  {
+    char error_message[256];
+    sprintf(error_message, "[hMaxSNR] signal_end[=%d] > n=[%d]", signal_end, n);
+    throw PyCR::ValueError(error_message);
   }
 
   // Calculate the mean
