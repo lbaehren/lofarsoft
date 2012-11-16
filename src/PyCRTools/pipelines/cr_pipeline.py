@@ -52,7 +52,7 @@ start = time.clock()
 event = crdb.Event(db = db, id = options.id)
 
 # Set the event status
-event.status = "CR_PIPELINE_PROCESSING"
+event.status = "PROCESSING"
 event.write(recursive=False, parameters=False)
 
 cr_found = False

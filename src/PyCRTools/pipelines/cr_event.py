@@ -355,7 +355,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         if station_info:
             if station_info.polarization:
                 polarization_info = station_info.polarization["%d" %(current_polarization)]
-                polarization_info.alt_status = "CR_EVENT_PROCESSING"
+                polarization_info.alt_status = "PROCESSING"
                 polarization_info.write(recursive=False, parameters=False)
 
         results={}
@@ -1484,7 +1484,7 @@ def process_event(event_id=-1):
     """
     if event_id > 0:
         event_info = db_manager.getEvent(id=event_id)
-        event_info.alt_status = "CR_EVENT_PROCESSING"
+        event_info.alt_status = "PROCESSING"
         event_info.write(recursive=False, parameters=False)
         for datafile_info in event_info.datafiles:
             filename_full = os.path.join(datadir, datafile_info.filename)
