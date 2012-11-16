@@ -56,6 +56,8 @@ class CRDatabasePopulator(object):
         else:
             print "  Building list of files to process..."
             self.filename_list = os.listdir(datapath)
+            print "  - Sorting filename list..."
+            self.filename_list.sort()
 
             if options.verbose:
                 print "  initial list contains {0} files".format(len(self.filename_list))
@@ -78,15 +80,9 @@ class CRDatabasePopulator(object):
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
-            # Exclude: manual dumps
+            # Exclude: test
             print "  filtering out manual dumps..."
             self.filename_list = [f for f in self.filename_list if ("manual" not in f)]
-            if options.verbose:
-                print "    list contains {0} files after filtering".format(len(self.filename_list))
-
-            # Exclude: L00000 dumps
-            print "  filtering out L00000 dumps..."
-            self.filename_list = [f for f in self.filename_list if ("L00000_" not in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
@@ -102,11 +98,6 @@ class CRDatabasePopulator(object):
             self.filename_list = [f for f in self.filename_list if (f not in db_filename_list)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
-
-            print "  - Sorting filename list..."
-            filename_transposed_list = [s.split('_',1)[1]+'_'+s.split('_',1)[0] for s in self.filename_list]
-            filename_transposed_list.sort()
-            self.filename_list = [s.rsplit('_',1)[1]+'_'+s.rsplit('_',1)[0] for s in filename_transposed_list]
 
 
 
