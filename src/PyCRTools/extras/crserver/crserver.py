@@ -18,7 +18,7 @@ from StringIO import StringIO
 parser = OptionParser()
 parser.add_option("-p", "--port", default = 8000, type = "int", help="port to bind to")
 parser.add_option("-n", "--hostname", default = "localhost", help = "hostname or IP of server")
-parser.add_option("-d", "--database", default = "cr.db", help = "filename of database")
+parser.add_option("-d", "--database", default = "crdb.sqlite", help = "filename of database")
 
 (options, args) = parser.parse_args()
 

@@ -28,7 +28,7 @@ cr.tasks.task_write_parfiles = False
 parser = OptionParser()
 parser.add_option("-i", "--id", type="int", help="event ID", default=1)
 parser.add_option("-b", "--blocksize", type="int", default=2**16)
-parser.add_option("-d", "--database", default="cr.db", help="filename of database")
+parser.add_option("-d", "--database", default="crdb.sqlite", help="filename of database")
 parser.add_option("-o", "--output-dir", default="./", help="output directory")
 parser.add_option("-s", "--station", action="append", help="only process given station")
 parser.add_option("-a", "--accept_snr", default = 5, help="accept pulses with snr higher than this in the beamformed timeseries")
