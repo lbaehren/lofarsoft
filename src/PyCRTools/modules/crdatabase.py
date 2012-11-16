@@ -518,19 +518,13 @@ class CRDatabase(object):
 
             # Updates to Event and EventParameters
             sql_list.append("ALTER TABLE events ADD COLUMN statusmessage TEXT;")
-            sql_list.append("ALTER TABLE eventparameters ADD COLUMN cr_event_status TEXT;")
-            sql_list.append("ALTER TABLE eventparameters ADD COLUMN cr_event_statusmessage TEXT;")
 
             # Updates to Station and StationParameters
             sql_list.append("ALTER TABLE stations ADD COLUMN statusmessage TEXT;")
-            sql_list.append("ALTER TABLE stationparameters ADD COLUMN cr_event_status TEXT;")
-            sql_list.append("ALTER TABLE stationparameters ADD COLUMN cr_event_statusmessage TEXT;")
             sql_list.append("ALTER TABLE stationparameters ADD COLUMN plotfiles TEXT;")
 
             # Updates to Polarization and PolarizationParameters
             sql_list.append("ALTER TABLE polarizations ADD COLUMN statusmessage TEXT;")
-            sql_list.append("ALTER TABLE polarizationparameters ADD COLUMN cr_event_status TEXT;")
-            sql_list.append("ALTER TABLE polarizationparameters ADD COLUMN cr_event_statusmessage TEXT;")
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
@@ -545,9 +539,7 @@ class CRDatabase(object):
         5 and the required version is larger than the database version.
 
         List of changes:
-        - Add plotfiles parameter to StationParameters table
-        - Add cr_event_status and cr_event_statusmessage to all Parameter tables
-        - Add statusmessage to all tables as a keyword
+        - Add 'alt_status' and 'alt_statusmessage' to all tables as a keyword
         """
         db_version_pre = 5
         db_version_post = 6
@@ -559,15 +551,15 @@ class CRDatabase(object):
 
             sql_list= []
 
-            # Updates to Event and EventParameters
+            # Updates to Events table
             sql_list.append("ALTER TABLE events ADD COLUMN alt_status TEXT;")
             sql_list.append("ALTER TABLE events ADD COLUMN alt_statusmessage TEXT;")
 
-            # Updates to Station and StationParameters
+            # Updates to Stations table
             sql_list.append("ALTER TABLE stations ADD COLUMN alt_status TEXT;")
             sql_list.append("ALTER TABLE stations ADD COLUMN alt_statusmessage TEXT;")
 
-            # Updates to Polarization and PolarizationParameters
+            # Updates to Polarizations table
             sql_list.append("ALTER TABLE polarizations ADD COLUMN alt_status TEXT;")
             sql_list.append("ALTER TABLE polarizations ADD COLUMN alt_statusmessage TEXT;")
 
@@ -1655,9 +1647,7 @@ class Event(object):
       *lora_posz*,
       *lora_time*,
       *lora_utc_time_secs*,
-      *plotfiles*,
-      *cr_event_status*,
-      *cr_event_statusmessage*.
+      *plotfiles*.
     """
 
     def __init__(self, db=None, id=0):
@@ -1833,7 +1823,7 @@ class Event(object):
         if self._db:
             if self._inDatabase:
                 # Add the event information
-                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()))
+                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 sql_list.append(sql)
 
                 # Add the event parameters
@@ -2030,7 +2020,9 @@ class Event(object):
         print "  %-40s : %d" %("ID", self._id)
         print "  %-40s : %s (%s s)" %("Timestamp", time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(int(self.timestamp))), self.timestamp)
         print "  %-40s : %s" %("Status", self.status)
-        print "  %-40s : %s" %("Status message", self. statusmessage)
+        print "  %-40s : %s" %("Status message", self.statusmessage)
+        print "  %-40s : %s" %("Alt Status", self.alt_status)
+        print "  %-40s : %s" %("Alt Status message", self.alt_statusmessage)
 
         # Datafiles
         n_datafiles = len(self.datafiles)
@@ -2465,8 +2457,6 @@ class Station(object):
       The database supports the following parameter keyword:
 
       *crp_pulse_direction*,
-      *cr_event_status*,
-      *cr_event_statusmessage*,
       *plotfiles*.
     """
 
@@ -2488,7 +2478,7 @@ class Station(object):
         self.stationname = ""
         self.status = "NEW"
         self.statusmessage = ""
-        self.alt_status = "NEW" # Allowed values: NEW, CR_FOUND, CR_NOT_FOUND, CR_ANALYZED, CR_NOT_ANALYZED
+        self.alt_status = "NEW"
         self.alt_statusmessage = ""
         self.polarization = {}
         self.parameter = StationParameter(parent=self)
@@ -2634,7 +2624,7 @@ class Station(object):
         if self._db:
             if self._inDatabase:
                 # Add the station information
-                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()))
+                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 sql_list.append(sql)
 
                 # Add the station parameters
@@ -2815,6 +2805,8 @@ class Station(object):
         print "  %-40s : %s" %("Station name", self.stationname)
         print "  %-40s : %s" %("Status", self.status)
         print "  %-40s : %s" %("Status message", self.statusmessage)
+        print "  %-40s : %s" %("Alt Status", self.alt_status)
+        print "  %-40s : %s" %("Alt Status message", self.alt_statusmessage)
 
         # Polarizations
         n_polarizations = len(self.polarization)
@@ -2942,9 +2934,7 @@ class Polarization(object):
       *timeseries_power_mean*,
       *timeseries_power_rms*,
       *timeseries_raw_rms*,
-      *timeseries_rms*,
-      *cr_event_status*,
-      *cr_event_statusmessage*.
+      *timeseries_rms*.
     """
 
     def __init__(self, db=None, id=0):
@@ -3096,7 +3086,7 @@ class Polarization(object):
         if self._db:
             if self._inDatabase:
                 # Add the station information
-                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', resultsfile='{5}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.resultsfile))
+                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', status='{5}', statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
                 sql_list.append(sql)
 
                 # Add the polarization parameters
@@ -3166,6 +3156,8 @@ class Polarization(object):
         print "  %-40s : %s" %("Direction", self.direction)
         print "  %-40s : %s" %("Status", self.status)
         print "  %-40s : %s" %("Status message", self.statusmessage)
+        print "  %-40s : %s" %("Alt Status", self.alt_status)
+        print "  %-40s : %s" %("Alt Status message", self.alt_statusmessage)
         print "  %-40s : %s" %("Results file", self.resultsfile)
 
         # Parameters
