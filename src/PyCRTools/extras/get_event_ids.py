@@ -7,6 +7,7 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-d", "--database", default="cr.db", help = "filename of database")
 parser.add_option("-s", "--status", default="", help = "event status")
+parser.add_option("-a", "--alt-status", action="store_true", default=False, help = "use alt status")
 
 (options, args) = parser.parse_args()
 
@@ -19,7 +20,10 @@ with con:
     cur = con.cursor()
 
     if options.status != "":
-        cur.execute("SELECT eventID FROM events WHERE status=?", (options.status, ))
+        if options.alt_status:
+            cur.execute("SELECT eventID FROM events WHERE alt_status=?", (options.status, ))
+        else:
+            cur.execute("SELECT eventID FROM events WHERE status=?", (options.status, ))
     else:
         cur.execute("SELECT eventID FROM events")
 
