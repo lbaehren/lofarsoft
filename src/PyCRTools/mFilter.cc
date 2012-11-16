@@ -457,6 +457,10 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 {
   HInteger N = std::distance(data, data_end);
 
+  if (N % 2 == 0) {
+    throw PyCR::ValueError("[hApplyHilbertTransform] vector size must be odd");
+  }
+
   Iter it = data;
 
   // Shift phases of positive frequencies by -pi/2
