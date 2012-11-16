@@ -114,7 +114,7 @@ class CRDatabasePopulator(object):
             self.ID['event'] = self.createEventID(timestamp=timestamp)
 
             # Write event info to list of SQL statements
-            sql = "INSERT INTO main.events (eventID, timestamp, status) VALUES ({0}, {1}, '{2}');".format(self.ID['event'], timestamp, 'NEW')
+            sql = "INSERT INTO main.events (eventID, timestamp, status, alt_status) VALUES ({0}, {1}, '{2}','{3}');".format(self.ID['event'], timestamp, 'NEW', 'NEW')
             self.sqlList.append(sql)
 
             # Add LORA data to event parameters
@@ -139,7 +139,7 @@ class CRDatabasePopulator(object):
             # Write station info to list of SQL statements
             self.ID['station'] = self.newID['station']
             self.newID['station'] += 1
-            sql = "INSERT INTO main.stations (stationID, stationname, status) VALUES ({0},'{1}','{2}');".format(self.ID['station'],stationname, 'NEW')
+            sql = "INSERT INTO main.stations (stationID, stationname, status, alt_status) VALUES ({0},'{1}','{2}','{3}');".format(self.ID['station'],stationname, 'NEW', 'NEW')
             self.sqlList.append(sql)
 
             # Write station parameters to list of SQL statements
@@ -164,7 +164,7 @@ class CRDatabasePopulator(object):
                 # Write polarization info to list of SQL statements
                 antennaset = str(dx.antennaset)
                 resultsfile = str(dx.resultsfile(pol_direction))
-                sql = "INSERT INTO main.polarizations (polarizationID, antennaset, direction, status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}');".format(self.ID['polarization'], antennaset, pol_direction, 'NEW', resultsfile)
+                sql = "INSERT INTO main.polarizations (polarizationID, antennaset, direction, status, alt_status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}','{5}');".format(self.ID['polarization'], antennaset, pol_direction, 'NEW', 'NEW', resultsfile)
                 self.sqlList.append(sql)
 
                 # Write polarization parameters to list of SQL statements
@@ -210,7 +210,6 @@ class CRDatabasePopulator(object):
 
         # EventID Validation:
 
-        # TEST: CRDatabasePopulator.createEventID() - Check for negative value
         if result < 0:
             raise ValueError("Invalid EventID value (< 0), probably due to invalid timestamp (={0}).".format(timestamp))
 
@@ -220,7 +219,6 @@ class CRDatabasePopulator(object):
         # creation of two event s that occur on the boundary of a
         # second.
 
-        # TEST: CRDatabasePopulator.createEventID() - Check for duplicate value
         sql = "SELECT eventID FROM main.events WHERE eventID={0}".format(result)
         records = self.db.select(sql)
         if len(records) > 0:
