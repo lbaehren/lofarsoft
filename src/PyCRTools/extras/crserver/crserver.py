@@ -151,7 +151,7 @@ def events_handler():
     c = conn.cursor()
 
     # Fetch all event IDs
-    c.execute("""SELECT e.eventID, e.timestamp, e.status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere FROM
+    c.execute("""SELECT e.eventID, e.timestamp, e.status, e.alt_status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere FROM
     events AS e LEFT JOIN eventparameters AS ep ON (e.eventID=ep.eventID)""")
 
     # Generate empty XML
@@ -164,15 +164,16 @@ def events_handler():
         SubElement(event, "id").text = str(e[0])
         SubElement(event, "timestamp").text = str(datetime.utcfromtimestamp(e[1]))
         SubElement(event, "status").text = str(e[2])
+        SubElement(event, "alt_status").text = str(e[3])
 
         lora = SubElement(event, "lora")
 
-        energy = unpickle_parameter(e[3])
-        core_x = unpickle_parameter(e[4])
-        core_y = unpickle_parameter(e[5])
-        azimuth = unpickle_parameter(e[6])
-        elevation = unpickle_parameter(e[7])
-        moliere = unpickle_parameter(e[8])
+        energy = unpickle_parameter(e[4])
+        core_x = unpickle_parameter(e[5])
+        core_y = unpickle_parameter(e[6])
+        azimuth = unpickle_parameter(e[7])
+        elevation = unpickle_parameter(e[8])
+        moliere = unpickle_parameter(e[9])
 
         if good_lora_reconstruction(core_x, core_y, moliere, elevation):
             lora.attrib['good_reconstruction'] = "true"

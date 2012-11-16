@@ -30,6 +30,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <th>Id</th>
         <th>Timestamp</th>
         <th>Event status</th>
+        <th>Event alt_status</th>
         <th>Energy (eV)</th>
         <th>Core x (m)</th>
         <th>Core y (m)</th>
@@ -39,7 +40,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       </tr>
     </thead>
     <xsl:for-each select="/elements/event">
-      <xsl:if test="status='CR_FOUND' or status='CR_ANALYZED' or status='CR_PHYSICS_PROCESSING'">
+      <xsl:if test="status='CR_FOUND' or alt_status='CR_FOUND'">
       <xsl:choose>
          <xsl:when test="lora/@good_reconstruction">
            <tr class="highlight">
@@ -51,6 +52,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              </td>
              <td><xsl:value-of select="timestamp"/></td>
              <td><xsl:value-of select="status"/></td>
+             <td><xsl:value-of select="alt_status"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
              <td><xsl:value-of select="lora/core_x"/></td>
              <td><xsl:value-of select="lora/core_y"/></td>
@@ -69,6 +71,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              </td>
              <td><xsl:value-of select="timestamp"/></td>
              <td><xsl:value-of select="status"/></td>
+             <td><xsl:value-of select="alt_status"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
              <td><xsl:value-of select="lora/core_x"/></td>
              <td><xsl:value-of select="lora/core_y"/></td>
@@ -87,6 +90,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <th>Id</th>
       <th>Timestamp</th>
       <th>Event status</th>
+      <th>Event alt_status</th>
       <th>Energy (eV)</th>
       <th>Core x (m)</th>
       <th>Core y (m)</th>
@@ -104,6 +108,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         </td>
         <td><xsl:value-of select="timestamp"/></td>
         <td><xsl:value-of select="status"/></td>
+        <td><xsl:value-of select="alt_status"/></td>
         <td><xsl:value-of select="lora/energy"/></td>
         <td><xsl:value-of select="lora/core_x"/></td>
         <td><xsl:value-of select="lora/core_y"/></td>
