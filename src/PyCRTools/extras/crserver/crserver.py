@@ -63,18 +63,19 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     header = Element("header")
 
     # Get event header
-    cursor.execute("SELECT timestamp, status FROM events WHERE eventID=?", (eventID, ))
+    cursor.execute("SELECT timestamp, status, alt_status FROM events WHERE eventID=?", (eventID, ))
 
     e = cursor.fetchone()
     SubElement(header, "id").text = str(eventID)
     SubElement(header, "timestamp").text = str(datetime.utcfromtimestamp(e[0]))
     SubElement(header, "status").text = str(e[1])
+    SubElement(header, "alt_status").text = str(e[2])
 
     if station:
         s = SubElement(header, "station")
         SubElement(s, "name").text = str(station)
 
-        cursor.execute("""SELECT status FROM
+        cursor.execute("""SELECT status, alt_status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         WHERE (eventID=? AND stationName=?)
@@ -83,12 +84,13 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         e = cursor.fetchone()
 
         SubElement(s, "status").text = e[0]
+        SubElement(s, "alt_status").text = e[1]
 
     if polarization:
         p = SubElement(header, "polarization")
         SubElement(p, "name").text = str(polarization)
 
-        cursor.execute("""SELECT p.status FROM
+        cursor.execute("""SELECT p.status, p.alt_status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -98,9 +100,10 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         e = cursor.fetchone()
 
         SubElement(p, "status").text = e[0]
+        SubElement(p, "alt_status").text = e[1]
 
     # Get all stations in event
-    cursor.execute("""SELECT stationname, status FROM
+    cursor.execute("""SELECT stationname, status, alt_status FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     WHERE eventID=?
@@ -113,9 +116,10 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         if e[0] == station:
             s.set("current", "true")
         SubElement(s, "status").text = e[1]
+        SubElement(s, "alt_status").text = e[2]
 
         # Get all polarizations for this station
-        cursor.execute("""SELECT p.direction, p.status FROM
+        cursor.execute("""SELECT p.direction, p.status, p.alt_status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -127,6 +131,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
             p = SubElement(polarizations, "polarization")
             SubElement(p, "name").text = k[0]
             SubElement(p, "status").text = k[1]
+            SubElement(p, "alt_status").text = k[2]
 
     # Get all datafiles in event
     cursor.execute("""SELECT filename FROM
@@ -271,7 +276,7 @@ def station_handler(eventID, station_name):
     elements.append(header)
 
     # Get all polarizations for this station
-    c.execute("""SELECT p.direction, p.status FROM
+    c.execute("""SELECT p.direction, p.status, p.alt_status FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -283,6 +288,7 @@ def station_handler(eventID, station_name):
         s = SubElement(polarizations, "polarization")
         SubElement(s, "name").text = e[0]
         SubElement(s, "status").text = e[1]
+        SubElement(s, "alt_status").text = e[1]
 
     # Fetch all station parameters
     parameters = SubElement(elements, "parameters")

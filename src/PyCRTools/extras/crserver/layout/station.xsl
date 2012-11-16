@@ -56,7 +56,9 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <th>Id</th>
       <th>Timestamp</th>
       <th>Event status</th>
+      <th>Event alt_status</th>
       <th>Station status</th>
+      <th>Station alt_status</th>
     </tr>
     <tr>
       <td>
@@ -69,7 +71,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <xsl:value-of select="/elements/header/status"/>
       </td>
       <td>
+        <xsl:value-of select="/elements/header/alt_status"/>
+      </td>
+      <td>
         <xsl:value-of select="/elements/header/station/status"/>
+      </td>
+      <td>
+        <xsl:value-of select="/elements/header/station/alt_status"/>
       </td>
     </tr>
   </table>
@@ -84,6 +92,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <tr>
         <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/>/<xsl:value-of select="/elements/header/station/name"/>/<xsl:value-of select="name"/></xsl:attribute><xsl:value-of select="name"/></a></td>
         <td><xsl:value-of select="status"/></td>
+        <td><xsl:value-of select="alt_status"/></td>
       </tr>
     </xsl:for-each>
   </table>

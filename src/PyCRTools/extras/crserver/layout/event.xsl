@@ -51,6 +51,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <th>Id</th>
       <th>Timestamp</th>
       <th>Event status</th>
+      <th>Event alt_status</th>
     </tr>
     <tr>
       <td>
@@ -62,18 +63,21 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <td>
         <xsl:value-of select="/elements/header/status"/>
       </td>
+      <td>
+        <xsl:value-of select="/elements/header/alt_status"/>
+      </td>
     </tr>
   </table>
   <table>
   <caption id="logs">Logs</caption>
   <tr><th>Name</th><th>Description</th></tr>
-      <xsl:if test="/elements/header/status='CR_FOUND' or /elements/header/status='CR_NOT_FOUND' or /elements/header/status='CR_EVENT_PROCESSING'">
+      <xsl:if test="/elements/header/alt_status='CR_FOUND' or /elements/header/alt_status='CR_NOT_FOUND' or /elements/header/alt_status='PROCESSING'">
         <tr>
           <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.txt</xsl:attribute>cr_event</a></td>
           <td>First stage pipeline</td>
         </tr>
       </xsl:if>
-      <xsl:if test="/elements/header/status='CR_ANALYZED' or /elements/header/status='CR_NOT_ANALYZED' or /elements/header/status='CR_PHYSICS_PROCESSING'">
+      <xsl:if test="/elements/header/status='CR_FOUND' or /elements/header/status='CR_NOT_FOUND' or /elements/header/status='PROCESSING'">
         <tr>
           <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.txt</xsl:attribute>cr_event</a></td>
           <td>First stage pipeline</td>
@@ -89,8 +93,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <tr>
     <th>Name</th>
     <th>Station status</th>
+    <th>Station alt_status</th>
     <th>Polarization</th>
     <th>Polarization status</th>
+    <th>Polarization alt_status</th>
   </tr>
     <xsl:for-each select="/elements/header/stations/station">
     <xsl:sort select="name"/>
@@ -98,6 +104,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <xsl:variable name="station"><xsl:value-of select="name"/></xsl:variable>
         <td><a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/>/<xsl:copy-of select="$station" /></xsl:attribute><xsl:copy-of select="$station" /></a></td>
         <td><xsl:value-of select="status"/></td>
+        <td><xsl:value-of select="alt_status"/></td>
         <td>
           <table>
           <xsl:for-each select="polarizations/polarization">
@@ -112,6 +119,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <xsl:for-each select="polarizations/polarization">
             <tr>
               <td><xsl:value-of select="status"/></td>
+              <td><xsl:value-of select="alt_status"/></td>
             </tr>
           </xsl:for-each>
           </table>
