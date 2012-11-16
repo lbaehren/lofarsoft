@@ -164,7 +164,7 @@ def call_populate_script(data_filename=""):
 (options, args) = parseOptions()
 
 # Create command to execute
-commandline_base = "python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/scripts/crdb_populate2.py "
+commandline_base = "python "+os.environ["LOFARSOFT"]+"/src/PyCRTools/scripts/crdb_populate.py "
 if ("" != options.datapath): commandline_base += "-d {0} ".format(options.datapath)
 if ("" != options.resultspath): commandline_base += "-r {0} ".format(options.resultspath)
 if ("" != options.lorapath): commandline_base += "-l {0} ".format(options.lorapath)
