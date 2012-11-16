@@ -45,6 +45,9 @@ class CRDatabase(object):
 
         # Initialize database structure
         self.db.open()
+        if not os.path.exists(filename):
+            create = True
+
         if create:
             self.__createDatabase()
 
@@ -53,6 +56,8 @@ class CRDatabase(object):
 
         # Database version applied in this module
         self.db_required_version = 6
+
+
         if create:
             self.__updateDatabase()
 
