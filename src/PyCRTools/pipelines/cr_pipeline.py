@@ -123,7 +123,7 @@ for station in stations:
             if dipole_names[2*i] in findrfi.good_antennas and dipole_names[2*i+1] in findrfi.good_antennas:
                 selected_dipoles.extend([dipole_names[2*i], dipole_names[2*i+1]])
 
-        f["SELECTED_DIPOLES"] = selected_dipoles
+#        f["SELECTED_DIPOLES"] = selected_dipoles
 
         # Read FFT data
         fft_data = f.empty("FFT_DATA")
@@ -151,18 +151,11 @@ for station in stations:
         # Get expected galactic noise strength
         galactic_noise = cr.trun("GalacticNoise", timestamp = tbb_time)
 
-#        # Get measured noise strength (using very ugly code needed because not all dipoles are selected and results are stored per polarization)
-#        antennas_spectral_power = dict(zip(
-#            station.polarization['0']["antennas"].values()+station.polarization['1']["antennas"].values(),
-#            station.polarization['0']["antennas_spectral_power"]+station.polarization['1']["antennas_spectral_power"]
-#            ))
-#
-#        antennas_spectral_power_correction = cr.hArray([antennas_spectral_power[k] for k in selected_dipoles])
-#
-#        # Correct to expected level
-#        cr.hInverse(antennas_spectral_power_correction)
-#        cr.hMul(antennas_spectral_power_correction, galactic_noise.galactic_noise)
-#        cr.hMul(fft_data[...], antennas_spectral_power_correction[...])
+        # Correct to expected level
+        print "findrfi.antennas_cleaned_power", findrfi.antennas_cleaned_power
+        cr.hInverse(findrfi.antennas_cleaned_power)
+        cr.hMul(findrfi.antennas_cleaned_power, galactic_noise.galactic_noise)
+        cr.hMul(fft_data[...], findrfi.antennas_cleaned_power[...])
 
         # Get timeseries data
         timeseries_data = f.empty("TIMESERIES_DATA")
