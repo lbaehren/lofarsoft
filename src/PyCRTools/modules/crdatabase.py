@@ -10,6 +10,7 @@ import re
 import pickle
 import time
 
+
 debug_mode = False
 
 class CRDatabase(object):
@@ -59,9 +60,12 @@ class CRDatabase(object):
         # Database version applied in this module
         self.db_required_version = 6
 
-
         if create:
             self.__updateDatabase()
+
+        # Throw an error message when opening a non supported db
+        if self.settings.db_version > self.db_required_version:
+            raise ValueError("The database version (v{0}) is larger than the one supported by this module (v{1}).".format(self.settings.db_version,self.db_required_version))
 
         # Path settings
         self.basepath = os.path.dirname(self.filename)
