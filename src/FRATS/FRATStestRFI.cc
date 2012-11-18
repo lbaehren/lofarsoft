@@ -345,6 +345,8 @@ int main (int argc,
 	vector<std::string> inputdirs;
 	int ninputdirs;
 	bool multipledirs=false;
+    int Rstartchan;
+    int Rendchan;
 
 // start subband of the data. Mostly used in a previous version of the program
 	vector<int> inputstartSBs;
@@ -912,8 +914,24 @@ if(doFlagging){
         nrFlaggedChannels+=RFIcleaner.cleanChannel0("1");
         // Subtract average timeseries, a technique known as ZeroDMing. Effectiveness needs to be investigated.
         if(DoZeroDM){
-            RFIcleaner.calcAverageTimeseries();
-            RFIcleaner.subtractAverageTimeseries();
+            //RFIcleaner.calcAverageTimeseries();
+            //RFIcleaner.subtractAverageTimeseries();
+            //# Per stream
+            for(int sc=0; sc<nstreams; sc++){
+                Rstartchan=NrChannels*sc;
+                Rendchan=NrChannels*(sc+1);
+                RFIcleaner.calcAverageTimeseriesStream(Rstartchan,Rendchan);
+                RFIcleaner.subtractAverageTimeseriesStream(Rstartchan,Rendchan);
+                if(blockNr<2){
+                    cout << blockNr << " " << sc << " ";
+                    RFIcleaner.printAverageTimeseriesStream(false);
+                    cout << blockNr << ";" << sc << " ";
+                    RFIcleaner.calcAverageTimeseriesStream(Rstartchan,Rendchan);
+                    RFIcleaner.printAverageTimeseriesStream(false);
+                }
+                
+            }
+
         }
 
         // Write baseline and sqrt timeseries to files

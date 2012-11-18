@@ -1404,6 +1404,7 @@ Save timeseries (append)
                 sqrDivBaselineSort.resize(itsNrChannels);
                 timeseries.resize(itsNrSamples);
                 avgtimeseries.resize(itsNrSamples);
+                avgtimeseriesstream.resize(itsNrSamples);
                 sqrTimeseries.resize(itsNrSamples);
                 
         }
@@ -1486,6 +1487,29 @@ Save timeseries (append)
             return true;
         }
         
+        bool RFIcleaning::calcAverageTimeseriesStream(int startchan, int endchan){
+             // calculate average timeseries
+             float * it;
+             float * vec_end=itsDataStart+endchan;
+             it=itsDataStart;
+    /*         #ifdef _OPENMP
+                #pragma omp parallel for private(it,vec_end)
+            #else
+            #endif // _OPENMP
+    */         for(int sa=0; sa<itsNrSamples; sa++){
+                    it=itsDataStart+sa*itsNrChannels+startchan;
+                    avgtimeseriesstream[sa]=0.0;
+                    for ( ; it<vec_end; it++ ) {
+                        avgtimeseriesstream[sa]+=*it;
+                    }
+                    vec_end+=itsNrChannels;
+                    avgtimeseriesstream[sa]/=(endchan-startchan);//itsNrChannels;
+                }
+            return true;
+        }
+
+
+
 
         bool RFIcleaning::averageTimeseries(){
             it1=timeseries.begin();
@@ -1880,6 +1904,21 @@ Save timeseries (append)
             return true;  
         }
 
+        bool RFIcleaning::printAverageTimeseriesStream(bool printindex=true){
+            cout << " Average Timeseries     ";
+            if(printindex){
+                for(int i=0; i<avgtimeseriesstream.size()/10; i++){
+                    cout << i << " " << avgtimeseriesstream[i] << " " ; 
+                }
+            } else {
+                for(int i=0; i<avgtimeseriesstream.size()/10; i++){
+                    cout << avgtimeseriesstream[i] << " " ; 
+                }
+            }
+            cout << endl;
+            return true;  
+        }
+
         bool RFIcleaning::printSqrTimeseries(bool printindex=true){
             cout << " Square sum Timeseries     ";
             
@@ -1939,6 +1978,49 @@ Save timeseries (append)
             return true;
         }
         
+        bool RFIcleaning::subtractAverageTimeseriesStream(int startchan, int endchan){
+             float * it;
+             float * vec_end=itsDataStart+endchan;
+             it=itsDataStart;
+    /*         #ifdef _OPENMP
+                #pragma omp parallel for private(it,vec_end)
+            #else
+            #endif // _OPENMP
+    */         for(int sa=0; sa<itsNrSamples; sa++){
+                    it=itsDataStart+sa*itsNrChannels+startchan;
+                    for ( ; it<vec_end; it++ ) {
+                        *it-=avgtimeseriesstream[sa];
+
+                    }
+                    vec_end+=itsNrChannels;
+                }
+            return true;
+            
+            /*
+            float * dataptr = itsDataStart+startchan;
+            it1=avgtimeseriesstream.begin();
+            vec1_end=avgtimeseriesstream.end();
+            it2=avgtimeseriesstream.begin();
+            int chindex=0;
+            //cout << it1 << " " << vec1_end << endl;
+            while(dataptr<itsDataEnd){
+                while(chindex<endchan && dataptr<itsDataEnd){
+                    *dataptr -= *it2;
+                    dataptr++;
+                    chindex++;
+                }
+                chindex=startchan;
+                dataptr+=itsNrChannels-endchan+startchan; 
+                
+                it2++;
+                if(it2==vec1_end){
+                    it2=avgtimeseriesstream.begin();
+                }
+            }
+            */
+            return true;
+        }
+
         bool RFIcleaning::writeBadSamples(ofstream * fsfile, int blockNr){
             fsfile->write((const char*)&blockNr, sizeof(blockNr));
             size=badSamples.size();

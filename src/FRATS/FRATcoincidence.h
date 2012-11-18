@@ -428,6 +428,7 @@ namespace FRAT {
                 vector <float> baseline; // collapse over time
                 vector <float> timeseries; // collapse over channels
                 vector <float> avgtimeseries; 
+                vector <float> avgtimeseriesstream; 
                 vector <float> sqrTimeseries;
                 vector <float> IPbaseline;
                 vector <float> sqrBaseline; // sum over time of samples^2 for each channel
@@ -459,6 +460,7 @@ namespace FRAT {
                 bool cleanSamples(std::string method); // replace bad samples
                 bool calcTimeseries(); // sum over channels for each timestep
                 bool calcAverageTimeseries(); // sum over channels for each timestep divided by number of channels
+                bool calcAverageTimeseriesStream(int startchan, int endchan); // sum over channels for each timestep divided by number of channels
                 bool averageTimeseries(); // calculate average timeseries by dividing the timeseries by itsNrChannels
                 bool calcSqrTimeseries(); // sum over channels of samples^2 for each timestep
                 bool interpolateBaseline(); // not yet implemented
@@ -468,9 +470,11 @@ namespace FRAT {
                 bool printBaseline(bool printindex); // print baseline with or without channelindex
                 bool printTimeseries(bool printindex); // print timeseries with or without sampleindex
                 bool printAverageTimeseries(bool printindex); // print average timeseries with or without sampleindex
+                bool printAverageTimeseriesStream(bool printindex); // print average timeseries with or without sampleindex
                 bool printSqrTimeseries(bool printindex); // print sqrTimeseries with or without sampleindex
                 bool divideBaseline(bool useInterPolatedBaseline); // divide data at each sample by the baseline
                 bool subtractAverageTimeseries(); // subtract average timeseries, ZeroDMing
+                bool subtractAverageTimeseriesStream(int startchan, int endchan); // subtract average timeseries, ZeroDMing
                 bool writeBadSamples(ofstream * fsfile, int blockNr); // write bad samples to file
                 bool writeBadChannels(ofstream * fcfile, int blockNr); // write bad channels to file
                 bool writeBaseline(ofstream * blfile, int blockNr); // write baseline to file
