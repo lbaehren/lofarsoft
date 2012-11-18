@@ -24,7 +24,7 @@ with con:
     # Get cursor on database
     cur = con.cursor()
 
-    if options.all_events:
+    if options.every_event:
         cur.execute("SELECT eventID FROM events")
 
         events = [e[0] for e in cur.fetchall()]
