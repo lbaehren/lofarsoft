@@ -12,7 +12,7 @@ parser.add_option("-e", "--every-event", action="store_true", default=False, hel
 parser.add_option("-s", "--event-status", default = "NEW", help = "update event status to given value")
 parser.add_option("-o", "--old-event-status", default = "NEW", help = "update all events with this status to new status")
 parser.add_option("-d", "--database", default = "cr.db", help = "filename of database")
-parser.add_option("-a", "--alt-status", action = "store_true", default = False, doc = "use alternate status for all actions.")
+parser.add_option("-a", "--alt-status", action = "store_true", default = False, help = "use alternate status for all actions.")
 
 (options, args) = parser.parse_args()
 
