@@ -3036,7 +3036,7 @@ class Polarization(object):
         if self._db:
             # Write attributes
             if self._inDatabase:
-                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', , status='{5}', statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', alt_status='{5}', alt_statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
                 self._db.execute(sql)
             else:
                 if 0 == self._id:

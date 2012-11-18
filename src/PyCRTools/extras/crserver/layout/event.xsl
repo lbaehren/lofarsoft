@@ -119,6 +119,14 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
           <xsl:for-each select="polarizations/polarization">
             <tr>
               <td><xsl:value-of select="status"/></td>
+            </tr>
+          </xsl:for-each>
+          </table>
+        </td>
+        <td>
+          <table>
+          <xsl:for-each select="polarizations/polarization">
+            <tr>
               <td><xsl:value-of select="alt_status"/></td>
             </tr>
           </xsl:for-each>
