@@ -41,8 +41,8 @@ with con:
 
     if options.alt_status:
         for eid in events:
-            print "setting alt_status of event", eid, "to", options.event_alt_status
-            cur.execute('UPDATE events SET alt_status=? WHERE eventID=?', (options.event_alt_status, eid))
+            print "setting alt_status of event", eid, "to", options.event_status
+            cur.execute('UPDATE events SET alt_status=? WHERE eventID=?', (options.event_status, eid))
     else:
         for eid in events:
             print "setting status of event", eid, "to", options.event_status
