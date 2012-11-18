@@ -27,6 +27,19 @@ def myplot(data,doSquare=False):
     ax4.set_ylabel("time sample")
     
 
+
+
+def cleanPercentage(data,lowerfraction,upperfraction):
+    data2=np.copy(data)
+    data2=data2.reshape(np.product(data2.shape))
+    data2.sort()
+    low=data2[lowerfraction*len(data2)]
+    high=data2[upperfraction*len(data2)]
+    data[data<low]=0
+    data[data>high]=0
+    del data2
+
+
 def dedispersionShift(data,dr,DM,markboundary):
     delays=dedispersion.freq_to_delay(DM,dr.par['frequencies'],dr.par['timeresolution'])
     if markboundary:
@@ -68,6 +81,16 @@ def divideBaseline(data,blocksize=None):
         for b in range(nblocks):
             baseline=np.average(data[b*blocksize:(b+1)*blocksize],axis=0)
             data[b*blocksize:(b+1)*blocksize]/=baseline
+
+def subtractBaseline(data,blocksize=None):
+    if not blocksize:
+        baseline=np.average(data,axis=0)
+        data-=baseline
+    else:
+        nblocks=data.shape[0]/blocksize
+        for b in range(nblocks):
+            baseline=np.average(data[b*blocksize:(b+1)*blocksize],axis=0)
+            data[b*blocksize:(b+1)*blocksize]-=baseline
 
 
 def dataToFits(data,dr,fitsname,overwrite):
@@ -125,7 +148,98 @@ def flagSamples(data,directory,startblock,blocksize,method=1):
         flagindex=fs[block]+blocksize*block
         data[flagindex,:]=replacevalue
     
-    
+def RFIcalcbaseline(data,skipHighest=False):
+    if not skipHighest:
+        return np.sum(data,axis=0)
+    else:
+        correction=np.sum(np.sort(data,axis=1)[-0.05*data.shape[0]:,:],axis=0)
+        return (np.sum(data,axis=0)-correction)/0.95
+        
+def RFIcalcSqrBaseline(data,skipHighest=False):
+    if not skipHighest:
+        return np.sum(np.square(data),axis=0)
+    else:
+        correction=np.sum(np.square(np.sort(data,axis=1)[-0.05*data.shape[0]:,:]),axis=0)
+        return (np.sum(np.square(data),axis=0)-correction)/0.95
+
+def RFIcalcTimeseries(data):
+    return np.sum(data,axis=1)
+
+def RFIcalcAverageTimeseries(data):
+    return np.average(data,axis=1)
+
+def RFIaverageTimeseres(data,timeseries):
+    timeseries/=data.shape[1]
+
+def RFIcalcSqrTimeseries(data):
+    return np.sum(np.square(data),axis=1)
+
+def RFIcalcBadChannels(cutlevel,baseline,baselinesqr):
+    sqrDivBaseline=baselinesqr/np.square(baseline)    
+    sqrDivBaselineSort=np.copy(sqrDivBaseline)
+    sqrDivBaselineSort.sort()
+    nrchan=len(sqrDivBaselineSort)
+    av=np.average(sqrDivBaselineSort[0.1*nrchan:0.9*nrchan])
+    std=np.stddev(sqrDivBaselineSort[0.1*nrchan:0.9*nrchan])
+    limit=av+cutlevel*std
+    lowerlimit=av-cutlevel*std
+    index=np.arange(len(sqrDivBaseline))
+    badChans=index[sqrDivBaseline>limit]
+    badChans=np.append(badchans,index[sqrDivBaseline<lowerlimit])
+    return badChans
+
+def RFIcalcBadSamples(cutlevel,data,subdiv=8,reqsubdiv=2):
+    channelsPerPart=data.shape[1]/subdiv
+    data2=np.copy(data)
+    data2=data2.reshape(data.shape[0],subdiv,channelsPerPart)
+    collapsedData=np.sum(data2,axis=2)
+    collapsedDataSort=np.copy(collapsedData)
+    collapsedDataSort.sort(axis=0)
+    nrsa=collapsedDataSort.shape[0]
+    av=np.average(collapsedDataSort[0.1*nrsa:0.9*nrsa],axis=0)
+    std=np.std(collapsedDataSort[0.1*nrsa:0.9*nrsa],axis=0)
+    limit=av+cutlevel*std
+    index=np.arange(nrsa)
+    badSamples=np.copy(collapsedData)
+    badSamples.fill(0)
+    badSamples[collapsedData>limit]=1
+    return index[np.sum(badSamples,axis=1)>=reqsubdiv]
+
+def RFIcleanChannels(data,badChannels,method="1"):
+    if method==1:
+        data[:,badChannels]=1
+    elif method==0:
+        data[:,badChannels]=0
+    elif method=="prevfreq":
+        data[:,badChannels]=data[:badChannels-3]
+
+def RFIcleanChannels0(data,chPerSB,method):
+    if method==1:
+        data[:,range(0,data.shape[1],chPerSB)]=1 
+    elif method==0:
+        data[:,range(0,data.shape[1],chPerSB)]=0 
+
+def RFIcleanSamples(data,badSamples):
+    if method==1:
+        data[badSamples,:]=1
+    elif method==0:
+        data[badSamples,:]=0
+
+
+def RFIdivideBaseline(data,baseline):
+    data/=baseline 
+
+def subtractAverage(data,blocksize,nrstreams,zeroDM=False):
+    nblocks=data.shape[0]/blocksize
+    nchans=data.shape[1]/nrstreams
+    for block in range(nblocks):
+        for ch in range(nrstreams):
+            if zeroDM:
+                bl_av=np.average(data[block*blocksize:(block+1)*blocksize,ch*nchans:(ch+1)*nchans],axis=1).reshape(blocksize,1)
+            else:
+                bl_av=np.average(data[block*blocksize:(block+1)*blocksize,ch*nchans:(ch+1)*nchans])
+            data[block*blocksize:(block+1)*blocksize,ch*nchans:(ch+1)*nchans]-=bl_av
+
 
 
 try:
@@ -147,6 +261,7 @@ parser.add_option("-s","--startblock",type="int",default=0)
 parser.add_option("-n","--nofblocks",type="int",default=1)
 parser.add_option("-z","--blocksize","--sa",type="int",default=512)
 parser.add_option("-y","--dividebaseline",action="store_true",dest="dividebaseline",default=False)
+parser.add_option("-x","--subtractbaseline",action="store_true",dest="subtractbaseline",default=False)
 parser.add_option("-a","--savefits",action="store_true",dest="savefits",default=False)
 parser.add_option("-w","--overwritefits",action="store_true",dest="overwritefits",default=False)
 parser.add_option("-f","--fitsname",type="string",default="temp.fits")
@@ -163,6 +278,7 @@ parser.add_option("--pd","--plotdistance",type=float,dest="plotdistance",default
 parser.add_option("--pw","--plotwindow",type=float,dest="plotwindow",default=0)
 parser.add_option("--pc","--plotcenter",type=float,dest="plotcentertime",default=0)
 parser.add_option("--il","--integrationlength",type=int,dest="integrationlength",default=1)
+parser.add_option("--subav","--subtractaverage",action="store_true",default=False,dest="subtractaverage")
 
 
 (options,args)=parser.parse_args()
@@ -238,6 +354,19 @@ data1=data.reshape((data.shape[0]/chunksize,chunksize,totCh))
 # flag data
 print "Available for interactive use: data and dr (datareader) with dr.par for parameters"
 
+if options.subtractbaseline:
+    baseline=[]
+    nblocks=data.shape[0]/blocksize
+    for b in range(nblocks):
+        baseline.append(np.average(data[b*blocksize:(b+1)*blocksize],axis=0))
+    subtractBaseline(data)
+    for b in range(nblocks):
+        data[b*blocksize:(b+1)*blocksize]/=baseline[b]
+    flagmethod=0
+    cleanPercentage(data,0.1,0.9)
+    
+    
+
 if options.dividebaseline:
     divideBaseline(data,blocksize) 
     flagmethod=1
@@ -245,17 +374,66 @@ else:
     flagmethod="average"
 
 
+rfidir=options.rfidir
 if options.flagrfi:
-    rfidir=options.rfidir
     if not rfidir:
         raise ValueError("No RFI directory specified")
     else:
         flagChannels(data,rfidir,startblock,blocksize,flagmethod)
-        flagSamples(data,rfidir,startblock,blocksize,flagmethod)
         if not options.chPerSB:
             print "WARNING, not flagging 0-th channel of the subband. Please specify -c" 
         else:
-            data[:,np.arange(0,data.shape[1],options.chPerSB)]=1
+            data[:,np.arange(0,data.shape[1],options.chPerSB)]=0
+
+
+if options.flagrfi:
+    if not rfidir:
+        raise ValueError("No RFI directory specified")
+    else:
+        flagSamples(data,rfidir,startblock,blocksize,flagmethod)
+
+if options.subtractaverage:
+    zeroDM=True
+    subtractAverage(data,blocksize,nrstreams,zeroDM)
+    flagmethod=0
+    data[:,np.arange(0,data.shape[1],options.chPerSB)]=0
+    if options.flagrfi and not zeroDM:
+        if not rfidir:
+            raise ValueError("No RFI directory specified")
+        else:
+            flagSamples(data,rfidir,startblock,blocksize,flagmethod)
+            flagChannels(data,rfidir,startblock,blocksize,flagmethod)
+            if not options.chPerSB:
+                print "WARNING, not flagging 0-th channel of the subband. Please specify -c" 
+            else:
+                data[:,np.arange(0,data.shape[1],options.chPerSB)]=flagmethod
+
+#if options.dividebaseline:
+#    divideBaseline(data,blocksize) 
+#    flagmethod=1
+#else:
+#    flagmethod="average"
+
+if False:
+    rfidir=options.rfidir
+    if options.flagrfi:
+        if not rfidir:
+            raise ValueError("No RFI directory specified")
+        else:
+            flagChannels(data,rfidir,startblock,blocksize,flagmethod)
+            flagSamples(data,rfidir,startblock,blocksize,flagmethod)
+            if not options.chPerSB:
+                print "WARNING, not flagging 0-th channel of the subband. Please specify -c" 
+            else:
+                data[:,np.arange(0,data.shape[1],options.chPerSB)]=1
+
+    if options.dividebaseline:
+        divideBaseline(data,blocksize) 
+        flagmethod=1
+    else:
+        flagmethod="average"
+
+
 
 if options.DM!=None and not options.bTimeseries:
     dedispersionShift(data,dr,options.DM,markboundary=True)
@@ -269,7 +447,9 @@ if options.DM!=None and options.bTimeseries:
     offsets=fa.loadOffset(nDMs,nrstreams,rfidir)
     DM=options.DM
     if DM not in offsets.keys():
-        raise ValueError("Invalid DM, options "+str(offsets.keys()))
+        DM=[d for d in offsets.keys() if np.abs(d-options.DM) < 0.5*min(np.diff(par['DM']))][0] 
+        if DM not in offsets.keys():
+            raise ValueError("Invalid DM, options "+str(offsets.keys()))
     chPerBand=par['nrfreqs']/par['nrstreams']
     ts=[dedispersionToTimeseries(data, i*chPerBand, chPerBand, offsets[DM][i], dr, DM) for i in range(nrstreams)]
     reftime=startblock*par['sa']
@@ -282,8 +462,10 @@ if options.DM!=None and options.bTimeseries:
     ta=fa.makeTimeAxes(reftime,delays,length)
     av=fa.loadAverage(len(par['DM']),par['nrstreams'],rfidir)
     std=fa.loadStddev(len(par['DM']),par['nrstreams'],rfidir)
-    trmsg=fa.loadTriggerMsg(rfidir,bReturnArray=True,newVersion=3)
+    #trmsg=fa.loadTriggerMsg(rfidir,bReturnArray=True,newVersion=3)
+    trmsg=None
     if DM not in av.keys():
+        DM=[d for d in pv.keys() if np.abs(d-DM) < 0.5*min(np.diff(par['DM']))][0] 
         raise ValueError("Invalid DM, options "+str(av.keys()))
     else:
         av=av[DM]
