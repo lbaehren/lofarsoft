@@ -34,18 +34,12 @@ class Database(object):
         self._db = None
 
 
-    def open(self, filename=":memory:", host=None, user=None, password=None, dbname=None):
+    def open(self):
         """Open the database.
         """
 
         if self._db:
             self._db.close()
-
-        self._filename = filename
-        self._host = host
-        self._user = user
-        self._password = password
-        self._dbname = dbname
 
         if self._host:
             # Open PostgreSQL database
