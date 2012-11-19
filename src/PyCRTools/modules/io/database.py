@@ -3,11 +3,12 @@ Provide a simple database access interface using sqlite3.
 """
 
 import sqlite3
+import psycopg2
 
 class Database(object):
-    """Class to handle all python communication with an SQLite database."""
+    """Class to handle all python communication with an database."""
 
-    def __init__(self, filename=":memory:"):
+    def __init__(self, filename=":memory:", host=None, user=None, password=None, dbname=None):
         """Initialisation of the Database class.
 
         **Properties**
@@ -21,42 +22,41 @@ class Database(object):
         When the filename is ``:memory:`` the database is written to
         and read from memory.
         """
+
         self._filename = filename
+        self._host = host
+        self._user = user
+        self._password = password
+        self._dbname = dbname
+
         self._timeout = 60
-        self._isolation_level = "DEFERRED" # Default isolation level
 
         self._db = None
 
 
-    def open(self, filename="", isolation_level=None):
-        """Open an SQLite database.
-
-        **Properties**
-
-        ================== =======================================================
-        Parameter          Description
-        ================== =======================================================
-        *filename*         Filename of the database.
-        *isolation_level*  Type of isolation level for the connection.
-        ================== =======================================================
-
-        When the filename is ``:memory:`` the database is written to
-        and read from memory.
+    def open(self, filename=":memory:", host=None, user=None, password=None, dbname=None):
+        """Open the database.
         """
+
         if self._db:
             self._db.close()
 
-        if filename != "":
-            self._filename = filename
+        self._filename = filename
+        self._host = host
+        self._user = user
+        self._password = password
+        self._dbname = dbname
 
-        if not isolation_level:
-            isolation_level = self._isolation_level
-
-        self._db = sqlite3.connect(self._filename, timeout=self._timeout, isolation_level=isolation_level)
+        if self.host:
+            # Open PostgreSQL database
+            self._db = psycopg2.connect(host=self._host, user=self._user, password=self._password, dbname=self._dbname)
+        else:
+            # Open SQLite database
+            self._db = sqlite3.connect(self._filename, timeout=self._timeout)
 
 
     def close(self):
-        """Close the SQLite database."""
+        """Close the database."""
         if self._db:
             self._db.close()
             self._db = None
@@ -102,7 +102,7 @@ class Database(object):
         =========  =======================================================
         """
         if not self._db:
-            self.open(isolation_level="IMMEDIATE")
+            self.open()
 
         cursor = self._db.cursor()
 
@@ -128,7 +128,7 @@ class Database(object):
         """
 
         if not self._db:
-            self.open(isolation_level=None)
+            self.open()
 
         cursor = self._db.cursor()
 
