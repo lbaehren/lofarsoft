@@ -1424,9 +1424,9 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         if delay_quality_error >= 1:
             final_status = "BAD"
         elif delay_outliers > max_outliers:
-            final_status = "OK BUT TOO MANY OUTLIERS (" + str(delay_outliers) + ")"
+            final_status = "GOOD BUT TOO MANY OUTLIERS (" + str(delay_outliers) + ")"
         else:
-            final_status = "OK"
+            final_status = "GOOD"
         statuslist.append(final_status)
 
         results.update(dict(
