@@ -489,7 +489,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
                 write_results_to_database(results, polarization_info, xml_file=os.path.join(outputdir_with_subdirectories,"results.xml"))
                 if polarization_info:
                     polarization_info.alt_status = "BAD"
-                    polarization_info.write(recursive=False, parameters=False)
+                    polarization_info.write(recursive=False, parameters=True)
                 continue
             else:
                 print "# Using existing output directory",outputdir_with_subdirectories
