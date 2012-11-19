@@ -1766,7 +1766,7 @@ class Event(object):
         if self._db:
             # Writing attributes
             if self._inDatabase:        # Update values
-                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()))
+                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 self._db.execute(sql)
             else:                       # Create new record
                 if 0 == self._id:
