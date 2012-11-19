@@ -47,7 +47,7 @@ class Database(object):
         self._password = password
         self._dbname = dbname
 
-        if self.host:
+        if self._host:
             # Open PostgreSQL database
             self._db = psycopg2.connect(host=self._host, user=self._user, password=self._password, dbname=self._dbname)
         else:
