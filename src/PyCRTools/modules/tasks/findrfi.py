@@ -74,6 +74,7 @@ class FindRFI(Task):
         nfreq = dict( default = lambda self : self.blocksize / 2 + 1,
             doc = "Number of frequencies in FFT." ),
         nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
+        startblock = dict( default = 0, doc = "Start processing file at this block nr." ),
 #        timeseries_data = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.blocksize)),
 #            doc = "Timeseries data." ),
         freq_range = dict( default = None, doc = "Optional frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)" ), 
@@ -112,7 +113,7 @@ class FindRFI(Task):
         if self.filename:
             self.f = cr.open(self.filename, blocksize = self.blocksize) # assume blocksize has been set as well
             
-        nblocks = self.f["MAXIMUM_READ_LENGTH"] / self.blocksize
+        nblocks = (self.f["MAXIMUM_READ_LENGTH"] / self.blocksize) - self.startblock
         if self.nofblocks > 0:
             nblocks = min(nblocks, self.nofblocks) # cap to maximum read length
         
@@ -133,7 +134,7 @@ class FindRFI(Task):
         # have to cut out the block with the pulse... autodetect is best? 
             if self.verbose:
                 print 'Doing block %d of %d' % (i, nblocks)
-            self.f["BLOCK"] = i
+            self.f["BLOCK"] = i + self.startblock
             
             # want to discard blocks with spiky signals... see AverageSpectrum? Or a simple max/sigma test?
 #            x = f["TIMESERIES_DATA"]
