@@ -560,6 +560,10 @@ def parseOptions():
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="Show verbose information [default=False].")
     parser.add_option("--sqlverbose", action="store_true", dest="sqlverbose", default=False, help="Show verbose SQL information [default=False].")
     parser.add_option("-f", "--force", action="store_true", dest="force", default=False, help="Force writing to the database resetting the write-lock [default=False].")
+    parser.add_option("--host", default=None, help="PostgreSQL host.")
+    parser.add_option("--user", default=None, help="PostgreSQL user.")
+    parser.add_option("--password", default=None, help="PostgreSQL password.")
+    parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 
     (options, args) = parser.parse_args()
 
@@ -572,6 +576,10 @@ def parseOptions():
     print "resultspath = %s" %(options.resultspath)
     print "lorapath = %s" %(options.lorapath)
     print "parameters = ", options.parameters
+    print "host = ", options.host
+    print "user = ", options.user
+    print "password = ", options.password
+    print "dbname = ", options.dbname
 
     return (options, args)
 

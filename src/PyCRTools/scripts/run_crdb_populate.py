@@ -22,7 +22,11 @@ class CRDatabasePopulator(object):
         self.dbManager = crdb.CRDatabase(filename=self.db_filename,
                                          datapath=options.datapath,
                                          resultspath=options.resultspath,
-                                         lorapath=options.lorapath)
+                                         lorapath=options.lorapath,
+                                         host=options.host,
+                                         user=options.user,
+                                         password=options.password,
+                                         dbname=options.dbname)
 
         if self.dbManager:
             self.db = self.dbManager.db
@@ -120,6 +124,10 @@ def parseOptions():
     parser.add_option("--max-attempts", default=1, type=int, help="Maximum number of attempts to use.")
     parser.add_option("--logpath", type="str", dest="logpath", default="./log", help="directory where logged information should be written.")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False, help="Write verbose information.")
+    parser.add_option("--host", default=None, help="PostgreSQL host.")
+    parser.add_option("--user", default=None, help="PostgreSQL user.")
+    parser.add_option("--password", default=None, help="PostgreSQL password.")
+    parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 
     (options, args) = parser.parse_args()
 
@@ -172,6 +180,10 @@ if ("" != options.datafile): commandline_base += "-s {0} ".format(options.datafi
 if (options.update): commandline_base += "-u "
 if (options.parameters): commandline_base += "-p "
 if (options.verbose): commandline_base += "-v "
+if (options.host): commandline_base += "--host {0} ".format(options.host)
+if (options.user): commandline_base += "--user {0} ".format(options.user)
+if (options.password): commandline_base += "--host {0} ".format(options.host)
+if (options.dbname): commandline_base += "--dbname {0} ".format(options.dbname)
 
 
 if __name__ == '__main__':

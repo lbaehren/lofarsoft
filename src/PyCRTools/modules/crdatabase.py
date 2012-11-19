@@ -16,7 +16,7 @@ debug_mode = False
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
-    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath="", create=False):
+    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath="", create=False, host=None, user=None, password=None, dbname=None):
         """Initialisation of the CRDatabase object.
 
         **Properties**
@@ -46,7 +46,7 @@ class CRDatabase(object):
             create = True
 
         # Database object
-        self.db = db.Database(self.filename)
+        self.db = db.Database(self.filename, host, user, password, dbname)
 
         # Initialize database structure
         self.db.open()
