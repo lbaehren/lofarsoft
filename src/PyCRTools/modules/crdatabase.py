@@ -16,7 +16,7 @@ debug_mode = False
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
-    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath="", create=False, host=None, user=None, password=None, dbname=None):
+    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath="", host=None, user=None, password=None, dbname=None):
         """Initialisation of the CRDatabase object.
 
         **Properties**
@@ -28,7 +28,6 @@ class CRDatabase(object):
         *datapath*    path where the datafiles are stored.
         *resultspath* path where the results are stored.
         *lorapath*    path where the LORA information is stored.
-        *create*      force the creation of the database or assume it has been created.
         ============= ===================================================================
 
         If *datapath* is an empty string the ''data'' directory of
@@ -50,6 +49,8 @@ class CRDatabase(object):
         # Check for existence
         if not self.db.tableExists("settings"):
             create = True
+        else:
+            create = False
 
         if create:
             self.__createDatabase()
