@@ -42,7 +42,7 @@ class CRDatabase(object):
         self.filename = os.path.realpath(filename)
 
         # Check for existence
-        if not os.path.exists(filename):
+        if not self.tableExists("settings"):
             create = True
 
         # Database object

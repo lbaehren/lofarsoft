@@ -74,7 +74,6 @@ class Database(object):
         cursor = self._db.cursor()
 
         try:
-            print sql
             cursor.execute(sql)
             newID = cursor.lastrowid
 
@@ -118,6 +117,35 @@ class Database(object):
 
         return records
 
+    def tableExists(self, table):
+        """Select records from the database.
+
+        **Properties**
+
+        =========  =======================================================
+        Parameter  Description
+        =========  =======================================================
+        *table*    Check if table exists
+        =========  =======================================================
+        """
+        if not self._db:
+            self.open()
+
+        cursor = self._db.cursor()
+
+        cursor.execute("SELECT * FROM {0}".format(table))
+
+        try:
+            records = cursor.fetchone()
+            exists = True
+        except:
+            exists = False
+
+        cursor.close()
+
+        self.close()
+
+        return exists
 
     def execute(self, sql=""):
         """Execute an sql statement
@@ -137,7 +165,6 @@ class Database(object):
         cursor = self._db.cursor()
 
         try:
-            print sql
             cursor.execute(sql)
 
             self._db.commit()
