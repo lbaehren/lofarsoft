@@ -73,9 +73,18 @@ class Database(object):
         newID = 0
         cursor = self._db.cursor()
 
-        with self._db:
+        try:
             cursor.execute(sql)
             newID = cursor.lastrowid
+
+            self._db.commit()
+        except Exception as e:
+            print "Error when executing SQL statement:"
+            print sql
+            print e
+            print "rolling back transaction."
+
+            self._db.rollback()
 
         cursor.close()
 
@@ -126,8 +135,17 @@ class Database(object):
 
         cursor = self._db.cursor()
 
-        with self._db:
+        try:
             cursor.execute(sql)
+
+            self._db.commit()
+        except Exception as e:
+            print "Error when executing SQL statement:"
+            print sql
+            print e
+            print "rolling back transaction."
+
+            self._db.rollback()
 
         cursor.close()
 
@@ -155,7 +173,17 @@ class Database(object):
         cursor = self._db.cursor()
 
         for sql in sql_list:
-            cursor.execute(sql)
+            try:
+                cursor.execute(sql)
+    
+                self._db.commit()
+            except Exception as e:
+                print "Error when executing SQL statement:"
+                print sql
+                print e
+                print "rolling back transaction."
+    
+                self._db.rollback()
 
         cursor.close()
 
