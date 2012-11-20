@@ -9,6 +9,12 @@ import sqlite3
 import SocketServer
 import SimpleHTTPServer
 
+try:
+    import psycopg2
+    have_psycopg2 = True
+except ImportError:
+    have_psycopg2 = False
+
 from datetime import datetime
 from optparse import OptionParser
 from xml.etree.cElementTree import ElementTree, Element, SubElement, ProcessingInstruction
@@ -19,6 +25,10 @@ parser = OptionParser()
 parser.add_option("-p", "--port", default = 8000, type = "int", help="port to bind to")
 parser.add_option("-n", "--hostname", default = "localhost", help = "hostname or IP of server")
 parser.add_option("-d", "--database", default = "crdb.sqlite", help = "filename of database")
+parser.add_option("--host", default=None, help="PostgreSQL host.")
+parser.add_option("--user", default=None, help="PostgreSQL user.")
+parser.add_option("--password", default=None, help="PostgreSQL password.")
+parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 
 (options, args) = parser.parse_args()
 
@@ -150,7 +160,14 @@ def events_handler():
     """
 
     # Connect to database
-    conn = sqlite3.connect(options.database, timeout=60.0)
+    if have_psycopg2 and options.host:
+        # Open PostgreSQL database
+        print "Opening connection to PostgreSQL database"
+        conn = psycopg2.connect(host=options.host, user=options.user, password=options.password, dbname=options.dbname)
+    else:
+        # Open SQLite database
+        print "Opening Sqlite database"
+        conn = sqlite3.connect(options.database, timeout=60.0)
 
     # Create cursor
     c = conn.cursor()
