@@ -39,7 +39,6 @@ class CRDatabasePopulator(object):
                                          datapath=options.datapath,
                                          resultspath=options.resultspath,
                                          lorapath=options.lorapath,
-                                         create=True,
                                          host=options.host,
                                          user=options.user,
                                          password=options.password,
