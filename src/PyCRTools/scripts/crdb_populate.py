@@ -40,10 +40,10 @@ class CRDatabasePopulator(object):
                                          resultspath=options.resultspath,
                                          lorapath=options.lorapath,
                                          create=True,
-                                         options.host,
-                                         options.user,
-                                         options.password,
-                                         options.dbname)
+                                         host=options.host,
+                                         user=options.user,
+                                         password=options.password,
+                                         dbname=options.dbname)
         self.db = self.dbManager.db
         if not self.db:
             raise ValueError("Unable to open database.")
