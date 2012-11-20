@@ -275,11 +275,13 @@ def event_handler(eventID):
     if options.host:
         # PostgreSQL
         c.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='eventparameters'")
+
+        keys = [str(e[0]) for e in c.fetchall()[1:]]
     else:
         # Sqlite
         c.execute("PRAGMA table_info(eventparameters)")
 
-    keys = [str(e[1]) for e in c.fetchall()[1:]]
+        keys = [str(e[1]) for e in c.fetchall()[1:]]
 
     # Fetch event parameter values
     c.execute("SELECT * FROM eventparameters WHERE eventID=?", (eventID, ))
@@ -361,11 +363,13 @@ def station_handler(eventID, station_name):
     if options.host:
         # PostgreSQL
         c.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='stationparameters'")
+
+        keys = [str(e[0]) for e in c.fetchall()[1:]]
     else:
         # Sqlite
         c.execute("PRAGMA table_info(stationparameters)")
 
-    keys = [str(e[1]) for e in c.fetchall()[1:]]
+        keys = [str(e[1]) for e in c.fetchall()[1:]]
 
     # Fetch all station parameter values
     c.execute("""
@@ -453,11 +457,13 @@ def polarization_handler(eventID, station_name, polarization_direction):
     if options.host:
         # PostgreSQL
         c.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='polarizationparameters'")
+        
+        keys = [str(e[0]) for e in c.fetchall()[1:]]
     else:
         # Sqlite
         c.execute("PRAGMA table_info(polarizationparameters)")
 
-    keys = [str(e[1]) for e in c.fetchall()[1:]]
+        keys = [str(e[1]) for e in c.fetchall()[1:]]
 
     # Fetch polarization parameter values
     c.execute("""
