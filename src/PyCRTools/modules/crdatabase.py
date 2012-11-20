@@ -63,7 +63,7 @@ class CRDatabase(object):
         # Database version applied in this module
         self.db_required_version = 6
 
-        if create:
+        if create or self.settings.db_version < self.db_required_version:
             self.__updateDatabase()
 
         # Throw an error message when opening a non supported db
