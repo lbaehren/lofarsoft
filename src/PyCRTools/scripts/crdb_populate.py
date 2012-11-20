@@ -350,19 +350,16 @@ class CRParameter(object):
 
     def writeSql(self):
         """Construct an SQL statement to add or replace parameter information."""
+
         sql = ""
         sql_keys = "{0}".format(self._idlabel)
         sql_values = "{0}".format(self._id)
 
-        sql += "IF EXISTS (SELECT * FROM {0} WHERE {1} = '{2}')\n".format(self._parentname+"parameters", sql_keys, sql_values)
         for key in self._parameters.keys():
             sql_keys += ", {0}".format(key)
             sql_values += ", '{0}'".format(self.pickle_parameter(self._parameters[key]))
 
-            sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}'\n".format(self._parentname+"parameters", key, self.pickle_parameter(self._parameters[key]), self._idlabel, self._id)
-        sql += "ELSE\n"
         sql += "INSERT INTO {0} ({1}) VALUES ({2});\n".format(self._parentname+"parameters", sql_keys, sql_values)
-        sql += "END IF\n"
 
         return sql
 

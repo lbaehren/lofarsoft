@@ -28,6 +28,7 @@ class Database(object):
         self._user = user
         self._password = password
         self._dbname = dbname
+        self._dbtype = "unknown"
 
         self._timeout = 60
 
@@ -44,9 +45,11 @@ class Database(object):
         if self._host:
             # Open PostgreSQL database
             self._db = psycopg2.connect(host=self._host, user=self._user, password=self._password, dbname=self._dbname)
+            self._dbtype = "postgresql"
         else:
             # Open SQLite database
             self._db = sqlite3.connect(self._filename, timeout=self._timeout)
+            self._dbtype = "sqlite3"
 
 
     def close(self):

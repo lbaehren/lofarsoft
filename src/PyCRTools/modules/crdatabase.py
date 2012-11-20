@@ -1531,15 +1531,11 @@ class BaseParameter(object):
         sql_keys = "{0}".format(self._idlabel)
         sql_values = "{0}".format(self._id)
 
-        sql += "IF EXISTS (SELECT * FROM {0} WHERE {1} = '{2}')\n".format(self._tablename, sql_keys, sql_values)
         for key in self._parameter.keys():
             sql_keys += ", {0}".format(key)
             sql_values += ", '{0}'".format(self.pickle_parameter(self._parameter[key]))
 
-            sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}'\n".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
-        sql += "ELSE\n"
-        sql += "INSERT INTO {0} ({1}) VALUES ({2});\n".format(self._tablename, sql_keys, sql_values)
-        sql += "END IF\n"
+            sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}';".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
 
         self._db.insert(sql)
 
@@ -1556,15 +1552,11 @@ class BaseParameter(object):
             sql_keys = "{0}".format(self._idlabel)
             sql_values = "{0}".format(self._id)
 
-            sql += "IF EXISTS (SELECT * FROM {0} WHERE {1} = '{2}')\n".format(self._tablename, sql_keys, sql_values)
             for key in self._parameter.keys():
                 sql_keys += ", {0}".format(key)
                 sql_values += ", '{0}'".format(self.pickle_parameter(self._parameter[key]))
 
-                sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}'\n".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
-            sql += "ELSE\n"
-            sql += "INSERT INTO {0} ({1}) VALUES ({2});\n".format(self._tablename, sql_keys, sql_values)
-            sql += "END IF\n"
+                sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}';".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
 
             sql_list.append(sql)
 
