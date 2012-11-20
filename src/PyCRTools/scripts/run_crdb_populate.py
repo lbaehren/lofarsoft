@@ -182,7 +182,7 @@ if (options.parameters): commandline_base += "-p "
 if (options.verbose): commandline_base += "-v "
 if (options.host): commandline_base += "--host {0} ".format(options.host)
 if (options.user): commandline_base += "--user {0} ".format(options.user)
-if (options.password): commandline_base += "--host {0} ".format(options.host)
+if (options.password): commandline_base += "--password {0} ".format(options.password)
 if (options.dbname): commandline_base += "--dbname {0} ".format(options.dbname)
 
 
