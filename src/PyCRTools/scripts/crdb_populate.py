@@ -129,6 +129,8 @@ class CRDatabasePopulator(object):
                 # Write event parameters to list of SQL statements
                 sql = eventParameters.writeSql()
                 self.sqlList.append(sql)
+            else:
+                print "Have no lorapath"
 
         # Write Event-Datafile table SQL
         sql = "INSERT INTO event_datafile (eventID, datafileID) VALUES ({0}, {1});".format(self.ID['event'], self.ID['datafile'])
