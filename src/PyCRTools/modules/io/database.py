@@ -133,13 +133,8 @@ class Database(object):
 
         cursor = self._db.cursor()
 
-        cursor.execute("SELECT * FROM {0}".format(table))
-
-        try:
-            records = cursor.fetchone()
-            exists = True
-        except:
-            exists = False
+        cursor.execute("select exists(select * from information_schema.tables where table_name=%s)", (table,))
+        exists = cursor.fetchone()[0]
 
         cursor.close()
 
