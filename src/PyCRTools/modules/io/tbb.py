@@ -769,6 +769,13 @@ class MultiTBBData(IOInterface):
             for f in self.__files:
                 ret.extend(f[key])
             return ret
+        elif key == "MAXIMUM_READ_LENGTH":
+            print 'Warning: just returning minimum MAXIMUM_READ_LENGTH over all included files.'
+            print 'This may not be correct if alignment offsets are large...'
+            ret = []
+            for f in self.__files:
+                ret.append(f[key])
+            return min(ret)
         elif key == "CLOCK_OFFSET":
             return [f["CLOCK_OFFSET"][0] for f in self.__files] # assume one station per file; return one number per station
         elif key == "SUBSAMPLE_CLOCK_OFFSET":
