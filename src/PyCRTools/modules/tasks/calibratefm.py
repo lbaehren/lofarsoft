@@ -21,12 +21,42 @@ import pycrtools as cr
 import matplotlib.pyplot as plt
 import pycrtools as cr
 from pycrtools import srcfind as sf
-#import pytmf
+import pytmf
 import datetime
 
 twopi = 2 * np.pi
 deg2rad = twopi / 360.0
 halfpi = twopi / 4
+def vectorAverage(directions):
+    """
+    Takes a list of (az, el) tuples
+    Converts to cartesian vectors, sums them up to average
+    Converts average back to (az, el)
+    returns average (az, el)
+    """
+    sumvector = cr.hArray(float, dimensions = [3])
+    azel = cr.hArray(copy = sumvector)
+    cartesian = cr.hArray(copy = sumvector)
+
+    for direction in directions:
+        azel[0] = direction[0]
+        azel[1] = direction[1]
+        azel[2] = 1.0 # radius
+        cr.hCoordinateConvert(azel, cr.CoordinateTypes.AzElRadius, cartesian, cr.CoordinateTypes.Cartesian, False)
+        sumvector += cartesian
+#    cr.hCoordinateConvert(sumvector, cr.CoordinateTypes.Cartesian, azel, cr.CoordinateTypes.AzElRadius, False)
+    # not implemented in hCoordinateConvert... todo
+    meandirection_spherical = pytmf.cartesian2spherical(sumvector[0], sumvector[1], sumvector[2])
+
+    meandirection_azel = (np.pi - (meandirection_spherical[2] + halfpi) , halfpi - (meandirection_spherical[1]))
+    
+#    print meandirection_azel[0] / deg2rad
+#    print meandirection_azel[1] / deg2rad
+        
+    del sumvector
+    del cartesian
+    
+    return (meandirection_azel[0], meandirection_azel[1])
 
 
 def getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays):
@@ -89,6 +119,7 @@ class CalibrateFM(Task):
         #outputDataFile = {default: None, doc: "Optional: output text file where results can be written."},
         #batch = {default: False, doc: "Suppress plot display when set to True."},
         averagePhases = {default: None, doc: "Average phase spectrum per antenna, as output from FindRFI Task. Optional, if not given 'filefilter' or 'filelist' will be used to (re)run FindRFI." },
+        phaseRMS = {default: None, doc: "Phase RMS from FindRFI Task." },
         medians = {default: None, doc: "Output from FindRFI: Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1." },
         referenceTransmitterGPS = {default: None, doc: "GPS [long, lat] in degrees (N, E is positive) for a known transmitter. Typically used when tuning to a known frequency. The Smilde tower is at (6.403565, 52.902671)."},
 
@@ -162,14 +193,15 @@ class CalibrateFM(Task):
             print '[rfilines] Processing files: '
             print filelist
             self.f = cr.open(filelist, blocksize = self.blocksize)
-            findrfi = cr.trerun("FindRFI", "0", f = self.f) # do all blocks by default. Do both polarisations.
+            findrfi = cr.trerun("FindRFI", "0", f = self.f, nofblocks = 10) # do all blocks by default. Do both polarisations.
             # select channels with polarisation 'self.pol'
 #            if self.antennaselection:
 #                selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if (int(x) % 2 == self.pol) and ((int(x) % 100) / 2 in self.antennaselection)]
 #            else:
             selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
-            
+            print 'SELECTING POL %d' % self.pol
             self.f["SELECTED_DIPOLES"] = selected_dipoles
+            print 'DONE SELECTION'
     # test shift:        f.shiftTimeseriesData([-1, 1, 0, -1, 0, -1])
             self.nofchannels = len(selected_dipoles)
             print '# channels = %d' % self.nofchannels
@@ -177,11 +209,14 @@ class CalibrateFM(Task):
             # Get output of FindRFI into our parameter space. Apply channel selection for polarisation
             findrfi_channels = findrfi.nantennas # total nr. of channels
             thisPolsChannels = range(self.pol, findrfi_channels, 2)
-            a = findrfi.phase_average[thisPolsChannels, ...]
-            self.averagePhases = cr.hArray(copy = a)
-            a = findrfi.medians[thisPolsChannels]
-            self.medians = cr.hArray(copy = a)
             
+            #a = findrfi.phase_average[thisPolsChannels, ...]
+            a = findrfi.phase_average.toNumpy()[thisPolsChannels]
+            self.averagePhases = cr.hArray(a)
+            a = findrfi.median_phase_spreads
+            self.medians = a.toNumpy() # they are a median over all antennas, which is OK
+            self.phaseRMS = findrfi.phase_RMS
+            # Numpy for using argmin, argsort etc.
 
         # get calibration delays from file
         caldelays = cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"]) # f[...] outputs list!
@@ -197,7 +232,7 @@ class CalibrateFM(Task):
             
         # make calibration phases, i.e. convert delays to phases for every frequency
         freqs = self.f["FREQUENCY_DATA"]
-        calphases = hArray(float, dimensions = [self.nofchannels, len(freqs)]) # check dim.
+        calphases = cr.hArray(float, dimensions = [self.nofchannels, len(freqs)]) # check dim.
 
         cr.hDelayToPhase(calphases, freqs, caldelays) # check!
         # Use these calphases instead of those below for a single freq. Check if output is the same...
@@ -207,12 +242,12 @@ class CalibrateFM(Task):
            
         if not self.lines: # if no value given, take the one with best phase stability
             if not self.freq_range: # take overall best channel
-                bestchannel = medians.argmin()
+                bestchannel = self.medians.argmin()
             else: # take the best channel in the given range
                 f0 = 200.0e6 / self.blocksize # hardcoded sampling rate
                 startindex = int(self.freq_range[0] * 1.0e6 / f0)
                 stopindex = 1 + int(self.freq_range[1] * 1.0e6 / f0) 
-                bestchannel = startindex + medians[startindex:stopindex].argmin()
+                bestchannel = startindex + self.medians[startindex:stopindex].argmin()
 
             bestchannel = int(bestchannel) # ! Needed for use in hArray slicing etc. Type numpy.int64 not recognized otherwise
         elif type(self.lines) == type([]):
@@ -220,13 +255,13 @@ class CalibrateFM(Task):
         else: # either list or number assumed
             bestchannel = self.lines
 
-        channelsSortedByStability = medians.argsort()
+        channelsSortedByStability = self.medians.argsort()
         freqsByStability = freqs.toNumpy()[channelsSortedByStability]
         print 'The best 10 channels: '
         for i in range(10):
-            print 'Channel %d, freq %2.3f: phase RMS = %1.4f' % (channelsSortedByStability[i], freqsByStability[i] / 1.0e6, medians[channelsSortedByStability[i]])
+            print 'Channel %d, freq %2.3f: phase RMS = %1.4f' % (channelsSortedByStability[i], freqsByStability[i] / 1.0e6, self.medians[channelsSortedByStability[i]])
 
-        print ' Median phase-sigma is lowest (i.e. best phase stability) at channel %d, value = %f' % (bestchannel, medians[bestchannel])
+        print ' Median phase-sigma is lowest (i.e. best phase stability) at channel %d, value = %f' % (bestchannel, self.medians[bestchannel])
 
 #        if self.testplots:
 #            # test phase of one antenna in consecutive data blocks, show in plot versus block nr.
@@ -271,7 +306,7 @@ class CalibrateFM(Task):
         azSteps = int(360 / self.direction_resolution[0])
         elSteps = int(90 / self.direction_resolution[1])
         
-        if not isinstance(filelist, list):
+        if not isinstance(self.f, cr.io.tbb.MultiTBBData):
         # for one file being processed
             positions = allpositions.ravel() # only pol 'polarisation'
             # NB. Indexing to the end is done by thisArray[start::step] !
@@ -332,7 +367,7 @@ class CalibrateFM(Task):
 
                 outstr = filelist + ' ' + datestring + ' ' + timestring + ' ' + str(timestamp) + ' ' + format('%3.4f' % bestFrequency) + ' ' + format('%3.2f' % (fitaz / deg2rad)) + ' '
                 outstr += format('%3.2f' % (fitel / deg2rad)) + ' ' + format('%3.4f' % minPhaseError) + ' '
-                outstr += format('%3.6f' % medians[bestchannel])
+                outstr += format('%3.6f' % self.medians[bestchannel])
                 
                 outf.write(outstr + '\n')
                 outf.close()
@@ -442,7 +477,7 @@ class CalibrateFM(Task):
                 if self.correctOneSampleShifts:
                     plt.plot(timeDiff_glitches, 'o-', c = 'r', label='5 ns shifts found')
                 #plt.figure()
-                rms_phase = phaseRMS.toNumpy()[:, bestchannel]
+                rms_phase = self.phaseRMS.toNumpy()[:, bestchannel]
                 plt.plot(rms_phase, 'r', label='RMS phase noise')
                 plt.plot( - rms_phase, 'r')
                 plt.title(self.filefilter+'\nPhase difference between measured and best-fit modeled phase\nChannel %d,   f = %2.4f MHz,   pi rad = %1.3f ns' % (bestchannel, freq/1.0e6, 1.0e9 / (2 * freq)))
@@ -461,6 +496,6 @@ class CalibrateFM(Task):
 #        print self.oneSampleShifts
         self.strongestFrequency = freqs[bestchannel]
         #self.strongestDirection = [fitaz / deg2rad, fitel / deg2rad]
-        self.bestPhaseRMS = medians[bestchannel]
+        self.bestPhaseRMS = self.medians[bestchannel]
         self.timestamp = self.f["TIME"][0]
         #print self.interStationDelays
