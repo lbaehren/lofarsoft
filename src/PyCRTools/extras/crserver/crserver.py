@@ -75,7 +75,10 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     header = Element("header")
 
     # Get event header
-    cursor.execute("SELECT timestamp, status, alt_status FROM events WHERE eventID=?", (eventID, ))
+    sql = "SELECT timestamp, status, alt_status FROM events WHERE eventID={0}".format(eventID)
+    print sql
+    cursor.execute(sql)
+    print "this worked"
 
     e = cursor.fetchone()
     SubElement(header, "id").text = str(eventID)
@@ -106,12 +109,16 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         p = SubElement(header, "polarization")
         SubElement(p, "name").text = str(polarization)
 
-        cursor.execute("""SELECT p.status, p.alt_status FROM
+        sql = """SELECT p.status, p.alt_status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
         INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-        WHERE (ed.eventID=? AND s.stationName=? AND p.direction=?)""", (eventID, station, polarization))
+        WHERE (ed.eventID={0} AND s.stationName='{1}' AND p.direction='{2}')""".format(eventID, station, polarization)
+
+        print sql
+        cursor.execute(sql)
+        print "this worked"
 
         e = cursor.fetchone()
 
@@ -119,11 +126,14 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         SubElement(p, "alt_status").text = e[1]
 
     # Get all stations in event
-    cursor.execute("""SELECT s.stationname, s.status, s.alt_status FROM
+    sql = """SELECT s.stationname, s.status, s.alt_status FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
-    WHERE eventID=?
-    """, (eventID, ))
+    WHERE eventID={0}
+    """.format(eventID)
+    print sql
+    cursor.execute(sql)
+    print "this worked"
 
     stations = SubElement(header, "stations")
     for e in cursor.fetchall():
@@ -135,12 +145,15 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         SubElement(s, "alt_status").text = e[2]
 
         # Get all polarizations for this station
-        cursor.execute("""SELECT p.direction, p.status, p.alt_status FROM
+        sql = """SELECT p.direction, p.status, p.alt_status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
         INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-        WHERE (ed.eventID=? AND s.stationName=?)""", (eventID, e[0]))
+        WHERE (ed.eventID={0} AND s.stationName='{1}')""".format(eventID, e[0])
+        print sql
+        cursor.execute(sql)
+        print "this worked"
 
         polarizations = SubElement(s, "polarizations")
         for k in cursor.fetchall():
@@ -150,9 +163,12 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
             SubElement(p, "alt_status").text = k[2]
 
     # Get all datafiles in event
-    cursor.execute("""SELECT filename FROM
+    sql = """SELECT filename FROM
     event_datafile AS ed INNER JOIN datafiles AS df ON (ed.datafileID=df.datafileID)
-    WHERE ed.eventID=?""", (eventID, ))
+    WHERE ed.eventID={0}""".format(eventID)
+    print sql
+    cursor.execute(sql)
+    print "this worked"
 
     datafiles = SubElement(header, "datafiles")
     for e in cursor.fetchall():
