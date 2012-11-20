@@ -65,6 +65,7 @@ class CRDatabasePopulator(object):
     def populate(self):
         """Populate the database with information from the selected datafile.
         """
+        print "calling populate"
         # Initialize data extractor
         filename_full = options.datapath + "/" + dataFilename
         dx = None
@@ -112,8 +113,10 @@ class CRDatabasePopulator(object):
         print "Timestamp = ",timestamp
         eventIDs = self.dbManager.getEventIDs(timestamp=timestamp)
         if eventIDs:
+            print "case 1"
             self.ID['event'] = eventIDs[0]
         else:
+            print "case 2"
             self.ID['event'] = self.createEventID(timestamp=timestamp)
 
             # Write event info to list of SQL statements
