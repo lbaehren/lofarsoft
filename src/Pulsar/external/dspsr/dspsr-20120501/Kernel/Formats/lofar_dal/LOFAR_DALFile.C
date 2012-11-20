@@ -287,8 +287,11 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   cerr << "VLAD: bandwidth = " << bw.get() << endl;
   */
 
-  info.set_dc_centred( true );
-  cerr << "VLAD: dc_centered = True" << endl;
+//  info.set_dc_centred( true );
+//  cerr << "VLAD: dc_centered = True" << endl;
+  info.set_dc_centred( false );
+  cerr << "VLAD: dc_centered = False" << endl;
+
 
   // getting the start MJD
   Attribute<double> mjd = bf_file->observationStartMJD();
@@ -366,8 +369,8 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 	std::vector<double> w = world.get();
 	cerr << "Size of the freq array = " << w.size() << endl;
 	for (unsigned i=0; i<w.size(); i++)
-	  if (w[i] * 1.0e-6 != info.get_centre_frequency(i))
-	    cerr << "NOT EQUAL: " << setprecision(20) << w[i]*1.0e-6 << " != " << setprecision(20) << info.get_centre_frequency(i) << endl;
+	  if (w[i] != 1000000.0 * info.get_centre_frequency(i))
+	    cerr << "NOT EQUAL: " << setprecision(20) << w[i] << " != " << setprecision(20) << 1000000.0 * info.get_centre_frequency(i) << endl;
       }
     }
   }
