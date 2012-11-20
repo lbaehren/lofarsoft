@@ -107,40 +107,40 @@ class CRDatabase(object):
         if self.db:
             sql_list = []
             # Event table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT);")
+            sql_list.append("CREATE TABLE main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT);")
 
             # Event parameters table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE main.eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Datafile table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT);")
+            sql_list.append("CREATE TABLE main.datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT);")
 
             # Datafile parameters table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE main.datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Stations table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT);")
+            sql_list.append("CREATE TABLE main.stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT);")
 
             # Station parameters table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE main.stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Polarizations table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT);")
+            sql_list.append("CREATE TABLE main.polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT);")
 
             # Polarization parameters table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE main.polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # event_datafile table (linking events to datafiles)
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE);")
+            sql_list.append("CREATE TABLE main.event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE);")
 
             # datafile_station table (linking datafiles to stations)
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE);")
+            sql_list.append("CREATE TABLE main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE);")
 
             # station_polarization table (linking stations to polarizations)
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.station_polarization (stationID INTEGER NOT NULL, polarizationID INTEGER NOT NULL UNIQUE);")
+            sql_list.append("CREATE TABLE main.station_polarization (stationID INTEGER NOT NULL, polarizationID INTEGER NOT NULL UNIQUE);")
 
             # settings table
-            sql_list.append("CREATE TABLE IF NOT EXISTS main.settings (key TEXT NOT NULL UNIQUE, value TEXT);")
+            sql_list.append("CREATE TABLE main.settings (key TEXT NOT NULL UNIQUE, value TEXT);")
             sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');")
             sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');")
             sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('lorapath', '');")
@@ -217,7 +217,7 @@ class CRDatabase(object):
             columns_string += ", {0} TEXT".format(key)
 
         sql_list = []
-        sql_list.append("CREATE TABLE IF NOT EXISTS main.{0}parameters_new ({0}ID INTEGER PRIMARY KEY {1});".format(tablename, columns_string))
+        sql_list.append("CREATE TABLE main.{0}parameters_new ({0}ID INTEGER PRIMARY KEY {1});".format(tablename, columns_string))
         self.db.executelist(sql_list)
 
         # Transfer information from old to new parameter table
