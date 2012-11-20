@@ -74,7 +74,7 @@ class CRDatabasePopulator(object):
             raise IOError("Datafile can not be opened")
 
         # Check if datafile is not already in database
-        sql = "SELECT * FROM main.datafiles WHERE filename='{0}';".format(self.dataFilename)
+        sql = "SELECT * FROM datafiles WHERE filename='{0}';".format(self.dataFilename)
         record = self.db.select(sql)
         if record:
             print "Datafile is already in the database."
@@ -82,7 +82,7 @@ class CRDatabasePopulator(object):
 
         # Retrieve new IDs for database entries (eventID is determined using the createEventID method)
         for tableName in ['datafile', 'station', 'polarization']:
-            sql = "SELECT max({0}ID) FROM main.{0}s;".format(tableName)
+            sql = "SELECT max({0}ID) FROM {0}s;".format(tableName)
             records = self.db.select(sql)
             if records and records[0] and records[0][0]:
                 self.newID[tableName] = int(records[0][0]) + 1
@@ -95,7 +95,7 @@ class CRDatabasePopulator(object):
         # Write datafile info to list of SQL statements
         self.ID['datafile'] = self.newID['datafile']
         self.newID['datafile'] += 1
-        sql = "INSERT INTO main.datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}');".format(self.ID['datafile'], self.dataFilename, 'NEW')
+        sql = "INSERT INTO datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}');".format(self.ID['datafile'], self.dataFilename, 'NEW')
         self.sqlList.append(sql)
 
         # Write datafile parameters to list of SQL statements
@@ -118,7 +118,7 @@ class CRDatabasePopulator(object):
             self.ID['event'] = self.createEventID(timestamp=timestamp)
 
             # Write event info to list of SQL statements
-            sql = "INSERT INTO main.events (eventID, timestamp, status, alt_status) VALUES ({0}, {1}, '{2}','{3}');".format(self.ID['event'], timestamp, 'NEW', 'NEW')
+            sql = "INSERT INTO events (eventID, timestamp, status, alt_status) VALUES ({0}, {1}, '{2}','{3}');".format(self.ID['event'], timestamp, 'NEW', 'NEW')
             self.sqlList.append(sql)
 
             # Add LORA data to event parameters
@@ -132,7 +132,7 @@ class CRDatabasePopulator(object):
                 self.sqlList.append(sql)
 
         # Write Event-Datafile table SQL
-        sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1});".format(self.ID['event'], self.ID['datafile'])
+        sql = "INSERT INTO event_datafile (eventID, datafileID) VALUES ({0}, {1});".format(self.ID['event'], self.ID['datafile'])
         self.sqlList.append(sql)
 
 
@@ -143,7 +143,7 @@ class CRDatabasePopulator(object):
             # Write station info to list of SQL statements
             self.ID['station'] = self.newID['station']
             self.newID['station'] += 1
-            sql = "INSERT INTO main.stations (stationID, stationname, status, alt_status) VALUES ({0},'{1}','{2}','{3}');".format(self.ID['station'],stationname, 'NEW', 'NEW')
+            sql = "INSERT INTO stations (stationID, stationname, status, alt_status) VALUES ({0},'{1}','{2}','{3}');".format(self.ID['station'],stationname, 'NEW', 'NEW')
             self.sqlList.append(sql)
 
             # Write station parameters to list of SQL statements
@@ -154,7 +154,7 @@ class CRDatabasePopulator(object):
             #     self.sqlList.append(sql)
 
             # write Datafile-Station table SQL
-            sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1});".format(self.ID['datafile'], self.ID['station'])
+            sql = "INSERT INTO datafile_station (datafileID, stationID) VALUES ({0}, {1});".format(self.ID['datafile'], self.ID['station'])
             self.sqlList.append(sql)
 
 
@@ -168,7 +168,7 @@ class CRDatabasePopulator(object):
                 # Write polarization info to list of SQL statements
                 antennaset = str(dx.antennaset)
                 resultsfile = str(dx.resultsfile(pol_direction))
-                sql = "INSERT INTO main.polarizations (polarizationID, antennaset, direction, status, alt_status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}','{5}');".format(self.ID['polarization'], antennaset, pol_direction, 'NEW', 'NEW', resultsfile)
+                sql = "INSERT INTO polarizations (polarizationID, antennaset, direction, status, alt_status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}','{5}');".format(self.ID['polarization'], antennaset, pol_direction, 'NEW', 'NEW', resultsfile)
                 self.sqlList.append(sql)
 
                 # Write polarization parameters to list of SQL statements
@@ -183,7 +183,7 @@ class CRDatabasePopulator(object):
                     self.sqlList.append(sql)
 
                 # Write Station-Polarization table SQL
-                sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1});".format(self.ID['station'], self.ID['polarization'])
+                sql = "INSERT INTO station_polarization (stationID, polarizationID) VALUES ({0}, {1});".format(self.ID['station'], self.ID['polarization'])
                 self.sqlList.append(sql)
 
 
@@ -223,7 +223,7 @@ class CRDatabasePopulator(object):
         # creation of two event s that occur on the boundary of a
         # second.
 
-        sql = "SELECT eventID FROM main.events WHERE eventID={0}".format(result)
+        sql = "SELECT eventID FROM events WHERE eventID={0}".format(result)
         records = self.db.select(sql)
         if len(records) > 0:
             raise ValueError("Event with ID={0} already exists.".format(result))
