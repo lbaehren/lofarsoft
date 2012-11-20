@@ -272,7 +272,12 @@ def event_handler(eventID):
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
 
-    c.execute("PRAGMA table_info(eventparameters)")
+    if options.host:
+        # PostgreSQL
+        c.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='eventparameters'")
+    else:
+        # Sqlite
+        c.execute("PRAGMA table_info(eventparameters)")
 
     keys = [str(e[1]) for e in c.fetchall()[1:]]
 
@@ -353,7 +358,12 @@ def station_handler(eventID, station_name):
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
 
-    c.execute("PRAGMA table_info(stationparameters)")
+    if options.host:
+        # PostgreSQL
+        c.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='stationparameters'")
+    else:
+        # Sqlite
+        c.execute("PRAGMA table_info(stationparameters)")
 
     keys = [str(e[1]) for e in c.fetchall()[1:]]
 
@@ -440,7 +450,12 @@ def polarization_handler(eventID, station_name, polarization_direction):
     parameters = SubElement(elements, "parameters")
     figures = SubElement(elements, "figures")
 
-    c.execute("PRAGMA table_info(polarizationparameters)")
+    if options.host:
+        # PostgreSQL
+        c.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='polarizationparameters'")
+    else:
+        # Sqlite
+        c.execute("PRAGMA table_info(polarizationparameters)")
 
     keys = [str(e[1]) for e in c.fetchall()[1:]]
 
