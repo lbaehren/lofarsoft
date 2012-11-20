@@ -134,30 +134,6 @@ class Database(object):
         self.close()
 
 
-    def executescript(self, sql=""):
-        """Execute a series of SQL statements.
-
-        **Properties**
-
-        ==========  =======================================================
-        Parameter   Description
-        ==========  =======================================================
-        *sql*       SQL statement to execute.
-        ==========  =======================================================
-        """
-        if not self._db:
-            self.open()
-
-        cursor = self._db.cursor()
-
-        cursor.executescript(sql)
-        self._db.commit()
-
-        cursor.close()
-
-        self.close()
-
-
     def executelist(self, sql_list=[], blocksize=128, verbose=False):
         """Execute a list of SQL statements.
 
@@ -180,27 +156,9 @@ class Database(object):
 
         cursor = self._db.cursor()
 
-        if sql_list:
-            sql_block = "BEGIN TRANSACTION;\n"
-            for sql_statement in sql_list:
-                if sql_statement[-1] != ';':
-                    sql_statement += ';'
-                sql_block += sql_statement + "\n"
-                i_block += 1
-                if i_block > blocksize:
-                    sql_block += "COMMIT;"
-                    if verbose:
-                        print "commiting sql_block ", n_block, "(",n_block*blocksize,")"
-                        print sql_block
-                    cursor.executescript(sql_block)
-                    self._db.commit()
-                    sql_block = "BEGIN TRANSACTION;\n"
-                    i_block = 1
-                    n_block += 1
-
-            sql_block += "COMMIT;"
-            cursor.executescript(sql_block)
-            self._db.commit()
+        for sql in sql_list:
+            with self._db:
+                cursor.execute(sql)
 
         cursor.close()
 
