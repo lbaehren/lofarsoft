@@ -70,8 +70,6 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     """
     """
 
-    print "calling event_header"
-
     header = Element("header")
 
     # Get event header
@@ -167,8 +165,6 @@ def events_handler():
     """Handle summary of events.
     """
 
-    print "calling events_handler"
-
     # Connect to database
     if have_psycopg2 and options.host:
         # Open PostgreSQL database
@@ -232,8 +228,6 @@ def events_handler():
 def event_handler(eventID):
     """Handle a single event.
     """
-
-    print "calling event_handler"
 
     # Connect to database
     if have_psycopg2 and options.host:
@@ -305,8 +299,6 @@ def event_handler(eventID):
 def station_handler(eventID, station_name):
     """Handle a single event.
     """
-
-    print "calling station_handler"
 
     # Connect to database
     if have_psycopg2 and options.host:
@@ -399,8 +391,6 @@ def station_handler(eventID, station_name):
 def polarization_handler(eventID, station_name, polarization_direction):
     """Handle a single event.
     """
-
-    print "calling polarization_handler"
 
     # Connect to database
     if have_psycopg2 and options.host:
