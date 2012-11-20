@@ -173,7 +173,7 @@ class CRDatabase(object):
         if not self._db:
             self.open()
 
-        cursor = self._db.cursor()
+        cursor = self.db.cursor()
 
         cursor.execute("SELECT * FROM {0}".format(table))
 
