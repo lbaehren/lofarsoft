@@ -76,9 +76,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
 
     # Get event header
     sql = "SELECT timestamp, status, alt_status FROM events WHERE eventID={0}".format(eventID)
-    print sql
     cursor.execute(sql)
-    print "this worked"
 
     e = cursor.fetchone()
     SubElement(header, "id").text = str(eventID)
@@ -95,10 +93,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         WHERE (eventID={0} AND stationName='{1}')
         """.format(eventID, station)
-
-        print sql
         cursor.execute(sql)
-        print "this worked"
 
         e = cursor.fetchone()
 
@@ -115,10 +110,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
         INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
         WHERE (ed.eventID={0} AND s.stationName='{1}' AND p.direction='{2}')""".format(eventID, station, polarization)
-
-        print sql
         cursor.execute(sql)
-        print "this worked"
 
         e = cursor.fetchone()
 
@@ -131,9 +123,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     WHERE eventID={0}
     """.format(eventID)
-    print sql
     cursor.execute(sql)
-    print "this worked"
 
     stations = SubElement(header, "stations")
     for e in cursor.fetchall():
@@ -151,9 +141,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
         INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
         WHERE (ed.eventID={0} AND s.stationName='{1}')""".format(eventID, e[0])
-        print sql
         cursor.execute(sql)
-        print "this worked"
 
         polarizations = SubElement(s, "polarizations")
         for k in cursor.fetchall():
@@ -166,9 +154,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     sql = """SELECT filename FROM
     event_datafile AS ed INNER JOIN datafiles AS df ON (ed.datafileID=df.datafileID)
     WHERE ed.eventID={0}""".format(eventID)
-    print sql
     cursor.execute(sql)
-    print "this worked"
 
     datafiles = SubElement(header, "datafiles")
     for e in cursor.fetchall():
@@ -284,7 +270,8 @@ def event_handler(eventID):
         keys = [str(e[1]) for e in c.fetchall()[1:]]
 
     # Fetch event parameter values
-    c.execute("SELECT * FROM eventparameters WHERE eventID=?", (eventID, ))
+    sql = "SELECT * FROM eventparameters WHERE eventID={0}".format(eventID)
+    c.execute(sql)
 
     v = c.fetchone()
     if v is not None and len(v) > 1:
@@ -342,12 +329,13 @@ def station_handler(eventID, station_name):
     elements.append(header)
 
     # Get all polarizations for this station
-    c.execute("""SELECT p.direction, p.status, p.alt_status FROM
+    sql = """SELECT p.direction, p.status, p.alt_status FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
     INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-    WHERE (ed.eventID=? AND s.stationName=?)""", (eventID, station_name))
+    WHERE (ed.eventID={0} AND s.stationName={1})""".format(eventID, station_name)
+    c.execute(sql)
 
     polarizations = SubElement(header, "polarizations")
     for e in c.fetchall():
@@ -372,13 +360,12 @@ def station_handler(eventID, station_name):
         keys = [str(e[1]) for e in c.fetchall()[1:]]
 
     # Fetch all station parameter values
-    c.execute("""
-    SELECT sp.* FROM
+    sql = """SELECT sp.* FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN stationparameters AS sp ON (s.stationID=sp.stationID)
-    WHERE (ed.eventID=? AND s.stationname=?)
-    """, (eventID, station_name))
+    WHERE (ed.eventID={0} AND s.stationname={1})""".format(eventID, station_name)
+    c.execute(sql)
 
     v = c.fetchone()
     if v is not None and len(v) > 1:
@@ -436,12 +423,13 @@ def polarization_handler(eventID, station_name, polarization_direction):
     elements.append(header)
 
     # Get all polarizations for this station
-    c.execute("""SELECT direction FROM
+    sql = """SELECT direction FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
     INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-    WHERE (ed.eventID=? AND s.stationName=?)""", (eventID, station_name))
+    WHERE (ed.eventID={0} AND s.stationName={1})""".format(eventID, station_name)
+    c.execute(sql)
 
     polarizations = SubElement(header, "polarizations")
     for e in c.fetchall():
@@ -466,15 +454,15 @@ def polarization_handler(eventID, station_name, polarization_direction):
         keys = [str(e[1]) for e in c.fetchall()[1:]]
 
     # Fetch polarization parameter values
-    c.execute("""
-    SELECT pp.* FROM
+    sql = """SELECT pp.* FROM
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
     INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
     INNER JOIN polarizationparameters AS pp ON (p.polarizationID=pp.polarizationID)
-    WHERE (ed.eventID=? AND s.stationname=? AND p.direction=?)
-    """, (eventID, station_name, polarization_direction))
+    WHERE (ed.eventID={0} AND s.stationname={1} AND p.direction={2})
+    """.format(eventID, station_name, polarization_direction)
+    c.execute(sql)
 
     v = c.fetchone()
     if v is not None and len(v) > 1:
