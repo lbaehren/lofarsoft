@@ -110,28 +110,28 @@ class CRDatabase(object):
         if self.db:
             sql_list = []
             # Event table
-            sql_list.append("CREATE TABLE events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT);")
+            sql_list.append("CREATE TABLE events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
 
             # Event parameters table
-            sql_list.append("CREATE TABLE eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE eventparameters (eventID INTEGER PRIMARY KEY, lora_energy_ev TEXT, lora_energy TEXT, lora_core_x TEXT, lora_core_y TEXT, lora_coreuncertainties TEXT, lora_elevation TEXT, lora_utc_time_secs TEXT, lora_coree_x TEXT, lora_coree_y TEXT, lora_core TEXT, lora_direction TEXT, lora_10_nsec TEXT, lora_moliere_rad_m TEXT, lora_time TEXT, lora_detectorid TEXT, lora_moliere TEXT, lora_azimuth TEXT, lora_particle_density__m2 TEXT, lora_nsecs TEXT, lora_posz TEXT, lora_posx TEXT, lora_posy TEXT, plotfiles TEXT, crp_average_direction TEXT, lora_datafile TEXT, lora_ldf TEXT);")
 
             # Datafile table
-            sql_list.append("CREATE TABLE datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT);")
+            sql_list.append("CREATE TABLE datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
 
             # Datafile parameters table
-            sql_list.append("CREATE TABLE datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE datafileparameters (datafileID INTEGER PRIMARY KEY);")
 
             # Stations table
-            sql_list.append("CREATE TABLE stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT);")
+            sql_list.append("CREATE TABLE stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
 
             # Station parameters table
-            sql_list.append("CREATE TABLE stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE stationparameters (stationID INTEGER PRIMARY KEY, crp_pulse_direction TEXT, plotfiles TEXT);")
 
             # Polarizations table
-            sql_list.append("CREATE TABLE polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT);")
+            sql_list.append("CREATE TABLE polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
 
             # Polarization parameters table
-            sql_list.append("CREATE TABLE polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE polarizationparameters (polarizationID INTEGER PRIMARY KEY, antenna_positions_array_xyz_m TEXT, antenna_positions_itrf_m TEXT, antenna_positions_station_xyz_m TEXT, antenna_set TEXT, antennas TEXT, antennas_final_cable_delays TEXT, antennas_flagged_delays TEXT, antennas_residual_cable_delays TEXT, antennas_spectral_power TEXT, antennas_timeseries_npeaks TEXT, antennas_timeseries_rms TEXT, antennas_with_peaks TEXT, antennas_with_strong_pulses TEXT, bad_antennas TEXT, block TEXT, blocksize TEXT, data_length TEXT, data_length_ms TEXT, delay_quality_error TEXT, dipole_calibration_delay_applied TEXT, dirty_channels TEXT, filedir TEXT, filename TEXT, frequency_range TEXT, nantennas_with_strong_pulses TEXT, ndipoles TEXT, nof_dipole_datasets TEXT, npeaks_found TEXT, nyquist_zone TEXT, pipeline_version TEXT, plotfiles TEXT, polarization TEXT, pulse_core_lora TEXT, pulse_coreuncertainties_lora TEXT, pulse_direction TEXT, pulse_direction_delta_delays_final TEXT, pulse_direction_delta_delays_start TEXT, pulse_direction_lora TEXT, pulse_direction_planewave TEXT, pulse_end_sample TEXT, pulse_energy_lora TEXT, pulse_height TEXT, pulse_height_incoherent TEXT, pulse_height_rms TEXT, pulse_location TEXT, pulse_moliere_lora TEXT, pulse_normalized_height TEXT, pulse_start_sample TEXT, pulse_time_ms TEXT, pulses_absolute_arrivaltime TEXT, pulses_maxima_x TEXT, pulses_maxima_y TEXT, pulses_power_snr TEXT, pulses_refant TEXT, pulses_sigma TEXT, pulses_strength TEXT, pulses_timelags_ns TEXT, sample_frequency TEXT, sample_interval TEXT, sample_number TEXT, station_antennas_homogeneity_factor TEXT, station_spectral_power TEXT, station_timeseries_npeaks TEXT, station_timeseries_rms TEXT, status TEXT, svn_revision TEXT, telescope TEXT, time TEXT, timeseries_power_mean TEXT, timeseries_power_rms TEXT, timeseries_raw_rms TEXT, timeseries_rms);")
 
             # event_datafile table (linking events to datafiles)
             sql_list.append("CREATE TABLE event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE);")
@@ -147,7 +147,7 @@ class CRDatabase(object):
             sql_list.append("INSERT INTO settings (key, value) VALUES ('datapath', '');")
             sql_list.append("INSERT INTO settings (key, value) VALUES ('resultspath', '');")
             sql_list.append("INSERT INTO settings (key, value) VALUES ('lorapath', '');")
-            sql_list.append("INSERT INTO settings (key, value) VALUES ('db_version', '0');")
+            sql_list.append("INSERT INTO settings (key, value) VALUES ('db_version', '6');")
 
             self.db.executelist(sql_list)
         else:
@@ -155,12 +155,7 @@ class CRDatabase(object):
 
 
     def __updateDatabase(self):
-        self.__updateDatabase_v0_to_v1()
-        self.__updateDatabase_v1_to_v2()
-        self.__updateDatabase_v2_to_v3()
-        self.__updateDatabase_v3_to_v4()
-        self.__updateDatabase_v4_to_v5()
-        self.__updateDatabase_v5_to_v6()
+        pass
 
     def addParameterName(self, grouptype, parametername):
         """Add a parameter with name *parametername* to the table
