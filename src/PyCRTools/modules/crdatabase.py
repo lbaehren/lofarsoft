@@ -49,8 +49,10 @@ class CRDatabase(object):
         # Check for existence
         if not self.db.tableExists("settings"):
             create = True
+            print "creating database"
         else:
             create = False
+            print "not creating database"
 
         if create:
             self.__createDatabase()
