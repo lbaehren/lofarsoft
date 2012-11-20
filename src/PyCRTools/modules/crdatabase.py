@@ -401,7 +401,7 @@ class CRDatabase(object):
             #                                                 Update database version number
             print "  Updating database version number..." # DEBUG
 
-            self.db.executescript("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
+            self.db.execute("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
 
 
     def __updateDatabase_v1_to_v2(self):
@@ -423,7 +423,7 @@ class CRDatabase(object):
 
             # Add lock setting.
             print "  Updating database locking..."
-            self.db.executescript("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('locked', '1');")
+            self.db.execute("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('locked', '1');")
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
