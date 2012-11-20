@@ -148,8 +148,6 @@ class Database(object):
         *verbose*    Boolean that [default=False].
         ===========  ======================================================================
         """
-        i_block = 1
-        n_block = 1
 
         if not self._db:
             self.open()
@@ -157,8 +155,7 @@ class Database(object):
         cursor = self._db.cursor()
 
         for sql in sql_list:
-            with self._db:
-                cursor.execute(sql)
+            cursor.execute(sql)
 
         cursor.close()
 
