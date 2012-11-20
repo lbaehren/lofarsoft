@@ -788,6 +788,8 @@ class MultiTBBData(IOInterface):
 #            return y # memory leak!
         elif key == "ANTENNA_SET":
             return [f["ANTENNA_SET"] for f in self.__files]
+        elif key == "NOF_SELECTED_DATASETS":
+            return sum([f[key] for f in self.__files])
         elif key == "BLOCKSIZE":
             return self.__blocksize
         elif key == "ANTENNA_POSITIONS": # return antenna positions from ITRF, otherwise positions are relative to each station!
