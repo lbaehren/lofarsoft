@@ -48,7 +48,7 @@ class CRDatabase(object):
         self.db.open()
 
         # Check for existence
-        if not self.tableExists("settings"):
+        if not self.db.tableExists("settings"):
             create = True
 
         if create:
@@ -158,36 +158,6 @@ class CRDatabase(object):
         self.__updateDatabase_v3_to_v4()
         self.__updateDatabase_v4_to_v5()
         self.__updateDatabase_v5_to_v6()
-
-    def tableExists(self, table):
-        """Select records from the database.
-
-        **Properties**
-
-        =========  =======================================================
-        Parameter  Description
-        =========  =======================================================
-        *table*    Check if table exists
-        =========  =======================================================
-        """
-        if not self.db:
-            self.open()
-
-        cursor = self.db.cursor()
-
-        cursor.execute("SELECT * FROM {0}".format(table))
-
-        try:
-            records = cursor.fetchone()
-            exists = True
-        except:
-            exists = False
-
-        cursor.close()
-
-        self.close()
-
-        return exists
 
     def addParameterName(self, grouptype, parametername):
         """Add a parameter with name *parametername* to the table
