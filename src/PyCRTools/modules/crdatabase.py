@@ -170,7 +170,7 @@ class CRDatabase(object):
         *table*    Check if table exists
         =========  =======================================================
         """
-        if not self._db:
+        if not self.db:
             self.open()
 
         cursor = self.db.cursor()
