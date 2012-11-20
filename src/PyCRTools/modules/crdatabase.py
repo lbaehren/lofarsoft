@@ -107,44 +107,44 @@ class CRDatabase(object):
         if self.db:
             sql_list = []
             # Event table
-            sql_list.append("CREATE TABLE main.events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT);")
+            sql_list.append("CREATE TABLE events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT);")
 
             # Event parameters table
-            sql_list.append("CREATE TABLE main.eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE eventparameters (parameterID INTEGER PRIMARY KEY, eventID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Datafile table
-            sql_list.append("CREATE TABLE main.datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT);")
+            sql_list.append("CREATE TABLE datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT);")
 
             # Datafile parameters table
-            sql_list.append("CREATE TABLE main.datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE datafileparameters (parameterID INTEGER PRIMARY KEY, datafileID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Stations table
-            sql_list.append("CREATE TABLE main.stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT);")
+            sql_list.append("CREATE TABLE stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT);")
 
             # Station parameters table
-            sql_list.append("CREATE TABLE main.stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE stationparameters (parameterID INTEGER PRIMARY KEY, stationID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # Polarizations table
-            sql_list.append("CREATE TABLE main.polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT);")
+            sql_list.append("CREATE TABLE polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT);")
 
             # Polarization parameters table
-            sql_list.append("CREATE TABLE main.polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT);")
+            sql_list.append("CREATE TABLE polarizationparameters (parameterID INTEGER PRIMARY KEY, polarizationID INTEGER NOT NULL, key TEXT, value TEXT);")
 
             # event_datafile table (linking events to datafiles)
-            sql_list.append("CREATE TABLE main.event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE);")
+            sql_list.append("CREATE TABLE event_datafile (eventID INTEGER NOT NULL, datafileID INTEGER NOT NULL UNIQUE);")
 
             # datafile_station table (linking datafiles to stations)
-            sql_list.append("CREATE TABLE main.datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE);")
+            sql_list.append("CREATE TABLE datafile_station (datafileID INTEGER NOT NULL, stationID INTEGER NOT NULL UNIQUE);")
 
             # station_polarization table (linking stations to polarizations)
-            sql_list.append("CREATE TABLE main.station_polarization (stationID INTEGER NOT NULL, polarizationID INTEGER NOT NULL UNIQUE);")
+            sql_list.append("CREATE TABLE station_polarization (stationID INTEGER NOT NULL, polarizationID INTEGER NOT NULL UNIQUE);")
 
             # settings table
-            sql_list.append("CREATE TABLE main.settings (key TEXT NOT NULL UNIQUE, value TEXT);")
-            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('datapath', '');")
-            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('resultspath', '');")
-            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('lorapath', '');")
-            sql_list.append("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('db_version', '0');")
+            sql_list.append("CREATE TABLE settings (key TEXT NOT NULL UNIQUE, value TEXT);")
+            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('datapath', '');")
+            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('resultspath', '');")
+            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('lorapath', '');")
+            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('db_version', '0');")
 
             self.db.executelist(sql_list)
         else:
@@ -217,13 +217,13 @@ class CRDatabase(object):
             columns_string += ", {0} TEXT".format(key)
 
         sql_list = []
-        sql_list.append("CREATE TABLE main.{0}parameters_new ({0}ID INTEGER PRIMARY KEY {1});".format(tablename, columns_string))
+        sql_list.append("CREATE TABLE {0}parameters_new ({0}ID INTEGER PRIMARY KEY {1});".format(tablename, columns_string))
         self.db.executelist(sql_list)
 
         # Transfer information from old to new parameter table
         if debug_mode: print "    Transfering data to new table..." # DEBUG
         if debug_mode: print "      . retrieving data from db..."   # DEBUG
-        id_list = [r[0] for r in self.db.select("SELECT DISTINCT {0}ID FROM main.{0}parameters;".format(tablename))]
+        id_list = [r[0] for r in self.db.select("SELECT DISTINCT {0}ID FROM {0}parameters;".format(tablename))]
         records = self.db.select("SELECT {0}ID, lower(key), value FROM {0}parameters ORDER BY {0}ID;".format(tablename))
 
         if debug_mode: print "      . extracting parameter keys and values..." # DEBUG
@@ -249,8 +249,8 @@ class CRDatabase(object):
         # Rename new polarizationparameters table
         if debug_mode: print "    Renaming new table (replacing old table)..." # DEBUG
         sql_list = []
-        sql_list.append("DROP TABLE main.{0}parameters;".format(tablename))
-        sql_list.append("ALTER TABLE main.{0}parameters_new RENAME TO {0}parameters;".format(tablename))
+        sql_list.append("DROP TABLE {0}parameters;".format(tablename))
+        sql_list.append("ALTER TABLE {0}parameters_new RENAME TO {0}parameters;".format(tablename))
         self.db.executelist(sql_list)
 
 
@@ -401,7 +401,7 @@ class CRDatabase(object):
             #                                                 Update database version number
             print "  Updating database version number..." # DEBUG
 
-            self.db.execute("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
+            self.db.execute("UPDATE settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
 
 
     def __updateDatabase_v1_to_v2(self):
@@ -423,11 +423,11 @@ class CRDatabase(object):
 
             # Add lock setting.
             print "  Updating database locking..."
-            self.db.execute("INSERT OR IGNORE INTO main.settings (key, value) VALUES ('locked', '1');")
+            self.db.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('locked', '1');")
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
-            self.db.execute("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
+            self.db.execute("UPDATE settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
 
 
     def __updateDatabase_v2_to_v3(self):
@@ -465,7 +465,7 @@ class CRDatabase(object):
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
-            self.db.execute("UPDATE main.settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
+            self.db.execute("UPDATE settings SET value='{0}' WHERE key='db_version';\n".format(db_version_post))
 
 
     def __updateDatabase_v3_to_v4(self):
@@ -495,7 +495,7 @@ class CRDatabase(object):
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
-            sql_list.append("UPDATE main.settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
+            sql_list.append("UPDATE settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
             self.db.executelist(sql_list)
 
 
@@ -532,7 +532,7 @@ class CRDatabase(object):
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
-            sql_list.append("UPDATE main.settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
+            sql_list.append("UPDATE settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
             self.db.executelist(sql_list)
 
 
@@ -569,7 +569,7 @@ class CRDatabase(object):
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
-            sql_list.append("UPDATE main.settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
+            sql_list.append("UPDATE settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
             self.db.executelist(sql_list)
 
 
@@ -681,7 +681,7 @@ class CRDatabase(object):
         eventID = int(id)
 
         # Check existence of eventID
-        sql = "SELECT COUNT(eventID) FROM main.events WHERE eventID={0};".format(eventID)
+        sql = "SELECT COUNT(eventID) FROM events WHERE eventID={0};".format(eventID)
         results = self.db.select(sql)
         if len(results) > 0:
             sql_list += (self.__getDeleteEventSql(eventID))
@@ -712,15 +712,15 @@ class CRDatabase(object):
         eventID = int(id)
 
         # Remove Event with eventID
-        sql = "DELETE FROM main.events WHERE eventID={0};".format(eventID)
+        sql = "DELETE FROM events WHERE eventID={0};".format(eventID)
         sql_list.append(sql)
 
         # Remove EventParameters with EventID
-        sql = "DELETE FROM main.eventparameters WHERE eventID={0};".format(eventID)
+        sql = "DELETE FROM eventparameters WHERE eventID={0};".format(eventID)
         sql_list.append(sql)
 
         # Get list of DatafileIDs
-        sql = "SELECT datafileID FROM main.event_datafile WHERE eventID={0};".format(eventID)
+        sql = "SELECT datafileID FROM event_datafile WHERE eventID={0};".format(eventID)
         results = self.db.select(sql)
         if len(results) > 0:
             datafileIDs = [r[0] for r in results]
@@ -729,7 +729,7 @@ class CRDatabase(object):
                 sql_list += self.__getDeleteDatafileSql(datafileID)
 
         # Delete extries from event_datafile table
-        sql = "DELETE FROM main.event_datafile WHERE eventID={0};".format(eventID)
+        sql = "DELETE FROM event_datafile WHERE eventID={0};".format(eventID)
         sql_list.append(sql)
 
         return sql_list
@@ -830,7 +830,7 @@ class CRDatabase(object):
         datafileID = int(id)
 
         # Check existence of datafileID
-        sql = "SELECT COUNT(datafileID) FROM main.datafiles WHERE datafileID={0};".format(datafileID)
+        sql = "SELECT COUNT(datafileID) FROM datafiles WHERE datafileID={0};".format(datafileID)
         results = self.db.select(sql)
         if len(results) > 0:
             sql_list += self.__getDeleteDatafileSql(datafileID)
@@ -861,15 +861,15 @@ class CRDatabase(object):
         datafileID = int(id)
 
         # Remove Datafile with datafileID
-        sql = "DELETE FROM main.datafiles WHERE datafileID={0};".format(datafileID)
+        sql = "DELETE FROM datafiles WHERE datafileID={0};".format(datafileID)
         sql_list.append(sql)
 
         # Remove DatafileParameters with datafileID
-        sql = "DELETE FROM main.datafileparameters WHERE datafileID={0};".format(datafileID)
+        sql = "DELETE FROM datafileparameters WHERE datafileID={0};".format(datafileID)
         sql_list.append(sql)
 
         # Get list of StationIDs
-        sql = "SELECT stationID FROM main.datafile_station WHERE datafileID={0};".format(datafileID)
+        sql = "SELECT stationID FROM datafile_station WHERE datafileID={0};".format(datafileID)
         results = self.db.select(sql)
         if len(results) > 0:
             stationIDs = [r[0] for r in results]
@@ -878,7 +878,7 @@ class CRDatabase(object):
                 sql_list += self.__getDeleteStationSql(stationID)
 
         # Delete entries from datafile_station table
-        sql = "DELETE FROM main.datafile_station WHERE datafileID={0};".format(datafileID)
+        sql = "DELETE FROM datafile_station WHERE datafileID={0};".format(datafileID)
         sql_list.append(sql)
 
         return sql_list
@@ -983,7 +983,7 @@ class CRDatabase(object):
         stationID = int(id)
 
         # Check existence of stationID
-        sql = "SELECT COUNT(stationID) FROM main.stations WHERE stationID={0};".format(stationID)
+        sql = "SELECT COUNT(stationID) FROM stations WHERE stationID={0};".format(stationID)
         results = self.db.select(sql)
         if len(results) > 0:
             sql_list += self.__getDeleteStationSql(stationID)
@@ -1014,15 +1014,15 @@ class CRDatabase(object):
         stationID = int(id)
 
         # Remove Station with stationID
-        sql = "DELETE FROM main.stations WHERE stationID={0};".format(stationID)
+        sql = "DELETE FROM stations WHERE stationID={0};".format(stationID)
         sql_list.append(sql)
 
         # Remove StationParameters with stationID
-        sql = "DELETE FROM main.stationparameters WHERE stationID={0};".format(stationID)
+        sql = "DELETE FROM stationparameters WHERE stationID={0};".format(stationID)
         sql_list.append(sql)
 
         # Get list of PolarizationIDs
-        sql = "SELECT polarizationID FROM main.station_polarization WHERE stationID={0};".format(stationID)
+        sql = "SELECT polarizationID FROM station_polarization WHERE stationID={0};".format(stationID)
         results = self.db.select(sql)
         if len(results) > 0:
             polarizationIDs = [r[0] for r in results]
@@ -1031,7 +1031,7 @@ class CRDatabase(object):
                 sql_list += self.__getDeletePolarizationSql(polarizationID)
 
         # Delete entries from station_polarization table.
-        sql = "DELETE FROM main.station_polarization WHERE stationID={0};".format(stationID)
+        sql = "DELETE FROM station_polarization WHERE stationID={0};".format(stationID)
         sql_list.append(sql)
 
         return sql_list
@@ -1142,7 +1142,7 @@ class CRDatabase(object):
         polarizationID = int(id)
 
         # Check existence of polarizationID
-        sql = "SELECT COUNT(polarizationID) FROM main.polarizations WHERE polarizationID={0};".format(polarizationID)
+        sql = "SELECT COUNT(polarizationID) FROM polarizations WHERE polarizationID={0};".format(polarizationID)
         results = self.db.select(sql)
         if len(results) > 0:
             sql_list += self.__getDeletePolarizationSql(polarizationID)
@@ -1173,11 +1173,11 @@ class CRDatabase(object):
         polarizationID = int(id)
 
         # Remove Polarization with polarizationID
-        sql = "DELETE FROM main.polarizations WHERE polarizationID={0};".format(polarizationID)
+        sql = "DELETE FROM polarizations WHERE polarizationID={0};".format(polarizationID)
         sql_list.append(sql)
 
         # Remove PolarizationParameters with polarizationID
-        sql = "DELETE FROM main.polarizationparameters WHERE polarizationID={0};".format(polarizationID)
+        sql = "DELETE FROM polarizationparameters WHERE polarizationID={0};".format(polarizationID)
         sql_list.append(sql)
 
         return sql_list
@@ -1188,10 +1188,10 @@ class CRDatabase(object):
         result = True
 
         if self.db:
-            sql = "SELECT value FROM main.settings WHERE key='locked'"
+            sql = "SELECT value FROM settings WHERE key='locked'"
             if (int(self.db.select(sql)[0][0]) == 0):
                 if os.path.exists(self.lockfilename):
-                    sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('locked', str(1))
+                    sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('locked', str(1))
                     self.db.execute(sql)
                     result = True
                 else:
@@ -1210,7 +1210,7 @@ class CRDatabase(object):
                 print "UNLOCKING THE DATABASE..."
                 print "WARNING: An unlocked database cannot be locked again!"
 
-                sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('locked', str(0))
+                sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('locked', str(0))
                 self.db.execute(sql)
             else:
                 print "Unable to unlock the database."
@@ -1248,25 +1248,25 @@ class CRDatabase(object):
 
         # Events
         if self.db:
-            sql = "SELECT COUNT(eventID) AS nevents FROM main.events"
+            sql = "SELECT COUNT(eventID) AS nevents FROM events"
             n_events = self.db.select(sql)[0][0]
             print "  %-40s : %d" %("Nr. of events", n_events)
 
         # Datafiles
         if self.db:
-            sql = "SELECT COUNT(datafileID) AS ndatafiles FROM main.datafiles"
+            sql = "SELECT COUNT(datafileID) AS ndatafiles FROM datafiles"
             n_datafiles = self.db.select(sql)[0][0]
             print "  %-40s : %d" %("Nr. of datafiles", n_datafiles)
 
         # Stations
         if self.db:
-            sql = "SELECT COUNT(stationID) AS nstations FROM main.stations"
+            sql = "SELECT COUNT(stationID) AS nstations FROM stations"
             n_stations = self.db.select(sql)[0][0]
             print "  %-40s : %d" %("Nr. of stations", n_stations)
 
         # Polarizations
         if self.db:
-            sql = "SELECT COUNT(polarizationID) AS npolarizations FROM main.polarizations"
+            sql = "SELECT COUNT(polarizationID) AS npolarizations FROM polarizations"
             n_polarizations = self.db.select(sql)[0][0]
             print "  %-40s : %d" %("Nr. of polarizations", n_polarizations)
 
@@ -1315,7 +1315,7 @@ class Settings(object):
             result = self._datapath
         else:
             if self._db:
-                sql = "SELECT value FROM main.settings WHERE key='datapath'"
+                sql = "SELECT value FROM settings WHERE key='datapath'"
                 result = str(self._db.select(sql)[0][0])
                 self._datapath = result
             else:
@@ -1337,7 +1337,7 @@ class Settings(object):
         =========  ===========================================
         """
         if self._db:
-            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('datapath', str(value))
+            sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('datapath', str(value))
             self._db.execute(sql)
             self._datapath = str(value)
         else:
@@ -1353,7 +1353,7 @@ class Settings(object):
             result = self._resultspath
         else:
             if self._db:
-                sql = "SELECT value FROM main.settings WHERE key='resultspath'"
+                sql = "SELECT value FROM settings WHERE key='resultspath'"
                 result = str(self._db.select(sql)[0][0])
                 self._resultspath = result
             else:
@@ -1375,7 +1375,7 @@ class Settings(object):
         =========  ===========================================
         """
         if self._db:
-            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
+            sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
             self._db.execute(sql)
             self._resultspath = str(value)
         else:
@@ -1391,7 +1391,7 @@ class Settings(object):
             result = self._lorapath
         else:
             if self._db:
-                sql = "SELECT value FROM main.settings WHERE key='lorapath'"
+                sql = "SELECT value FROM settings WHERE key='lorapath'"
                 result = str(self._db.select(sql)[0][0])
                 self._lorapath = result
             else:
@@ -1413,7 +1413,7 @@ class Settings(object):
         =========  ===========================================
         """
         if self._db:
-            sql = "UPDATE main.settings SET value='{1}' WHERE key='{0}'".format('lorapath',str(value))
+            sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('lorapath',str(value))
             self._db.execute(sql)
             self._lorapath = value
         else:
@@ -1712,7 +1712,7 @@ class Event(object):
         if self._db:
             if self._inDatabase:
                 # Read attributes
-                sql = "SELECT eventID, timestamp, status, statusmessage, alt_status, alt_statusmessage FROM main.events WHERE eventID={0}".format(int(self._id))
+                sql = "SELECT eventID, timestamp, status, statusmessage, alt_status, alt_statusmessage FROM events WHERE eventID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
@@ -1728,7 +1728,7 @@ class Event(object):
 
                 # Read datafiles
                 self.datafiles = []
-                sql = "SELECT datafileID FROM main.event_datafile WHERE eventID={0}".format(self._id)
+                sql = "SELECT datafileID FROM event_datafile WHERE eventID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
                     datafileID = int(record[0])
@@ -1766,13 +1766,13 @@ class Event(object):
         if self._db:
             # Writing attributes
             if self._inDatabase:        # Update values
-                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 self._db.execute(sql)
             else:                       # Create new record
                 if 0 == self._id:
-                    sql = "INSERT INTO main.events (timestamp, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                    sql = "INSERT INTO events (timestamp, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 else:
-                    sql = "INSERT INTO main.events (eventID, timestamp, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, {1},'{2}','{3}','{4}','{5}')".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                    sql = "INSERT INTO events (eventID, timestamp, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, {1},'{2}','{3}','{4}','{5}')".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 self._id = self._db.insert(sql)
                 self._inDatabase = True
 
@@ -1827,7 +1827,7 @@ class Event(object):
         if self._db:
             if self._inDatabase:
                 # Add the event information
-                sql = "UPDATE main.events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 sql_list.append(sql)
 
                 # Add the event parameters
@@ -1861,7 +1861,7 @@ class Event(object):
         result = False
 
         if self._db:
-            sql = "SELECT eventID FROM main.events WHERE eventID={0}".format(int(self._id))
+            sql = "SELECT eventID FROM events WHERE eventID={0}".format(int(self._id))
             records = self._db.select(sql)
             if len(records) > 0:
                 result = True
@@ -1919,9 +1919,9 @@ class Event(object):
                     self.write(recursive=False, parameters=False)
 
                 # Update the linking table.
-                sql = "SELECT eventID FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafile.id)
+                sql = "SELECT eventID FROM event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafile.id)
                 if 0 == len(self._db.select(sql)):
-                    sql = "INSERT INTO main.event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafile.id)
+                    sql = "INSERT INTO event_datafile (eventID, datafileID) VALUES ({0}, {1})".format(self._id, datafile.id)
                     self._db.insert(sql)
                     result = True
             else:
@@ -1967,7 +1967,7 @@ class Event(object):
             # Update database
             if self._db:
                 if self._id:
-                    sql = "DELETE FROM main.event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
+                    sql = "DELETE FROM event_datafile WHERE eventID={0} AND datafileID={1}".format(self._id, datafileID)
                     self._db.execute(sql)
             else:
                 raise ValueError("Unable to write to database: no database was set.")
@@ -2128,7 +2128,7 @@ class Datafile(object):
         if self._db:
             if self._inDatabase:
                 # Read attributes
-                sql = "SELECT datafileID, filename, status FROM main.datafiles WHERE datafileID={0}".format(int(self._id))
+                sql = "SELECT datafileID, filename, status FROM datafiles WHERE datafileID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
@@ -2141,7 +2141,7 @@ class Datafile(object):
 
                 # Read station information
                 self.stations = []
-                sql = "SELECT stationID FROM main.datafile_station WHERE datafileID={0}".format(self._id)
+                sql = "SELECT stationID FROM datafile_station WHERE datafileID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
                     stationID = int(record[0])
@@ -2172,19 +2172,19 @@ class Datafile(object):
         if self._db:
             # Write attributes
             if self._inDatabase:
-                sql = "UPDATE main.datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status.upper()))
+                sql = "UPDATE datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status.upper()))
                 self._db.execute(sql)
             else:
                 # Check uniqueness (filename)
-                sql = "SELECT datafileID FROM main.datafiles WHERE filename='{0}'".format(self.filename)
+                sql = "SELECT datafileID FROM datafiles WHERE filename='{0}'".format(self.filename)
                 if len(self._db.select(sql)) > 0:
                     print "ERROR: Filename is not uniquely defined"
                     return
                 # Add to database
                 if 0 == self._id:
-                    sql = "INSERT INTO main.datafiles (filename, status) VALUES ('{0}', '{1}')".format(str(self.filename), str(self.status.upper()))
+                    sql = "INSERT INTO datafiles (filename, status) VALUES ('{0}', '{1}')".format(str(self.filename), str(self.status.upper()))
                 else:
-                    sql = "INSERT INTO main.datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.filename), str(self.status.upper()))
+                    sql = "INSERT INTO datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}')".format(self._id, str(self.filename), str(self.status.upper()))
                 self._id = self._db.insert(sql)
                 self._inDatabase = True
 
@@ -2239,7 +2239,7 @@ class Datafile(object):
         if self._db:
             if self._inDatabase:
                 # Add the datafile information
-                sql = "UPDATE main.datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status.upper()))
+                sql = "UPDATE datafiles SET filename='{1}', status='{2}' WHERE datafileID={0}".format(self._id, str(self.filename), str(self.status.upper()))
                 sql_list.append(sql)
 
                 # Add the datafile parameters
@@ -2273,7 +2273,7 @@ class Datafile(object):
         result = False
 
         if self._db:
-            sql = "SELECT datafileID FROM main.datafiles WHERE datafileID={0}".format(int(self._id))
+            sql = "SELECT datafileID FROM datafiles WHERE datafileID={0}".format(int(self._id))
             records = self._db.select(sql)
             if len(records) > 0:
                 result = True
@@ -2332,9 +2332,9 @@ class Datafile(object):
 
                 # Update linking table
                 if self._id != 0:
-                    sql = "SELECT datafileID FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, station.id)
+                    sql = "SELECT datafileID FROM datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, station.id)
                     if 0 == len(self._db.select(sql)):
-                        sql = "INSERT INTO main.datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, station.id)
+                        sql = "INSERT INTO datafile_station (datafileID, stationID) VALUES ({0}, {1})".format(self._id, station.id)
                         self._db.insert(sql)
                         result = True
             else:
@@ -2380,7 +2380,7 @@ class Datafile(object):
             # Update database
             if self._db:
                 if self._id != 0:
-                    sql = "DELETE FROM main.datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
+                    sql = "DELETE FROM datafile_station WHERE datafileID={0} AND stationID={1}".format(self._id, stationID)
                     self._db.execute(sql)
             else:
                 raise ValueError("Unable to write to database: no database was set.")
@@ -2519,7 +2519,7 @@ class Station(object):
         if self._db:
             if self._inDatabase:
                 # Read attributes
-                sql = "SELECT stationID, stationname, status, statusmessage, alt_status, alt_statusmessage FROM main.stations WHERE stationID={0}".format(int(self._id))
+                sql = "SELECT stationID, stationname, status, statusmessage, alt_status, alt_statusmessage FROM stations WHERE stationID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
@@ -2535,7 +2535,7 @@ class Station(object):
 
                 # Read polarization information
                 self.polarization = {}
-                sql = "SELECT polarizationID FROM main.station_polarization WHERE stationID={0}".format(self._id)
+                sql = "SELECT polarizationID FROM station_polarization WHERE stationID={0}".format(self._id)
                 records = self._db.select(sql)
                 for record in records:
                     polarizationID = int(record[0])
@@ -2567,13 +2567,13 @@ class Station(object):
         if self._db:
             # Write attributes
             if self._inDatabase:
-                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE stations SET stationname='{1}', status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 self._db.execute(sql)
             else:
                 if 0 == self._id:
-                    sql = "INSERT INTO main.stations (stationname, status, statusmessage, alt_status, alt_statusmessage) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper())))
+                    sql = "INSERT INTO stations (stationname, status, statusmessage, alt_status, alt_statusmessage) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper())))
                 else:
-                    sql = "INSERT INTO main.stations (stationID, stationname, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, '{1}', '{2}', '{3}','{4}', '{5}')".format(self._id, str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper())))
+                    sql = "INSERT INTO stations (stationID, stationname, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, '{1}', '{2}', '{3}','{4}', '{5}')".format(self._id, str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper())))
                 self._id = self._db.insert(sql)
                 self._inDatabase = True
 
@@ -2628,7 +2628,7 @@ class Station(object):
         if self._db:
             if self._inDatabase:
                 # Add the station information
-                sql = "UPDATE main.stations SET stationname='{1}', status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE stations SET stationname='{1}', status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
                 sql_list.append(sql)
 
                 # Add the station parameters
@@ -2661,7 +2661,7 @@ class Station(object):
         result = False
 
         if self._db:
-            sql = "SELECT stationID FROM main.stations WHERE stationID={0}".format(int(self._id))
+            sql = "SELECT stationID FROM stations WHERE stationID={0}".format(int(self._id))
             records = self._db.select(sql)
             if len(records) > 0:
                 result = True
@@ -2714,9 +2714,9 @@ class Station(object):
                     self.write(recursive=False, parameters=False)
 
                 # Update linking table
-                sql = "SELECT stationID FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, polarization.id)
+                sql = "SELECT stationID FROM station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, polarization.id)
                 if 0 == len(self._db.select(sql)):
-                    sql = "INSERT INTO main.station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self.id, polarization.id)
+                    sql = "INSERT INTO station_polarization (stationID, polarizationID) VALUES ({0}, {1})".format(self.id, polarization.id)
                     self._db.insert(sql)
                     result = True
             else:
@@ -2777,7 +2777,7 @@ class Station(object):
             # Update database
             if self._db:
                 if self.id != 0:
-                    sql = "DELETE FROM main.station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, pol_id)
+                    sql = "DELETE FROM station_polarization WHERE stationID={0} AND polarizationID={1}".format(self.id, pol_id)
                     self._db.execute(sql)
                     result = True
             else:
@@ -2997,7 +2997,7 @@ class Polarization(object):
         if self._db:
             if self._inDatabase:
                 # Read attributes
-                sql = "SELECT polarizationID, antennaset, direction, status, statusmessage, resultsfile FROM main.polarizations WHERE polarizationID={0}".format(int(self._id))
+                sql = "SELECT polarizationID, antennaset, direction, status, statusmessage, resultsfile FROM polarizations WHERE polarizationID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
@@ -3036,13 +3036,13 @@ class Polarization(object):
         if self._db:
             # Write attributes
             if self._inDatabase:
-                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', alt_status='{5}', alt_statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                sql = "UPDATE polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', alt_status='{5}', alt_statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
                 self._db.execute(sql)
             else:
                 if 0 == self._id:
-                    sql = "INSERT INTO main.polarizations (antennaset, direction, status, statusmessage, alt_status, alt_statusmessage, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                    sql = "INSERT INTO polarizations (antennaset, direction, status, statusmessage, alt_status, alt_statusmessage, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
                 else:
-                    sql = "INSERT INTO main.polarizations (polarizationID, antennaset, direction, status, statusmessage, alt_status, alt_statusmessage, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                    sql = "INSERT INTO polarizations (polarizationID, antennaset, direction, status, statusmessage, alt_status, alt_statusmessage, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
                 self._id = self._db.insert(sql)
                 self._inDatabase = True
 
@@ -3090,7 +3090,7 @@ class Polarization(object):
         if self._db:
             if self._inDatabase:
                 # Add the station information
-                sql = "UPDATE main.polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', status='{5}', statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                sql = "UPDATE polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', status='{5}', statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
                 sql_list.append(sql)
 
                 # Add the polarization parameters
@@ -3118,7 +3118,7 @@ class Polarization(object):
         result = False
 
         if self._db:
-            sql = "SELECT polarizationID FROM main.polarizations WHERE polarizationID={0}".format(int(self._id))
+            sql = "SELECT polarizationID FROM polarizations WHERE polarizationID={0}".format(int(self._id))
             records = self._db.select(sql)
             if len(records) > 0:
                 result = True
