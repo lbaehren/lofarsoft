@@ -74,6 +74,7 @@ class Database(object):
         cursor = self._db.cursor()
 
         try:
+            print sql
             cursor.execute(sql)
             newID = cursor.lastrowid
 
@@ -136,6 +137,7 @@ class Database(object):
         cursor = self._db.cursor()
 
         try:
+            print sql
             cursor.execute(sql)
 
             self._db.commit()
