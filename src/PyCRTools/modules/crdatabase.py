@@ -41,15 +41,15 @@ class CRDatabase(object):
         # Full filename of the datapath
         self.filename = os.path.realpath(filename)
 
-        # Check for existence
-        if not self.tableExists("settings"):
-            create = True
-
         # Database object
         self.db = db.Database(self.filename, host, user, password, dbname)
 
         # Initialize database structure
         self.db.open()
+
+        # Check for existence
+        if not self.tableExists("settings"):
+            create = True
 
         if create:
             self.__createDatabase()
