@@ -109,7 +109,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
         INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-        WHERE (ed.eventID={0} AND s.stationName='{1}' AND p.direction='{2}')""".format(eventID, station, polarization)
+        WHERE (ed.eventID={0} AND s.stationname='{1}' AND p.direction='{2}')""".format(eventID, station, polarization)
         cursor.execute(sql)
 
         e = cursor.fetchone()
@@ -140,7 +140,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
         INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-        WHERE (ed.eventID={0} AND s.stationName='{1}')""".format(eventID, e[0])
+        WHERE (ed.eventID={0} AND s.stationname='{1}')""".format(eventID, e[0])
         cursor.execute(sql)
 
         polarizations = SubElement(s, "polarizations")
@@ -334,7 +334,7 @@ def station_handler(eventID, station_name):
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
     INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-    WHERE (ed.eventID={0} AND s.stationName={1})""".format(eventID, station_name)
+    WHERE (ed.eventID={0} AND s.stationname='{1}')""".format(eventID, station_name)
     c.execute(sql)
 
     polarizations = SubElement(header, "polarizations")
@@ -428,7 +428,7 @@ def polarization_handler(eventID, station_name, polarization_direction):
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
     INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
-    WHERE (ed.eventID={0} AND s.stationName={1})""".format(eventID, station_name)
+    WHERE (ed.eventID={0} AND s.stationname='{1}')""".format(eventID, station_name)
     c.execute(sql)
 
     polarizations = SubElement(header, "polarizations")
