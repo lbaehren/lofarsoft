@@ -85,11 +85,15 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
         s = SubElement(header, "station")
         SubElement(s, "name").text = str(station)
 
-        cursor.execute("""SELECT status, alt_status FROM
+        sql = """SELECT status, alt_status FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
-        WHERE (eventID=? AND stationName=?)
-        """, (eventID, station))
+        WHERE (eventID={0} AND stationName='{1}')
+        """.format(eventID, station)
+
+        print sql
+        cursor.execute(sql)
+        print "this worked"
 
         e = cursor.fetchone()
 
