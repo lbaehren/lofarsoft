@@ -141,10 +141,10 @@ class CRDatabase(object):
 
             # settings table
             sql_list.append("CREATE TABLE settings (key TEXT NOT NULL UNIQUE, value TEXT);")
-            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('datapath', '');")
-            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('resultspath', '');")
-            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('lorapath', '');")
-            sql_list.append("INSERT OR IGNORE INTO settings (key, value) VALUES ('db_version', '0');")
+            sql_list.append("INSERT INTO settings (key, value) VALUES ('datapath', '');")
+            sql_list.append("INSERT INTO settings (key, value) VALUES ('resultspath', '');")
+            sql_list.append("INSERT INTO settings (key, value) VALUES ('lorapath', '');")
+            sql_list.append("INSERT INTO settings (key, value) VALUES ('db_version', '0');")
 
             self.db.executelist(sql_list)
         else:
@@ -423,7 +423,7 @@ class CRDatabase(object):
 
             # Add lock setting.
             print "  Updating database locking..."
-            self.db.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('locked', '1');")
+            self.db.execute("INSERT INTO settings (key, value) VALUES ('locked', '1');")
 
             # Upgrade the database version number.
             print "  Updating database version number..." # DEBUG
