@@ -364,7 +364,7 @@ def station_handler(eventID, station_name):
     event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
     INNER JOIN stations AS s ON (ds.stationID=s.stationID)
     INNER JOIN stationparameters AS sp ON (s.stationID=sp.stationID)
-    WHERE (ed.eventID={0} AND s.stationname={1})""".format(eventID, station_name)
+    WHERE (ed.eventID={0} AND s.stationname='{1}')""".format(eventID, station_name)
     c.execute(sql)
 
     v = c.fetchone()
@@ -460,7 +460,7 @@ def polarization_handler(eventID, station_name, polarization_direction):
     INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
     INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
     INNER JOIN polarizationparameters AS pp ON (p.polarizationID=pp.polarizationID)
-    WHERE (ed.eventID={0} AND s.stationname={1} AND p.direction={2})
+    WHERE (ed.eventID={0} AND s.stationname='{1}' AND p.direction='{2}')
     """.format(eventID, station_name, polarization_direction)
     c.execute(sql)
 
