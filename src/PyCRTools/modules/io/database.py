@@ -136,6 +136,8 @@ class Database(object):
         cursor.execute("select exists(select * from information_schema.tables where table_name=%s)", (table,))
         exists = cursor.fetchone()[0]
 
+        print "exists", exists
+
         cursor.close()
 
         self.close()
