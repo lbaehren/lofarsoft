@@ -250,7 +250,14 @@ def event_handler(eventID):
     print "calling event_handler"
 
     # Connect to database
-    conn = sqlite3.connect(options.database)
+    if have_psycopg2 and options.host:
+        # Open PostgreSQL database
+        print "Opening connection to PostgreSQL database"
+        conn = psycopg2.connect(host=options.host, user=options.user, password=options.password, dbname=options.dbname)
+    else:
+        # Open SQLite database
+        print "Opening Sqlite database"
+        conn = sqlite3.connect(options.database, timeout=60.0)
 
     # Create cursor
     c = conn.cursor()
@@ -308,7 +315,14 @@ def station_handler(eventID, station_name):
     print "calling station_handler"
 
     # Connect to database
-    conn = sqlite3.connect(options.database)
+    if have_psycopg2 and options.host:
+        # Open PostgreSQL database
+        print "Opening connection to PostgreSQL database"
+        conn = psycopg2.connect(host=options.host, user=options.user, password=options.password, dbname=options.dbname)
+    else:
+        # Open SQLite database
+        print "Opening Sqlite database"
+        conn = sqlite3.connect(options.database, timeout=60.0)
 
     # Create cursor
     c = conn.cursor()
@@ -388,7 +402,14 @@ def polarization_handler(eventID, station_name, polarization_direction):
     print "calling polarization_handler"
 
     # Connect to database
-    conn = sqlite3.connect(options.database)
+    if have_psycopg2 and options.host:
+        # Open PostgreSQL database
+        print "Opening connection to PostgreSQL database"
+        conn = psycopg2.connect(host=options.host, user=options.user, password=options.password, dbname=options.dbname)
+    else:
+        # Open SQLite database
+        print "Opening Sqlite database"
+        conn = sqlite3.connect(options.database, timeout=60.0)
 
     # Create cursor
     c = conn.cursor()
