@@ -97,7 +97,7 @@ usage: %prog [--database <databasename>] [options] <datafile.h5>
 
 parser = OptionParser(usage=usage)
 
-parser.add_option("--database", type="str", default="", help="Location of the database file")
+parser.add_option("--database", default=None, help="Location of the database file")
 parser.add_option("-i","--id", type="int", dest="event_id", default=0, help="event ID as stored in the database")
 
 parser.add_option("-o","--outputdir", type="str", default="/data/VHECR/LORAtriggered/results",help="directory where to store the final results (will be stored in a subdirectory filename.dir/ within that directory)")
@@ -212,7 +212,7 @@ else:
 
     # Database
     db = None
-    if (options.database != ""):
+    if (options.database or options.host) 
         db_manager = crdb.CRDatabase(filename = options.database, host = options.host, user = options.user, password = options.password, dbname = options.dbname)
         db = db_manager.db
 
