@@ -67,6 +67,7 @@ class Imager(Task):
         intgrfreq = dict( default = False,
                           doc = "Output frequency integrated image." ),
         inversefft = dict( default = False ),
+        rfi_remove = dict(default = None,doc='List of frequency indices to remove.'),
         FREQMIN = dict( default = None ),
         FREQMAX = dict( default = None ),
         OBSTIME = dict( default = lambda self : self.data["TIME"][0] ),
@@ -201,6 +202,10 @@ class Imager(Task):
                     self.data.getFFTData(self.fftdata, block)
 
                 cr.hFFTConvert(self.fftdata[...])
+
+                #Revoming RFI
+                if self.rfi_remove:
+                    self.fftdata[...,self.rfi_remove] = 0
 
                 print "reading done"
 
