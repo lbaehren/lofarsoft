@@ -1497,7 +1497,7 @@ def process_event(event_id=-1):
             event_info.alt_status = "CR_FOUND"
         else:
             event_info.alt_status = "CR_NOT_FOUND"
-        event_info.write(recursive=False, parameters=False)
+        event_info.write(recursive=True, parameters=True)
 
         event_info.summary()
     else:
