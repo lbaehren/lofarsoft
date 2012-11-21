@@ -183,7 +183,12 @@ class CRDatabase(object):
         if not self.isLocked():
             # Find list of parameter names
             parameternames = []
-            sql = "pragma table_info({0});".format(tablename)
+
+            if self._db.dbtype == "postgresql":
+                sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='{0}';".format(tablename)
+            else:
+                sql = "pragma table_info({0});".format(tablename)
+
             if debug_mode: print "SQL: table info: ",sql
             records = self.db.select(sql)
             if records:
@@ -1502,7 +1507,10 @@ class BaseParameter(object):
         self._keys = self._parameter.keys()
 
         if not self._keys:
-            sql = "pragma table_info({0});".format(self._tablename)
+            if self._db.dbtype == "postgresql":
+                sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='{0}';".format(self._tablename)
+            else:
+                sql = "pragma table_info({0});".format(self._tablename)
             if debug_mode: print sql    # DEBUG
             records = self._db.select(sql)
             if records:
