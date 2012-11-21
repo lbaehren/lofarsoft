@@ -98,6 +98,10 @@ class CRDatabasePopulator(object):
         sql = "INSERT INTO datafiles (datafileID, filename, status) VALUES ({0}, '{1}', '{2}');".format(self.ID['datafile'], self.dataFilename, 'NEW')
         self.sqlList.append(sql)
 
+        # Write empty row for later updating of parameters
+        sql = "INSERT INTO datafileparameters (datafileID) VALUES ({0})".format(self.ID['datafile'])
+        self.sqlList.append(sql)
+
         # Write datafile parameters to list of SQL statements
         # => Disabled as there are at the moment no station parameters
         # if options.parameters:
@@ -161,6 +165,10 @@ class CRDatabasePopulator(object):
             sql = "INSERT INTO datafile_station (datafileID, stationID) VALUES ({0}, {1});".format(self.ID['datafile'], self.ID['station'])
             self.sqlList.append(sql)
 
+            # Write empty row for later updating of parameters
+            sql = "INSERT INTO stationparameters (stationID) VALUES ({0})".format(self.ID['station'])
+            self.sqlList.append(sql)
+
 
             # __________________________________________________________________________
             #                                                               Polarization
@@ -173,6 +181,10 @@ class CRDatabasePopulator(object):
                 antennaset = str(dx.antennaset)
                 resultsfile = str(dx.resultsfile(pol_direction))
                 sql = "INSERT INTO polarizations (polarizationID, antennaset, direction, status, alt_status, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}','{5}');".format(self.ID['polarization'], antennaset, pol_direction, 'NEW', 'NEW', resultsfile)
+                self.sqlList.append(sql)
+
+                # Write empty row for later updating of parameters
+                sql = "INSERT INTO polarizationparameters (polarizationID) VALUES ({0})".format(self.ID['polarization'])
                 self.sqlList.append(sql)
 
                 # Write polarization parameters to list of SQL statements
