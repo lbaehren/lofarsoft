@@ -113,7 +113,7 @@ class CRDatabase(object):
             sql_list.append("CREATE TABLE events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
 
             # Event parameters table
-            sql_list.append("CREATE TABLE eventparameters (eventID INTEGER PRIMARY KEY, lora_energy_ev TEXT, lora_energy TEXT, lora_core_x TEXT, lora_core_y TEXT, lora_coreuncertainties TEXT, lora_elevation TEXT, lora_utc_time_secs TEXT, lora_coree_x TEXT, lora_coree_y TEXT, lora_core TEXT, lora_direction TEXT, lora_10_nsec TEXT, lora_moliere_rad_m TEXT, lora_time TEXT, lora_detectorid TEXT, lora_moliere TEXT, lora_azimuth TEXT, lora_particle_density__m2 TEXT, lora_nsecs TEXT, lora_posz TEXT, lora_posx TEXT, lora_posy TEXT, plotfiles TEXT, crp_average_direction TEXT, lora_datafile TEXT, lora_ldf TEXT);")
+            sql_list.append("CREATE TABLE eventparameters (eventID INTEGER PRIMARY KEY, lora_energy_ev TEXT, lora_energy TEXT, lora_core_x TEXT, lora_core_y TEXT, lora_coreuncertainties TEXT, lora_elevation TEXT, lora_utc_time_secs TEXT, lora_coree_x TEXT, lora_coree_y TEXT, lora_core TEXT, lora_direction TEXT, lora_10_nsec TEXT, lora_moliere_rad_m TEXT, lora_time TEXT, lora_detectorid TEXT, lora_moliere TEXT, lora_azimuth TEXT, lora_particle_density__m2 TEXT, lora_nsecs TEXT, lora_posz TEXT, lora_posx TEXT, lora_posy TEXT, plotfiles TEXT, crp_average_direction TEXT, lora_datafile TEXT, lora_ldf TEXT, lora_energyerr_ev TEXT, lora_elevaerr TEXT, lora_azierr TEXT);")
 
             # Datafile table
             sql_list.append("CREATE TABLE datafiles (datafileID INTEGER PRIMARY KEY, filename TEXT UNIQUE, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
