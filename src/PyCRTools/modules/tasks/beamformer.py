@@ -643,7 +643,11 @@ class BeamFormer(tasks.Task):
  
                 self.phases.delaytophase(self.frequencies,self.delays)
                 self.weights.phasetocomplex(self.phases)
+                if self.test_beam_per_antenna:
+                    self.nchunks=19
                 for nchunk in range(self.nchunks):
+                    if self.test_beam_per_antenna:
+                        nchunk=18
                     print ' Working on chunk {0} out of {1} \r'.format(nchunk,self.nchunks  ),          #Prints the progress.
                     sys.stdout.flush()
                     blocks=range(nchunk*self.blocks_per_sect,(nchunk+1)*self.blocks_per_sect,self.stride)
@@ -687,8 +691,8 @@ class BeamFormer(tasks.Task):
 #                        self.avspec[...].spectralpower2(self.beams[...]) #Debug# This is now done in self.dyncalc, no need for it here...
                         self.beams.write(self.spectrum_file,nblocks=self.nchunks,block=nchunk,writeheader=False,clearfile=clearfile,ext=self.file_ext)
                         clearfile=False
-                        if self.test_beam_per_antenna:
-                            test_beam[count]= self.beams[7] # 7 since was checking in CR file.
+                        if self.test_beam_per_antenna and nchunk==18:
+                            test_beam[count]= self.beams[238] # 238 since was checking in CR file (block 5998, file: L28348_D20110612T231913.199Z_CS002_R000_tbb.h5)
                             count+=1
                         #print "#  Time:",time.clock()-t0,"s for processing this chunk. Number of spectra added =",self.nspectraadded
 #                        if self.doplot>2 and self.nspectraadded[nchunk]%self.plotskip==0:
