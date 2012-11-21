@@ -36,9 +36,11 @@ cur = conn.cursor()
 
 if options.status != "":
     if options.alt_status:
-        cur.execute("SELECT eventID FROM events WHERE alt_status=?", (options.status, ))
+        sql = "SELECT eventID FROM events WHERE alt_status={0}".format(options.status)
+        cur.execute(sql)
     else:
-        cur.execute("SELECT eventID FROM events WHERE status=?", (options.status, ))
+        sql = "SELECT eventID FROM events WHERE status={0}".format(options.status)
+        cur.execute(sql)
 else:
     cur.execute("SELECT eventID FROM events")
 
