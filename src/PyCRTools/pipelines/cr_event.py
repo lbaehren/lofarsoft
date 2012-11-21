@@ -212,7 +212,7 @@ else:
 
     # Database
     db = None
-    if (options.database or options.host) 
+    if (options.database or options.host):
         db_manager = crdb.CRDatabase(filename = options.database, host = options.host, user = options.user, password = options.password, dbname = options.dbname)
         db = db_manager.db
 
