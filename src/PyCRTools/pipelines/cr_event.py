@@ -123,6 +123,10 @@ parser.add_option("-I","--imager", action="store_true", help="Run imager")
 parser.add_option("-O", "--max_outliers", type="int", default=24, help="Maximum allowed number of outliers in calculated cable delays")
 parser.add_option("-r", "--randomize_rfi", action="store_true", help="Replace RFI lines with mean value at random phase.")
 parser.add_option("-F", "--full_output", action="store_true", help="Write data arrays to pcr files and task parameters to par files.")
+parser.add_option("--host", default=None, help="PostgreSQL host.")
+parser.add_option("--user", default=None, help="PostgreSQL user.")
+parser.add_option("--password", default=None, help="PostgreSQL password.")
+parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 
 if parser.get_prog_name()=="cr_event.py":
     (options, args) = parser.parse_args()
@@ -209,7 +213,7 @@ else:
     # Database
     db = None
     if (options.database != ""):
-        db_manager = crdb.CRDatabase(options.database)
+        db_manager = crdb.CRDatabase(filename = options.database, host = options.host, user = options.user, password = options.password, dbname = options.dbname)
         db = db_manager.db
 
     if db:
