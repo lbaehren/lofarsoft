@@ -2,6 +2,9 @@
 Imager documentation
 ====================
 
+"Representations of celestial coordinates in FITS"
+http://adsabs.harvard.edu/abs/2002A%26A...395.1077C
+
 """
 
 from pycrtools.tasks import Task
@@ -12,6 +15,7 @@ import numpy as np
 import time
 import pyfits
 import os
+import pdb;# pdb.set_trace()
 
 def savefits(filename, array, overwrite=True, **kwargs):
     """Save image as standard FITS file.
@@ -140,9 +144,9 @@ class Imager(Task):
 
         self.frequency_slice = None
         if self.FREQMIN != None and self.FREQMAX != None:
-            frequency_slice = cr.hArray(int, 2)
-            cr.hFindSequenceBetweenOrEqual(frequency_slice, self.frequencies, self.FREQMIN, self.FREQMAX, 0, 0)
-            self.frequencies=cr.hArray(list(self.frequencies[frequency_slice[0]:frequency_slice[1]].vec()))
+            self.frequency_slice = cr.hArray(int, 2)
+            cr.hFindSequenceBetweenOrEqual(self.frequency_slice, self.frequencies, self.FREQMIN, self.FREQMAX, 0, 0)
+            self.frequencies=cr.hArray(list(self.frequencies[self.frequency_slice[0]:self.frequency_slice[1]].vec()))
 
         self.nfreq = len(self.frequencies)
 
