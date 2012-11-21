@@ -1998,7 +1998,7 @@ class Event(object):
         this event.
 
         Returns *True* if a polarization with a CR detection
-        (polarization.status=='OK') is found, *False* otherwise.
+        (polarization.status=='GOOD') is found, *False* otherwise.
         """
         result = False
 
@@ -2009,7 +2009,7 @@ class Event(object):
             INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
             INNER JOIN station_polarization as sp ON (ds.stationID=sp.stationID)
             INNER JOIN polarizations as p ON (sp.polarizationID=p.polarizationID)
-            WHERE (p.alt_status='OK' AND ed.eventID={0});""".format(self._id)
+            WHERE (p.alt_status='GOOD' AND ed.eventID={0});""".format(self._id)
             records = self._db.select(sql)
 
             if records:
@@ -2022,7 +2022,7 @@ class Event(object):
             INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
             INNER JOIN station_polarization as sp ON (ds.stationID=sp.stationID)
             INNER JOIN polarizations as p ON (sp.polarizationID=p.polarizationID)
-            WHERE (p.status='OK' AND ed.eventID={0});""".format(self._id)
+            WHERE (p.status='GOOD' AND ed.eventID={0});""".format(self._id)
             records = self._db.select(sql)
 
             if records:
