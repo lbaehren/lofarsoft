@@ -93,6 +93,7 @@ class FindRFI(Task):
         average_spectrum = dict( default = None, doc = "Average power spectrum (ADC units) per antenna, uncleaned. Dim = [nantennas, nfreq]", output = True ),
         cleaned_spectrum = dict( default = None, doc = "Cleaned power spectrum per antenna.", output = True ),
         phase_average = dict( default = None, doc = "Average phases per antenna, per frequency. Can be passed to the RF calibration Task. Dimension = nantennas x nfreq", output = True ),
+        phase_RMS = dict( default = None, doc = "RMS phase spread for each antenna, per frequency. Can be passed to RF calibration Task. Dimension = nantennas x nfreq", output = True ),
         median_phase_spreads = dict( default = None, doc = "Median over antennas, of the phase spread measure from all blocks. Dimension = [nfreq]", output = True ),
         antennas_cleaned_power = dict(default = None, doc = "Cleaned power (sum of squares) from cleaned spectrum, per antenna. ", output = True ),
         save_plots = dict( default = False,
@@ -211,7 +212,7 @@ class FindRFI(Task):
         incPhaseRMS.sqrt()
         incPhaseRMS *= np.sqrt(2.0) # check...???
         phaseRMS = incPhaseRMS
-                
+        self.phase_RMS = phaseRMS        
         x = phaseRMS.toNumpy()
         medians = np.median(x, axis=0)
         medians[0] = 1.0
