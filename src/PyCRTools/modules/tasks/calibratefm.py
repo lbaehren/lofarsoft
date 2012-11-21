@@ -219,6 +219,8 @@ class CalibrateFM(Task):
             self.phaseRMS = cr.hArray(a)
             # Numpy for using argmin, argsort etc.
 
+#        import pdb; pdb.set_trace()
+        self.blocksize = self.f["BLOCKSIZE"]
         self.nofchannels = len(self.f["SELECTED_DIPOLES"])
         print '# channels = %d' % self.nofchannels
         if not self.filefilter: # set for title plotting purpose
