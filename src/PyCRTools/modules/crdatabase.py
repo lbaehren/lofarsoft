@@ -186,13 +186,14 @@ class CRDatabase(object):
 
             if self._db._dbtype == "postgresql":
                 sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='{0}';".format(tablename)
+                records = self._db.select(sql)
+                if records:
+                    self._keys = [str(r[0]) for r in records[1:]]
             else:
                 sql = "pragma table_info({0});".format(tablename)
-
-            if debug_mode: print "SQL: table info: ",sql
-            records = self.db.select(sql)
-            if records:
-                parameternames = [str(r[1]) for r in records[1:]]
+                records = self._db.select(sql)
+                if records:
+                    self._keys = [str(r[1]) for r in records[1:]]
 
             if parameternames:
                 if columnname in parameternames:
@@ -1509,12 +1510,14 @@ class BaseParameter(object):
         if not self._keys:
             if self._db._dbtype == "postgresql":
                 sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='{0}';".format(self._tablename)
+                records = self._db.select(sql)
+                if records:
+                    self._keys = [str(r[0]) for r in records[1:]]
             else:
                 sql = "pragma table_info({0});".format(self._tablename)
-            if debug_mode: print sql    # DEBUG
-            records = self._db.select(sql)
-            if records:
-                self._keys = [str(r[1]) for r in records[1:]]
+                records = self._db.select(sql)
+                if records:
+                    self._keys = [str(r[1]) for r in records[1:]]
 
         return self._keys
 
