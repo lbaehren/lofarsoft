@@ -75,6 +75,7 @@ class FindRFI(Task):
             doc = "Number of frequencies in FFT." ),
         nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
         startblock = dict( default = 0, doc = "Start processing file at this block nr." ),
+        refant = dict(default = None, doc = "Optional parameter to set reference antenna number."),
 #        timeseries_data = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.blocksize)),
 #            doc = "Timeseries data." ),
         freq_range = dict( default = None, doc = "Optional frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)" ), 
@@ -129,7 +130,7 @@ class FindRFI(Task):
         
         n = 0
         skippedblocks = 0
-        refant = -1 # determine reference antenna from median power; do not rely on antenna 0 being alive...
+        refant = self.refant # determine reference antenna from median power; do not rely on antenna 0 being alive...
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
         # have to cut out the block with the pulse... autodetect is best? 
@@ -158,7 +159,7 @@ class FindRFI(Task):
             # end test hack
             magspectrum.copy(spectrum)
             magspectrum.abs()
-            if i == 0: # in first block, determine reference antenna (which channel has median power)
+            if i == 0 and self.refant < 0: # in first block, determine reference antenna (which channel has median power)
                 magspectrum.square()
                 channel_power = 2 * cr.hArray(magspectrum[...].sum() )                
                 refant = np.argsort(channel_power.toNumpy())[self.nantennas / 2]

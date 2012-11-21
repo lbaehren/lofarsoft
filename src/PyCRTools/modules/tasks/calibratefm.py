@@ -23,6 +23,7 @@ import pycrtools as cr
 from pycrtools import srcfind as sf
 import pytmf
 import datetime
+import os
 
 twopi = 2 * np.pi
 deg2rad = twopi / 360.0
@@ -193,32 +194,36 @@ class CalibrateFM(Task):
             print '[rfilines] Processing files: '
             print filelist
             self.f = cr.open(filelist, blocksize = self.blocksize)
-            findrfi = cr.trerun("FindRFI", "0", f = self.f, nofblocks = 10) # do all blocks by default. Do both polarisations.
-            # select channels with polarisation 'self.pol'
-#            if self.antennaselection:
-#                selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if (int(x) % 2 == self.pol) and ((int(x) % 100) / 2 in self.antennaselection)]
-#            else:
             selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
             print 'SELECTING POL %d' % self.pol
             self.f["SELECTED_DIPOLES"] = selected_dipoles
             print 'DONE SELECTION'
+            findrfi = cr.trerun("FindRFI", "0", f = self.f, nofblocks = 10, refant = 0) # do all blocks by default. Do only given polarisation.
+            
+            # select channels with polarisation 'self.pol'
+#            if self.antennaselection:
+#                selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if (int(x) % 2 == self.pol) and ((int(x) % 100) / 2 in self.antennaselection)]
+#            else:
     # test shift:        f.shiftTimeseriesData([-1, 1, 0, -1, 0, -1])
-            self.nofchannels = len(selected_dipoles)
-            print '# channels = %d' % self.nofchannels
             
             # Get output of FindRFI into our parameter space. Apply channel selection for polarisation
             findrfi_channels = findrfi.nantennas # total nr. of channels
-            thisPolsChannels = range(self.pol, findrfi_channels, 2)
-            
+            #thisPolsChannels = range(self.pol, findrfi_channels, 2)
+
             #a = findrfi.phase_average[thisPolsChannels, ...]
-            a = findrfi.phase_average.toNumpy()[thisPolsChannels]
+            a = findrfi.phase_average.toNumpy() # [thisPolsChannels]
             self.averagePhases = cr.hArray(a)
             a = findrfi.median_phase_spreads
-            self.medians = a.toNumpy() # they are a median over all antennas, which is OK
-            a = findrfi.phase_RMS.toNumpy()[thisPolsChannels]
+            self.medians = cr.hArray(a) # they are a median over all antennas, which is OK
+            a = findrfi.phase_RMS.toNumpy()#[thisPolsChannels]
             self.phaseRMS = cr.hArray(a)
             # Numpy for using argmin, argsort etc.
 
+        self.nofchannels = len(self.f["SELECTED_DIPOLES"])
+        print '# channels = %d' % self.nofchannels
+        if not self.filefilter: # set for title plotting purpose
+            firstname = self.f._MultiTBBData__files[0]["FILENAME"]
+            self.filefilter = os.path.split(firstname)[-1].split("_CS")[0]
         # get calibration delays from file
         caldelays = cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"]) # f[...] outputs list!
         # add subsample clock offsets to caldelays
@@ -240,7 +245,7 @@ class CalibrateFM(Task):
 #        import pdb; pdb.set_trace()
         
 #        self.phase_average = cr.hArray(copy = phaseAvg)
-           
+        self.medians = self.medians.toNumpy()   
         if not self.lines: # if no value given, take the one with best phase stability
             if not self.freq_range: # take overall best channel
                 bestchannel = self.medians.argmin()
