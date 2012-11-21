@@ -184,7 +184,7 @@ class CRDatabase(object):
             # Find list of parameter names
             parameternames = []
 
-            if self._db.dbtype == "postgresql":
+            if self._db._dbtype == "postgresql":
                 sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='{0}';".format(tablename)
             else:
                 sql = "pragma table_info({0});".format(tablename)
@@ -1507,7 +1507,7 @@ class BaseParameter(object):
         self._keys = self._parameter.keys()
 
         if not self._keys:
-            if self._db.dbtype == "postgresql":
+            if self._db._dbtype == "postgresql":
                 sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='{0}';".format(self._tablename)
             else:
                 sql = "pragma table_info({0});".format(self._tablename)
