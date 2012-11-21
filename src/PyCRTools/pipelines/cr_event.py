@@ -1493,7 +1493,7 @@ def process_event(event_id=-1):
         for datafile_info in event_info.datafiles:
             filename_full = os.path.join(datadir, datafile_info.filename)
             process_datafile(filename_full, datafile_info)
-        if event_info.is_cr_found():
+        if event_info.is_cr_found(alt_status=True):
             event_info.alt_status = "CR_FOUND"
         else:
             event_info.alt_status = "CR_NOT_FOUND"

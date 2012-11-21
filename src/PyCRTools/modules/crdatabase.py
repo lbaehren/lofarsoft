@@ -1993,7 +1993,7 @@ class Event(object):
         return result
 
 
-    def is_cr_found(self):
+    def is_cr_found(self, alt_status=False):
         """Check if a polarization with a CR detection is found within
         this event.
 
@@ -2002,7 +2002,20 @@ class Event(object):
         """
         result = False
 
-        if self._db:
+        if self._db and alt_status:
+            sql = """
+            SELECT p.alt_status FROM
+            event_datafile AS ed
+            INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
+            INNER JOIN station_polarization as sp ON (ds.stationID=sp.stationID)
+            INNER JOIN polarizations as p ON (sp.polarizationID=p.polarizationID)
+            WHERE (p.alt_status='OK' AND ed.eventID={0});""".format(self._id)
+            records = self._db.select(sql)
+
+            if records:
+                result = True
+
+        elif self._db:
             sql = """
             SELECT p.status FROM
             event_datafile AS ed
