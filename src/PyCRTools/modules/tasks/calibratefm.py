@@ -215,7 +215,8 @@ class CalibrateFM(Task):
             self.averagePhases = cr.hArray(a)
             a = findrfi.median_phase_spreads
             self.medians = a.toNumpy() # they are a median over all antennas, which is OK
-            self.phaseRMS = findrfi.phase_RMS
+            a = findrfi.phase_RMS.toNumpy()[thisPolsChannels]
+            self.phaseRMS = cr.hArray(a)
             # Numpy for using argmin, argsort etc.
 
         # get calibration delays from file
