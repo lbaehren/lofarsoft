@@ -12,7 +12,7 @@ from optparse import OptionParser
 
 # Parse commandline options
 parser = OptionParser()
-parser.add_option("-d", "--database", default="cr.db", help = "filename of database")
+parser.add_option("-d", "--database", default=None, help = "filename of database")
 parser.add_option("-s", "--status", default="", help = "event status")
 parser.add_option("-a", "--alt-status", action="store_true", default=False, help = "use alt status")
 parser.add_option("--host", default=None, help="PostgreSQL host.")
