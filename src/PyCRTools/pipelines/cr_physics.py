@@ -47,13 +47,13 @@ parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 (options, args) = parser.parse_args()
 
 db_filename = options.database
-dbManager = crdb.CRDatabase(db_filename)
+dbManager = crdb.CRDatabase(db_filename, host = options.host, user = options.user, password = options.password, dbname = options.dbname)
 db = dbManager.db
 
 start = time.clock()
 
 # Get event from database
-event = crdb.Event(db = db, id = options.id, host = options.host, user = options.user, password = options.password, dbname = options.dbname)
+event = crdb.Event(db = db, id = options.id)
 
 # Set the event status
 event.status = "PROCESSING"
