@@ -105,10 +105,8 @@ for station in stations:
             pulse_search_window_end = sample_number_lora + options.broad_search_window_width / 2
 
             print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
-        except Exception:
-        
+        except:
             logging.exception("could not get expected block number from LORA data for station "+station.stationname)
-        
             continue
         
         logging.debug("have LORA data")
@@ -370,7 +368,7 @@ for station in stations:
         all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
         all_station_rms.append(p["crp_rms"])
     except:
-        print "Do not have all pulse parameters for station", station.stationname
+        logging.exception("Do not have all pulse parameters for station" + station.stationname)
 
 all_station_antenna_positions = np.vstack(all_station_antenna_positions)
 all_station_pulse_delays = np.vstack(all_station_pulse_delays)
