@@ -158,10 +158,14 @@ class Database(object):
 
         cursor = self._db.cursor()
 
-        cursor.execute("select exists(select * from information_schema.tables where table_name=%s)", (table,))
-        exists = cursor.fetchone()[0]
-
-        print "exists", exists
+        if self._dbtype == "postgresql":
+            cursor.execute("select exists(select * from information_schema.tables where table_name=%s)" %(table,))
+            exists = cursor.fetchone()[0]
+        elif self._dbtype == "sqlite3":
+            cursor.execute("SELECT EXISTS(SELECT name FROM sqlite_master WHERE type='table' AND name='%s');" %(table,))
+            exists =  cursor.fetchone()[0]
+        else:
+            raise ValueError("Unsupported database type")
 
         cursor.close()
 
