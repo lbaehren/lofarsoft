@@ -144,6 +144,7 @@ for station in stations:
             cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
         except:
             print "Error when obtaining DIPOLE_CALIBRATION_DELAY skipping station", f["STATION_NAME"]
+            continue
 
         weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
         phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
