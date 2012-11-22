@@ -12,7 +12,7 @@ except ImportError:
 
 
 class Database(object):
-    """Class to handle all python communication with an database."""
+    """Class to handle all python communication with a database."""
 
     def __init__(self, filename=":memory:", host=None, user=None, password=None, dbname=None):
         """Initialisation of the Database class.
@@ -22,8 +22,14 @@ class Database(object):
         ============ =======================================================
         Parameter    Description
         ============ =======================================================
-        *filename*   Filename of the database.
+        *filename*   Filename of the database (1).
+        *host*       Hostname of the database server (2).
+        *user*       Username to access the database server (2).
+        *password*   Password to access the database server (2).
+        *dbname*     Name of the database on the database server (2).
         ============ =======================================================
+        1) For SQLite database
+        2) For PostgreSQL database
 
         When the filename is ``:memory:`` the database is written to
         and read from memory.
