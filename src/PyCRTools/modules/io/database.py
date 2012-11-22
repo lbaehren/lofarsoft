@@ -75,7 +75,6 @@ class Database(object):
         if self._db:
             self._db.close()
             self._db = None
-            self._dbtype = "unknown"
 
 
     def insert(self, sql=""):
