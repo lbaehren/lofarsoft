@@ -348,6 +348,9 @@ for station in stations:
     print "finishing station "+station.stationname
     print "-" * 80
 
+# Ensure everything is written to database
+event.write(recursive=True, parameters=True)
+
 # Create list of event level plots
 plotlist = []
 
