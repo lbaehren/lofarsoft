@@ -14,7 +14,7 @@ except ImportError:
 class Database(object):
     """Class to handle all python communication with a database."""
 
-    def __init__(self, filename=":memory:", host=None, user=None, password=None, dbname=None):
+    def __init__(self, filename=":memory:", host=None, user=None, password=None, dbname=None, autoclose=True):
         """Initialisation of the Database class.
 
         **Properties**
@@ -27,6 +27,8 @@ class Database(object):
         *user*       Username to access the database server (2).
         *password*   Password to access the database server (2).
         *dbname*     Name of the database on the database server (2).
+        *autoclose*  Automatically close the connection to the database
+                     after a transaction [default=True].
         ============ =======================================================
         1) For SQLite database
         2) For PostgreSQL database
@@ -41,6 +43,7 @@ class Database(object):
         self._password = password
         self._dbname = dbname
         self._dbtype = "unknown"
+        self._autoclose = True
 
         self._timeout = 60
 
@@ -107,7 +110,8 @@ class Database(object):
 
         cursor.close()
 
-        self.close()
+        if self._autoclose:
+            self.close()
 
         return newID
 
@@ -132,7 +136,8 @@ class Database(object):
         records = cursor.fetchall()
         cursor.close()
 
-        self.close()
+        if self._autoclose:
+            self.close()
 
         return records
 
@@ -160,7 +165,8 @@ class Database(object):
 
         cursor.close()
 
-        self.close()
+        if self._autoclose:
+            self.close()
 
         return exists
 
@@ -196,7 +202,8 @@ class Database(object):
 
         cursor.close()
 
-        self.close()
+        if self._autoclose:
+            self.close()
 
 
     def executelist(self, sql_list=[], blocksize=128, verbose=False):
@@ -234,7 +241,8 @@ class Database(object):
 
         cursor.close()
 
-        self.close()
+        if self._autoclose:
+            self.close()
 
 
     def writescript(self, filename, sql_script):
@@ -254,5 +262,6 @@ class Database(object):
 
         sql_file.write(sql_script)
 
-        sql_file.close()
+        if self._autoclose:
+            sql_file.close()
 
