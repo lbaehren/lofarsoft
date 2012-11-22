@@ -1557,7 +1557,8 @@ class BaseParameter(object):
 
             sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}';".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
 
-        self._db.insert(sql)
+        if sql != "":
+            self._db.insert(sql)
 
 
     def __getUpdateSql(self):
