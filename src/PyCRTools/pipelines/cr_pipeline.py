@@ -39,6 +39,10 @@ parser.add_option("--broad_search_window_width", default = 2**12, help="width of
 parser.add_option("--narrow_search_window_width", default = 2**7, help="width of window around expected location for subsequent pulse search")
 parser.add_option("-l", "--lora_directory", default="./", help="directory containing LORA information")
 parser.add_option("--lora_logfile", default="LORAtime4", help="name of LORA logfile with timestamps")
+parser.add_option("--host", default=None, help="PostgreSQL host.")
+parser.add_option("--user", default=None, help="PostgreSQL user.")
+parser.add_option("--password", default=None, help="PostgreSQL password.")
+parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 
 (options, args) = parser.parse_args()
 
@@ -49,7 +53,7 @@ db = dbManager.db
 start = time.clock()
 
 # Get event from database
-event = crdb.Event(db = db, id = options.id)
+event = crdb.Event(db = db, id = options.id, host = options.host, user = options.user, password = options.password, dbname = options.dbname)
 
 # Set the event status
 event.status = "PROCESSING"
