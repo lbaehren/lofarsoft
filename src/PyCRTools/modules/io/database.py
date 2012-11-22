@@ -3,7 +3,13 @@ Provide a simple database access interface using sqlite3.
 """
 
 import sqlite3
-import psycopg2
+
+try:
+    import psycopg2
+    have_psycopg2 = True
+except ImportError:
+    have_psycopg2 = False
+
 
 class Database(object):
     """Class to handle all python communication with an database."""
@@ -43,9 +49,12 @@ class Database(object):
             self._db.close()
 
         if self._host:
-            # Open PostgreSQL database
-            self._db = psycopg2.connect(host=self._host, user=self._user, password=self._password, dbname=self._dbname)
-            self._dbtype = "postgresql"
+            if have_psycopg2:
+                # Open PostgreSQL database
+                self._db = psycopg2.connect(host=self._host, user=self._user, password=self._password, dbname=self._dbname)
+                self._dbtype = "postgresql"
+            else:
+                raise ImportError("Unable to import 'psycopg2' module which is needed to connect to the PostgreSQL server.")
         else:
             # Open SQLite database
             self._db = sqlite3.connect(self._filename, timeout=self._timeout)
@@ -57,6 +66,7 @@ class Database(object):
         if self._db:
             self._db.close()
             self._db = None
+            self._dbtype = "unknown"
 
 
     def insert(self, sql=""):
@@ -120,6 +130,7 @@ class Database(object):
 
         return records
 
+
     def tableExists(self, table):
         """Select records from the database.
 
@@ -146,6 +157,7 @@ class Database(object):
         self.close()
 
         return exists
+
 
     def execute(self, sql=""):
         """Execute an sql statement
@@ -204,14 +216,14 @@ class Database(object):
         for sql in sql_list:
             try:
                 cursor.execute(sql)
-    
+
                 self._db.commit()
             except Exception as e:
                 print "Error when executing SQL statement:"
                 print sql
                 print e
                 print "rolling back transaction."
-    
+
                 self._db.rollback()
 
         cursor.close()
