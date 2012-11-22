@@ -16,7 +16,7 @@ debug_mode = False
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
-    def __init__(self, filename=":memory:", basepath=None, datapath="", resultspath="", lorapath="", host=None, user=None, password=None, dbname=None):
+    def __init__(self, filename=":memory:", datapath="", resultspath="", lorapath="", host=None, user=None, password=None, dbname=None, basepath=None):
         """Initialisation of the CRDatabase object.
 
         **Properties**
@@ -25,11 +25,11 @@ class CRDatabase(object):
         Parameter     Description
         ============= ===================================================================
         *filename*    filename of the database.
-        *basepath*    common path prefix where the datafiles, analysis results and LORA
-                      information can be found.
         *datapath*    path where the datafiles are stored.
         *resultspath* path where the results are stored.
         *lorapath*    path where the LORA information is stored.
+        *basepath*    common path prefix where the datafiles, analysis results and LORA
+                      information can be found.
         ============= ===================================================================
 
         If *datapath* is an empty string the ''data'' directory of
