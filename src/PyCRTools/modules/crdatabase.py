@@ -74,7 +74,7 @@ class CRDatabase(object):
 
         # Path settings
         if not basepath:
-            if (self.filename == "" | self.filename == ":memory:"):
+            if (self.filename == "" or self.filename == ":memory:"):
                 self.basepath = "."
             else:
                 self.basepath = os.path.dirname(self.filename)
