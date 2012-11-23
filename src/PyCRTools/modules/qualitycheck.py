@@ -33,6 +33,7 @@ def CRQualityCheckAntenna(dataarray,
     the quality check and their statistical properties.
 
     Usage::
+
       >>> CRQualityCheckArray(dataarray,qualitycriteria=None,antennaID=0,
                               nsigma=-1,rmsfactor=2,meanfactor=7,
                               spikyness=7,spikeexcess=7,refblock=None,
@@ -47,60 +48,63 @@ def CRQualityCheckAntenna(dataarray,
 
     Example::
 
-      >> datafile=crfile(filename); nblocks=10
-      >> dataarray=hArray(float,[nblocks,datafile["blocksize"]])
-      >> datarray[...].read(datafile,"Fx",range(nblocks))
-      >> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7),"spikeexcess":(-1,7)}
-      >> flaglist=CRQualityCheck(dataarray,qualitycriteria=qualitycriteria,antennaID=0,nsigma=-1,rmsfactor=2,meanfactor=7,spikyness=20,spikeexcess=20,refblock=None,verbose=True)
+      >>> datafile=crfile(filename); nblocks=10
+      >>> dataarray=hArray(float,[nblocks,datafile["blocksize"]])
+      >>> datarray[...].read(datafile,"Fx",range(nblocks))
+      >>> qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7),"spikeexcess":(-1,7)}
+      >>> flaglist=CRQualityCheck(dataarray,qualitycriteria=qualitycriteria,antennaID=0,nsigma=-1,rmsfactor=2,meanfactor=7,spikyness=20,spikeexcess=20,refblock=None,verbose=True)
 
     Parameters:
 
 
     *dataarray* - an array containing the data with the dimensions
-    [nblocks,blocksize].
+     [nblocks,blocksize].
 
     *qualitycriteria* - a Python dict with keywords of parameters and
-    tuples with limits thereof (lower, upper). Keywords currently
-    implemented are mean, rms, spikyness (i.e. spikyness).
-    Example: qualitycriteria={"mean":(-15,15),"rms":(5,15),"spikyness":(-7,7)}
+     tuples with limits thereof (lower, upper). Keywords currently
+     implemented are mean, rms, spikyness (i.e. spikyness).
+
+     Example::
+
+       >>> qualitycriteria = {'mean':(-15,15), 'rms':(5,15), 'spikyness':(-7,7)}
 
     *normalize* - If true subtract the mean from the data and divide by the rms.
 
     *antennaID* - the ID of the current antenna (for output only)
 
     *blockoffset* - offset of the first block from the beginning of the
-    file (for output only)
+     file (for output only)
 
     *date* - Date of observation (for output only) - (GMT-)seconds since 1.1.1970 (standard UNIX)
 
     *datafile* - to obtain date, time, antennaID from file directly (output only)
 
     *nsigma* - determines for the peak counting algorithm the
-    threshold for peak detection in standard deviations. If nsigma is
-    negative set the sigma level such that -nsigma peaks are expected.
+     threshold for peak detection in standard deviations. If nsigma is
+     negative set the sigma level such that -nsigma peaks are expected.
 
     *rmsfactor* - if no quality criteria present, set limits for rms at this
-    factor times the rms in the reference block (or divided by this factor)
+     factor times the rms in the reference block (or divided by this factor)
 
     *rmsrange* - if no quality criteria present, set limits for rms at
-    least above and below the first and second value in this list or
-    tuple (e.g., ``rmsrange=(0.1,5)``). If ``None``ignore.
+     least above and below the first and second value in this list or
+     tuple (e.g., ``rmsrange=(0.1,5)``). If ``None`` ignore.
 
     *meanfactor* - if no quality criteria present, set limits for mean
-    at mean[refblock]-rms[refblock]/sqrt(blocksize)*meanfactor
+     at mean[refblock]-rms[refblock]/sqrt(blocksize)*meanfactor
 
     *spikyness* - if no quality criteria present, set maximum
-    spikyness level to this values and minimum value to
-    -spikyness. The spiykness is the detected number of peaks above
-    n*sigma minus the expected number divided by the square root
-    (i.e. error) of expected peak. For Gaussian noise one expects this
-    to fluctuate +/- 1 around zero. The value dervide from the data
-    can be negative if too few peaks are detected.
+     spikyness level to this values and minimum value to
+     -spikyness. The spiykness is the detected number of peaks above
+     n*sigma minus the expected number divided by the square root
+     (i.e. error) of expected peak. For Gaussian noise one expects this
+     to fluctuate +/- 1 around zero. The value dervide from the data
+     can be negative if too few peaks are detected.
 
     *spikeexcess* - if no quality criteria present, set maximum allowed
-    ratio of detected over expected peaks per block to this level (1
-    is roughly what one expects from Gaussian noise). In contrast to
-    'spikyness' this value cannot be negative.
+     ratio of detected over expected peaks per block to this level (1
+     is roughly what one expects from Gaussian noise). In contrast to
+     'spikyness' this value cannot be negative.
 
     *maxpeak* - Maximum height of the maximum in each block (in sigma,
      i.e. relative to rms) before quality is failed.
@@ -110,8 +114,8 @@ def CRQualityCheckAntenna(dataarray,
      same value as maxpeak.
 
     *refblock* = None - if >=0 use this block as reference for mean/rms to
-    calculate limits. For -1 pick one in the first quarter of
-    blocks, otherwise take minimum RMS/MEAN in the data array.
+     calculate limits. For -1 pick one in the first quarter of
+     blocks, otherwise take minimum RMS/MEAN in the data array.
 
     *observatory* - for output and archiving only
 
@@ -215,9 +219,9 @@ def CRQualityCheckAntenna(dataarray,
             if verbose:
                 if nblocksflagged<=3: # Print flagged blocks in chunk, but avoid printing too many blocks ...
                     print "#Flagged: #"+str(count)," chunk=",chunk,(", Block {0:5d}: mean={1: 6.2f}, rms={2:6.1f},  max={6:6.1f}, min={7:6.1f} "+("(norm.)" if normalize else "") +", npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}").format(*prop)," ",noncompliancelist
-                elif nblocksflagged==4: 
+                elif nblocksflagged==4:
                     print "#Other flagged blocks: [{0:5d}".format(*prop),
-                else: 
+                else:
                     print ",{0:5d}".format(*prop),
     if nblocksflagged>=4:
         print "]"
