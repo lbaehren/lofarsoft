@@ -58,7 +58,7 @@ event = crdb.Event(db = db, id = options.id)
 
 # Set the event status
 event.status = "PROCESSING"
-event.write(recursive=False, parameters=False)
+event.write()
 
 cr_found = False
 
@@ -212,21 +212,25 @@ for station in stations:
             p0.status = "GOOD"
         else:
             p0.status = "BAD"
+        p0.write()
 
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
             p1.status = "GOOD"
         else:
             p1.status = "BAD"
+        p1.write()
 
         # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
         # in the LORA direction for at least one of the polarizations
         if cr_found_in_station:
             station.status = "GOOD"
+            station.write()
 
             cr_found = True
         else:
             station.status = "BAD"
+            station.write()
 
             continue
 
@@ -326,7 +330,7 @@ for station in stations:
         elif np.std(direction_fit_plane_wave.residual_delays.toNumpy()) > options.maximum_spread_delays:
             p.status = "BAD"
             # Add reason that quality cut for delay spread was applied
-            print "Marked as BAD as spread on residual delays ", np.std(direction_fit_plane_wave.residual_delays.toNumpy()), "exceeds given option"
+            print "Marked as BAD as spread on residual delays {0} exceeds {1}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
                 
         else:
             p.status = "GOOD"
@@ -345,9 +349,10 @@ for station in stations:
     print "-" * 80
     print "finishing station "+station.stationname
     print "-" * 80
+    station.write()
 
 # Ensure everything is written to database
-event.write(recursive=True, parameters=True)
+event.write()
 
 # Create list of event level plots
 plotlist = []
@@ -360,15 +365,16 @@ all_station_rms = []
 all_station_direction = []
 
 for station in stations:
-    try:
-        all_station_direction.append(station["crp_pulse_direction"])
-        p = station.polarization["xyz"]
-        all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
-        all_station_pulse_delays.append(p["crp_pulse_delays"])
-        all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
-        all_station_rms.append(p["crp_rms"])
-    except:
-        logging.exception("Do not have all pulse parameters for station" + station.stationname)
+    if station.status == "GOOD":
+        try:
+            all_station_direction.append(station["crp_pulse_direction"])
+            p = station.polarization["xyz"]
+            all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
+            all_station_pulse_delays.append(p["crp_pulse_delays"])
+            all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
+            all_station_rms.append(p["crp_rms"])
+        except:
+            logging.exception("Do not have all pulse parameters for station " + station.stationname)
 
 all_station_antenna_positions = np.vstack(all_station_antenna_positions)
 all_station_pulse_delays = np.vstack(all_station_pulse_delays)
