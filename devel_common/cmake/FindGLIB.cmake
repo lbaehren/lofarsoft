@@ -89,7 +89,7 @@ endif (glibconfig_h)
 ## Check for the library
 
 find_library (GLIB_LIBRARIES glib-2.0
-  PATHS ${lib_locations} /lib64
+  PATHS ${lib_locations} /lib64 /lib/x86_64-linux-gnu /lib/i386-linux-gnu
   PATH_SUFFIXES
   glib
   glib/lib
