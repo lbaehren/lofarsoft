@@ -31,8 +31,10 @@
 
 ## [1] find the main header file
 
+message (STATUS "include_locations ${include_locations}")
+
 find_path (GLIB_INCLUDES glib.h
-  PATHS ${include_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0
+  PATHS ${include_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0 /usr/include
   PATH_SUFFIXES
   glib
   glib/include
@@ -43,7 +45,7 @@ find_path (GLIB_INCLUDES glib.h
   )
 
 find_path (GLIB_glibh_INCLUDES glib.h
-  PATHS ${include_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0
+  PATHS ${include_locations} /data/home/mbron/annotate_corpus/libs/glib-2.0 /usr/include
   PATH_SUFFIXES
   glib
   glib/include
@@ -89,7 +91,7 @@ endif (glibconfig_h)
 ## Check for the library
 
 find_library (GLIB_LIBRARIES glib-2.0
-  PATHS ${lib_locations} /lib64 /lib/x86_64-linux-gnu /lib/i386-linux-gnu
+  PATHS ${lib_locations} /lib64 /usr/lib/x86_64-linux-gnu /usr/lib/i386-linux-gnu
   PATH_SUFFIXES
   glib
   glib/lib
@@ -98,6 +100,8 @@ find_library (GLIB_LIBRARIES glib-2.0
   glib-2.0/lib
   NO_DEFAULT_PATH
   )
+
+MESSAGE (STATUS "GLIB_LIBRARIES ${GLIB_LIBRARIES}")
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
