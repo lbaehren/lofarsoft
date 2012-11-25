@@ -105,7 +105,7 @@ for station in stations:
             pulse_search_window_end = sample_number_lora + options.broad_search_window_width / 2
 
             print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
-        except:
+        except Exception:
             logging.exception("could not get expected block number from LORA data for station "+station.stationname)
             continue
         
@@ -140,7 +140,7 @@ for station in stations:
         # Apply calibration delays
         try:
             cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
-        except:
+        except Exception:
             print "Error when obtaining DIPOLE_CALIBRATION_DELAY skipping station", f["STATION_NAME"]
             continue
 
@@ -373,7 +373,7 @@ for station in stations:
             all_station_pulse_delays.append(p["crp_pulse_delays"])
             all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
             all_station_rms.append(p["crp_rms"])
-        except:
+        except Exception:
             logging.exception("Do not have all pulse parameters for station " + station.stationname)
 
 all_station_antenna_positions = np.vstack(all_station_antenna_positions)

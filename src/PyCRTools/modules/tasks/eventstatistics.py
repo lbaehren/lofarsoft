@@ -41,13 +41,13 @@ def GetInformationFromFile(topdir, events):
             try:
                 res = xmldict.load(os.path.join(datadir,"results.xml"))
                 #res=res["results"]
-            except:
+            except Exception:
                 continue
                 print "File skipped, NaN found!" 
             
             try:
                 status = res["status"]
-            except:
+            except Exception:
                 status = "OK assumed" #the status has not be propagated for old files
             
             if status == "OK":
@@ -154,7 +154,7 @@ class eventstatistics(tasks.Task):
             value = rms_0[station_0]
             power = spectral_power_0[station_0]
             
-        except:
+        except Exception:
             value = -100 
             power = -100
             print "Station not found"   

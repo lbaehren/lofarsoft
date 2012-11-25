@@ -54,6 +54,6 @@ with open(options.filename, "w") as output:
             theta_L = pytmf.rad2circle(pytmf.last(ut, tt, L));
     
             output.write("{0} {1:.6f} {2:.6f}\n".format(f["TIME"][0], theta_L, timeseries_data.rms().val()))
-        except:
+        except Exception:
             pass
 

@@ -49,14 +49,14 @@ def gatherresults(filefilter,pol,excludelist,plotlora,goodonly,loradir):
             try:
                 res = xmldict.load(os.path.join(datadir,"results.xml"))
 
-            except:
+            except Exception:
                 continue
                 print "File skipped, nan found!"     
                 
             try:    
                 status = res["status"]
                 
-            except:
+            except Exception:
                 status = "OK assumed" #the status has not be propagated for old files
                 
             pulseblock = res["BLOCK"]

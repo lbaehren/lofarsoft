@@ -20,7 +20,7 @@ for fname in dirList:
                         Draw3D=False,
                         save_images=sav_images,
                         generate_html=gen_html)
-        except:
+        except Exception:
             continue
 
         pollist=[0,1]
@@ -33,5 +33,5 @@ for fname in dirList:
                                     plotlora=True,
                                     save_images=sav_images,
                                     generate_html=gen_html)
-        except:
+        except Exception:
             continue

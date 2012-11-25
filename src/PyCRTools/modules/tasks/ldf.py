@@ -50,13 +50,13 @@ def GetInformationFromFile(topdir, events, plot_parameter, goodonly):
                 #execfile(os.path.join(datadir,"results.py"),res)
                 res = xmldict.load(os.path.join(datadir,"results.xml"))
                 #res=res["results"]
-            except:
+            except Exception:
                 continue
                 print "File skipped, NaN found!"
 
             try:
                 status = res["status"]
-            except:
+            except Exception:
                 status = "OK assumed" #the status has not be propagated for old files
 
             if goodonly:

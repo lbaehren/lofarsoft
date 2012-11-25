@@ -353,7 +353,7 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
         if ylen<xlen:
             try:
                 _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
-            except:
+            except Exception:
                 print "ERROR when plotting vectors:"
                 print "x:", xvalues.vec()[:ylen]
                 print "y:", self.vec()
@@ -363,7 +363,7 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
         else:
             try:
                 _plot(xvalues.vec(),self.vec(),**plotargs)
-            except:
+            except Exception:
                 print "ERROR when plotting vectors:"
                 print "x:", xvalues.vec()
                 print "y:", self.vec()

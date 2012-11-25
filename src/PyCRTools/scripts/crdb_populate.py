@@ -460,7 +460,7 @@ class DataExtractor(object):
             if "" != self._filename:
                 try:
                     self._datafile = cr.open(self._filename)
-                except:
+                except Exception:
                     self._datafile = None
                     print "WARNING: problem when opening file {0}".format(self._filename)
             else:

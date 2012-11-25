@@ -51,7 +51,7 @@ for f in files:
 
     try:
         subprocess.call([os.environ["LOFARSOFT"]+"/release/bin/tbbmd", "--dipoleCalibrationDelayDir="+os.environ["LOFARSOFT"]+"/data/lofar/dipole_calibration_delay/", f])
-    except:
+    except Exception:
         pass
 
 # Check how many CPU's we have
