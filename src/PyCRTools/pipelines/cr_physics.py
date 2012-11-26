@@ -83,6 +83,7 @@ for station in stations:
     print "*" * 80
     print "processing station "+station.stationname
     print "*" * 80
+    station.status = "PROCESSING"
 
     try:
 
@@ -109,6 +110,11 @@ for station in stations:
             continue
         
         logging.debug("have LORA data")
+
+        p0 = station.polarization['0']
+        p0.status = "PROCESSING"
+        p1 = station.polarization['1']
+        p1.status = "PROCESSING"
 
         # Set file parameters to match LORA block
         f["BLOCKSIZE"] = options.blocksize
@@ -199,9 +205,6 @@ for station in stations:
         # Look for significant pulse in beamformed signal
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data = beamformed_timeseries, pulse_start = pulse_search_window_start, pulse_end = pulse_search_window_end, nsigma = options.accept_snr, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-bf-", plotlist = [])
 
-        p0 = station.polarization['0']
-        p1 = station.polarization['1']
-
         p0["crp_plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ] + findrfi.plotlist]
         p1["crp_plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ] + findrfi.plotlist]
 
@@ -288,6 +291,9 @@ for station in stations:
         
                 
         # Project polarization onto x,y,z frame
+        p = station.polarization['xyz']
+        p.station = "PROCESSING"
+
         xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, options.blocksize))
         cr.hProjectPolarizations(xyz_timeseries_data[0:3*nantennas:3,...], xyz_timeseries_data[1:3*nantennas:3,...], xyz_timeseries_data[2:3*nantennas:3,...], timeseries_data[0:2*nantennas:2,...], timeseries_data[1:2*nantennas:2,...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
 
@@ -303,9 +309,6 @@ for station in stations:
         # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
         time_delays += float(block_number_lora * options.blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
-
-        # Get xyz-polarization instance
-        p = station.polarization['xyz']
 
         # Add parameters
         p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
@@ -333,8 +336,6 @@ for station in stations:
     except Exception:
 
         logging.exception("unexpected error occured when processing station "+station.stationname)
-
-        p = station.polarization['xyz']
 
         p.status = "BAD"
 
