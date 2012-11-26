@@ -107,6 +107,7 @@ for station in stations:
             print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
         except Exception:
             logging.exception("could not get expected block number from LORA data for station "+station.stationname)
+            station.status = "ERROR"
             continue
         
         logging.debug("have LORA data")
@@ -147,6 +148,9 @@ for station in stations:
             cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
         except Exception:
             print "Error when obtaining DIPOLE_CALIBRATION_DELAY skipping station", f["STATION_NAME"]
+            station.status = "ERROR"
+            p0.status = "ERROR"
+            p1.status = "ERROR"
             continue
 
         weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
@@ -337,7 +341,8 @@ for station in stations:
 
         logging.exception("unexpected error occured when processing station "+station.stationname)
 
-        p.status = "BAD"
+        station.status = "ERROR"
+        p.status = "ERROR"
 
     print "-" * 80
     print "finishing station "+station.stationname
@@ -366,6 +371,7 @@ for station in stations:
             all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
             all_station_rms.append(p["crp_rms"])
         except Exception:
+            event.status = "ERROR"
             logging.exception("Do not have all pulse parameters for station " + station.stationname)
 
 all_station_antenna_positions = np.vstack(all_station_antenna_positions)
