@@ -1359,7 +1359,7 @@ class Event(object):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
 
-   @property
+    @property
     def status(self):
         """Get event status
         """
@@ -2226,7 +2226,7 @@ class Station(object):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
  
-   @property
+    @property
     def status(self):
         """Get station status
         """
@@ -2751,7 +2751,7 @@ class Polarization(object):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
 
-   @property
+    @property
     def status(self):
         """Get polarization status
         """
