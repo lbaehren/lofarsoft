@@ -415,7 +415,7 @@ Here is an example of using it::
 
 """
 
-#Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
+# Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
 task_modules = ["averagespectrum",
 "dynamicspectrum",
 "fitbaseline",
@@ -454,8 +454,8 @@ import shortcuts as sc
 from sys import version_info
 import matplotlib.pyplot as plt
 
-#import pdb
-#pdb.set_trace()
+# import pdb
+# pdb.set_trace()
 #       if hasattr(self,"trace") and self.trace: pdb.set_trace()
 
 # Configuration (should be moved to config.py)
@@ -464,27 +464,29 @@ configdir = os.path.expanduser('~/.pycrtools')
 if not os.path.isdir(configdir):
     os.mkdir(configdir)
 
-dbfile = configdir+"/"+"task"
+dbfile = configdir + "/" + "task"
 
-globals=None
+globals = None
 
-def set_globals(var,val):
-    if type(globals)==dict:
-        globals[var]=val
-    elif type(globals)==types.ModuleType:
-        setattr(globals,var,val)
+
+def set_globals(var, val):
+    if isinstance(globals, dict):
+        globals[var] = val
+    elif isinstance(globals, types.ModuleType):
+        setattr(globals, var, val)
 
 Task = None
 task_instance = None
-task_instances = {} # Will store instances of tasks loaded with rerun
-task_allloaded = {} #list of all loaded tasks
-task_name = "" # Name of currently loaded task
-task_class= None
+task_instances = {}  # Will store instances of tasks loaded with rerun
+task_allloaded = {}  # list of all loaded tasks
+task_name = ""  # Name of currently loaded task
+task_class = None
 task_list = set()
-task_outputdir = "" # Where to write the .par files
-task_write_parfiles = True # Write parfile during execution of a task
-task_parfiles = [] # List of all parfiles created since launch of session
-task_logger = [] # List of all parfiles created since launch of session
+task_outputdir = ""  # Where to write the .par files
+task_write_parfiles = True  # Write parfile during execution of a task
+task_parfiles = []  # List of all parfiles created since launch of session
+task_logger = []  # List of all parfiles created since launch of session
+
 
 class TaskInit(type):
     """Metaclass for tasks.
@@ -498,13 +500,12 @@ class TaskInit(type):
         """
         cls.__taskname__ = name
         if not name == "Task":
-            if cls.__module__[:10]=="pycrtools.":
-                task_allloaded[name]=cls.__module__[10:]
+            if cls.__module__[:10] == "pycrtools.":
+                task_allloaded[name] = cls.__module__[10:]
             else:
-                task_allloaded[name]=cls.__module__
+                task_allloaded[name] = cls.__module__
         super(TaskInit, cls).__init__(name, bases, dct)
         cls.addtask()
-
 
     def __call__(cls, *args, **kwargs):
         """ Create a new instance.
@@ -515,22 +516,21 @@ class TaskInit(type):
 
         return obj
 
-
     def addtask(cls):
         """
         Adds a task to the library and adds its parameters to the documentation.
         """
-        if cls.__taskname__=='Task':
+        if cls.__taskname__ == 'Task':
             return
-        task_list.add(cls.__module__+"."+cls.__taskname__)
+        task_list.add(cls.__module__ + "." + cls.__taskname__)
         if hasattr(cls, "parameters"):
             dct = cls.parameters
         else:
             dct = {}
-            if hasattr(cls, "WorkSpace") and hasattr(cls.WorkSpace,"parameters"):
+            if hasattr(cls, "WorkSpace") and hasattr(cls.WorkSpace, "parameters"):
                 dct.update(cls.WorkSpace.parameters)
-        if (not type(cls.__doc__) == str):
-            cls.__doc__=""
+        if (not isinstance(cls.__doc__, str)):
+            cls.__doc__ = ""
 
         # Add parameter documentation
         par_doc_input, par_doc_output = cls.pardoc(dct, indent="  ")
@@ -539,7 +539,6 @@ class TaskInit(type):
         if par_doc_output:
             cls.__doc__ += "\n  **Output parameters**\n" + par_doc_output
         cls.__doc__ += "\n"
-
 
     def pardoc(cls, dct, indent=""):
         """
@@ -551,15 +550,15 @@ class TaskInit(type):
 
         newline = "\n" + indent
 
-        for p,v in sorted(dct.items()):
+        for p, v in sorted(dct.items()):
             par_doc = newline + "*" + p + "*"
             # Check for default values
-            if (v.has_key(sc.default) and
-                (not type(v[sc.default]) == types.FunctionType)):
+            if (sc.default in v and
+                (not isinstance(v[sc.default], types.FunctionType))):
                 par_doc_default = str(v[sc.default]).strip()
                 par_doc += " [default value: "
                 # Print string values in quotes
-                if isinstance(v[sc.default],(str, unicode, basestring)):
+                if isinstance(v[sc.default], (str, unicode, basestring)):
                     par_doc += "'" + par_doc_default + "'"
                 else:
                    if par_doc_default:
@@ -567,13 +566,13 @@ class TaskInit(type):
                 par_doc += "]"
             par_doc += newline
             # Check for documentation
-            if v.has_key(sc.doc):
-                par_doc += "  " + v[sc.doc].strip() + newline*2
+            if sc.doc in v:
+                par_doc += "  " + v[sc.doc].strip() + newline * 2
             else:
                 par_doc += newline
             # Add parameter documentation to input- or output parameter documentation.
-            if ((v.has_key(sc.default) and (type(v[sc.default]) == types.FunctionType)) or
-                (v.has_key(sc.output) and v[sc.output])):
+            if ((sc.default in v and (isinstance(v[sc.default], types.FunctionType))) or
+                (sc.output in v and v[sc.output])):
                 par_doc_output += par_doc
             else:
                 par_doc_input += par_doc
@@ -638,83 +637,83 @@ class Task(object):
     """
     __metaclass__ = TaskInit
 
-    def __init__(self,ws=None,parfile=None,**kwargs):
+    def __init__(self, ws=None, parfile=None, **kwargs):
 
-        self.__modulename__=self.__module__.split(".")[-1]
-        self.__taskname__=self.__class__.__taskname__
-        task_name=self.__taskname__
-        task_instance=self
+        self.__modulename__ = self.__module__.split(".")[-1]
+        self.__taskname__ = self.__class__.__taskname__
+        task_name = self.__taskname__
+        task_instance = self
 
-        margs=cr.readParfiles(parfile) #Reading parameters from a file
+        margs = cr.readParfiles(parfile)  # Reading parameters from a file
         margs.update(**kwargs)
 
-        if not hasattr(self,"WorkSpace"): #Create a Default WorkSpace class if it does not exist yet
-            if hasattr(self,"parameters"):
-                property_dict=self.parameters
+        if not hasattr(self, "WorkSpace"):  # Create a Default WorkSpace class if it does not exist yet
+            if hasattr(self, "parameters"):
+                property_dict = self.parameters
             else:
-                property_dict={}
-            if hasattr(self,"call"): # retrieve the parameters from the parameters of the callfunction
-                if self.call.im_func.func_defaults==None:
-                    n_named_pars=0
+                property_dict = {}
+            if hasattr(self, "call"):  # retrieve the parameters from the parameters of the callfunction
+                if self.call.im_func.func_defaults == None:
+                    n_named_pars = 0
                 else:
-                    n_named_pars=len(self.call.im_func.func_defaults) # number of named parameters which have defaults
-                n_positional_pars=self.call.im_func.func_code.co_argcount-n_named_pars
-                named_pars=self.call.im_func.func_code.co_varnames[n_positional_pars:]
-                positional_pars=self.call.im_func.func_code.co_varnames[1:n_positional_pars] # start at 1 to exclude "self" argument
-                npos=0
+                    n_named_pars = len(self.call.im_func.func_defaults)  # number of named parameters which have defaults
+                n_positional_pars = self.call.im_func.func_code.co_argcount - n_named_pars
+                named_pars = self.call.im_func.func_code.co_varnames[n_positional_pars:]
+                positional_pars = self.call.im_func.func_code.co_varnames[1:n_positional_pars]  # start at 1 to exclude "self" argument
+                npos = 0
                 for p in positional_pars:
-                    npos+=1
-                    if property_dict.has_key(p):
-                        property_dict[p].update({sc.default:None,sc.export:False,sc.positional:npos})
+                    npos += 1
+                    if p in property_dict:
+                        property_dict[p].update({sc.default: None, sc.export: False, sc.positional: npos})
                     else:
-                        property_dict[p]={sc.default:None,sc.export:False,sc.positional:npos}
-                if n_named_pars>0:
-                    for p,v in zip(named_pars,self.call.im_func.func_defaults):
-                        if property_dict.has_key(p):
-                            property_dict[p].update({sc.default:v})
+                        property_dict[p] = {sc.default: None, sc.export: False, sc.positional: npos}
+                if n_named_pars > 0:
+                    for p, v in zip(named_pars, self.call.im_func.func_defaults):
+                        if p in property_dict:
+                            property_dict[p].update({sc.default: v})
                         else:
-                            property_dict[p]={sc.default:v}
-            self.WorkSpace=WorkSpace(self.__taskname__,parameters=property_dict) # This creates the work space class that is used to create the actual ws instance
+                            property_dict[p] = {sc.default: v}
+            self.WorkSpace = WorkSpace(self.__taskname__, parameters=property_dict)  # This creates the work space class that is used to create the actual ws instance
 
-        if ws==None:
-            self.ws=self.WorkSpace(**margs) #create default workspace of this task
+        if ws == None:
+            self.ws = self.WorkSpace(**margs)  # create default workspace of this task
         else:
-            self.ws=ws(**margs) # or take the one which was provided already
+            self.ws = ws(**margs)  # or take the one which was provided already
 
-        #Add setter and getter functions for parameters to task class
-        pp=set(self.ws.getParameterNames(self,all=True)).difference(set(dir(self)))
+        # Add setter and getter functions for parameters to task class
+        pp = set(self.ws.getParameterNames(self, all=True)).difference(set(dir(self)))
         for p in pp:
-            self.addProperty(p,eval("lambda slf:slf.ws['"+p+"']"),eval("lambda slf,x:slf.ws.__setitem__('"+p+"',x)"),eval("lambda slf:slf.ws.delx('"+p+"')"),self.ws.getParameterDoc(p))
+            self.addProperty(p, eval("lambda slf:slf.ws['" + p + "']"), eval("lambda slf,x:slf.ws.__setitem__('" + p + "',x)"), eval("lambda slf:slf.ws.delx('" + p + "')"), self.ws.getParameterDoc(p))
 
-        self._initialized=False
+        self._initialized = False
         self.ws.evalInputParameters()
 
-    def callinit(self,forceinit=False):
+    def callinit(self, forceinit=False):
         """
         Calls the initialization routine if it wasn't run yet (or force it to run nonetheless)
         """
-        if hasattr(self,"init") and (not self._initialized or forceinit):
+        if hasattr(self, "init") and (not self._initialized or forceinit):
             self.init()
-            self._initialized=True
+            self._initialized = True
 
-            #Add those parameters that were added during init phase
-            pp=set(self.ws.getParameterNames(self,all=True)).difference(set(dir(self)))
+            # Add those parameters that were added during init phase
+            pp = set(self.ws.getParameterNames(self, all=True)).difference(set(dir(self)))
             for p in pp:
-                self.addProperty(p,eval("lambda slf:slf.ws['"+p+"']"),eval("lambda slf,x:slf.ws.__setitem__('"+p+"',x)"),eval("lambda slf:slf.ws.delx('"+p+"')"),self.ws.getParameterDoc(p))
-
+                self.addProperty(p, eval("lambda slf:slf.ws['" + p + "']"), eval("lambda slf,x:slf.ws.__setitem__('" + p + "',x)"), eval("lambda slf:slf.ws.delx('" + p + "')"), self.ws.getParameterDoc(p))
 
     def saveOutputFile(self):
         """
         Save the parameters to a file that can be read back later with
         the option parfile=filename (e.g., tpar parfile=filename)
         """
-        if not task_write_parfiles: return
-        self.parfile=os.path.join(task_outputdir,self.oparfile)
-        if len(task_parfiles)==0 or not task_parfiles[-1]==self.parfile:
+        if not task_write_parfiles:
+            return
+        self.parfile = os.path.join(task_outputdir, self.oparfile)
+        if len(task_parfiles) == 0 or not task_parfiles[-1] == self.parfile:
             task_parfiles.append(self.parfile)
-        f=open(self.parfile,"w")
-        f.write("# Task: "+self.__modulename__+" saved on "+time.strftime("%Y-%m-%d %H:%M:%S")+"\n# File: "+self.oparfile+"\n")
-        f.write(self.ws.__repr__(internals=False,workarrays=False))
+        f = open(self.parfile, "w")
+        f.write("# Task: " + self.__modulename__ + " saved on " + time.strftime("%Y-%m-%d %H:%M:%S") + "\n# File: " + self.oparfile + "\n")
+        f.write(self.ws.__repr__(internals=False, workarrays=False))
         f.close()
 
     def addProperty(self, name, *funcs):
@@ -725,10 +724,9 @@ class Task(object):
 
         self.addProperty(name,lambda self:self[name],lambda self,x:self.__setitem__(name,x),lambda self:self.delx(name),"This is parameter "+name)
         """
-        setattr(self.__class__, name, property(*funcs)) #property(getx, setx, delx, "I'm the property.")
+        setattr(self.__class__, name, property(*funcs))  # property(getx, setx, delx, "I'm the property.")
 
-
-    def __call__(self,*args,**kwargs):
+    def __call__(self, *args, **kwargs):
         """
         Usage:
 
@@ -765,63 +763,63 @@ class Task(object):
         returned task object.
 
         """
-        ws=None; init=False
-        if kwargs.has_key("ws"):
-            ws=kwargs["ws"]
+        ws = None
+        init = False
+        if "ws" in kwargs:
+            ws = kwargs["ws"]
             del kwargs["ws"]
-        if kwargs.has_key("init"):
-            init=kwargs["init"]
+        if "init" in kwargs:
+            init = kwargs["init"]
             del kwargs["init"]
 
-        self._starttime=time.strftime("%Y-%m-%d_%H:%M:%S")
-        self.oparfile=self.__taskname__+"_"+self._starttime+".par"
-        self.ws.addParameterDefinition("t0",dict(default=time.clock(),doc="Unix start time of task",unit="s",output=True))
-        self.ws.addParameterDefinition("tduration",dict(default=-1,doc="Execution time of task",unit="s",output=True))
-        self["t0"]=time.clock()
+        self._starttime = time.strftime("%Y-%m-%d_%H:%M:%S")
+        self.oparfile = self.__taskname__ + "_" + self._starttime + ".par"
+        self.ws.addParameterDefinition("t0", dict(default=time.clock(), doc="Unix start time of task", unit="s", output=True))
+        self.ws.addParameterDefinition("tduration", dict(default=-1, doc="Execution time of task", unit="s", output=True))
+        self["t0"] = time.clock()
 
-        if not ws==None:
-            self.ws=ws           # Updating WorkSpace
+        if not ws == None:
+            self.ws = ws           # Updating WorkSpace
         self.ws(**kwargs)
 
         if len(self.ws._positionals) < len(args):
-            print "Number of positional arguments provided (",len(args),") is larger than required number (",len(self.ws._positionals),"). Stopping."
+            print "Number of positional arguments provided (", len(args), ") is larger than required number (", len(self.ws._positionals), "). Stopping."
             return
         if len(self.ws._positionals) > len(args):
-            print "Number of positional arguments provided (",len(args),") is less than required number (",len(self.ws._positionals),"). Keeping previous values."
-        if len(args)>0:  #Setting positional parameters if provided
-            for p,v in zip(self.ws._positionals[:len(args)],args):
-                self.ws[p]=v
+            print "Number of positional arguments provided (", len(args), ") is less than required number (", len(self.ws._positionals), "). Keeping previous values."
+        if len(args) > 0:  # Setting positional parameters if provided
+            for p, v in zip(self.ws._positionals[:len(args)], args):
+                self.ws[p] = v
 
-        self.ws.update() # make sure all parameters are now up-to-date
-        self.callinit(forceinit=init) #Call initialization if not yet done
+        self.ws.update()  # make sure all parameters are now up-to-date
+        self.callinit(forceinit=init)  # Call initialization if not yet done
 
         self.saveOutputFile()
 
-        print "["+self.__taskname__+"] started"
+        print "[" + self.__taskname__ + "] started"
 
-        retval=self.run()
+        retval = self.run()
 
-        self["tduration"]=time.clock()-self["t0"] # Execution time of task
+        self["tduration"] = time.clock() - self["t0"]  # Execution time of task
 
-        print "["+self.__taskname__+"] completed in {0:.3f} s".format(self["tduration"])
+        print "[" + self.__taskname__ + "] completed in {0:.3f} s".format(self["tduration"])
 
-        self.saveOutputFile() # to store final values
+        self.saveOutputFile()  # to store final values
 
-        #Add logging information
+        # Add logging information
         task_logger.append(dict(name=self.__taskname__,
-                                version=str(self._version_name) if hasattr(self,"_version_name") else "",
+                                version=str(self._version_name) if hasattr(self, "_version_name") else "",
                                 start_time=" ".join(self._starttime.split("_")),
                                 start_time_cpu=self["t0"],
                                 execution_time=self["tduration"])
                            )
 
-	if retval==None:
+	if retval == None:
 	    return self
 	else:
 	    return retval
 
-
-    def __getitem__(self,par):
+    def __getitem__(self, par):
         """
         Usage:
 
@@ -832,8 +830,7 @@ class Task(object):
         """
         return self.ws[par]
 
-
-    def __setitem__(self,par,value):
+    def __setitem__(self, par, value):
         """
         Usage:
 
@@ -842,10 +839,9 @@ class Task(object):
         Set the parameter value using square brackets and a string
         of the parameter name. The basic "setter" function for workspace parameters.
         """
-        self.ws[par]=value
+        self.ws[par] = value
 
-
-    def put(self,name="",delete=False):
+    def put(self, name="", delete=False):
         """
         Stores the input parameters in the workspace to the parameter
         database (see also 'tput').  This can be restored with
@@ -859,17 +855,17 @@ class Task(object):
         # # Open task database
         taskdb = shelve.open(dbfile)
 
-	if not name=="":
-	    name="_"+str(name)
+	if not name == "":
+	    name = "_" + str(name)
 
 	if delete:
-	    del taskdb[self.__taskname__+name]
+	    del taskdb[self.__taskname__ + name]
 	else:
-	    taskdb[self.__taskname__+name] = self.ws.getInputParametersDict()
+	    taskdb[self.__taskname__ + name] = self.ws.getInputParametersDict()
 
         taskdb.close()
 
-    def get(self,name=""):
+    def get(self, name=""):
         """
         Gets the input parameters in the workspace from the parameter
         database (see also 'tget').  This can be stored there with
@@ -883,23 +879,22 @@ class Task(object):
         # # Open task database
         taskdb = shelve.open(dbfile)
 
-	if not name=="":
-	    name="_"+str(name)
+	if not name == "":
+	    name = "_" + str(name)
 
-        if self.__taskname__+name in taskdb:
+        if self.__taskname__ + name in taskdb:
             # Restoring from database
-            args = taskdb[self.__taskname__+name]
+            args = taskdb[self.__taskname__ + name]
             self.ws(**args)
-	    retval=True
+	    retval = True
 	else:
-	    print "Available parameter sets:\n-------------------------\n",", ".join(taskdb.keys()),"\n"
-	    retval=False
+	    print "Available parameter sets:\n-------------------------\n", ", ".join(taskdb.keys()), "\n"
+	    retval = False
 
         taskdb.close()
 	return retval
 
-
-    def reset(self,restorecallparameters=False,init=True,**args):
+    def reset(self, restorecallparameters=False, init=True, **args):
         """
         Usage:
 
@@ -918,8 +913,7 @@ class Task(object):
         self.ws.__init__(**args)
         self.callinit(forceinit=init)
 
-
-    def update(self,forced=False,workarrays=True):
+    def update(self, forced=False, workarrays=True):
         """
         Recalculates all existing derived parameters and assigns them
         their default values if they depend on a value that was
@@ -931,10 +925,9 @@ class Task(object):
          irrespective of whether they depend on modified parameters or
          not.
         """
-        self.ws.update(forced=forced,workarrays=workarrays)
+        self.ws.update(forced=forced, workarrays=workarrays)
 
-
-    def updateHeader(self,ary,parameters=[],**kwargs):
+    def updateHeader(self, ary, parameters=[], **kwargs):
         """
         Usage:
         Task.updateHeader(harray,parameters=['parname1','parname2',...],newparname1=oldparname1,newparname2=oldparname2,....)
@@ -956,11 +949,11 @@ class Task(object):
          value of the respective task keyword
 
         """
-        ary.setHeader(**{self.__taskname__:self.ws.getParameters()})
+        ary.setHeader(**{self.__taskname__: self.ws.getParameters()})
         for p in parameters:
-            ary.setHeader(**{p:getattr(self,p)})
-        for p,v in kwargs.items():
-            ary.setHeader(**{p:getattr(self,v)})
+            ary.setHeader(**{p: getattr(self, p)})
+        for p, v in kwargs.items():
+            ary.setHeader(**{p: getattr(self, v)})
 
     def plotpause(self):
         """
@@ -969,20 +962,20 @@ class Task(object):
         whether and how to continue calculation and plotting.
         May modify `self.plot_pause`` and ``self.doplot``.
         """
-        if hasattr(self,"plot_pause") and self.plot_pause:
-            plt.draw();
-            k=raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
-            if k=="q":
-                self.plot_pause=False
+        if hasattr(self, "plot_pause") and self.plot_pause:
+            plt.draw()
+            k = raw_input("Press 'return' to continue. Press 'q+return' to proceed without pausing, 'n+return' to continue without plotting...")
+            if k == "q":
+                self.plot_pause = False
                 print "Continue without pausing in this task (other tasks not affected)."
-            elif k=="n":
-                self.doplot=False
+            elif k == "n":
+                self.doplot = False
                 print "Continue without plotting in this task (other tasks not affected)."
                 plt.ion()
             else:
                 print "Continue."
 
-    def writehtml(self,results=None,parfiles=None,plotfiles=None,text=None,logfiles=None,output_dir=None,htmlfilename="index.html",filename=None, tduration=-1):
+    def writehtml(self, results=None, parfiles=None, plotfiles=None, text=None, logfiles=None, output_dir=None, htmlfilename="index.html", filename=None, tduration=-1):
         """
         **Usage:**
 
@@ -1027,85 +1020,88 @@ class Task(object):
         """
 
         if not results:
-            results={}
-            for parameter_name in self.ws.getOutputParameters(workarrays=False,nonexport=True):
-                if hasattr(self.ws,"_"+parameter_name): # Take only those which have a value already defined
-                    res=self[parameter_name]
-                    if isinstance(res,tuple(cr.hAllContainerTypes)):
-                        res=list(res)
+            results = {}
+            for parameter_name in self.ws.getOutputParameters(workarrays=False, nonexport=True):
+                if hasattr(self.ws, "_" + parameter_name):  # Take only those which have a value already defined
+                    res = self[parameter_name]
+                    if isinstance(res, tuple(cr.hAllContainerTypes)):
+                        res = list(res)
                     results[parameter_name] = res
 
         if not output_dir:
-            if hasattr(self,"output_dir"):
+            if hasattr(self, "output_dir"):
                 output_dir = self["output_dir"]
             else:
                 output_dir = ""
 
         if not filename:
-            if hasattr(self,"filename"):
+            if hasattr(self, "filename"):
                 filename = self["filename"]
             else:
                 filename = ""
 
         if not text:
-            if hasattr(self,"hprint"):
+            if hasattr(self, "hprint"):
                 text = self.hprint.textbuffer
             else:
                 text = []
 
-        if tduration<0 and hasattr(self,"t0"):
-            tduration=time.clock()-self["t0"]
+        if tduration < 0 and hasattr(self, "t0"):
+            tduration = time.clock() - self["t0"]
 
         if not parfiles:
-            if hasattr(self,"parfile"):
-                parfiles=[self.parfile]
+            if hasattr(self, "parfile"):
+                parfiles = [self.parfile]
             else:
-                parfiles=[]
+                parfiles = []
 
         if not plotfiles:
-            if hasattr(self,"plot_finish"):
-                plotfiles=self.plot_finish.plotfiles
+            if hasattr(self, "plot_finish"):
+                plotfiles = self.plot_finish.plotfiles
             else:
-                plotfiles=[]
+                plotfiles = []
 
         if not logfiles:
-            if hasattr(self,"logfile") and self.logfile:
-                logfiles=[self.logfile]
+            if hasattr(self, "logfile") and self.logfile:
+                logfiles = [self.logfile]
             else:
-                logfiles=[]
+                logfiles = []
 
-        #Header information
-        htmlfile=open(os.path.join(output_dir,htmlfilename),"w")
+        # Header information
+        htmlfile = open(os.path.join(output_dir, htmlfilename), "w")
         htmlfile.write("<html><head><title>{0:s}</title></head><body>\n".format(filename))
         htmlfile.write("<h1>{0:s}</h1>\n".format(filename))
         htmlfile.write("<h2>Parameters</h2>\n".format())
         htmlfile.write("<i>File processed on {0:s}, by user {1:s}. Processing time = {2:5.2f}s</i><br>\n".format(
-            time.strftime("%A, %Y-%m-%d at %H:%M:%S"),os.getlogin(),tduration))
+            time.strftime("%A, %Y-%m-%d at %H:%M:%S"), os.getlogin(), tduration))
 
-        #Write results parameter dict
-        l=results.items(); l.sort()
+        # Write results parameter dict
+        l = results.items()
+        l.sort()
 
         htmlfile.write('<table border="1">\n'.format())
-        for k,v in l:
-            htmlfile.write("<tr><td><b>{0:s}</b></td><td>{1:s}</td></tr>\n".format(k,str(v)))
+        for k, v in l:
+            htmlfile.write("<tr><td><b>{0:s}</b></td><td>{1:s}</td></tr>\n".format(k, str(v)))
         htmlfile.write("</table>\n".format())
 
-        #Write parfile links
-        if parfiles: htmlfile.write("<h2>Parfiles</h2>\n".format())
+        # Write parfile links
+        if parfiles:
+            htmlfile.write("<h2>Parfiles</h2>\n".format())
         for parfile in parfiles:
             if os.path.exists(parfile):
-                if os.path.exists(parfile+".txt"):
-                    os.remove(parfile+".txt")
-                os.symlink(parfile,parfile+".txt")
-                htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(relpath(output_dir,parfile),os.path.split(parfile)[-1]))
+                if os.path.exists(parfile + ".txt"):
+                    os.remove(parfile + ".txt")
+                os.symlink(parfile, parfile + ".txt")
+                htmlfile.write('<a type="text/http" href="{0:s}.txt">{1:s}</a><br>\n'.format(relpath(output_dir, parfile), os.path.split(parfile)[-1]))
 
-        #Write logfile links
-        if logfiles: htmlfile.write("<h2>Logfiles</h2>\n".format())
+        # Write logfile links
+        if logfiles:
+            htmlfile.write("<h2>Logfiles</h2>\n".format())
         for logfile in logfiles:
             if os.path.exists(logfile):
-                htmlfile.write('<a type="text/http" href="{0:s}">{1:s}</a><br>\n'.format(relpath(output_dir,logfile),os.path.split(logfile)[-1]))
+                htmlfile.write('<a type="text/http" href="{0:s}">{1:s}</a><br>\n'.format(relpath(output_dir, logfile), os.path.split(logfile)[-1]))
 
-        #Include text log
+        # Include text log
         if text:
             htmlfile.write("<h2>Output</h2>\n".format())
             htmlfile.write("<XMP>\n".format())
@@ -1113,18 +1109,18 @@ class Task(object):
                 htmlfile.write("{0:s}\n".format(txt))
             htmlfile.write("</XMP>\n".format())
 
-        #Include plotfiles
+        # Include plotfiles
         if plotfiles:
             htmlfile.write("<h2>Plotfiles</h2>\n".format())
             htmlfile.write('<table>\n'.format())
 
             for plotfile in plotfiles:
                 htmlfile.write('<tr>'.format())
-                if isinstance(plotfile,list):
+                if isinstance(plotfile, list):
                     for plotfile_i in plotfile:
-                        htmlfile.write('  <td><a href="{0:s}">{1:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>\n'.format(relpath(output_dir,plotfile_i),os.path.split(plotfile_i)[-1]))
+                        htmlfile.write('  <td><a href="{0:s}">{1:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>\n'.format(relpath(output_dir, plotfile_i), os.path.split(plotfile_i)[-1]))
                 else:
-                    htmlfile.write('<td><a href="{0:s}">{1:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(relpath(output_dir,plotfile_i),os.path.split(plotfile)[-1]))
+                    htmlfile.write('<td><a href="{0:s}">{1:s}</a>:<br><a href="{0:s}"><img src="{0:s}" width=400></a></td>'.format(relpath(output_dir, plotfile_i), os.path.split(plotfile)[-1]))
                     htmlfile.write('</tr>\n'.format())
 
             htmlfile.write('</table>\n'.format())
@@ -1133,15 +1129,10 @@ class Task(object):
         htmlfile.close()
 
 
-
-
-
 #########################################################################
 #                             Workspaces
 #########################################################################
-
-
-def printindent_string(txt,indentlen,width=80,prefix="# "):
+def printindent_string(txt, indentlen, width=80, prefix="# "):
     """
     Usage:
 
@@ -1157,30 +1148,31 @@ def printindent_string(txt,indentlen,width=80,prefix="# "):
         tasks.printindent_string('Hallo lieber Leser, dies ist ein Text, der umgebrochen werden soll!',10,width=20)
 
     """
-    textsize=len(txt)
-    blockwidth=width-indentlen-len(prefix)
-    indentstr="                                                                                                                                                                                                        "[:indentlen]
-    start=0; end=blockwidth
-    outstr=""
-    while start<textsize:
-        if end>=textsize:
-            if start>0:
-                outstr+=indentstr+prefix+txt[start:textsize]+"\n"
+    textsize = len(txt)
+    blockwidth = width - indentlen - len(prefix)
+    indentstr = "                                                                                                                                                                                                        "[:indentlen]
+    start = 0
+    end = blockwidth
+    outstr = ""
+    while start < textsize:
+        if end >= textsize:
+            if start > 0:
+                outstr += indentstr + prefix + txt[start:textsize] + "\n"
             else:
-                outstr+=prefix+txt[start:end]+"\n"
+                outstr += prefix + txt[start:end] + "\n"
             return outstr
-        space_end=txt[start:end].rfind(" ")
-        if space_end>=0:
-            end=start+space_end
-        if start>0:
-            outstr+=indentstr+prefix+txt[start:end]+"\n"
+        space_end = txt[start:end].rfind(" ")
+        if space_end >= 0:
+            end = start + space_end
+        if start > 0:
+            outstr += indentstr + prefix + txt[start:end] + "\n"
         else:
-            outstr+=prefix+txt[start:end]+"\n"
-        if space_end>=0:
-            start=end+1;
+            outstr += prefix + txt[start:end] + "\n"
+        if space_end >= 0:
+            start = end + 1
         else:
-            start=end
-        end=start+blockwidth
+            start = end
+        end = start + blockwidth
     return outstr
 
 
@@ -1199,7 +1191,7 @@ class WorkSpaceType(type):
 #        cls.__taskname__ = name
 #        super(WorkSpaceType, cls).__init__(name, bases, dct)
 
-    def __call__(cls, taskname='Task',parameters={},  parfile=None,**kwargs):
+    def __call__(cls, taskname='Task', parameters={}, parfile=None, **kwargs):
         """ Create a new instance.
 
         *taskname* the name of the task for which the Workspace is
@@ -1224,15 +1216,15 @@ class WorkSpaceType(type):
 
         # Create instance with restored arguments
 #        obj=type(taskname+cls.name,cls.bases,cls.dct)
-        obj=type(taskname+cls.__name__,cls.__bases__,cls.__dict__.copy())
+        obj = type(taskname + cls.__name__, cls.__bases__, cls.__dict__.copy())
 
-        for k,v in cr.readParfiles(parfile).items():
-            parameters[k]={sc.default:v}
+        for k, v in cr.readParfiles(parfile).items():
+            parameters[k] = {sc.default: v}
 
-        for k,v in kwargs.items():
-            parameters[k]={sc.default:v}
+        for k, v in kwargs.items():
+            parameters[k] = {sc.default: v}
         obj.parameters = parameters
-        obj.__taskname__=taskname
+        obj.__taskname__ = taskname
 
         return obj
 
@@ -1241,6 +1233,7 @@ wsc=WorkSpace("MyTask",x={sc.default:1},y={sc.default:2})
 wsc=WorkSpace("MyTask",x=1,y=2)
 ws=wsc(x=3)
 """
+
 
 class WorkSpace(object):
     """
@@ -1268,24 +1261,25 @@ class WorkSpace(object):
      """
     __metaclass__ = WorkSpaceType
 
-    def __init__(self,**args):
-        if not hasattr(self,"parameters"): self.parameters={}
-        self.parameter_properties=self.parameters.copy()
-        self.parameterlist=set(self.parameter_properties.keys())
-        self._initparameters=args.copy()
-        self._parameterlist=set()
-        self._positionals=[]
-        self._modified_parameters=set()
-        self._default_parameter_definition={sc.doc:"", sc.unit:"", sc.default:None, sc.workarray:False, sc.export:True}
-        self._default_parameter_order=(sc.default,sc.doc,sc.unit)
-        self._known_methods=set()
+    def __init__(self, **args):
+        if not hasattr(self, "parameters"):
+            self.parameters = {}
+        self.parameter_properties = self.parameters.copy()
+        self.parameterlist = set(self.parameter_properties.keys())
+        self._initparameters = args.copy()
+        self._parameterlist = set()
+        self._positionals = []
+        self._modified_parameters = set()
+        self._default_parameter_definition = {sc.doc: "", sc.unit: "", sc.default: None, sc.workarray: False, sc.export: True}
+        self._default_parameter_order = (sc.default, sc.doc, sc.unit)
+        self._known_methods = set()
         self._known_methods.update(set(dir(self)))
         self.addParameters(self.parameter_properties)
         self.evalInputParameters()
-        if len(args)>0:
-            self(**args) # assign parameter values from the parameter list
+        if len(args) > 0:
+            self(**args)  # assign parameter values from the parameter list
 
-    def setParFromDict(self,d,root=True, taskname=None, follow_tree=False):
+    def setParFromDict(self, d, root=True, taskname=None, follow_tree=False):
         """
         Set parameters in the workspace from parameters in a dict. If
         a taskname is provided and a key in the dict matches the
@@ -1312,16 +1306,16 @@ class WorkSpace(object):
 
         """
         if root:
-            for k,v in d.items():
-                if (k in self.parameterlist): # This is a top-level, i.e. global parameter
-                    self[k]=v
-        for k,v in d.items():
-            if (k==taskname) and (type(v) == dict): # This is a parameter for the current task, stop going through tree
+            for k, v in d.items():
+                if (k in self.parameterlist):  # This is a top-level, i.e. global parameter
+                    self[k] = v
+        for k, v in d.items():
+            if (k == taskname) and (isinstance(v, dict)):  # This is a parameter for the current task, stop going through tree
                 self.setParFromDict(v)
-            elif taskname and follow_tree and (type(v)==dict): # A taskname is provided and a dict, then go through the tree and search for the taskname
-                self.setParFromDict(v,root=False,taskname=self.__taskname__,follow_tree=True)
+            elif taskname and follow_tree and (isinstance(v, dict)):  # A taskname is provided and a dict, then go through the tree and search for the taskname
+                self.setParFromDict(v, root=False, taskname=self.__taskname__, follow_tree=True)
 
-    def reset(self,restorecallparameters=False):
+    def reset(self, restorecallparameters=False):
         """
         ws.reset() -> reset all parameters to their state at initialization
 
@@ -1329,14 +1323,14 @@ class WorkSpace(object):
         to their state at initialization, but keep the parameters
         provided during initialisation.
         """
-        for p in self._parameterlist: # Delete all actually stored values
-            if hasattr(self,p): delattr(self,p)
-        if restorecallparameters and len(self._initparameters)>0:
-            self(**(self._initparameters)) # assign parameter values from the parameter list
+        for p in self._parameterlist:  # Delete all actually stored values
+            if hasattr(self, p):
+                delattr(self, p)
+        if restorecallparameters and len(self._initparameters) > 0:
+            self(**(self._initparameters))  # assign parameter values from the parameter list
         self.clearModifications()
 
-
-    def __call__(self,pardict={},parfile=None,**args):
+    def __call__(self, pardict={}, parfile=None, **args):
         """
         Usage:
 
@@ -1354,20 +1348,19 @@ class WorkSpace(object):
         *parfile* - provide a filename from which to read parameters
          in the form par1=val1, par2=val2,....
         """
-        self.setParFromDict(pardict,root=True, taskname=self.__taskname__, follow_tree=True)
+        self.setParFromDict(pardict, root=True, taskname=self.__taskname__, follow_tree=True)
 
-        margs=cr.readParfiles(parfile) #Reading parameters from a file
+        margs = cr.readParfiles(parfile)  # Reading parameters from a file
         margs.update(**args)
 
-        for k,v in margs.items():
+        for k, v in margs.items():
             if k in self.parameterlist:
-                self[k]=v
+                self[k] = v
             else:
-                print "Warning ws.__call__: Parameter ",k,"not known."
+                print "Warning ws.__call__: Parameter ", k, "not known."
         return self
 
-
-    def __getitem__(self,par):
+    def __getitem__(self, par):
         """
         Usage:
 
@@ -1376,26 +1369,25 @@ class WorkSpace(object):
         Access the parameter value using square brackets and a string
         of the parametername. The basic "getter" function for parameters.
         """
-        if hasattr(self,"_"+par):   # Return locally stored value
-            return getattr(self,"_"+par)
-        elif self.parameter_properties.has_key(par):
-            if self.parameter_properties[par].has_key(sc.default):   #return default value or function
-                f_or_val=self.parameter_properties[par][sc.default]
-                if type(f_or_val)==types.FunctionType:
-                    setattr(self,"_"+par,f_or_val(self))
+        if hasattr(self, "_" + par):   # Return locally stored value
+            return getattr(self, "_" + par)
+        elif par in self.parameter_properties:
+            if sc.default in self.parameter_properties[par]:  # return default value or function
+                f_or_val = self.parameter_properties[par][sc.default]
+                if isinstance(f_or_val, types.FunctionType):
+                    setattr(self, "_" + par, f_or_val(self))
                 else:
-                    setattr(self,"_"+par,f_or_val)
+                    setattr(self, "_" + par, f_or_val)
             else:
-                print "ERROR in Workspace",self.__module__,": Parameter ", par,"does not have default values!"
-            return getattr(self,"_"+par)
-        elif hasattr(self,par):   # Return locally stored value
-            return getattr(self,par)
+                print "ERROR in Workspace", self.__module__, ": Parameter ", par, "does not have default values!"
+            return getattr(self, "_" + par)
+        elif hasattr(self, par):   # Return locally stored value
+            return getattr(self, par)
         else:
-            print "ERROR in Workspace",self.__module__,": Parameter ", par,"not known!"
+            print "ERROR in Workspace", self.__module__, ": Parameter ", par, "not known!"
             return None
 
-
-    def __setitem__(self,par,value):
+    def __setitem__(self, par, value):
         """
         Usage:
 
@@ -1415,42 +1407,40 @@ class WorkSpace(object):
         """
 #        if hasattr(self,"trace") and self.trace:
 #            import pdb; pdb.set_trace()
-        if hasattr(self,"_"+par) or par in self.parameterlist:   #replace stored value
-            if hasattr(self,"_"+par):
-                if getattr(self,"_"+par) is value: return  # don't assign or considered modified if it is the same value
-                delattr(self,"_"+par) # Delete first in case it contains a large array which blocks memory
-            setattr(self,"_"+par,value)
-            self.parameter_properties[par][sc.default]=value
+        if hasattr(self, "_" + par) or par in self.parameterlist:  # replace stored value
+            if hasattr(self, "_" + par):
+                if getattr(self, "_" + par) is value:
+                    return  # don't assign or considered modified if it is the same value
+                delattr(self, "_" + par)  # Delete first in case it contains a large array which blocks memory
+            setattr(self, "_" + par, value)
+            self.parameter_properties[par][sc.default] = value
         else:
-            setattr(self,"_"+par,value) # create new parameter with default parameters
-            self.parameter_properties[par]=self._default_parameter_definition
+            setattr(self, "_" + par, value)  # create new parameter with default parameters
+            self.parameter_properties[par] = self._default_parameter_definition
             self.add(par)
         self._modified_parameters.add(par)
-
 
     def clearModifications(self):
         """
         Set all parameters to be unmodified.
         """
-        self._modified_parameters=set([])
+        self._modified_parameters = set([])
 
-
-    def clearModification(self,p):
+    def clearModification(self, p):
         """
         Remove parameter from modification list.
         """
         if p in self._modified_parameters:
             del self._modified_parameters[p]
 
-    def addParameterDefinition(self,p,v):
+    def addParameterDefinition(self, p, v):
         """
         Add the defintion dict of one parameter to the overall dict containing parameter definitions.
         """
-        self.parameter_properties[p]=self._default_parameter_definition.copy()
-        self.parameter_properties[p].update(v) # then copy the ones explicitly provided
+        self.parameter_properties[p] = self._default_parameter_definition.copy()
+        self.parameter_properties[p].update(v)  # then copy the ones explicitly provided
 
-
-    def delx(self,name):
+    def delx(self, name):
         """
         Delete a parameter from the workspace. If the parameter was
         hardcoded before initialization (i.e., provided through
@@ -1459,25 +1449,24 @@ class WorkSpace(object):
         retrieval. Otherwise the parameter is completely removed.
         """
         if name in self.parameterlist:
-            if hasattr(self,"_"+name):
-                delattr(self,"_"+name)
-                if "_"+name in self._parameterlist:
-                    self._parameterlist.remove("_"+name)
-            if self.parameters.has_key(name): #OK that is a pre-defined parameter
-                self.parameter_properties[name]=self._default_parameter_definition.copy()
-                self.parameter_properties[name].update(self.parameters[name]) # restore the properties with original properties
-                if self.parameter_properties[name].has_key(sc.default) and type(self.parameter_properties[name][sc.default])==types.FunctionType: # this is a function
-                    self.parameter_properties[name][sc.dependencies]=self.parameterlist.intersection(self.parameter_properties[name][sc.default].func_code.co_names) #reset dependencies
-            else: # parameter was added later, thus will be removed completely
-                if self.parameter_properties.has_key(name):
+            if hasattr(self, "_" + name):
+                delattr(self, "_" + name)
+                if "_" + name in self._parameterlist:
+                    self._parameterlist.remove("_" + name)
+            if name in self.parameters:  # OK that is a pre-defined parameter
+                self.parameter_properties[name] = self._default_parameter_definition.copy()
+                self.parameter_properties[name].update(self.parameters[name])  # restore the properties with original properties
+                if sc.default in self.parameter_properties[name] and isinstance(self.parameter_properties[name][sc.default], types.FunctionType):  # this is a function
+                    self.parameter_properties[name][sc.dependencies] = self.parameterlist.intersection(self.parameter_properties[name][sc.default].func_code.co_names)  # reset dependencies
+            else:  # parameter was added later, thus will be removed completely
+                if name in self.parameter_properties:
                     del self.parameter_properties[name]
             self._modified_parameters.add(name)
-        else: # not in parameterlist
-            if hasattr(self,name): # was set explicitly as normal method
-                delattr(self,name)
-            else: #does not exist
+        else:  # not in parameterlist
+            if hasattr(self, name):  # was set explicitly as normal method
+                delattr(self, name)
+            else:  # does not exist
                 print "Error WorkSpace: Did not delete parameter",
-
 
     def addProperty(self, name, *funcs):
         """
@@ -1487,10 +1476,9 @@ class WorkSpace(object):
 
         self.addProperty(name,lambda ws:ws[name],lambda ws,x:ws.__setitem__(name,x),lambda ws:ws.delx(name),"This is parameter "+name)
         """
-        setattr(self.__class__, name, property(*funcs)) #property(getx, setx, delx, "I'm the property.")
+        setattr(self.__class__, name, property(*funcs))  # property(getx, setx, delx, "I'm the property.")
 
-
-    def partuple_to_pardict(self,tup):
+    def partuple_to_pardict(self, tup):
         """
         Converts a tuple of parameter description values into a
         properly formatted dict. If the tuple is shorter than default
@@ -1498,12 +1486,12 @@ class WorkSpace(object):
 
         Example: partuple_to_pardict(self,(value,"Parameter description","MHz")) -> {"default":value,"doc":"Parameter description","unit":"MHz"}
         """
-        pardict=self._default_parameter_definition.copy()
-        for i in range(len(tup)): pardict[self._default_parameter_order[i]]=tup[i]
+        pardict = self._default_parameter_definition.copy()
+        for i in range(len(tup)):
+            pardict[self._default_parameter_order[i]] = tup[i]
         return pardict
 
-
-    def addParameters(self,parlist):
+    def addParameters(self, parlist):
         """
         This provides an easy interface to add a number of parameters,
         either as a list or as a dict with properties.
@@ -1536,18 +1524,17 @@ class WorkSpace(object):
 
         will add the parameters ``parN`` with the respective parameters.
         """
-        if type(parlist)==dict:
-            for p,v in parlist.items():
-                self.add(p,**v)
-        elif type(parlist)==list:
+        if isinstance(parlist, dict):
+            for p, v in parlist.items():
+                self.add(p, **v)
+        elif isinstance(parlist, list):
             for p in parlist:
-                if type(p)==tuple:
-                    self.add(p[0],**(self.partuple_to_pardict(p[1:])))
+                if isinstance(p, tuple):
+                    self.add(p[0], **(self.partuple_to_pardict(p[1:])))
                 else:
                     self.add(p)
 
-
-    def add(self,par,**properties):
+    def add(self, par, **properties):
         """
         Add a new parameter to the workspace, providing additional
         information, such as documentation and default values. The
@@ -1568,18 +1555,17 @@ class WorkSpace(object):
         retrieval.
         """
         self._known_methods.add(par)
-        self._known_methods.add("_"+par)
+        self._known_methods.add("_" + par)
         self.parameterlist.add(par)
-        self._parameterlist.add("_"+par)
-        self.addProperty(par,lambda ws:ws[par],lambda ws,x:ws.__setitem__(par,x),lambda ws:ws.delx(par),self.getParameterDoc(par))
-        if properties.has_key(sc.positional) and properties[sc.positional]:
+        self._parameterlist.add("_" + par)
+        self.addProperty(par, lambda ws: ws[par], lambda ws, x: ws.__setitem__(par, x), lambda ws: ws.delx(par), self.getParameterDoc(par))
+        if sc.positional in properties and properties[sc.positional]:
             self._positionals.append(par)
-        if properties.has_key(sc.default) and type(properties[sc.default])==types.FunctionType: # this is a function
-            properties[sc.dependencies]=self.parameterlist.intersection(properties["default"].func_code.co_names) #check the variables it depends on
-        self.addParameterDefinition(par,properties)
+        if sc.default in properties and isinstance(properties[sc.default], types.FunctionType):  # this is a function
+            properties[sc.dependencies] = self.parameterlist.intersection(properties["default"].func_code.co_names)  # check the variables it depends on
+        self.addParameterDefinition(par, properties)
 
-
-    def getDerivedParameters(self,workarrays=True,nonexport=True):
+    def getDerivedParameters(self, workarrays=True, nonexport=True):
         """
         Return a python set which contains the parameters that are
         derived from input parameters through a default function at
@@ -1592,26 +1578,26 @@ class WorkSpace(object):
         *workarrays* = True - Include workarrays in the list
         *nonexport* = True - Include parameters which were not meant for export in the list
         """
-        derivedparameters=set()
+        derivedparameters = set()
         for p in self.parameterlist:
-            properties=self.parameter_properties[p]
-            if ((properties.has_key(sc.default) and (type(properties[sc.default])==types.FunctionType)) # default is a function
-                and (not nonexport or not (properties.has_key(sc.export) and not properties[sc.export]))  #export is true
-                and (not (properties.has_key(sc.workarray) and properties[sc.workarray]) or workarrays)): # not a workarray if requested
-                derivedparameters.add(p) # then it is a derived parameter we want to see
+            properties = self.parameter_properties[p]
+            if ((sc.default in properties and (isinstance(properties[sc.default], types.FunctionType)))  # default is a function
+                and (not nonexport or not (sc.export in properties and not properties[sc.export]))  # export is true
+                and (not (sc.workarray in properties and properties[sc.workarray]) or workarrays)):  # not a workarray if requested
+                derivedparameters.add(p)  # then it is a derived parameter we want to see
         return derivedparameters
 
-    def getOutputParameters(self,workarrays=False,nonexport=True):
+    def getOutputParameters(self, workarrays=False, nonexport=True):
         """
         Return all parameters that are considered output parameters,
         i.e., those which are 'derived' parameters and those explicitly
         labelled as output.
         """
-        l=set(self.getDerivedParameters(workarrays=workarrays,nonexport=nonexport))
-        for p,v in self.parameter_properties.items():
-            if (v.has_key(sc.output) and v[sc.output]):
-                if ((workarrays or not (v.has_key(sc.workarray) and v[sc.workarray]))
-                    and (not nonexport or not (v.has_key(sc.export) and not v[sc.export]))):
+        l = set(self.getDerivedParameters(workarrays=workarrays, nonexport=nonexport))
+        for p, v in self.parameter_properties.items():
+            if (sc.output in v and v[sc.output]):
+                if ((workarrays or not (sc.workarray in v and v[sc.workarray]))
+                    and (not nonexport or not (sc.export in v and not v[sc.export]))):
                     l.add(p)
         return l
 
@@ -1627,20 +1613,19 @@ class WorkSpace(object):
 # nonexport=True
 # """
 
-
     def getPositionalParameters(self):
         """
         Return all parameters that are used as postional parameters,
         i.e. those which don't have a default value or a keyword.
         """
-        l1={}
-        for p,v in self.parameter_properties.items():
-            if (v.has_key(sc.positional) and v[sc.positional]): l1[p]=v[sc.positional]
-        l2=range(len(l1))
-        for p,v in l1.items():
-            l2[v-1]=p
+        l1 = {}
+        for p, v in self.parameter_properties.items():
+            if (sc.positional in v and v[sc.positional]):
+                l1[p] = v[sc.positional]
+        l2 = range(len(l1))
+        for p, v in l1.items():
+            l2[v - 1] = p
         return l2
-
 
     def getInputParameters(self):
         """
@@ -1649,27 +1634,25 @@ class WorkSpace(object):
         were defined before initialization in ws.parameters and which
         do not have a function as default value.
         """
-        inputparameters=set()
+        inputparameters = set()
         for p in self.parameterlist:
-            properties=self.parameter_properties[p]
-            if ((properties.has_key(sc.default) and (not type(properties[sc.default])==types.FunctionType)) # is not a function
-            and ((not properties.has_key(sc.export)) or properties[sc.export]) #export is true
-            and ((not properties.has_key(sc.workarray)) or (not properties[sc.workarray])) #not a workarray
-            and ((not properties.has_key(sc.output)) or (not properties[sc.output]))): #not explicitly defined as output
-                inputparameters.add(p) # then it is an input parameter
+            properties = self.parameter_properties[p]
+            if ((sc.default in properties and (not isinstance(properties[sc.default], types.FunctionType)))  # is not a function
+            and ((sc.export not in properties) or properties[sc.export])  # export is true
+            and ((sc.workarray not in properties) or (not properties[sc.workarray]))  # not a workarray
+            and ((sc.output not in properties) or (not properties[sc.output]))):  # not explicitly defined as output
+                inputparameters.add(p)  # then it is an input parameter
         return inputparameters
-
 
     def getInputParametersDict(self):
         """
         Returns the input parameters as a dict that can be provided
         at startup to the function to restore the parameters.
         """
-        dct={}
+        dct = {}
         for p in self.getInputParameters():
-            dct[p]=self[p]
+            dct[p] = self[p]
         return dct
-
 
     def getInternalParameters(self):
         """
@@ -1681,7 +1664,6 @@ class WorkSpace(object):
         """
         return set(dir(self)).difference(self._known_methods)
 
-
     def listInternalParameters(self):
         """
         Return a string that contains all methods that simply contain
@@ -1690,16 +1672,17 @@ class WorkSpace(object):
         description. These are typically inetranl variables that are
         not well documented.
         """
-        s=""
+        s = ""
         for p in self.getInternalParameters():
-            if hasattr(self,p): val=getattr(self,p)
-            else: val="'UNDEFINED'"
-            if version_info > (2,5,9):
-                s+="# {0:>20} = {1!r:20} \n".format(p,val)
+            if hasattr(self, p):
+                val = getattr(self, p)
             else:
-                s+=str((p,val))
+                val = "'UNDEFINED'"
+            if version_info > (2, 5, 9):
+                s += "# {0:>20} = {1!r:20} \n".format(p, val)
+            else:
+                s += str((p, val))
         return s
-
 
     def printall(self):
         """
@@ -1709,29 +1692,28 @@ class WorkSpace(object):
         """
         print self.__repr__(True)
 
-
     def evalAll(self):
         """
         Evaluates all parameters and assigns them their default values if they are as yet undefined.
         """
-        for p in self.parameterlist: self[p]
-
+        for p in self.parameterlist:
+            self[p]
 
     def evalParameters(self):
         """
         Evaluates all input and output parameters and assigns them their default values if they are as yet undefined.
         """
-        for p in self.getInputParameters().union(self.getOutputParameters()): self[p]
-
+        for p in self.getInputParameters().union(self.getOutputParameters()):
+            self[p]
 
     def evalInputParameters(self):
         """
         Evaluates all input parameters and assigns them their default values if they are as yet undefined.
         """
-        for p in self.getInputParameters(): self[p]
+        for p in self.getInputParameters():
+            self[p]
 
-
-    def isModified(self,par,firstcall=True):
+    def isModified(self, par, firstcall=True):
         """
         Returns true or false whether a parameter was modified since
         the last update or recalc. The function will also add the
@@ -1739,18 +1721,22 @@ class WorkSpace(object):
         """
 #        if hasattr(self,"trace") and self.trace:
 #            import pdb; pdb.set_trace()
-        if firstcall: self.checkedalready=set()
-        if par in self._modified_parameters: return True
-        if par in self.checkedalready: return False # to avoid infinite loops
-        self.checkedalready.add(par);
-        if self.parameter_properties[par].has_key(sc.dependencies) and len(self.parameter_properties[par][sc.dependencies])>0:
+        if firstcall:
+            self.checkedalready = set()
+        if par in self._modified_parameters:
+            return True
+        if par in self.checkedalready:
+            return False  # to avoid infinite loops
+        self.checkedalready.add(par)
+        if sc.dependencies in self.parameter_properties[par] and len(self.parameter_properties[par][sc.dependencies]) > 0:
 #            print "Modified parameter -> ",par
-            modified=reduce(lambda a,b:a | b,map(lambda p:self.isModified(p,firstcall=False),self.parameter_properties[par][sc.dependencies]))
-            if modified: self._modified_parameters.add(par)
+            modified = reduce(lambda a, b: a | b, map(lambda p: self.isModified(p, firstcall=False), self.parameter_properties[par][sc.dependencies]))
+            if modified:
+                self._modified_parameters.add(par)
             return modified
         return False
 
-    def update(self,forced=False,workarrays=True,nonexport=False):
+    def update(self, forced=False, workarrays=True, nonexport=False):
         """
         Recalculates all existing derived parameters and assigns them
         their default values if they depend on a value that was
@@ -1766,16 +1752,16 @@ class WorkSpace(object):
           if you want to avoid reinitializing them due to an update
 
         """
-        pars=[]
-        for p in self.getDerivedParameters(workarrays=workarrays,nonexport=nonexport): # first make sure all modified parameters are identified
-            if (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][sc.default])==types.FunctionType) and (workarrays or ((not self.parameter_properties[p].has_key(sc.workarray)) or not self.parameter_properties[p][sc.workarray])):
-                delattr(self,"_"+p) # delete buffered value so that it will be recalculated
+        pars = []
+        for p in self.getDerivedParameters(workarrays=workarrays, nonexport=nonexport):  # first make sure all modified parameters are identified
+            if (self.isModified(p) or forced) and hasattr(self, "_" + p) and (isinstance(self.parameter_properties[p][sc.default], types.FunctionType)) and (workarrays or ((sc.workarray not in self.parameter_properties[p]) or not self.parameter_properties[p][sc.workarray])):
+                delattr(self, "_" + p)  # delete buffered value so that it will be recalculated
                 pars.append(p)
         for p in pars:
-            self[p] # recalculate the parameters where the local value was deleted
+            self[p]  # recalculate the parameters where the local value was deleted
         self.clearModifications()
 
-    def updateParameter(self,p,forced=False):
+    def updateParameter(self, p, forced=False):
         """
         Recalculates the named parameter and assign it
         the default values if it depends on a value that was
@@ -1788,22 +1774,21 @@ class WorkSpace(object):
          not.
 
         """
-        if ((p in self.getDerivedParameters()) and (self.isModified(p) or forced) and hasattr(self,"_"+p) and (type(self.parameter_properties[p][sc.default])==types.FunctionType)):
-            delattr(self,"_"+p) # delete buffered value so that it will be recalculated
-            self[p] # recalculate the parameters where the local value was deleted
+        if ((p in self.getDerivedParameters()) and (self.isModified(p) or forced) and hasattr(self, "_" + p) and (isinstance(self.parameter_properties[p][sc.default], types.FunctionType))):
+            delattr(self, "_" + p)  # delete buffered value so that it will be recalculated
+            self[p]  # recalculate the parameters where the local value was deleted
             self.clearModification(p)
 
-    def getParameterDoc(self,name):
+    def getParameterDoc(self, name):
         """
         If parameter was defined in parameter_properties return the "doc" keyword, otherwise a default string.
         """
-        if self.parameter_properties.has_key(name) and self.parameter_properties[name].has_key(sc.doc):
+        if name in self.parameter_properties and sc.doc in self.parameter_properties[name]:
             return self.parameter_properties[name][sc.doc]
         else:
-            return "This is parameter "+name+"."
+            return "This is parameter " + name + "."
 
-
-    def getParameters(self,internals=False,excludeworkarrays=True,excludenonexports=True,all=False):
+    def getParameters(self, internals=False, excludeworkarrays=True, excludenonexports=True, all=False):
         """
         ws.getParameters(internals=False,excludeworkarrays=True,excludenonexports=True,all=False) -> {"par1":value1, "par2":value2,...}
 
@@ -1817,13 +1802,12 @@ class WorkSpace(object):
         *excludenonexports* = True - whether or not to exclude parameters that are marked to not be printed
         *all* = False - really return all parameters (internals, workarrays, excludes)
         """
-        pdict={}
-        for p in self.getParameterNames(internals,excludeworkarrays,excludenonexports,all):
-            pdict[p]=self[p]
+        pdict = {}
+        for p in self.getParameterNames(internals, excludeworkarrays, excludenonexports, all):
+            pdict[p] = self[p]
         return pdict
 
-
-    def getParameterNames(self,internals=False,excludeworkarrays=True,excludenonexports=True,all=False):
+    def getParameterNames(self, internals=False, excludeworkarrays=True, excludenonexports=True, all=False):
         """
         ws.getParameterNames(internals=False,excludeworkarrays=True,excludenonexports=True,all=False) -> ["par1", "par2",...]
 
@@ -1840,22 +1824,22 @@ class WorkSpace(object):
         *all* = False - really return all parameters (internals, workarrays, excludes)
         """
         if all:
-            internals=True
-            excludeworkarrays=False
-            excludenonexports=False
-        plist=[]
+            internals = True
+            excludeworkarrays = False
+            excludenonexports = False
+        plist = []
         for p in self.parameterlist:
-            if ((excludenonexports and self.parameter_properties[p].has_key(sc.export) and (not self.parameter_properties[p][sc.export])) or
-                (excludeworkarrays and self.parameter_properties[p].has_key(sc.workarray) and self.parameter_properties[p][sc.workarray])):
-                pass # do not return parameter since it is a work array or is explicitly excluded
+            if ((excludenonexports and sc.export in self.parameter_properties[p] and (not self.parameter_properties[p][sc.export])) or
+                (excludeworkarrays and sc.workarray in self.parameter_properties[p] and self.parameter_properties[p][sc.workarray])):
+                pass  # do not return parameter since it is a work array or is explicitly excluded
             else:
                 plist.append(p)
         if internals:
-            for p in self.getInternalParameters(): plist.append(p)
+            for p in self.getInternalParameters():
+                plist.append(p)
         return plist
 
-
-    def __repr__(self,internals=False,workarrays=True,noninputparameters=True):
+    def __repr__(self, internals=False, workarrays=True, noninputparameters=True):
         """
         String representation of a work space, listing all explicitly defined parameters.
 
@@ -1865,43 +1849,49 @@ class WorkSpace(object):
          by ws.par=value.
         """
 #        variables=set(Task.run.func_code.co_names)
-        s="#-------------------------------------------------------------------------------------------------------------------------\n# WorkSpace of "+self.__taskname__+"("+",".join(self.getPositionalParameters())+")\n#-------------------------------------------------------------------------------------------------------------------------\n"
-        s0=""; s1=""; s2=""
-        pars=self.parameter_properties.items()
-        pars.sort()
-        for p,v in pars:
-            if hasattr(self,"_"+p):
-		val=getattr(self,"_"+p)
+        s = "#-------------------------------------------------------------------------------------------------------------------------\n# WorkSpace of " + self.__taskname__ + "(" + ",".join(self.getPositionalParameters()) + ")\n#-------------------------------------------------------------------------------------------------------------------------\n"
+        s0 = ""
+        s1 = ""
+        s2 = ""
+        pars = sorted(self.parameter_properties.items())
+        for p, v in pars:
+            if hasattr(self, "_" + p):
+		val = getattr(self, "_" + p)
             else:
-		val="'UNDEFINED'"
+		val = "'UNDEFINED'"
 	    if type(val) in cr.hAllContainerTypes:
-		val=val.__repr__(8)
-            if (v.has_key(sc.positional)) and (v[sc.positional]):
-                s+="# {0:s} = {1!r} - {2:s}".format(p,val,printindent_string(v[sc.doc],66,width=120,prefix="# "))
-            if (v.has_key(sc.export)) and (not v[sc.export]):
+		val = val.__repr__(8)
+            if (sc.positional in v) and (v[sc.positional]):
+                s += "# {0:s} = {1!r} - {2:s}".format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
+            if (sc.export in v) and (not v[sc.export]):
                 continue
             if p in self.getInputParameters():
-                if (v[sc.unit]==""): s0+="{0:<22} = {1!r:30} #         {2:s}".format(p,val,printindent_string(v[sc.doc],66,width=120,prefix="# "))
-                else: s0+="{0:<22} = {1!r:30} # [{2:^5s}] {3:s}".format(p,val,v[sc.unit],printindent_string(v[sc.doc],66,width=120,prefix="# "))
-            elif (v.has_key(sc.workarray)) and (v[sc.workarray]):
-                if workarrays:
-                    if v.has_key(sc.dependencies):
-                        deps=" <- ["+", ".join(v[sc.dependencies])+"]"
-                    else:
-                        deps=""
-		    s2+=("# {2:s}\n# {0:s} = {1!r}"+deps).format(p,val,printindent_string(v[sc.doc],66,width=120,prefix="# "))
-            elif noninputparameters:
-                if v.has_key(sc.dependencies):
-                    deps=" <- ["+", ".join(v[sc.dependencies])+"]"
+                if (v[sc.unit] == ""):
+                    s0 += "{0:<22} = {1!r:30} #         {2:s}".format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
                 else:
-                    deps=""
-                if (v[sc.unit]==""): s1+=("# {0:>20} = {1!r:30} - {2:s}").format(p,val,printindent_string(v[sc.doc]+deps,58,width=120,prefix="# "))
-                else: s1+=("# {0:>20} = {1:<30} - {2:s}").format(p,str(val)+" "+v[sc.unit],printindent_string(v[sc.doc]+deps,58,width=120,prefix="# "))
-        s+=s0
-        if not s1=="": s+="#------------------------Output Parameters------------------------------\n"+s1
-        if not s2=="": s+="#---------------------------Work Arrays---------------------------------\n"+s2
-        if internals:  s+="#-----------------------Internal Parameters-----------------------------\n"+self.listInternalParameters()
+                    s0 += "{0:<22} = {1!r:30} # [{2:^5s}] {3:s}".format(p, val, v[sc.unit], printindent_string(v[sc.doc], 66, width=120, prefix="# "))
+            elif (sc.workarray in v) and (v[sc.workarray]):
+                if workarrays:
+                    if sc.dependencies in v:
+                        deps = " <- [" + ", ".join(v[sc.dependencies]) + "]"
+                    else:
+                        deps = ""
+		    s2 += ("# {2:s}\n# {0:s} = {1!r}" + deps).format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
+            elif noninputparameters:
+                if sc.dependencies in v:
+                    deps = " <- [" + ", ".join(v[sc.dependencies]) + "]"
+                else:
+                    deps = ""
+                if (v[sc.unit] == ""):
+                    s1 += ("# {0:>20} = {1!r:30} - {2:s}").format(p, val, printindent_string(v[sc.doc] + deps, 58, width=120, prefix="# "))
+                else:
+                    s1 += ("# {0:>20} = {1:<30} - {2:s}").format(p, str(val) + " " + v[sc.unit], printindent_string(v[sc.doc] + deps, 58, width=120, prefix="# "))
+        s += s0
+        if not s1 == "":
+            s += "#------------------------Output Parameters------------------------------\n" + s1
+        if not s2 == "":
+            s += "#---------------------------Work Arrays---------------------------------\n" + s2
+        if internals:
+            s += "#-----------------------Internal Parameters-----------------------------\n" + self.listInternalParameters()
         s += "#-----------------------------------------------------------------------\n"
         return s
-
-

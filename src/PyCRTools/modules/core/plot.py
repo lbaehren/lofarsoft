@@ -1,7 +1,7 @@
 """Provides an n-dimensional array class.
 """
-#import pdb
-#pdb.set_trace()
+# import pdb
+# pdb.set_trace()
 
 import numpy as np
 import matplotlib
@@ -15,17 +15,20 @@ from harray import *
 #======================================================================
 #  Define Plotting functions for vectors and arrays
 #======================================================================
-plot_pause=True
-doplot=True
+plot_pause = True
+doplot = True
+
 
 class plot_draw_class():
     """Just calls plt.draw - can be used in place of plotfinish in tasks to just plot and do nothing fancy"""
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         pass
-    def __call__(self,*args,**kwargs):
+
+    def __call__(self, *args, **kwargs):
         plt.draw()
 
-plot_draw=plot_draw_class()
+plot_draw = plot_draw_class()
+
 
 class plotfinish:
     """
@@ -104,16 +107,16 @@ class plotfinish:
       -> Nothing happens (i.e. no pause)....
 
     """
-    def __init__(self,name="",plotpause=True,doplot=True,refresh=True,filename="",filetype="png",counter=0,plotfiles=[]):
-        self.plot_pause=plotpause
-        self.doplot=doplot
-        self.refresh=refresh
-        self.filename=filename
-        self.filetype=filetype
-        self.plotfiles=plotfiles
-        self.counter=counter
+    def __init__(self, name="", plotpause=True, doplot=True, refresh=True, filename="", filetype="png", counter=0, plotfiles=[]):
+        self.plot_pause = plotpause
+        self.doplot = doplot
+        self.refresh = refresh
+        self.filename = filename
+        self.filetype = filetype
+        self.plotfiles = plotfiles
+        self.counter = counter
 
-    def __call__(self,txt="",name="",filename="",filetype="",setcounter=0,counter=None,savefig=False,same_row=False):
+    def __call__(self, txt="", name="", filename="", filetype="", setcounter=0, counter=None, savefig=False, same_row=False):
         """
         Usage:
 
@@ -124,56 +127,57 @@ class plotfinish:
         Call this after ever plot to save output and ask for user input.
         """
         if self.doplot:
-            if not filename: filename=self.filename
-            if not filetype: filetype=self.filetype
-            (fdir,fname)=os.path.split(filename)
-            if setcounter>0:
-                self.counter=setcounter
+            if not filename:
+                filename = self.filename
+            if not filetype:
+                filetype = self.filetype
+            (fdir, fname) = os.path.split(filename)
+            if setcounter > 0:
+                self.counter = setcounter
             else:
-                self.counter+=1
+                self.counter += 1
             if filename:
                 if name:
-                    f="{0:s}-{1:04d}-{2:s}-{3:s}.{4:s}".format(os.path.join(fdir,"pycrfig"),counter if not counter==None else self.counter,fname,name,filetype)
+                    f = "{0:s}-{1:04d}-{2:s}-{3:s}.{4:s}".format(os.path.join(fdir, "pycrfig"), counter if not counter == None else self.counter, fname, name, filetype)
                 else:
-                    f="{0:s}-{1:04d}-{2:s}.{3:s}".format(os.path.join(fdir,"pycrfig"),counter if not counter==None else self.counter,fname,filetype)
-                if same_row and len(self.plotfiles)>0:
-                    if isinstance(self.plotfiles[-1],list):
+                    f = "{0:s}-{1:04d}-{2:s}.{3:s}".format(os.path.join(fdir, "pycrfig"), counter if not counter == None else self.counter, fname, filetype)
+                if same_row and len(self.plotfiles) > 0:
+                    if isinstance(self.plotfiles[-1], list):
                         self.plotfiles[-1].append(f)
                     else:
-                        self.plotfiles[-1]=[self.plotfiles[-1],f]
+                        self.plotfiles[-1] = [self.plotfiles[-1], f]
                 else:
                     self.plotfiles.append(f)
-                fig=plt.gcf()
+                fig = plt.gcf()
 #                dpi=fig.get_dpi()
 #                fig.set_dpi(200)
 #                fig.set_size_inches(10,10)
 
-                fig.savefig(f,dpi=200)
+                fig.savefig(f, dpi=200)
 #               fig.set_dpi(dpi)
-                print "Saved plot in",f
+                print "Saved plot in", f
             if txt:
-                print (("("+name+") ") if name else "")+txt
+                print (("(" + name + ") ") if name else "") + txt
             if self.refresh:
-                plt.draw();
+                plt.draw()
             if self.plot_pause:
-                k=raw_input("Press key+[return]: [any]=continue, [d]=draw on screen without pause, [q]=quiet plotting, don't pause, [n]=no plots at all. ")
-                if k=="q":
-                    self.plot_pause=False
-                    self.refresh=False
+                k = raw_input("Press key+[return]: [any]=continue, [d]=draw on screen without pause, [q]=quiet plotting, don't pause, [n]=no plots at all. ")
+                if k == "q":
+                    self.plot_pause = False
+                    self.refresh = False
                     print "Continue without pausing from now on."
-                elif k=="d":
-                    self.plot_pause=False
-                    self.refresh=True
-                elif k=="n":
-                    self.doplot=False
-                    self.plot_pause=False
+                elif k == "d":
+                    self.plot_pause = False
+                    self.refresh = True
+                elif k == "n":
+                    self.doplot = False
+                    self.plot_pause = False
                     print "Continue without plotting and without pausing."
                 else:
                     print "Continue."
 
 
-
-def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,title=None,clf=True,logplot=None,xlim=None,ylim=None,legend=None,highlight=None,nhighlight=None,highlightcolor=None,highlightlabel=None,**plotargs):
+def hPlot_plot(self, xvalues=None, xerr=None, yerr=None, xlabel=None, ylabel=None, title=None, clf=True, logplot=None, xlim=None, ylim=None, legend=None, highlight=None, nhighlight=None, highlightcolor=None, highlightlabel=None, **plotargs):
     """
     Method of arrays. Plots the current slice. If the array is in
     looping mode, multiple curves are plotted in one windows.
@@ -235,185 +239,264 @@ def hPlot_plot(self,xvalues=None,xerr=None,yerr=None,xlabel=None,ylabel=None,tit
 
     Example:
 
-    #Plotting an hArray with errorbars
+    # Plotting an hArray with errorbars
     a=hArray(float,10,fill=range(1,11));  b=hArray(copy=a,yerr=a,xerr=a,logplot="y"); a*=0.1; b.plot()
 
     """
 #    if EDP64bug==None and hasattr(self.plt,"EDP64bug"):
 #        EDP64bug=self.plt.EDP64bug
-    if (xvalues==None):
-        if hasattr(self.par,"xvalues"):
-            if hasattr(self,"__slice__"):
-                dim_difference=self.getNumberOfDimensions() - self.par.xvalues.getNumberOfDimensions()
-                if dim_difference==0:
-                    xvalues=self.par.xvalues.getSlicedArray(self.__slice__)
-                elif dim_difference>0:
-                    ellipsiscount=self.__slice__.count(Ellipsis) # check if an ellipsis is present that occupies and extra slot in the index list
-                    if ellipsiscount==1:
-                        ellipsislocation=self.__slice__.index(Ellipsis)
-                        if ellipsislocation==0 or type(self.__slice__[ellipsislocation-1]) in [int,long]:
-                            ellipsiscount=0
-                    dim_difference+=ellipsiscount
-                    if dim_difference==len(self.__slice__):
-                        xvalues=self.par.xvalues
-                    elif dim_difference<len(self.__slice__):
-                        xvalues=self.par.xvalues.getSlicedArray(self.__slice__[dim_difference:])
+    if (xvalues == None):
+        if hasattr(self.par, "xvalues"):
+            if hasattr(self, "__slice__"):
+                dim_difference = self.getNumberOfDimensions() - self.par.xvalues.getNumberOfDimensions()
+                if dim_difference == 0:
+                    xvalues = self.par.xvalues.getSlicedArray(self.__slice__)
+                elif dim_difference > 0:
+                    ellipsiscount = self.__slice__.count(Ellipsis)  # check if an ellipsis is present that occupies and extra slot in the index list
+                    if ellipsiscount == 1:
+                        ellipsislocation = self.__slice__.index(Ellipsis)
+                        if ellipsislocation == 0 or type(self.__slice__[ellipsislocation - 1]) in [int, long]:
+                            ellipsiscount = 0
+                    dim_difference += ellipsiscount
+                    if dim_difference == len(self.__slice__):
+                        xvalues = self.par.xvalues
+                    elif dim_difference < len(self.__slice__):
+                        xvalues = self.par.xvalues.getSlicedArray(self.__slice__[dim_difference:])
                     else:
                         raise IndexError("Slicing made y-value array dimenisons too small for x-value array in plot.")
                 else:
                     raise IndexError("x-value array has higher dimensions than y-value array in plot.")
             else:
-                xvalues=self.par.xvalues
+                xvalues = self.par.xvalues
         else:
-            xvalues=hArray(float,len(self.vec()))
-            xvalues.fillrange(0.,1.)
-    xunit=xvalues.getUnit().replace("\\mu","$\\mu$")
-    if not xunit=="": xunit=" ["+xunit+"]"
-    yunit=self.getUnit().replace("\\mu","$\\mu$")
-    if not yunit=="": yunit=" ["+yunit+"]"
-    if xlabel==None: xlabel=xvalues.getKey("name")
-    if ylabel==None: ylabel=self.getKey("name")
-    var="clf"; dflt=True; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="xerr"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="yerr"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="xlabel"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="ylabel"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="xlim"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="ylim"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="legend"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="title"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        elif hasattr(self.par,"filename"): exec(var+"=self.par.filename")
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="logplot"; dflt=""; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="highlightcolor"; dflt=("red"); val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="highlightlabel"; dflt=(None); val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="nhighlight"; dflt=[1]; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    var="highlight"; dflt=None; val=eval(var);
-    if val==None:
-        if hasattr(self.par,var): exec(var+"=self.par."+var)
-        else: exec(var+"="+str(dflt.__repr__()))
-    if type(val)==str: val=(str)
-    if clf: self.plt.clf()
+            xvalues = hArray(float, len(self.vec()))
+            xvalues.fillrange(0., 1.)
+    xunit = xvalues.getUnit().replace("\\mu", "$\\mu$")
+    if not xunit == "":
+        xunit = " [" + xunit + "]"
+    yunit = self.getUnit().replace("\\mu", "$\\mu$")
+    if not yunit == "":
+        yunit = " [" + yunit + "]"
+    if xlabel == None:
+        xlabel = xvalues.getKey("name")
+    if ylabel == None:
+        ylabel = self.getKey("name")
+    var = "clf"
+    dflt = True
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "xerr"
+    dflt = None
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "yerr"
+    dflt = None
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "xlabel"
+    dflt = ""
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "ylabel"
+    dflt = ""
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "xlim"
+    dflt = None
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "ylim"
+    dflt = None
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "legend"
+    dflt = None
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "title"
+    dflt = ""
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        elif hasattr(self.par, "filename"):
+            exec(var + "=self.par.filename")
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "logplot"
+    dflt = ""
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "highlightcolor"
+    dflt = ("red")
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "highlightlabel"
+    dflt = (None)
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "nhighlight"
+    dflt = [1]
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    var = "highlight"
+    dflt = None
+    val = eval(var)
+    if val == None:
+        if hasattr(self.par, var):
+            exec(var + "=self.par." + var)
+        else:
+            exec(var + "=" + str(dflt.__repr__()))
+    if type(val) == str:
+        val = (str)
+    if clf:
+        self.plt.clf()
 #    if logplot=="x": _plot=hSemiLogX if EDP64bug else self.plt.semilogx
 #    elif logplot=="y": _plot=hSemiLogY if EDP64bug else self.plt.semilogy
 #    elif (logplot=="xy") | (logplot=="yx"): _plot=hSemiLogXY if EDP64bug else self.plt.loglog
     fig = self.plt.figure()
-    ax = fig.add_axes((0.1,0.1,0.8,0.8))
-    _plot = ax.plot # self.plt.semilogx
-    if logplot=="x":
+    ax = fig.add_axes((0.1, 0.1, 0.8, 0.8))
+    _plot = ax.plot  # self.plt.semilogx
+    if logplot == "x":
         ax.set_xscale("log", nonposx='clip')
-    elif logplot=="y":
+    elif logplot == "y":
         ax.set_yscale("log", nonposy='clip')
-    elif (logplot=="xy") | (logplot=="yx"):
+    elif (logplot == "xy") | (logplot == "yx"):
         ax.set_xscale("log", nonposx='clip')
         ax.set_yscale("log", nonposy='clip')
-    iterate=True
-    loop=0
-    ylen=len(self.vec())
-    xlen=len(xvalues.vec())
+    iterate = True
+    loop = 0
+    ylen = len(self.vec())
+    xlen = len(xvalues.vec())
     while (iterate):
-        if ylen<xlen:
+        if ylen < xlen:
             try:
-                _plot(xvalues.vec()[:ylen],self.vec(),**plotargs)
+                _plot(xvalues.vec()[:ylen], self.vec(), **plotargs)
             except Exception:
                 print "ERROR when plotting vectors:"
                 print "x:", xvalues.vec()[:ylen]
                 print "y:", self.vec()
                 print "Skipping plot"
             if yerr or xerr:
-                self.plt.errorbar(xvalues.vec()[:ylen],self.vec(),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
+                self.plt.errorbar(xvalues.vec()[:ylen], self.vec(), yerr=asvec(yerr), xerr=asvec(xerr), fmt="-")
         else:
             try:
-                _plot(xvalues.vec(),self.vec(),**plotargs)
+                _plot(xvalues.vec(), self.vec(), **plotargs)
             except Exception:
                 print "ERROR when plotting vectors:"
                 print "x:", xvalues.vec()
                 print "y:", self.vec()
                 print "Skipping plot"
-                #ErrorValue()
+                # ErrorValue()
             if yerr or xerr:
-                self.plt.errorbar(asvec(xvalues),asvec(self),yerr=asvec(yerr),xerr=asvec(xerr),fmt="-")
-        if not highlight==None:
-            if type(nhighlight) in [int,long]: nhighlight=[nhighlight]
-            hv=ashArray(highlight).vec()
-            ha=hArray(hv,[len(hv)/2,2])
-            for n in xrange(nhighlight[loop]): #how many sections are to be highlighted?
-                slc=slice(ha[n,0],ha[n,1]+1)
-                _plot(xvalues.vec()[slc],self.vec()[slc],color=highlightcolor,label=highlightlabel if n==0 else False)
+                self.plt.errorbar(asvec(xvalues), asvec(self), yerr=asvec(yerr), xerr=asvec(xerr), fmt="-")
+        if not highlight == None:
+            if type(nhighlight) in [int, long]:
+                nhighlight = [nhighlight]
+            hv = ashArray(highlight).vec()
+            ha = hArray(hv, [len(hv) / 2, 2])
+            for n in xrange(nhighlight[loop]):  # how many sections are to be highlighted?
+                slc = slice(ha[n, 0], ha[n, 1] + 1)
+                _plot(xvalues.vec()[slc], self.vec()[slc], color=highlightcolor, label=highlightlabel if n == 0 else False)
         if highlight:
             highlight.next()
         xvalues.next()
-        iterate=self.next().doLoopAgain()
-        loop+=1;
-    self.plt.ylabel(ylabel+yunit)
-    self.plt.xlabel(xlabel+xunit)
-    if not xlim==None: self.plt.xlim(*xlim)
-    if not ylim==None: self.plt.ylim(*ylim)
-    if not legend==None: self.plt.legend(legend)
-    if not ((title=="") | (title==None)): self.plt.title(title)
+        iterate = self.next().doLoopAgain()
+        loop += 1
+    self.plt.ylabel(ylabel + yunit)
+    self.plt.xlabel(xlabel + xunit)
+    if not xlim == None:
+        self.plt.xlim(*xlim)
+    if not ylim == None:
+        self.plt.ylim(*ylim)
+    if not legend == None:
+        self.plt.legend(legend)
+    if not ((title == "") | (title == None)):
+        self.plt.title(title)
 
 for v in hAllArrayTypes:
-    setattr(v,"plt",plt)
-    setattr(v,"plot",hPlot_plot)
+    setattr(v, "plt", plt)
+    setattr(v, "plot", hPlot_plot)
 
 
-def hSemiLogY(x,y,**args):
+def hSemiLogY(x, y, **args):
     """Total frustration avoid EDP64 crash on new Mac function"""
-    xvec=x
-    yvec=Vector(float,len(y)); yvec.copy(y); yvec.log10()
-    plt.plot(xvec,yvec,**args)
+    xvec = x
+    yvec = Vector(float, len(y))
+    yvec.copy(y)
+    yvec.log10()
+    plt.plot(xvec, yvec, **args)
 
-def hSemiLogX(x,y,**args):
+
+def hSemiLogX(x, y, **args):
     """Total frustration avoid EDP64 crash on new Mac function"""
-    yvec=y
-    xvec=Vector(float,len(x)); xvec.copy(x); xvec.log10()
-    plt.plot(xvec,yvec,**args)
+    yvec = y
+    xvec = Vector(float, len(x))
+    xvec.copy(x)
+    xvec.log10()
+    plt.plot(xvec, yvec, **args)
 
-def hSemiLogXY(x,y,**args):
+
+def hSemiLogXY(x, y, **args):
     """Total frustration avoid EDP64 crash on new Mac function"""
-    yvec=Vector(float,len(y)); yvec.copy(y); yvec.log10()
-    xvec=Vector(float,len(x)); xvec.copy(x); xvec.log10()
-    plt.plot(xvec,yvec,**args)
+    yvec = Vector(float, len(y))
+    yvec.copy(y)
+    yvec.log10()
+    xvec = Vector(float, len(x))
+    xvec.copy(x)
+    xvec.log10()
+    plt.plot(xvec, yvec, **args)
 
-def plotconst(xvalues,y):
+
+def plotconst(xvalues, y):
     """
     Plot a constant line.
 
@@ -423,4 +506,4 @@ def plotconst(xvalues,y):
       -> will plot a constant line with y-value 'y' for the xvalues provided.
 
     """
-    return hArray([y,y],xvalues=hArray([xvalues.vec()[0],xvalues.vec()[-1]]))
+    return hArray([y, y], xvalues=hArray([xvalues.vec()[0], xvalues.vec()[-1]]))

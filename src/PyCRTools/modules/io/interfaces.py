@@ -212,4 +212,3 @@ class IOInterface(object):
 
         """
         raise NotImplementedError("You are attempting to call a method that has not been implemented for this subclass of the IO interface.")
-

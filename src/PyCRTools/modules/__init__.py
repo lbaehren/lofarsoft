@@ -5,27 +5,27 @@ import os
 import sys
 import global_space
 
-#Now store the interactive namespace in tasks, so that we can assign to global variables in the interactive session
-if __builtins__.has_key("get_ipython"):
+# Now store the interactive namespace in tasks, so that we can assign to global variables in the interactive session
+if "get_ipython" in __builtins__:
     print "IPython 0.11 detected - importing user namespace"
-    global_space.globals=__builtins__["get_ipython"]().user_ns
-elif __builtins__.has_key("__IPYTHON__"):
+    global_space.globals = __builtins__["get_ipython"]().user_ns
+elif "__IPYTHON__" in __builtins__:
     print "IPython 0.10 detected - importing user namespace"
-    global_space.globals=__IPYTHON__.user_ns
+    global_space.globals = __IPYTHON__.user_ns
 else:
-    if sys.modules.has_key("__main__") and hasattr(sys.modules["__main__"],"__builtins__"):
+    if "__main__" in sys.modules and hasattr(sys.modules["__main__"], "__builtins__"):
         print "Python detected - importing user namespace"
-        global_space.globals=sys.modules["__main__"].__builtins__.globals()
+        global_space.globals = sys.modules["__main__"].__builtins__.globals()
     else:
         print "Unknown Python version detected - not importing user namespace into tasks module."
 
 import matplotlib
-if global_space.globals.has_key("nogui") and global_space.globals["nogui"]:
-    print "PyCRTools: 'nogui=True' detected - using no plotting GUI!" 
+if "nogui" in global_space.globals and global_space.globals["nogui"]:
+    print "PyCRTools: 'nogui=True' detected - using no plotting GUI!"
     matplotlib.use('Agg')
 else:
     print "PyCRTools: Starting with plotting GUI. To run in batch mode use 'nogui=True' before importing pycrtools."
-    
+
 
 # Make core functionality available in local namespace
 
@@ -39,11 +39,11 @@ from io import open
 
 # Ensure from pycrtools import * works correctly
 # for all functions exported from core
-#__all__ = [func for func in dir(core) if "__" not in  func]
+# __all__ = [func for func in dir(core) if "__" not in  func]
 
-#import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 
-tasks.globals=global_space.globals
+tasks.globals = global_space.globals
 
 """
 Some info on tasks:
@@ -56,7 +56,7 @@ Task                    # the currently loaded task instance
 Task.par (=value)       # access or set a parameter (without updating)
 Task(par1,par2,...)     # run the task with parameters par1,par2,....
 trun "taskname", pars   # run the task with name "taskname" and assign it to the global variable `Task``
-trerun "taskname", pars # like trun, but store task and do not reload it during a 2nd call, but rerun. 
+trerun "taskname", pars # like trun, but store task and do not reload it during a 2nd call, but rerun.
 tlist                   # to view the available tasks
 tlog                    # list the log of recently run tasks, including execution times.
 tload 2                 # to load the task #2 (can also provide a name)
@@ -72,7 +72,8 @@ tinit                   # run the initialization routine again (without resettin
 thelp                   # print documentation of task module
 """
 
-def trun(name,*args,**kwargs):
+
+def trun(name, *args, **kwargs):
     """
     Usage:
 
@@ -83,15 +84,15 @@ def trun(name,*args,**kwargs):
     The task itself will be available via the global variable ``Task`` afterwards.
     """
     if not name in tasks.task_allloaded.keys():
-        print "ERROR: trun - Task name",name,"unknown. See 'tlist' for full list."
+        print "ERROR: trun - Task name", name, "unknown. See 'tlist' for full list."
         return
-    tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
-    tasks.task_instance=tasks.task_class()
-    tasks.set_globals("Task",tasks.task_instance)
-    return tasks.task_instance(*args,**kwargs)
+    tasks.task_class = eval(tasks.task_allloaded[name] + "." + name)
+    tasks.task_instance = tasks.task_class()
+    tasks.set_globals("Task", tasks.task_instance)
+    return tasks.task_instance(*args, **kwargs)
 
 
-def trerun(name,version,*args,**kwargs):
+def trerun(name, version, *args, **kwargs):
     """
     Usage:
 
@@ -102,27 +103,28 @@ def trerun(name,version,*args,**kwargs):
     *name*       - task name to load (see :func:`tlist`)
     *version*    - assign the task a unique version ID, so that you can store
                  and rerun different instances of the same task
-                 
+
     The task itself will be available via the global variable ``Task`` afterwards.
 
-    All stored tasks can be found in the dict tasks.task_instances.    
+    All stored tasks can be found in the dict tasks.task_instances.
     """
     if not name in tasks.task_allloaded.keys():
-        print "ERROR: trerun - Task name",name,"unknown. See 'tlist' for full list."
+        print "ERROR: trerun - Task name", name, "unknown. See 'tlist' for full list."
         return
-    taskinstancename=name+str(version)
-    if tasks.task_instances.has_key(taskinstancename): #reload existing instance
-        tasks.task_class=None
-        tasks.task_instance=tasks.task_instances[taskinstancename]
-    else:                                              #create a new task instance
-        tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
-        tasks.task_instance=tasks.task_class()
-        tasks.task_instances[taskinstancename]=tasks.task_instance
-    tasks.task_instance._version_name=version
-    tasks.set_globals("Task",tasks.task_instance)
-    return tasks.task_instance(*args,**kwargs)
+    taskinstancename = name + str(version)
+    if taskinstancename in tasks.task_instances:  # reload existing instance
+        tasks.task_class = None
+        tasks.task_instance = tasks.task_instances[taskinstancename]
+    else:  # create a new task instance
+        tasks.task_class = eval(tasks.task_allloaded[name] + "." + name)
+        tasks.task_instance = tasks.task_class()
+        tasks.task_instances[taskinstancename] = tasks.task_instance
+    tasks.task_instance._version_name = version
+    tasks.set_globals("Task", tasks.task_instance)
+    return tasks.task_instance(*args, **kwargs)
 
-def tnorerun(name,version,*args,**kwargs):
+
+def tnorerun(name, version, *args, **kwargs):
     """
     Usage:
 
@@ -135,24 +137,24 @@ def tnorerun(name,version,*args,**kwargs):
     *name*       - task name to load (see :func:`tlist`)
     *version*    - assign the task a unique version ID, so that you can store
                  and rerun different instances of the same task
-                 
+
     The task itself will be available via the global variable ``Task`` afterwards.
 
-    All stored tasks can be found in the dict tasks.task_instances.    
+    All stored tasks can be found in the dict tasks.task_instances.
     """
     if not name in tasks.task_allloaded.keys():
-        print "ERROR: trerun - Task name",name,"unknown. See 'tlist' for full list."
+        print "ERROR: trerun - Task name", name, "unknown. See 'tlist' for full list."
         return
-    taskinstancename=name+str(version)
-    tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
-    tasks.task_instance=tasks.task_class()
-    tasks.task_instances[taskinstancename]=tasks.task_instance
-    tasks.task_instance._version_name=version
-    tasks.set_globals("Task",tasks.task_instance)
-    return tasks.task_instance(*args,**kwargs)
+    taskinstancename = name + str(version)
+    tasks.task_class = eval(tasks.task_allloaded[name] + "." + name)
+    tasks.task_instance = tasks.task_class()
+    tasks.task_instances[taskinstancename] = tasks.task_instance
+    tasks.task_instance._version_name = version
+    tasks.set_globals("Task", tasks.task_instance)
+    return tasks.task_instance(*args, **kwargs)
 
 
-def tload(name,get=True,quiet=False,**args):
+def tload(name, get=True, quiet=False, **args):
     """
     Loads a specific task as the current task, you you can start it
     with 'go' and set parameters with 'par x=value'.
@@ -163,28 +165,30 @@ def tload(name,get=True,quiet=False,**args):
     The loaded task will be saved and reloaded the next time the
     program is started.
     """
-    if type(name)==int:
-        if name >= len(tasks.task_allloaded.keys()) or (name<0):
-            print "ERROR: tload - Index number",name,"out of range (should be <",len(tasks.task_allloaded.keys()),"). See 'tlist'"
-            return                                                                
-        name=tasks.task_allloaded.keys()[name]
-    elif type(name)==str:
+    if type(name) == int:
+        if name >= len(tasks.task_allloaded.keys()) or (name < 0):
+            print "ERROR: tload - Index number", name, "out of range (should be <", len(tasks.task_allloaded.keys()), "). See 'tlist'"
+            return
+        name = tasks.task_allloaded.keys()[name]
+    elif type(name) == str:
         if not name in tasks.task_allloaded.keys():
-            print "ERROR: tload - Task name",name,"unknown. See 'tlist' for full list."
+            print "ERROR: tload - Task name", name, "unknown. See 'tlist' for full list."
             return
     else:
-        print "ERROR: tload - Task name",name,"unknown - wrong data type (should be string or int). See 'tlist' for full list."
+        print "ERROR: tload - Task name", name, "unknown - wrong data type (should be string or int). See 'tlist' for full list."
         return
-    tasks.task_class=eval(tasks.task_allloaded[name]+"."+name)
-    tasks.task_instance=tasks.task_class(**args)
-    tasks.set_globals("Task",tasks.task_instance)
+    tasks.task_class = eval(tasks.task_allloaded[name] + "." + name)
+    tasks.task_instance = tasks.task_class(**args)
+    tasks.set_globals("Task", tasks.task_instance)
     taskdb = shelve.open(tasks.dbfile)
-    taskdb["last_taskname"]=name
+    taskdb["last_taskname"] = name
     taskdb.close()
-    if get: tget(quiet=quiet)
+    if get:
+        tget(quiet=quiet)
     return tasks.task_instance
 
-def task(*args,**kwargs):
+
+def task(*args, **kwargs):
     """
     **Usage:**
 
@@ -207,8 +211,9 @@ def task(*args,**kwargs):
     if not args and not kwargs:
         return tasks.task_instance
     else:
-        name=args[0]
-        return eval(tasks.task_allloaded[name]+"."+name)(*args[1:],**kwargs)
+        name = args[0]
+        return eval(tasks.task_allloaded[name] + "." + name)(*args[1:], **kwargs)
+
 
 class t_class():
     """
@@ -220,6 +225,7 @@ class t_class():
 #       if tasks.task_instance == None: return ""
         self()
         return ""
+
 
 class go_class():
     """
@@ -236,25 +242,27 @@ class go_class():
     """
     def __repr__(self):
 #       if tasks.task_instance == None: return ""
-        print "Starting task",tasks.task_name
+        print "Starting task", tasks.task_name
         tput()
         tasks.task_instance()
-        print "Task",tasks.task_name,"run."
+        print "Task", tasks.task_name, "run."
         return ""
-    def __call__(self,*args,**kwargs):
+
+    def __call__(self, *args, **kwargs):
         tput()
-        if kwargs.has_key('task') and not kwargs["task"]==None:
-            ttask=kwargs["task"]
+        if 'task' in kwargs and not kwargs["task"] == None:
+            ttask = kwargs["task"]
             del kwargs["task"]
         else:
-            ttask=tasks.task_instance
-        ttask(*args,**kwargs)
+            ttask = tasks.task_instance
+        ttask(*args, **kwargs)
 #           if len(args)>0:
 #       else:
 #           ttask()
-        print "Task",ttask.__taskname__,"run."
+        print "Task", ttask.__taskname__, "run."
 
 go = go_class()
+
 
 class tpars_class(t_class):
     """
@@ -270,11 +278,12 @@ class tpars_class(t_class):
 
     *workarrays*=False - If True also list the work arrays.
     """
-    def __call__(self,noninputparameters=True,workarrays=False):
-        print "Parameters of task",tasks.task_name
-        print tasks.task_instance.ws.__repr__(workarrays=workarrays,noninputparameters=noninputparameters)
+    def __call__(self, noninputparameters=True, workarrays=False):
+        print "Parameters of task", tasks.task_name
+        print tasks.task_instance.ws.__repr__(workarrays=workarrays, noninputparameters=noninputparameters)
 
 tpars = tpars_class()
+
 
 class tinit_class(t_class):
     """
@@ -282,19 +291,20 @@ class tinit_class(t_class):
     will result in a forced initialization, irrespective of whether
     this has been run before, unless force=False.
     """
-    def __call__(self,force=True):
+    def __call__(self, force=True):
         tasks.task_instance.callinit(forceinit=force)
 
 tinit = tinit_class()
+
 
 class thelp_class(t_class):
     """
     **Usage:**
 
-    thelp what 
+    thelp what
 
     **Description:**
-    
+
     Print documentation of tasks
 
     **Parameters:**
@@ -303,7 +313,7 @@ class thelp_class(t_class):
              'taskname' - help on named task
 
     """
-    def __call__(self,what=0):
+    def __call__(self, what=0):
         import pycrtools.tasks
         if what == 0:
             print  tasks.task_instance.__doc__
@@ -313,11 +323,11 @@ class thelp_class(t_class):
             print pycrtools.tasks.__doc__
             print """\nTo get help on current task type: thelp"""
             print """\nTo get help on a specific task type: thelp 'taskname'"""
-        elif isinstance(what,str):
+        elif isinstance(what, str):
             if not what in tasks.task_allloaded.keys():
-                print "ERROR: thelp - Task name",name,"unknown. See 'tlist' for full list."
+                print "ERROR: thelp - Task name", name, "unknown. See 'tlist' for full list."
                 return
-            taskclass=eval(tasks.task_allloaded[what]+"."+what)
+            taskclass = eval(tasks.task_allloaded[what] + "." + what)
 
             print  taskclass.__doc__
             print """\nTo get help on current task type: thelp"""
@@ -330,6 +340,7 @@ class thelp_class(t_class):
 
 thelp = thelp_class()
 
+
 class tlist_class(t_class):
     """
     Class to let the user list the available tasks that can be loaded with tload.
@@ -338,9 +349,9 @@ class tlist_class(t_class):
     def __call__(self):
         print "Available Tasks:"
         print "------------------------------------------------------------"
-        for tpl in zip(range(len(tasks.task_allloaded)),tasks.task_allloaded.keys(),tasks.task_allloaded.values()):
+        for tpl in zip(range(len(tasks.task_allloaded)), tasks.task_allloaded.keys(), tasks.task_allloaded.values()):
             from sys import version_info
-            if version_info > (2,5,9):
+            if version_info > (2, 5, 9):
                 print "{0:2}: {1:30s} ({2})".format(*tpl)
             else:
                 print tpl
@@ -370,36 +381,38 @@ class tlog_class(t_class):
   'version': ''}]
 
     """
-    def __call__(self,n=20,doprint=True,loglist=None,colsep=" | "):
-        s=""
-        s="Log of recently run Tasks:\n\n"
+    def __call__(self, n=20, doprint=True, loglist=None, colsep=" | "):
+        s = ""
+        s = "Log of recently run Tasks:\n\n"
         if not loglist:
-            loglist=tasks.task_logger
-        l=len(loglist)
-        if l==0: return
-        if n>0 and n<l:
-            loglist=loglist[-n:]
-            
-        keys=('name','version', 'start_time', 'start_time_cpu','execution_time','cummulative_time')
-        size=(25,10,19,14,14,16)
-        format_keys=("s","s","s",".3f",".3f",".3f")
-        nkeys=len(keys)
-        
-        s+= " | ".join([("{0:"+str(size[i])+"s}").format(keys[i]) for i in range(nkeys)]) + "\n"
-        s+= "".join(["-" for i in range(Vector(size).sum()+len(colsep)*nkeys)])  + "\n"
-        format_string=colsep.join([("{"+str(i)+":"+str(size[i])+format_keys[i]+"}") for i in range(nkeys)])
-        summed_time=0
+            loglist = tasks.task_logger
+        l = len(loglist)
+        if l == 0:
+            return
+        if n > 0 and n < l:
+            loglist = loglist[-n:]
+
+        keys = ('name', 'version', 'start_time', 'start_time_cpu', 'execution_time', 'cummulative_time')
+        size = (25, 10, 19, 14, 14, 16)
+        format_keys = ("s", "s", "s", ".3f", ".3f", ".3f")
+        nkeys = len(keys)
+
+        s += " | ".join([("{0:" + str(size[i]) + "s}").format(keys[i]) for i in range(nkeys)]) + "\n"
+        s += "".join(["-" for i in range(Vector(size).sum() + len(colsep) * nkeys)]) + "\n"
+        format_string = colsep.join([("{" + str(i) + ":" + str(size[i]) + format_keys[i] + "}") for i in range(nkeys)])
+        summed_time = 0
         for d in loglist:
-            summed_time+=d["execution_time"]
-            d["cummulative_time"]=summed_time
-            values=[d[keys[i]] for i in range(nkeys)]
-            s+= format_string.format(*values)  + "\n"
+            summed_time += d["execution_time"]
+            d["cummulative_time"] = summed_time
+            values = [d[keys[i]] for i in range(nkeys)]
+            s += format_string.format(*values) + "\n"
         if doprint:
             print s
         else:
             return s
-        
+
 tlog = tlog_class()
+
 
 class tget_class(t_class):
     """
@@ -412,16 +425,18 @@ class tget_class(t_class):
 
     tget 0 (or any unknown name) -> show a list of all available parameter sets
     """
-    def __call__(self,name="",quiet=False):
-        if not isinstance(tasks.task_instance,tasks.Task):
+    def __call__(self, name="", quiet=False):
+        if not isinstance(tasks.task_instance, tasks.Task):
             print "ERROR: No valid task loaded yet - use tload first."
             return
-        found=tasks.task_instance.get(name)
+        found = tasks.task_instance.get(name)
         if found:
             tasks.task_instance.ws.update()
-            if not quiet: tpars(False,False)
+            if not quiet:
+                tpars(False, False)
 
 tget = tget_class()
+
 
 class treset_class(t_class):
     """
@@ -437,12 +452,13 @@ class treset_class(t_class):
     keep the parameters provided during the last initialisation.
 
     """
-    def __call__(self,restorecallparameters=False,**args):
-        tasks.task_instance.reset(restorecallparameters=False,**args)
+    def __call__(self, restorecallparameters=False, **args):
+        tasks.task_instance.reset(restorecallparameters=False, **args)
         tasks.task_instance.ws.evalInputParameters()
-        tpars(False,False)
+        tpars(False, False)
 
 treset = treset_class()
+
 
 class tput_class(t_class):
     """
@@ -456,10 +472,11 @@ class tput_class(t_class):
     *delete* - If True, delete the parameter set from data base.
 
     """
-    def __call__(self,name="",delete=False):
-        tasks.task_instance.put(name=name,delete=delete)
+    def __call__(self, name="", delete=False):
+        tasks.task_instance.put(name=name, delete=delete)
 
 tput = tput_class()
+
 
 class tpar_class():
     """Sets the parameters in the workspace of a task.
@@ -474,16 +491,18 @@ class tpar_class():
 
     If no parameters are provided, just print the input parameters.
     """
-    def __call__(self,**args):
+    def __call__(self, **args):
         tasks.task_instance.ws(**args)
         tasks.task_instance.ws.update()
+
     def __repr__(self):
 #       if tasks.task_instance == None: return ""
-        print "Input parameters of task",tasks.task_name
-        print tasks.task_instance.ws.__repr__(workarrays=False,noninputparameters=False)
+        print "Input parameters of task", tasks.task_name
+        print tasks.task_instance.ws.__repr__(workarrays=False, noninputparameters=False)
         return ""
 
-tpar=tpar_class()
+tpar = tpar_class()
+
 
 def tdel(*args):
     """Deletes the parameters in the workspace of a task.
@@ -500,17 +519,17 @@ def tdel(*args):
     tdel "x"
     """
     for p in args:
-        exec("del tasks.task_instance.ws."+p)
+        exec("del tasks.task_instance.ws." + p)
     tasks.task_instance.ws.update()
 
 
-#Now importing all modules with tasks
+# Now importing all modules with tasks
 for mn in tasks.task_modules:
-    m=__import__("pycrtools.tasks",fromlist=[mn])
-    setattr(tasks,mn,getattr(m,mn))
+    m = __import__("pycrtools.tasks", fromlist=[mn])
+    setattr(tasks, mn, getattr(m, mn))
 
 taskdb = shelve.open(tasks.dbfile)
-if taskdb.has_key("last_taskname"):
-    print "*** Restoring last task:",taskdb["last_taskname"] 
-    tload(taskdb["last_taskname"],quiet=True)
+if "last_taskname" in taskdb:
+    print "*** Restoring last task:", taskdb["last_taskname"]
+    tload(taskdb["last_taskname"], quiet=True)
 taskdb.close()

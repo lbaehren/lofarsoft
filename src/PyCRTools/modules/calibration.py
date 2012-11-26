@@ -36,10 +36,12 @@ import metadata as md
 import IO
 
 ## Examples
+
+
 class AntennaCalibration():
     """Class documentation"""
 
-    def __init__(self,files,antennaset,selection=None):
+    def __init__(self, files, antennaset, selection=None):
         """Constructor
         Initializes all the Antenna Calibration variables.
         This is a CableDelay, ClockOffset and station fine calibration,
@@ -53,64 +55,62 @@ class AntennaCalibration():
         *antennaset* Antennaset corresponding to the files (e.g. "HBA", "LBA_OUTER" )
         """
 
-        self.selection=selection
-        #initialize used arrays
-        self.antennaIDs=IO.get(files,"antennaIDs",False)
+        self.selection = selection
+        # initialize used arrays
+        self.antennaIDs = IO.get(files, "antennaIDs", False)
 
-        timeinterval=IO.get(files,"sampleInterval",False)
-        samplefrequency=IO.get(files,"sampleFrequency",False)
-        self.frequencyValues=hf.hArray(IO.get(files,"frequencyValues",False))
-        self.antennaset=antennaset
-        self.totalCalibrationtemp=IO.get(files,"emptyFFT",False)
-        self.totalShift=IO.get(files,"shift",False).new()
+        timeinterval = IO.get(files, "sampleInterval", False)
+        samplefrequency = IO.get(files, "sampleFrequency", False)
+        self.frequencyValues = hf.hArray(IO.get(files, "frequencyValues", False))
+        self.antennaset = antennaset
+        self.totalCalibrationtemp = IO.get(files, "emptyFFT", False)
+        self.totalShift = IO.get(files, "shift", False).new()
 
-        nyquistZone=IO.get(files,"nyquistZone",True)
+        nyquistZone = IO.get(files, "nyquistZone", True)
         if "HBA" in antennaset and 1 in nyquistZone:
-            if IO.get(files,"sampleFrequency") > 180000000.0:
-                nyquistZone=2
+            if IO.get(files, "sampleFrequency") > 180000000.0:
+                nyquistZone = 2
             else:
-                nyquistZone=3
-            IO.set(files,"nyquistZone",nyquistZone)
+                nyquistZone = 3
+            IO.set(files, "nyquistZone", nyquistZone)
         else:
-            nyquistZone=nyquistZone[0]
+            nyquistZone = nyquistZone[0]
 
         # CableDelays
-        CableDelays=md.get("CableDelays",self.antennaIDs,antennaset,True)
+        CableDelays = md.get("CableDelays", self.antennaIDs, antennaset, True)
 
-        self.CablePhaseDelays=CableDelays.new()
+        self.CablePhaseDelays = CableDelays.new()
 
-        self.CablePhaseDelays.fmod(CableDelays,timeinterval)
+        self.CablePhaseDelays.fmod(CableDelays, timeinterval)
 
-        self.CableTimeDelays=CableDelays.new()
+        self.CableTimeDelays = CableDelays.new()
 
-        self.CableTimeDelays.sub(CableDelays,self.CablePhaseDelays)
+        self.CableTimeDelays.sub(CableDelays, self.CablePhaseDelays)
 
         # Clock offset
-        ClockDelays=md.get("ClockCorrection",self.antennaIDs,antennaset,True)
+        ClockDelays = md.get("ClockCorrection", self.antennaIDs, antennaset, True)
 
-        self.ClockPhaseDelays=ClockDelays.new()
+        self.ClockPhaseDelays = ClockDelays.new()
 
-        self.ClockPhaseDelays.fmod(ClockDelays,timeinterval)
+        self.ClockPhaseDelays.fmod(ClockDelays, timeinterval)
 
-        self.ClockTimeDelays=ClockDelays.new()
+        self.ClockTimeDelays = ClockDelays.new()
 
-        self.ClockTimeDelays.sub(ClockDelays,self.ClockPhaseDelays)
+        self.ClockTimeDelays.sub(ClockDelays, self.ClockPhaseDelays)
 
         # Station Phase Calibration
 
-        self.StationCalibration=md.get("StationPhaseCalibration",self.antennaIDs,antennaset,True)
+        self.StationCalibration = md.get("StationPhaseCalibration", self.antennaIDs, antennaset, True)
 
-        if IO.get(files,"blocksize",False)!=1024:
+        if IO.get(files, "blocksize", False) != 1024:
             print "Blocksize not yet supported for station fine calibration."
 
-
-            #interpolate frequencies
-            #BeginFreq=IO.get(files,"frequencyRange",False)[0]
-            #StationFrequencies=Vector(float,513)
-            #StationFrequencies.fillrange(BeginFreq,samplefrequency/1024)
-
+            # interpolate frequencies
+            # BeginFreq=IO.get(files,"frequencyRange",False)[0]
+            # StationFrequencies=Vector(float,513)
+            # StationFrequencies.fillrange(BeginFreq,samplefrequency/1024)
             self.StationCalibration.copy(self.totalCalibrationtemp)
-            self.StationCalibration.fill(complex(1,0))
+            self.StationCalibration.fill(complex(1, 0))
 
         self.CalcShift()
         self.CalcDelay()
@@ -118,57 +118,54 @@ class AntennaCalibration():
     def CalcShift(self):
         """Calculate the shift"""
         # Add that Cable Time delay is also optionally applied
-        self.totalShift=self.ClockTimeDelays.new()
+        self.totalShift = self.ClockTimeDelays.new()
         self.totalShift.copy(self.ClockTimeDelays)
 
     def CalcDelay(self):
         """Calculate the delays"""
-        self.totalDelays=self.ClockPhaseDelays.new()
-        #a.sub(b,c) = a=b-c
-        self.totalDelays.sub(self.ClockPhaseDelays,self.CablePhaseDelays)
-        phases=self.totalDelays.new()
-        phases.delaytophase(self.frequencyValues,self.totalDelays)
+        self.totalDelays = self.ClockPhaseDelays.new()
+        # a.sub(b,c) = a=b-c
+        self.totalDelays.sub(self.ClockPhaseDelays, self.CablePhaseDelays)
+        phases = self.totalDelays.new()
+        phases.delaytophase(self.frequencyValues, self.totalDelays)
         phases.negate()
         self.totalCalibrationtemp.phasetocomplex(phases)
         self.totalCalibrationtemp.mul(self.StationCalibration)
-        self.totalCalibration=IO.applySelection(self.selection,self.totalCalibrationtemp)
+        self.totalCalibration = IO.applySelection(self.selection, self.totalCalibrationtemp)
 
-    def applyCalibration(self,fftdata):
+    def applyCalibration(self, fftdata):
         """Apply all the calibration set.
 
         *fftdata* Array with FFT data, data is return in this as well
         """
 
-
         fftdata.mul(self.totalCalibration)
         return True
 
-    def applyShift(self,files):
+    def applyShift(self, files):
         """Apply the calibration shift set in the calibration.
 
         *files* List of crfiles to apply the calibration too.
         """
 
-        #if self.totalShift.max().val() == 0.0 and self.totalShift.min().val() = 0.0:
+        # if self.totalShift.max().val() == 0.0 and self.totalShift.min().val() = 0.0:
         #    # no shifts to be applied
         #    return True
-        #else:
-        #list with applied shifts
-        nrAnts=IO.get(files,"nofSelectedAntennas",True)
-        allinitialShift=hf.hArray(IO.get(files,"shift",False))
+        # else:
+        # list with applied shifts
+        nrAnts = IO.get(files, "nofSelectedAntennas", True)
+        allinitialShift = hf.hArray(IO.get(files, "shift", False))
         allinitialShift.add(self.totalShift)
 
-        shifts=[]
-        startAnt=0
-        endAnt=0
-        for num,nAnts in enumerate(nrAnts):
-            startAnt=endAnt
-            endAnt+=nAnts
+        shifts = []
+        startAnt = 0
+        endAnt = 0
+        for num, nAnts in enumerate(nrAnts):
+            startAnt = endAnt
+            endAnt += nAnts
             shifts.append(allinitialShift[startAnt:endAnt].val())
 
-        IO.set(files,"shiftVector",shifts)
-
-
+        IO.set(files, "shiftVector", shifts)
 
         return True
 
@@ -176,6 +173,6 @@ class AntennaCalibration():
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
 #  See http://docs.python.org/library/doctest.html for more information.
-if __name__=='__main__':
+if __name__ == '__main__':
     import doctest
     doctest.testmod()

@@ -16,7 +16,7 @@ from mEndPointRadiation import *
 # Add additional hftools methods
 from _hftools import *
 
-trackHistory.__doc__="""
+trackHistory.__doc__ = """
 Function for PYCRTOOLS module. Globally switch history tracking of
 hArrays on (True) or off (False). Default at start-up is "on". This
 setting is valid for all arrays created after the function is

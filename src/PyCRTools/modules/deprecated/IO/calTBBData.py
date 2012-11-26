@@ -30,13 +30,14 @@ The 'to-do' list for this class is:
 
 """
 
-#import TBBData as TBD
+# import TBBData as TBD
 import IO as TBD
 import pycrtools as cr
 import ppf
 import os
 
 reload(TBD)
+
 
 class AntennaSet():
     """
@@ -82,19 +83,19 @@ class AntennaSet():
         """
 
         if selection == None:
-            self.selection=range(0,96,1)
-            self.nAntennas=96
+            self.selection = range(0, 96, 1)
+            self.nAntennas = 96
         elif selection == "polA":
-            self.selection = range(0,96,2)
+            self.selection = range(0, 96, 2)
             self.nAntennas = 48
         elif selection == "polB":
-            self.selection = range(1,96,2)
+            self.selection = range(1, 96, 2)
             self.nAntennas = 48
         else:
-            self.selection=selection
-            self.nAntennas=len(selection)
+            self.selection = selection
+            self.nAntennas = len(selection)
 
-        self.genFFTArray=genFFTArray
+        self.genFFTArray = genFFTArray
         self.blockSize = calData.blockSize
         self.fftMethod = calData.fftMethod
         self.filterType = calData.filterType
@@ -107,16 +108,16 @@ class AntennaSet():
         self.readBlocks = 0
         self.crfile = calData.crfile
         self.nyquistZone = calData.nyquistZone
-        self.timeData = cr.hArray(float,[self.nAntennas,self.blockSize])
-        if self.fftMethod=='NONE':
-            self.fftSize=self.blockSize # time-domain data!
+        self.timeData = cr.hArray(float, [self.nAntennas, self.blockSize])
+        if self.fftMethod == 'NONE':
+            self.fftSize = self.blockSize  # time-domain data!
         else:
-            self.fftSize = self.blockSize/2+1
+            self.fftSize = self.blockSize / 2 + 1
         if (self.genFFTArray):
             self.freqData = cr.hArray(complex, [self.nAntennas, self.fftSize])
         else:
             self.freqData = None
-        self.frequencies=calData.frequencies
+        self.frequencies = calData.frequencies
 
         if not self.check_OK():
             print 'Improper initialisation - somehow...'
@@ -125,21 +126,21 @@ class AntennaSet():
 ## initialises the filter arrays
         if self.filterType == 'PPF':
             self.ppf = ppf.PPF()
-            self.filter=None
+            self.filter = None
         elif self.filterType == 'HANNING':
-            hfilter=cr.hArray(float,[self.blockSize])
+            hfilter = cr.hArray(float, [self.blockSize])
             hfilter.gethanningfilter()
-            self.filter=hfilter
-            self.ppf=None
+            self.filter = hfilter
+            self.ppf = None
         elif self.filterType == 'NONE':
-            self.filter=None
-            self.ppf=None
+            self.filter = None
+            self.ppf = None
 
         if self.calMethod:
             self.crfile.setSelection(self.selection)
-            self.cal=crfile.getCalibrator()
+            self.cal = crfile.getCalibrator()
         else:
-            self.cal=None
+            self.cal = None
 
     def getFrequencies(self):
         return self.frequencies
@@ -166,10 +167,10 @@ class AntennaSet():
                 print 'No internal freqData array - please provide!'
                 return None
             else:
-                freqData=self.freqData
+                freqData = self.freqData
 
 # sets the crfile object antenna selection and reads in the data
-        self.crfile.setSelection(self.selection) ### HOW DOES THIS WORK!??!?!?!?!? ###
+        self.crfile.setSelection(self.selection)  # HOW DOES THIS WORK!??!?!?!?!? ###
         self.crfile.readdata(self.timeData, self.currentBlock)
 
 # updates the number of read blocks, and the next block to be read
@@ -190,11 +191,11 @@ class AntennaSet():
 # performs the Fourier Transform if appllicable
         if self.fftMethod == 'CASA':
             # note here that the ... will loop over antennas in the antenna selection
-            freqData[...].fftcasa(self.timeData[...],self.nyquistZone)
+            freqData[...].fftcasa(self.timeData[...], self.nyquistZone)
         elif self.fftMethod == 'FFTW':
             freqData[...].fftw(self.timeData[...])
         else:
-            freqData=self.timeData
+            freqData = self.timeData
 
 # calibrates the data in the frequency domain using internal vales
         if self.calMethod:
@@ -219,14 +220,14 @@ class AntennaSet():
             and startblock to be greater than 0
 
         """
-        OK=True
-        if not (self.nFiles > 0 and  self.nAntennas > 0 and\
+        OK = True
+        if not (self.nFiles > 0 and self.nAntennas > 0 and
 self.blockSize > 0 and self.startBlock >= 0):
-            OK=False
+            OK = False
         if self.fftMethod == None:
             if self.calMethod != 0:
                 print 'calibration useless for time dat! Ignored'
-                self.calMethod=0
+                self.calMethod = 0
 
         return OK
 
@@ -282,9 +283,8 @@ fftMethod="fftcasa", checkMethod=None, genFFTArray=True)
         useful for creating such objects externally.
     """
 
-
-    def __init__(self, fileList=None, blockSize=1024, selection=None, startBlock=None, \
-filterType='Hanning', calMethod=True, antennaSet=None,\
+    def __init__(self, fileList=None, blockSize=1024, selection=None, startBlock=None,
+filterType='Hanning', calMethod=True, antennaSet=None,
 fftMethod="fftcasa", checkMethod=None, ownArrays=True, genFFTArray=True):
 
         """
@@ -400,7 +400,7 @@ fftMethod="fftcasa", checkMethod=None)
             fftMethod = 'CASA'
 
         # converts possible filterType specifications into something sensible
-        if filterType == 'None' or filterType==None or filterType == 'none':
+        if filterType == 'None' or filterType == None or filterType == 'none':
             filterType = 'NONE'
         elif filterType == 'Hanning' or filterType == 'hanning':
             filterType = 'HANNING'
@@ -418,29 +418,29 @@ fftMethod="fftcasa", checkMethod=None)
         if selection == None:
             if genFFTArray:
                 nAntennas = 96
-                selection = range(0,96,1)
+                selection = range(0, 96, 1)
             else:
                 nAntennas = 0
         elif selection == "polA":
-            selection = range(0,96,2)
+            selection = range(0, 96, 2)
             nAntennas = 48
         elif selection == "polB":
-            selection = range(1,96,2)
+            selection = range(1, 96, 2)
             nAntennas = 48
         else:
-            nAntennas=len(selection)
+            nAntennas = len(selection)
 
     # checcking antennaset inputs
         if antennaSet == None:
             print 'we still need to get an antenna set automatically\
  - arbitrarily setting this to LBA Outer'
-            antennaSet="LBA_Outer"
+            antennaSet = "LBA_Outer"
 
     # checking file-list inputs
         if fileList != None:
-            nFiles=len(fileList)
+            nFiles = len(fileList)
         else:
-            nFiles=0
+            nFiles = 0
 
         if startBlock == None:
             startBlock = 0
@@ -469,10 +469,10 @@ fftMethod="fftcasa", checkMethod=None)
         self.cal = None
         self.ready = 0
         self.genFFTArray = genFFTArray
-        self.fftSize=self.blockSize/2+1
-        self.ownArrays=ownArrays
+        self.fftSize = self.blockSize / 2 + 1
+        self.ownArrays = ownArrays
 
-        if ownArrays==True:
+        if ownArrays == True:
             if self.check_OK():
                 print 'initialising own arrays...'
                 self.initOwnArrays()
@@ -483,25 +483,24 @@ fftMethod="fftcasa", checkMethod=None)
             print 'No antennas selected - will not return data'
 
         ####### initialises IO of the data files
-        self.crfile=TBD.open(self.fileList, self.blockSize, self.selection) # self.selection
+        self.crfile = TBD.open(self.fileList, self.blockSize, self.selection)  # self.selection
         self.crfile.setAntennaset(self.antennaSet)
-        self.nyquistZone=self.crfile["nyquistZone"]
+        self.nyquistZone = self.crfile["nyquistZone"]
 
-        self.frequencies=cr.hArray(float,[self.fftSize])
+        self.frequencies = cr.hArray(float, [self.fftSize])
 
         if fftMethod == 'CASA':
-            self.frequencies.fillrange(1e8+1e8/self.fftSize, 1e8/self.fftSize)
+            self.frequencies.fillrange(1e8 + 1e8 / self.fftSize, 1e8 / self.fftSize)
         elif fftMethod == 'FFTW':
-            self.frequencies.fillrange(2e8-1e8/self.fftSize, -1e8/self.fftSize)
+            self.frequencies.fillrange(2e8 - 1e8 / self.fftSize, -1e8 / self.fftSize)
         else:
-            self.frequencies=None
+            self.frequencies = None
 
          # Apply calibration shift for clockdelays
-        if self.calMethod==True:
+        if self.calMethod == True:
             print 'applying the calibration shift'
-            self.cal=self.crfile.getCalibrator()
+            self.cal = self.crfile.getCalibrator()
     #       self.crfile.applyCalibrationShift()
-
 
     def getFrequencies(self):
         return self.frequencies
@@ -513,20 +512,17 @@ fftMethod="fftcasa", checkMethod=None)
             Returns either True or False
 
         """
-        OK=True
-        if self.nFiles > 0 and  self.nAntennas > 0 and\
+        OK = True
+        if self.nFiles > 0 and self.nAntennas > 0 and\
 self.blockSize > 0 and self.startBlock >= 0:
             for fname in self.fileList:
                 if not (os.path.isfile(fname)):
-                    OK=False
+                    OK = False
                     print 'File ', fname, ' can not be found'
         else:
-            OK=False
-            print 'please check that nfiles, nantennas, and blocksize are'\
-,' positive integers, and startblock is >= 0'
+            OK = False
+            print 'please check that nfiles, nantennas, and blocksize are', ' positive integers, and startblock is >= 0'
         return OK
-
-
 
 ##### BEGIN INITIALISATION OF IO AND ARRAYS ######
     def initOwnArrays(self):
@@ -550,21 +546,21 @@ self.blockSize > 0 and self.startBlock >= 0:
             import PPF as PPF
             self.ppf = ppf.PPF()
         elif self.filterType == 'HANNING':
-            hfilter=cr.hArray(float,[self.blockSize])
+            hfilter = cr.hArray(float, [self.blockSize])
             hfilter.gethanningfilter()
-            self.filter=hfilter
+            self.filter = hfilter
         elif self.filterType == 'NONE':
-            self.filter=None
+            self.filter = None
 
 #       self.timeData=self.crfile["emptyFx"]
 #       self.freqData=self.crfile["emptyFFT"]
-        self.timeData=cr.hArray(float,[self.nAntennas, self.blockSize])
+        self.timeData = cr.hArray(float, [self.nAntennas, self.blockSize])
         if self.genFFTArray:
-            self.freqData=cr.hArray(complex,[self.nAntennas, self.fftSize])
+            self.freqData = cr.hArray(complex, [self.nAntennas, self.fftSize])
         else:
-            self.freqData=None
+            self.freqData = None
 
-        self.ready=1
+        self.ready = 1
 
 ### routine to get next lot of data
     def getData(self, freqData=None):
@@ -589,7 +585,7 @@ self.blockSize > 0 and self.startBlock >= 0:
             print 'Not ready to return data!'
             return None
         print 'self.currentBlock is ', self.currentBlock
-        self.crfile.readdata(self.timeData,self.currentBlock)
+        self.crfile.readdata(self.timeData, self.currentBlock)
 
         self.currentBlock += 1
 
@@ -598,8 +594,8 @@ self.blockSize > 0 and self.startBlock >= 0:
         elif self.filterType != 'NONE':
             self.timeData.mul(self.filter)
 
-        if freqData==None:
-            freqData=self.freqData
+        if freqData == None:
+            freqData = self.freqData
 
         if self.checkMethod:
             if timeData.max().val() >= 2048 or timeData.min().val() < -2048:
@@ -608,13 +604,12 @@ self.blockSize > 0 and self.startBlock >= 0:
         if self.fftMethod == 'CASA':
             # note here that the ... will loop over antennas in the antenna selection
             print 'dimensionality is: ', freqData.getDim(), self.timeData.getDim()
-            freqData[...].fftcasa(self.timeData[...],self.nyquistZone)
+            freqData[...].fftcasa(self.timeData[...], self.nyquistZone)
         elif self.fftMethod == 'FFTW':
-            freqData[...].fftw(self.timeData[...],self.nyquistZone)
+            freqData[...].fftw(self.timeData[...], self.nyquistZone)
 
         if self.calMethod:
             self.cal.applyCalibration(fftData)
-
 
         self.readBlocks += 1
 
@@ -627,14 +622,14 @@ self.blockSize > 0 and self.startBlock >= 0:
         """
 
         if startBlock == None:
-            startBlock=self.startBlock
+            startBlock = self.startBlock
 
-        self.readBlocks=0;
-        self.startBlock=startBlock
+        self.readBlocks = 0
+        self.startBlock = startBlock
         if filterType == 'PPF':
             self.ppf.buffer.fill(0.)
-            self.ppf.startrow=0
-            self.ppf.total_rows_added=0
+            self.ppf.startrow = 0
+            self.ppf.total_rows_added = 0
 
     def getAntennaPos(self, selection=None):
         if selection == None:
@@ -649,8 +644,7 @@ self.blockSize > 0 and self.startBlock >= 0:
             return self.crfile["RelativeAntennaPositions"]
 
     def newAntennaSet(self, selection):
-        return AntennaSet(self,selection)
-
+        return AntennaSet(self, selection)
 
     def getAntennaPos(self):
         self.crfile.setSelection(self.selection)
@@ -667,11 +661,10 @@ self.blockSize > 0 and self.startBlock >= 0:
 #               self.freqdata=None
 
 
-
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
 #  See http://docs.python.org/library/doctest.html for more information.
-if __name__=='__main__':
+if __name__ == '__main__':
     import doctest
     doctest.testmod()

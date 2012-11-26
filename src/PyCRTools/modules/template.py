@@ -48,6 +48,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 
+
 class Test(object):
     """This is just a dummy class to illustrate class level
     documentation.
@@ -77,6 +78,7 @@ class Test(object):
         ========= =======================
 
         """
+
 
 def test(x, y):
     """ Returns x+y

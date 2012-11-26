@@ -4,6 +4,7 @@
 import pickle
 import xml.dom.minidom
 
+
 def flatten_result(f):
     """If return value is iterable and has only one element, just return
     this element. Otherwise return the iterable.
@@ -29,6 +30,7 @@ def flatten_result(f):
 
     return inner_func
 
+
 def dump(filename, *args, **kwargs):
     """Save a series of Python dictionary objects to XML file.
 
@@ -37,14 +39,14 @@ def dump(filename, *args, **kwargs):
     """
 
     # Generate a empty DOM
-    implement=xml.dom.minidom.getDOMImplementation()
+    implement = xml.dom.minidom.getDOMImplementation()
 
-    dom=implement.createDocument(None, "shelve", None)
+    dom = implement.createDocument(None, "shelve", None)
 
-    def add_dict(obj, dom, name = None):
+    def add_dict(obj, dom, name=None):
         """Helper function to add dict to DOM.
         """
-        
+
         dct = dom.createElement("dict")
 
         if name:
@@ -59,23 +61,23 @@ def dump(filename, *args, **kwargs):
         # Loop over items in dictionary and create human readable key, value
         # representation
         for k, v in obj.iteritems():
-            
+
             # Create item
-            parent=dom.createElement("item")
+            parent = dom.createElement("item")
 
             # Add key
-            element=dom.createElement("key")
+            element = dom.createElement("key")
 
-            content=dom.createTextNode(k)
+            content = dom.createTextNode(k)
 
             element.appendChild(content)
 
             parent.appendChild(element)
 
             # Add value
-            element=dom.createElement("value")
+            element = dom.createElement("value")
 
-            content=dom.createTextNode(str(v))
+            content = dom.createTextNode(str(v))
 
             element.appendChild(content)
 
@@ -98,7 +100,6 @@ def dump(filename, *args, **kwargs):
         dct.appendChild(binary)
 
         dom.documentElement.appendChild(dct)
-
 
     # Loop over dictionaries and create <dict> element for each one
     for obj in args:
@@ -123,7 +124,8 @@ def dump(filename, *args, **kwargs):
 
     with open(filename, 'w') as f:
         f.write(dom.toprettyxml(indent="    "))
-    
+
+
 @flatten_result
 def load(filename):
     """Parses XML file containing Python dictionaries in binary
@@ -151,7 +153,6 @@ def load(filename):
             node = node.nextSibling
 
         if node is not None:
-            results.append(pickle.loads(node.data.encode('ascii','ignore')))
+            results.append(pickle.loads(node.data.encode('ascii', 'ignore')))
 
     return results
-

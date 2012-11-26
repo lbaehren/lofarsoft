@@ -14,33 +14,34 @@ import os
 import time
 from pycrtools import *
 
+
 def cleanSpectrum(crfile):
     #------------------------------------------------------------------------
-    #Creating Workspaces
+    # Creating Workspaces
     #------------------------------------------------------------------------
-    ws=CRMainWorkSpace(datafile=crfile,doplot=True,verbose=True,modulename="ws")
+    ws = CRMainWorkSpace(datafile=crfile, doplot=True, verbose=True, modulename="ws")
 
     # note that the number of bins (e.g. nbins=256) is the number of bins after spline fitting
-    ws.makeFitBaseline(ws,logfit=True,fittype="BSPLINE",nbins=256)#256) #fittype="POLY" or "BSPLINE"
+    ws.makeFitBaseline(ws, logfit=True, fittype="BSPLINE", nbins=256)  # 256) #fittype="POLY" or "BSPLINE"
     ws.makeAverageSpectrum(ws)
     # ? average spectrum over all antennas or over all blocks for each antenna?
 
     #------------------------------------------------------------------------
-    #Setting parameters
+    # Setting parameters
     #------------------------------------------------------------------------
-    ws["blocksize"] = 2*65536
-    ws["max_nblocks"]=2
-    #ws["ncoeffs"]=45
-    ws["ncoeffs"]=12
-    if ws["datafile"]["Observatory"]=='LOFAR':
-        ws["numin"]=12 #MHz
-        ws["numax"]=82 #MHz
-    if ws["datafile"]["Observatory"]=='LOPES':
-        ws["numin"]=43 #MHz
-        ws["numax"]=73 #MHz
+    ws["blocksize"] = 2 * 65536
+    ws["max_nblocks"] = 2
+    # ws["ncoeffs"]=45
+    ws["ncoeffs"] = 12
+    if ws["datafile"]["Observatory"] == 'LOFAR':
+        ws["numin"] = 12  # MHz
+        ws["numax"] = 82  # MHz
+    if ws["datafile"]["Observatory"] == 'LOPES':
+        ws["numin"] = 43  # MHz
+        ws["numax"] = 73  # MHz
 
     #------------------------------------------------------------------------
-    #Begin Calculations
+    # Begin Calculations
     #------------------------------------------------------------------------
 
     print 'workspace frequencies are: ', ws["frequency"]
@@ -48,12 +49,12 @@ def cleanSpectrum(crfile):
     """
     Calculate a spectrum averaged over all blocks (fft and sum)
     """
-    ws["spectrum"].craveragespectrum(ws["datafile"],ws)
+    ws["spectrum"].craveragespectrum(ws["datafile"], ws)
 
     """
     Fit a polynomial/spline (as specified) to baseline of the (binned) average spectrum and return the coefficients.
     """
-    ws["meanrms"]=ws["coeffs"].crfitbaseline(ws["frequency"],ws["spectrum"],ws)
+    ws["meanrms"] = ws["coeffs"].crfitbaseline(ws["frequency"], ws["spectrum"], ws)
 
     """
     Calculcate the baseline from the coefficients on the actual frequency grid.
@@ -63,34 +64,34 @@ def cleanSpectrum(crfile):
     print ws["numax_i"]
     print ws["coeffs"]
 
-    ws["baseline"].crcalcbaseline(ws["frequency"],ws["numin_i"],ws["numax_i"],ws["coeffs"],ws)
+    ws["baseline"].crcalcbaseline(ws["frequency"], ws["numin_i"], ws["numax_i"], ws["coeffs"], ws)
 
-    if ws["verbose"]: print time.clock()-ws["t0"],"s: Applying gain calibration - flattening spectrum."
+    if ws["verbose"]:
+        print time.clock() - ws["t0"], "s: Applying gain calibration - flattening spectrum."
 
     """
     Apply the baseline and do a gain calibration on the spectrum
     """
     ws["cleanspec"].copy(ws.spectrum)
     ws.cleanspec /= ws.baseline
-    if ws["doplot"]: ws.cleanspec[0].plot()
+    if ws["doplot"]:
+        ws.cleanspec[0].plot()
 
     """
     Identify spiky channels and replace them by the mean value (which is unity here).
     """
-    ws["meanspec"]=ws["cleanspec"][...,ws["numin_i"]:ws["numax_i"]].meaninverse()
+    ws["meanspec"] = ws["cleanspec"][..., ws["numin_i"]:ws["numax_i"]].meaninverse()
     ws["rfithreshold"] = (ws["meanrms"] * ws["rfi_nsigma"]) + ws["meanspec"]
-    ws["nbad_channels"]=ws["bad_channels"][...].findgreaterthan(ws["cleanspec"][...],ws["rfithreshold"])
+    ws["nbad_channels"] = ws["bad_channels"][...].findgreaterthan(ws["cleanspec"][...], ws["rfithreshold"])
 
-    ws["cleanspec"][...].set(ws["bad_channels"][...,[0]:ws["nbad_channels"]],ws["meanspec"])
+    ws["cleanspec"][...].set(ws["bad_channels"][..., [0]:ws["nbad_channels"]], ws["meanspec"])
 
-    if ws["verbose"]: print time.clock()-ws["t0"],"s: Done calculating clean spectrum."
+    if ws["verbose"]:
+        print time.clock() - ws["t0"], "s: Done calculating clean spectrum."
     if ws["doplot"]:
         ws.cleanspec[0].plot(clf=False)
 #        plt.savefig("testrfi2-spectrum.pdf",format="pdf")
         raw_input("Plotted clean spectrum - press Enter to continue...")
-
-
-
 
 
 # Execute doctests if module is executed as script

@@ -3,8 +3,9 @@
 from pycrtools import *
 import time
 
-#import pdb
-#pdb.set_trace()
+# import pdb
+# pdb.set_trace()
+
 
 def CRQualityCheckAntenna(dataarray,
                           qualitycriteria=None,
@@ -137,109 +138,118 @@ def CRQualityCheckAntenna(dataarray,
      information. verbose=True only prints when a block is
      flagged. verbose=2 prints information on every chunk.
     """
-    dim=dataarray.shape()
-    (nblocks,blocksize)=dim
-    qualityflaglist=[]
-    nblocksflagged=0
-    flaggedblocklist=[]
-    noncompliancelist=[]
-    if not minpeak: minpeak=maxpeak
-    if not datafile==None:
-        if antennaID==None: antennaID=datafile["SELECTED_DIPOLES"][0]
-        if date==None: date=datafile["TIME"][0]
-        #if observatory==None: observatory=datafile["TELESCOPE"]
-        if filename=="": filename=datafile["FILENAME"]
-#Calculate probabilities to find peaks
-    if nsigma<0:
-        nsigma=sqrt(-2.0*log(sqrt(2.*pi)/blocksize))  # set nsigma such that the expected number of peaks is (roughly) one
-    probability=funcGaussian(nsigma,1,0) # what is the probability of a 5 sigma peak
-    npeaksexpected=probability*blocksize # what is the probability to see such a peak for the given blocksize
-    npeaksexpected_full=npeaksexpected*nblocks # what is the probability to see such a peak for the given blocksize
-    npeakserror=sqrt(npeaksexpected) # what is the statistical error on that expectation
-#Start checking and calculate mean, rms, and number of peaks
+    dim = dataarray.shape()
+    (nblocks, blocksize) = dim
+    qualityflaglist = []
+    nblocksflagged = 0
+    flaggedblocklist = []
+    noncompliancelist = []
+    if not minpeak:
+        minpeak = maxpeak
+    if not datafile == None:
+        if antennaID == None:
+            antennaID = datafile["SELECTED_DIPOLES"][0]
+        if date == None:
+            date = datafile["TIME"][0]
+        # if observatory==None: observatory=datafile["TELESCOPE"]
+        if filename == "":
+            filename = datafile["FILENAME"]
+# Calculate probabilities to find peaks
+    if nsigma < 0:
+        nsigma = sqrt(-2.0 * log(sqrt(2. * pi) / blocksize))  # set nsigma such that the expected number of peaks is (roughly) one
+    probability = funcGaussian(nsigma, 1, 0)  # what is the probability of a 5 sigma peak
+    npeaksexpected = probability * blocksize  # what is the probability to see such a peak for the given blocksize
+    npeaksexpected_full = npeaksexpected * nblocks  # what is the probability to see such a peak for the given blocksize
+    npeakserror = sqrt(npeaksexpected)  # what is the statistical error on that expectation
+# Start checking and calculate mean, rms, and number of peaks
     datamean = dataarray[...].mean()
     datarms = dataarray[...].stddev(datamean)
 #    mean=datamean[datamean.minpos()]; rms=datarms[datarms.minpos()];
 #    mean=datamean.mean(); rms=datarms.mean();
-    mean=datamean.median(); rms=datarms.median();
+    mean = datamean.median()
+    rms = datarms.median()
     if normalize:
         datamean -= mean
         datarms /= rms
         dataarray -= mean
         dataarray /= rms
-        lower_limit=Vector(float,nblocks,fill=-nsigma)
-        upper_limit=Vector(float,nblocks,fill=nsigma)
+        lower_limit = Vector(float, nblocks, fill=-nsigma)
+        upper_limit = Vector(float, nblocks, fill=nsigma)
     else:
-        lower_limit=Vector(float,nblocks,fill=datamean-datarms*nsigma)
-        upper_limit=Vector(float,nblocks,fill=datamean+datarms*nsigma)
-    datanpeaks = dataarray[...].countoutside(lower_limit,upper_limit)
-    datamax = Vector(float,copy=dataarray[...].max()) # get the maxima and
-    datamin = Vector(float,copy=dataarray[...].min()) # an mininima in each block (use copy to float, in case dataarray is complex)
-    datamax -= mean; datamax /= rms # relative height (in sigma)  of maximum in data
-    datamin -= mean; datamin /= -rms # relative height (in sigma) of minimum in data
-    npeaks=datanpeaks.sum(); peaksexcess=npeaks/npeaksexpected_full
-    if verbose>1:
+        lower_limit = Vector(float, nblocks, fill=datamean - datarms * nsigma)
+        upper_limit = Vector(float, nblocks, fill=datamean + datarms * nsigma)
+    datanpeaks = dataarray[...].countoutside(lower_limit, upper_limit)
+    datamax = Vector(float, copy=dataarray[...].max())  # get the maxima and
+    datamin = Vector(float, copy=dataarray[...].min())  # an mininima in each block (use copy to float, in case dataarray is complex)
+    datamax -= mean
+    datamax /= rms  # relative height (in sigma)  of maximum in data
+    datamin -= mean
+    datamin /= -rms  # relative height (in sigma) of minimum in data
+    npeaks = datanpeaks.sum()
+    peaksexcess = npeaks / npeaksexpected_full
+    if verbose > 1:
 #        print "Blocksize=",blocksize,", nsigma=",nsigma, ", number of peaks expected per block=",npeaksexpected,"+/-",npeakserror
-        print "{8} [{11}] - Mean={0:6.2f}, RMS={1:6.2f}, Npeaks={2:5d}, Nexpected={3:6.2f} (Npeaks/Nexpected={4:6.2f}), Max={9:6.2f}, Min={10:6.2f}, nsigma={7:6.2f}, limits=({5:6.2f}, {6:6.2f})".format(mean,rms,npeaks,npeaksexpected_full,peaksexcess,lower_limit.mean(),upper_limit.mean(),nsigma,chunk,datamax.max(),datamin.max(),count)
-    dataNonGaussianity = Vector(float,nblocks)
-    dataSpikeExcess = Vector(float,nblocks)
-    dataNonGaussianity.sub(datanpeaks,npeaksexpected)
-    dataSpikeExcess.div(datanpeaks,npeaksexpected)
+        print "{8} [{11}] - Mean={0:6.2f}, RMS={1:6.2f}, Npeaks={2:5d}, Nexpected={3:6.2f} (Npeaks/Nexpected={4:6.2f}), Max={9:6.2f}, Min={10:6.2f}, nsigma={7:6.2f}, limits=({5:6.2f}, {6:6.2f})".format(mean, rms, npeaks, npeaksexpected_full, peaksexcess, lower_limit.mean(), upper_limit.mean(), nsigma, chunk, datamax.max(), datamin.max(), count)
+    dataNonGaussianity = Vector(float, nblocks)
+    dataSpikeExcess = Vector(float, nblocks)
+    dataNonGaussianity.sub(datanpeaks, npeaksexpected)
+    dataSpikeExcess.div(datanpeaks, npeaksexpected)
     dataNonGaussianity /= npeakserror
-    dataproperties=zip(range(blockoffset,nblocks+blockoffset),datamean,datarms,datanpeaks,dataNonGaussianity,dataSpikeExcess,datamax,datamin)
-    if qualitycriteria==None:
-        if refblock==-1:
-            refblock=nblocks/4 # Take something around the first quarter of the data
-        if not refblock==None:
-            mean=datamean[refblock]; rms=datarms[refblock];
+    dataproperties = zip(range(blockoffset, nblocks + blockoffset), datamean, datarms, datanpeaks, dataNonGaussianity, dataSpikeExcess, datamax, datamin)
+    if qualitycriteria == None:
+        if refblock == -1:
+            refblock = nblocks / 4  # Take something around the first quarter of the data
+        if not refblock == None:
+            mean = datamean[refblock]
+            rms = datarms[refblock]
         if normalize:
-            qualitycriteria={"mean":(-rms*meanfactor/sqrt(blocksize),rms*meanfactor/sqrt(blocksize)),
-                             "rms":(max(1/rmsfactor,rmsrange[0]/rms),min(rmsfactor,rmsrange[1]/rms)) if rmsrange else (1/rmsfactor,rmsfactor),
-                             "spikyness":(-spikyness,spikyness),
-                             "spikeexcess":(-1,spikeexcess),
-                             "max":(-1,maxpeak),
-                             "min":(-1,minpeak)}
+            qualitycriteria = {"mean": (-rms * meanfactor / sqrt(blocksize), rms * meanfactor / sqrt(blocksize)),
+                             "rms": (max(1 / rmsfactor, rmsrange[0] / rms), min(rmsfactor, rmsrange[1] / rms)) if rmsrange else (1 / rmsfactor, rmsfactor),
+                             "spikyness": (-spikyness, spikyness),
+                             "spikeexcess": (-1, spikeexcess),
+                             "max": (-1, maxpeak),
+                             "min": (-1, minpeak)}
         else:
-            qualitycriteria={"mean":(mean-rms/sqrt(blocksize)*meanfactor,mean+rms/sqrt(blocksize)*meanfactor),
-                             "rms":(max(rms/rmsfactor,rmsrange[0]),min(rms*rmsfactor,rmsrange[1])) if rmsrange else (rms/rmsfactor,rms*rmsfactor),
-                             "spikyness":(-spikyness,spikyness),
-                             "spikeexcess":(-spikeexcess,spikeexcess),
-                             "max":(-1,maxpeak),
-                             "min":(-1,minpeak)}
-        if verbose>1:
-            print "Quality criteria =",qualitycriteria
-    flags=set()
+            qualitycriteria = {"mean": (mean - rms / sqrt(blocksize) * meanfactor, mean + rms / sqrt(blocksize) * meanfactor),
+                             "rms": (max(rms / rmsfactor, rmsrange[0]), min(rms * rmsfactor, rmsrange[1])) if rmsrange else (rms / rmsfactor, rms * rmsfactor),
+                             "spikyness": (-spikyness, spikyness),
+                             "spikeexcess": (-spikeexcess, spikeexcess),
+                             "max": (-1, maxpeak),
+                             "min": (-1, minpeak)}
+        if verbose > 1:
+            print "Quality criteria =", qualitycriteria
+    flags = set()
     for prop in iter(dataproperties):
-        noncompliancelist=CheckParameterConformance(prop,{"mean":1,"rms":2,"spikyness":4,"spikeexcess":5,"max":6,"min":7},qualitycriteria)
+        noncompliancelist = CheckParameterConformance(prop, {"mean": 1, "rms": 2, "spikyness": 4, "spikeexcess": 5, "max": 6, "min": 7}, qualitycriteria)
         if noncompliancelist:
-            nblocksflagged+=1
+            nblocksflagged += 1
             flags.update(noncompliancelist)
             flaggedblocklist.append(prop[0])
-            qualityflaglist.append({"block":prop[0],"mean":prop[1],"rms":prop[2],"npeaks":prop[3],"spikyness":prop[4],"spikeexcess":prop[5],"flags":noncompliancelist,"max":maxpeak,"min":minpeak})
+            qualityflaglist.append({"block": prop[0], "mean": prop[1], "rms": prop[2], "npeaks": prop[3], "spikyness": prop[4], "spikeexcess": prop[5], "flags": noncompliancelist, "max": maxpeak, "min": minpeak})
             if verbose:
-                if nblocksflagged<=3: # Print flagged blocks in chunk, but avoid printing too many blocks ...
-                    print "#Flagged: #"+str(count)," chunk=",chunk,(", Block {0:5d}: mean={1: 6.2f}, rms={2:6.1f},  max={6:6.1f}, min={7:6.1f} "+("(norm.)" if normalize else "") +", npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}").format(*prop)," ",noncompliancelist
-                elif nblocksflagged==4:
+                if nblocksflagged <= 3:  # Print flagged blocks in chunk, but avoid printing too many blocks ...
+                    print "#Flagged: #" + str(count), " chunk=", chunk, (", Block {0:5d}: mean={1: 6.2f}, rms={2:6.1f},  max={6:6.1f}, min={7:6.1f} " + ("(norm.)" if normalize else "") + ", npeaks={3:5d}, spikyness={4: 7.2f}, spikeexcess={5: 6.2f}").format(*prop), " ", noncompliancelist
+                elif nblocksflagged == 4:
                     print "#Other flagged blocks: [{0:5d}".format(*prop),
                 else:
                     print ",{0:5d}".format(*prop),
-    if nblocksflagged>=4:
+    if nblocksflagged >= 4:
         print "]"
 
-    return {"filename":filename,"type":"QualityFx","observatory":observatory,"antenna":antennaID,"date":'"'+time.strftime("%Y-%m-%d %H:%M:%S %z",time.gmtime(date))+'"',"idate":date,"chunk":chunk,"count":count,"offset":blockoffset,"size":blocksize*nblocks,"blocksize":blocksize,"nblocks":nblocks,"mean":mean,"rms":rms,"npeaks":npeaks,"npeaksexpected":npeaksexpected_full,"peaksexcess":peaksexcess,"nblocksflagged":nblocksflagged,"flaggedblocks":flaggedblocklist,"flags":flags,"flaglist":qualityflaglist}
+    return {"filename": filename, "type": "QualityFx", "observatory": observatory, "antenna": antennaID, "date": '"' + time.strftime("%Y-%m-%d %H:%M:%S %z", time.gmtime(date)) + '"', "idate": date, "chunk": chunk, "count": count, "offset": blockoffset, "size": blocksize * nblocks, "blocksize": blocksize, "nblocks": nblocks, "mean": mean, "rms": rms, "npeaks": npeaks, "npeaksexpected": npeaksexpected_full, "peaksexcess": peaksexcess, "nblocksflagged": nblocksflagged, "flaggedblocks": flaggedblocklist, "flags": flags, "flaglist": qualityflaglist}
 
 
 def CRDatabaseWrite(filename, quality):
     """Write a quality entry calculated by CRQualityCheckAntenna to a database (currently a simple textfile)
 
     """
-    qkeys=quality.keys()
-    orderedkeys=["type","observatory","antenna","idate","date","size","blocksize","offset","nblocks","mean","rms","npeaks","npeaksexpected","peaksexcess","nblocksflagged","flaggedblocks","flags"]
-    keys=orderedkeys+list(set(qkeys).difference(orderedkeys))
-    f=open(filename,"a")
-    f.write("#"+time.strftime("%Y-%m-%d %H:%M:%S %z")+"\n")
+    qkeys = quality.keys()
+    orderedkeys = ["type", "observatory", "antenna", "idate", "date", "size", "blocksize", "offset", "nblocks", "mean", "rms", "npeaks", "npeaksexpected", "peaksexcess", "nblocksflagged", "flaggedblocks", "flags"]
+    keys = orderedkeys + list(set(qkeys).difference(orderedkeys))
+    f = open(filename, "a")
+    f.write("#" + time.strftime("%Y-%m-%d %H:%M:%S %z") + "\n")
     for k in keys:
         if k in qkeys:
-            f.write(k+"= "+str(quality[k])+"  ")
+            f.write(k + "= " + str(quality[k]) + "  ")
     f.write("\n")
     f.close()

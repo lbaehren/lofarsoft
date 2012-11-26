@@ -8,7 +8,7 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-#import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 
 from hftools import *
 from htypes import *
@@ -18,7 +18,8 @@ from vector import *
 #  hArray Class Methods/Attributes
 #======================================================================
 
-def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=None, xvalues=None,units=None,par=None,header=None,**kwargs):
+
+def hArray(Type=None, dimensions=None, fill=None, name=None, copy=None, properties=None, xvalues=None, units=None, par=None, header=None, **kwargs):
     """
 
     Usage:
@@ -115,62 +116,81 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
 
     """
     if type(copy) in hAllVectorTypes:
-        copy=hArray(copy)
+        copy = hArray(copy)
     if type(copy) in hAllArrayTypes:
-        if properties==None: properties=copy
-        if fill==None: fill=copy
+        if properties == None:
+            properties = copy
+        if fill == None:
+            fill = copy
     if type(properties) in hAllArrayTypes:
-        if Type==None: Type=basetype(properties)
-        if name==None: name=properties.getKey("name")
-        if dimensions==None: dimensions=properties.shape()
-        if units==None: units=(properties.getUnitPrefix(),properties.getUnitName())
-        if hasattr(properties,"par"):
-            par=properties.par.__dict__
-    if Type==None: Type=float
-    if isVector(Type):  #Make a new array with reference to the input vector
-        ary=type2array(basetype(Type))
-        ary.__stored_vector=Type
+        if Type == None:
+            Type = basetype(properties)
+        if name == None:
+            name = properties.getKey("name")
+        if dimensions == None:
+            dimensions = properties.shape()
+        if units == None:
+            units = (properties.getUnitPrefix(), properties.getUnitName())
+        if hasattr(properties, "par"):
+            par = properties.par.__dict__
+    if Type == None:
+        Type = float
+    if isVector(Type):  # Make a new array with reference to the input vector
+        ary = type2array(basetype(Type))
+        ary.__stored_vector = Type
         ary.setVector(ary.__stored_vector)
     elif ishArray(Type):  # Just make a copy with reference to same vector
-        ary=Type.newreference()
-    else: # Create a new vector
+        ary = Type.newreference()
+    else:  # Create a new vector
         if type(Type) == np.ndarray and not dimensions:
-            dimensions=Type.shape
-        if type(dimensions) in [int,long]:
-            size=dimensions
-        elif (type(dimensions) in [list,tuple,IntVec]):
-            size=reduce(lambda x,y : x*y, dimensions)
+            dimensions = Type.shape
+        if type(dimensions) in [int, long]:
+            size = dimensions
+        elif (type(dimensions) in [list, tuple, IntVec]):
+            size = reduce(lambda x, y: x * y, dimensions)
         elif (type(dimensions) in hAllArrayTypes):
-            size=reduce(lambda x,y : x*y, dimensions.shape())
+            size = reduce(lambda x, y: x * y, dimensions.shape())
         else:
-            size=-1
-        vec=Vector(Type=Type, size=size)
-        ary=type2array(basetype(vec))
-        ary.__stored_vector=vec
+            size = -1
+        vec = Vector(Type=Type, size=size)
+        ary = type2array(basetype(vec))
+        ary.__stored_vector = vec
         ary.setVector(ary.__stored_vector)
-    if not hasattr(ary,"par"): setattr(ary,"par",hArray_par())
-    if not hasattr(ary.par,"hdr"): setattr(ary.par,"hdr",{})
-    if type(dimensions) in [int,long]: ary.reshape([dimensions])
-    elif (type(dimensions) in [list,tuple,IntVec]): ary.reshape(dimensions)
-    elif (type(dimensions) in hAllArrayTypes): ary.reshape(dimensions.shape())
+    if not hasattr(ary, "par"):
+        setattr(ary, "par", hArray_par())
+    if not hasattr(ary.par, "hdr"):
+        setattr(ary.par, "hdr", {})
+    if type(dimensions) in [int, long]:
+        ary.reshape([dimensions])
+    elif (type(dimensions) in [list, tuple, IntVec]):
+        ary.reshape(dimensions)
+    elif (type(dimensions) in hAllArrayTypes):
+        ary.reshape(dimensions.shape())
     if kwargs:
-        for k,v in kwargs.items():
-            setattr(ary.par,k,v)
+        for k, v in kwargs.items():
+            setattr(ary.par, k, v)
     if type(par) == dict:
-        for k,v in par.items():
-            setattr(ary.par,k,v)
-    if type(par) == tuple: setattr(ary.par,par[0],par[1])
-    if type(par) == list: map(lambda elem:setattr(ary.par,elem[0],elem[1]),par)
-    if type(header) == dict: ary.par.hdr.update(header)
-    if not (xvalues == None): ary.par.xvalues=xvalues
+        for k, v in par.items():
+            setattr(ary.par, k, v)
+    if type(par) == tuple:
+        setattr(ary.par, par[0], par[1])
+    if type(par) == list:
+        map(lambda elem: setattr(ary.par, elem[0], elem[1]), par)
+    if type(header) == dict:
+        ary.par.hdr.update(header)
+    if not (xvalues == None):
+        ary.par.xvalues = xvalues
     if not (units == None):
-        if type(units)==str: ary.setUnit("",units)
-        elif type(units)==tuple: ary.setUnit(*units)
-        else: print "Error - hArray: Wrong format for units specified."
+        if type(units) == str:
+            ary.setUnit("", units)
+        elif type(units) == tuple:
+            ary.setUnit(*units)
+        else:
+            print "Error - hArray: Wrong format for units specified."
     if not (fill == None):
         if type(fill) in hAllVectorTypes:
-            #ary.vec().fill(fill)
-            #if fill.loopingMode():
+            # ary.vec().fill(fill)
+            # if fill.loopingMode():
             #    passs
             #                iterate=True
             #                lfill=fill.getSize()
@@ -178,35 +198,38 @@ def hArray(Type=None,dimensions=None,fill=None,name=None,copy=None,properties=No
             #                ary2=hArray(ary.vec(),[,)
             #                while iterate:
             #                    ary.vec().fill(fill)
-            #else:
+            # else:
             ary.vec().fill(fill)
-        elif type(fill) in [tuple,list]:
-            if len(fill)>0:
-                if Type in [float, int]: # Convert filling list/tuple to a single type.
-                    fill=[Type(i) for i in fill]
+        elif type(fill) in [tuple, list]:
+            if len(fill) > 0:
+                if Type in [float, int]:  # Convert filling list/tuple to a single type.
+                    fill = [Type(i) for i in fill]
                 ary.vec().fill(Vector(fill))
         else:
             ary.fill(fill)
-    if type(name)==str: ary.setKey("name",name);
+    if type(name) == str:
+        ary.setKey("name", name)
     return ary
+
 
 def hArray_repr(self, maxlen=100):
 
     # Check if looping is enabled
-    loops=""
+    loops = ""
     if self.loopingMode():
-        loops="*"
+        loops = "*"
 
     # Get name (if any)
-    name=self.getKey("name")
+    name = self.getKey("name")
 
-    if not name=="":
-        name=', name="'+name+'"'
+    if not name == "":
+        name = ', name="' + name + '"'
 
     # Compose string
-    s="hArray("+hTypeNamesDictionary[basetype(self)]+", "+str(list(self.shape()))+", fill="+hPrettyString(self.vec(),maxlen)+name+") # len="+str(len(self))+" slice=["+str(self.getBegin())+":"+str(self.getEnd())+"]"+loops+")"
+    s = "hArray(" + hTypeNamesDictionary[basetype(self)] + ", " + str(list(self.shape())) + ", fill=" + hPrettyString(self.vec(), maxlen) + name + ") # len=" + str(len(self)) + " slice=[" + str(self.getBegin()) + ":" + str(self.getEnd()) + "]" + loops + ")"
 
     return s
+
 
 def hArray_none(self):
     """
@@ -217,6 +240,7 @@ def hArray_none(self):
     """
     return None
 
+
 def hArray_newreference(self):
     """
     array.newreference() -> copy of array referencing the same vector
@@ -225,72 +249,100 @@ def hArray_newreference(self):
     vector. Hence the new array can be assigned a new slice, but will
     still access the same underlying vector in memory.
     """
-    ary=self.shared_copy()
+    ary = self.shared_copy()
     ary.__stored_vector = self.__stored_vector
-    if hasattr(self,"par"): ary.par=self.par
+    if hasattr(self, "par"):
+        ary.par = self.par
     return ary
+
 
 def hArray_return_slice_start(val):
     """ Reduces a slice to its start value"""
-    if val==Ellipsis:
+    if val == Ellipsis:
         return 0
-    elif type(val)==slice:
-        if (val.start == None): return 0
+    elif type(val) == slice:
+        if (val.start == None):
+            return 0
         return val.start
     elif type(val) in hListAndArrayTypes:
         return Vector(val)
     else:
         return val
 
+
 def hArray_return_slice_end(val):
     """ Reduces a slice to its end value"""
-    if val==Ellipsis:
+    if val == Ellipsis:
         return -1
-    elif type(val)==slice:
-        return hNone2Value(val.stop,-1)
+    elif type(val) == slice:
+        return hNone2Value(val.stop, -1)
     elif type(val) in hListAndArrayTypes:
         return Vector(val)
     else:
-        return val+1
+        return val + 1
 
-def hNone2Value(none,defval):
+
+def hNone2Value(none, defval):
     """
     Returns a default value if the the first input is the None object,
     otherwise return the value of the first argument.
     """
-    if none==None: return defval
-    else: return none
+    if none == None:
+        return defval
+    else:
+        return none
 
-def hSliceListElementToNormalValuesStart(s,dim):
-    if s==None: return 0
-    if s>=0: return s
-    else: return s+dim
 
-def hSliceListElementToNormalValuesEnd(s,dim):
-    if s==None: return dim
-    if s>=0: return s
-    else: return s+dim
+def hSliceListElementToNormalValuesStart(s, dim):
+    if s == None:
+        return 0
+    if s >= 0:
+        return s
+    else:
+        return s + dim
 
-def hSliceToNormalValues(s,dim):
+
+def hSliceListElementToNormalValuesEnd(s, dim):
+    if s == None:
+        return dim
+    if s >= 0:
+        return s
+    else:
+        return s + dim
+
+
+def hSliceToNormalValues(s, dim):
     """
     Returns a slice object where none and negative numbers are replaced by the appropriate integers, given a dimension (length) dim of the full slice.
     """
-    if type(s) in [int,long]:
-        if s<0: return s+dim
-    if not type(s)==slice: return s
-    s1=s.start;s2=s.stop;s3=s.step
+    if type(s) in [int, long]:
+        if s < 0:
+            return s + dim
+    if not type(s) == slice:
+        return s
+    s1 = s.start
+    s2 = s.stop
+    s3 = s.step
     if type(s1) in hListAndArrayTypes:
-        s1=Vector(map(lambda x:hSliceListElementToNormalValuesStart(x,dim),s1))
-    elif s1==None: s1=0
-    elif s1<0: s1+=dim
-    elif s1>dim: s1=dim
+        s1 = Vector(map(lambda x: hSliceListElementToNormalValuesStart(x, dim), s1))
+    elif s1 == None:
+        s1 = 0
+    elif s1 < 0:
+        s1 += dim
+    elif s1 > dim:
+        s1 = dim
     if type(s2) in hListAndArrayTypes:
-        s2=Vector(map(lambda x:hSliceListElementToNormalValuesEnd(x,dim),s2))
-    elif s2==None: s2=dim
-    elif s2<0: s2+=dim
-    elif s2>dim: s2=dim
-    if s3==None: s3=1
-    return slice(s1,s2,s3)
+        s2 = Vector(map(lambda x: hSliceListElementToNormalValuesEnd(x, dim), s2))
+    elif s2 == None:
+        s2 = dim
+    elif s2 < 0:
+        s2 += dim
+    elif s2 > dim:
+        s2 = dim
+    if s3 == None:
+        s3 = 1
+    return slice(s1, s2, s3)
+
 
 def hArray_vec(self):
     """
@@ -301,9 +353,13 @@ def hArray_vec(self):
     data vector is returned. Otherwise, if a slice is active, a copy
     of that slice is returned.
     """
-    beg=self.getBegin(); end=self.getEnd()
-    if ((beg==0 )& (end==len(self))): return self.__stored_vector
-    else: return self.__stored_vector[beg:end]
+    beg = self.getBegin()
+    end = self.getEnd()
+    if ((beg == 0) & (end == len(self))):
+        return self.__stored_vector
+    else:
+        return self.__stored_vector[beg:end]
+
 
 def hArray_array(self):
     """
@@ -324,17 +380,19 @@ def hArray_array(self):
     x=hArray(int,[2,3,4],fill=range(6*4),name="test")
     self=x[1,1:3]
     """
-    if hasattr(self,"__slice__"):
-        dim=self.shape()
-        if type(self.__slice__[-1])==slice:
-            slc=hSliceToNormalValues(self.__slice__[-1],dim[len(self.__slice__)-1])
-            newdim=[slc.stop-slc.start]+dim[len(self.__slice__):]
+    if hasattr(self, "__slice__"):
+        dim = self.shape()
+        if type(self.__slice__[-1]) == slice:
+            slc = hSliceToNormalValues(self.__slice__[-1], dim[len(self.__slice__) - 1])
+            newdim = [slc.stop - slc.start] + dim[len(self.__slice__):]
         else:
-            newdim=dim[len(self.__slice__):]
-        beg=self.getBegin(); end=self.getEnd()
-        return hArray(self.__stored_vector[beg:end],dimensions=newdim,properties=self)
+            newdim = dim[len(self.__slice__):]
+        beg = self.getBegin()
+        end = self.getEnd()
+        return hArray(self.__stored_vector[beg:end], dimensions=newdim, properties=self)
     else:
-        return hArray(self.__stored_vector,properties=self)
+        return hArray(self.__stored_vector, properties=self)
+
 
 def hArray_list(self):
     """
@@ -345,13 +403,15 @@ def hArray_list(self):
     """
     return list(self.__stored_vector[self.getBegin():self.getEnd()])
 
+
 def hArray_new(self):
     """
     ary.new() -> new_array
 
     Create a new array of the same type and dimensions
     """
-    return hArray(basetype(self),self)
+    return hArray(basetype(self), self)
+
 
 def hArray_val(self):
     """
@@ -363,6 +423,7 @@ def hArray_val(self):
     otherwise return a python list.
     """
     return self.vec().val()
+
 
 def hArray_toslice(self):
     """Usage: ary.toslice() -> slice(ary1,ary2,ary3)
@@ -379,7 +440,8 @@ def hArray_toslice(self):
     """
     return slice(*(self.vec()[0:3]))
 
-def hArray_copy_resize(self,ary):
+
+def hArray_copy_resize(self, ary):
     """
     Retrieve the first element of the currently selected slice from the stored vector.
     """
@@ -387,7 +449,8 @@ def hArray_copy_resize(self,ary):
     ary.copy(self)
     return ary
 
-def hArray_getitem(self,indexlist,asvec=False):
+
+def hArray_getitem(self, indexlist, asvec=False):
     """
     ary[n1,n2,n3]-> return Element with these indices
 
@@ -399,8 +462,8 @@ def hArray_getitem(self,indexlist,asvec=False):
 
     Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
     """
-    ary=self.getSlicedArray(indexlist)
-    size=ary.getSize()
+    ary = self.getSlicedArray(indexlist)
+    size = ary.getSize()
     if size == 0:
         if isinstance(indexlist, slice) and (indexlist.start == indexlist.stop or (indexlist.start is None and indexlist.stop == 0)):
             return ary
@@ -411,7 +474,8 @@ def hArray_getitem(self,indexlist,asvec=False):
     else:
         return ary
 
-def hArray_getSlicedArray(self,indexlist):
+
+def hArray_getSlicedArray(self, indexlist):
     """
     self[n1,n2,n3]-> return Element with these indices
 
@@ -420,72 +484,76 @@ def hArray_getSlicedArray(self,indexlist):
 
     Use array.reshape([dim1,dim2,...,dimN]) to set the dimensions.
     """
-    if type(indexlist)==tuple:
-        indexlist=list(indexlist)
+    if type(indexlist) == tuple:
+        indexlist = list(indexlist)
     else:
-        indexlist=[indexlist]
-    ary=hArray(self)
-    if hasattr(self,"par"):
-        ary.par=self.par
-    ary.__slice__=tuple(indexlist)
-    dimensions=ary.shape()
-    subslice_start=0; subslice_end=-1;
+        indexlist = [indexlist]
+    ary = hArray(self)
+    if hasattr(self, "par"):
+        ary.par = self.par
+    ary.__slice__ = tuple(indexlist)
+    dimensions = ary.shape()
+    subslice_start = 0
+    subslice_end = -1
 #   Now check if there is an ellipsis in the index list, which indicates looping.
-    ellipsiscount=indexlist.count(Ellipsis)
-    if ellipsiscount==0:
-        ellipsislocation=0
-    elif ellipsiscount==1:
-        ellipsislocation=indexlist.index(Ellipsis)
-        if ellipsislocation==0:
-            indexlist[0]=slice(0,None,None) # replace ellipsis with slice
+    ellipsiscount = indexlist.count(Ellipsis)
+    if ellipsiscount == 0:
+        ellipsislocation = 0
+    elif ellipsiscount == 1:
+        ellipsislocation = indexlist.index(Ellipsis)
+        if ellipsislocation == 0:
+            indexlist[0] = slice(0, None, None)  # replace ellipsis with slice
         else:
-            if type(indexlist[ellipsislocation-1]) in [slice,list]: # check if Ellipsis is preceded by a slice specification over which to loop.
-                del indexlist[ellipsislocation] # delete ellipsis
-                ellipsislocation -= 1; #looping is over preceding index
+            if type(indexlist[ellipsislocation - 1]) in [slice, list]:  # check if Ellipsis is preceded by a slice specification over which to loop.
+                del indexlist[ellipsislocation]  # delete ellipsis
+                ellipsislocation -= 1
+                # looping is over preceding index
             else:
-                indexlist[ellipsislocation]=slice(0,None,None) # replace ellipsis with slice
+                indexlist[ellipsislocation] = slice(0, None, None)  # replace ellipsis with slice
     else:
         raise IndexError("only one Ellipsis (...) allowed in index list")
-    nindices=len(indexlist)
-    subslice_level=nindices-1
+    nindices = len(indexlist)
+    subslice_level = nindices - 1
     for i in range(nindices):
-        indexlist[i]=hSliceToNormalValues(indexlist[i],dimensions[i])
-    indexliststarts=map(hArray_return_slice_start,indexlist)
-    lastelement=indexlist[-1]
+        indexlist[i] = hSliceToNormalValues(indexlist[i], dimensions[i])
+    indexliststarts = map(hArray_return_slice_start, indexlist)
+    lastelement = indexlist[-1]
     if ellipsiscount:
-        ellipsiselement=indexlist[ellipsislocation]
-        if ellipsislocation<nindices-1: #The slice to return is itself not a slice over a full dimension, but just a part
-            subslice_start=hArray_return_slice_start(lastelement);
-            subslice_end=hArray_return_slice_end(lastelement)
-            indexlist=indexlist[0:-1]; lastelement=indexlist[-1]
-        else: #Take an entire dimension as a slice to return
-            subslice_start=0
-            subslice_end=1
-        if type(ellipsiselement)==slice: #loop over a slice of a higher index
-            ary.setSubSlice(subslice_start,subslice_end,subslice_level)
-            ary.loop(Vector(int,ellipsislocation,fill=indexliststarts[0:ellipsislocation]),hNone2Value(ellipsiselement.start,0),hNone2Value(ellipsiselement.stop,-1),hNone2Value(ellipsiselement.step,1))
-        elif type(lastelement)==list: # loop over a list of indices
-            ary.setSubSlice(subslice_start,subslice_end,subslice_level)
-            ary.loop(Vector(int,ellipsislocation,fill=indexliststarts[0:ellipsislocation]),Vector(indexlist[ellipsislocation]))
-    elif type(lastelement)==slice: #Non-looping slice
-        ary.setSubSlice(hArray_return_slice_start(lastelement),hArray_return_slice_end(lastelement),subslice_level)
-        ary.setSliceVector(Vector(int,nindices-1,fill=indexliststarts[0:-1]))
-    elif type(lastelement) in [list,IntVec,IntArray]: #make new vector
-        if len(dimensions)==nindices: ## only implemented for last slice.
-            arycopy=hArray(Type=basetype(ary),dimensions=[len(lastelement)])
-            if nindices>1:
-                ary.setSubSlice(subslice_start,subslice_end,subslice_level)
-                ary.setSliceVector(Vector(int,nindices-1,fill=indexliststarts[0:-1]))
-            arycopy.copy(ary,hArray(lastelement),-1)
+        ellipsiselement = indexlist[ellipsislocation]
+        if ellipsislocation < nindices - 1:  # The slice to return is itself not a slice over a full dimension, but just a part
+            subslice_start = hArray_return_slice_start(lastelement)
+            subslice_end = hArray_return_slice_end(lastelement)
+            indexlist = indexlist[0:-1]
+            lastelement = indexlist[-1]
+        else:  # Take an entire dimension as a slice to return
+            subslice_start = 0
+            subslice_end = 1
+        if type(ellipsiselement) == slice:  # loop over a slice of a higher index
+            ary.setSubSlice(subslice_start, subslice_end, subslice_level)
+            ary.loop(Vector(int, ellipsislocation, fill=indexliststarts[0:ellipsislocation]), hNone2Value(ellipsiselement.start, 0), hNone2Value(ellipsiselement.stop, -1), hNone2Value(ellipsiselement.step, 1))
+        elif type(lastelement) == list:  # loop over a list of indices
+            ary.setSubSlice(subslice_start, subslice_end, subslice_level)
+            ary.loop(Vector(int, ellipsislocation, fill=indexliststarts[0:ellipsislocation]), Vector(indexlist[ellipsislocation]))
+    elif type(lastelement) == slice:  # Non-looping slice
+        ary.setSubSlice(hArray_return_slice_start(lastelement), hArray_return_slice_end(lastelement), subslice_level)
+        ary.setSliceVector(Vector(int, nindices - 1, fill=indexliststarts[0:-1]))
+    elif type(lastelement) in [list, IntVec, IntArray]:  # make new vector
+        if len(dimensions) == nindices:  # only implemented for last slice.
+            arycopy = hArray(Type=basetype(ary), dimensions=[len(lastelement)])
+            if nindices > 1:
+                ary.setSubSlice(subslice_start, subslice_end, subslice_level)
+                ary.setSliceVector(Vector(int, nindices - 1, fill=indexliststarts[0:-1]))
+            arycopy.copy(ary, hArray(lastelement), -1)
             return arycopy
         else:
             raise IndexError("list of indices has to be at the position of the last index.")
-    else: # normal integer index
-        ary.setSubSlice(lastelement,lastelement+1,subslice_level)
-        ary.setSliceVector(Vector(int,nindices-1,fill=indexliststarts[0:-1]))
-    return ary;
+    else:  # normal integer index
+        ary.setSubSlice(lastelement, lastelement + 1, subslice_level)
+        ary.setSliceVector(Vector(int, nindices - 1, fill=indexliststarts[0:-1]))
+    return ary
 
-def hArray_setitem(self,dims,fill):
+
+def hArray_setitem(self, dims, fill):
     """
     vec[n1,n2,..] = [0,1,2] -> set slice of array to input vector/value
     vec[indexvector] = val -> set the elements with indices provided in indexvector to the respective values.
@@ -508,34 +576,35 @@ def hArray_setitem(self,dims,fill):
 
 
     """
-    if type(fill) in [list,tuple]:
-        fill=Vector(fill)
+    if type(fill) in [list, tuple]:
+        fill = Vector(fill)
 
-    if type(dims) in [int,long]:
-        hFill(hArray_getSlicedArray(self,dims),fill)
+    if type(dims) in [int, long]:
+        hFill(hArray_getSlicedArray(self, dims), fill)
         return
-    elif type(dims)==tuple:# (multi-d index)
-        if type(dims[-1]) in [list,IntVec]:
-            hSet(hArray_getSlicedArray(self,dims[:-1]),hArray(dims[-1]),fill)
+    elif type(dims) == tuple:  # (multi-d index)
+        if type(dims[-1]) in [list, IntVec]:
+            hSet(hArray_getSlicedArray(self, dims[:-1]), hArray(dims[-1]), fill)
         elif type(dims[-1]) == IntArray:
-            hSet(hArray_getSlicedArray(self,dims[:-1]),dims[-1],fill)
+            hSet(hArray_getSlicedArray(self, dims[:-1]), dims[-1], fill)
         else:
-            hFill(hArray_getSlicedArray(self,dims),fill)
+            hFill(hArray_getSlicedArray(self, dims), fill)
         return
 
     if type(fill) in hAllVectorTypes:
-        fill=hArray(fill)
+        fill = hArray(fill)
 
-    if type(dims) in [list,IntVec]:
-        self.set(hArray(dims),fill)
+    if type(dims) in [list, IntVec]:
+        self.set(hArray(dims), fill)
     elif type(dims) == IntArray:
-        self.set(dims,fill)
-    elif dims == Ellipsis or type(dims)==slice:
-        hFill(hArray_getSlicedArray(self,dims),fill)
+        self.set(dims, fill)
+    elif dims == Ellipsis or type(dims) == slice:
+        hFill(hArray_getSlicedArray(self, dims), fill)
     else:
-        raise IndexError ("Wrong type of index for array: " + str(dims))
+        raise IndexError("Wrong type of index for array: " + str(dims))
 
-def hArray_read(self,datafile,key,block=-1,antenna=-1):
+
+def hArray_read(self, datafile, key, block=-1, antenna=-1):
     """
     array.read(file,"Time",block=-1) -> read key Data Array "Time" from file into array.
 
@@ -546,17 +615,19 @@ def hArray_read(self,datafile,key,block=-1,antenna=-1):
     specified as a list, the read operation will loop over the array
     (if ellipses are used).
     """
-    self.par.filename=datafile["FILENAME"]
-    self.addHistory("read","Reading data from file "+self.par.filename)
-    if type(block) in [int,long]: block=Vector([block])
-    if type(block) in [list,tuple]: block=Vector(block)
+    self.par.filename = datafile["FILENAME"]
+    self.addHistory("read", "Reading data from file " + self.par.filename)
+    if type(block) in [int, long]:
+        block = Vector([block])
+    if type(block) in [list, tuple]:
+        block = Vector(block)
 #    self.par.file=self ??????
 #    datafile.read(key,self,block,antenna)
-    datafile.read(key,self,block)
+    datafile.read(key, self, block)
     return self
 
 
-def hArray_setPar(self,key,value):
+def hArray_setPar(self, key, value):
     """
     array.setPar("keyword",value) -> array.par.keyword=value
 
@@ -570,8 +641,9 @@ def hArray_setPar(self,key,value):
 
     to set the default x-axis values.
     """
-    setattr(self.par,key,value)
+    setattr(self.par, key, value)
     return self
+
 
 class hArray_par:
     """
@@ -580,33 +652,38 @@ class hArray_par:
     command).
     """
     def __repr__(self):
-        s=""
+        s = ""
         for attr in dir(self)[2:]:
-            if not (attr.find("_")==0):
-                s+="par."+str(attr)+" = "+str(getattr(self,attr))+"\n"
+            if not (attr.find("_") == 0):
+                s += "par." + str(attr) + " = " + str(getattr(self, attr)) + "\n"
         return s
+
     def __list__(self):
-        l=[]
+        l = []
         for attr in dir(self)[2:]:
-            if not (attr.find("_")==0):
-                l.append((str(attr),getattr(self,attr)))
+            if not (attr.find("_") == 0):
+                l.append((str(attr), getattr(self, attr)))
         return l
+
     def __dict__(self):
-        d={}
+        d = {}
         for attr in dir(self)[2:]:
-            if not (attr.find("_")==0):
-                d[str(attr)]=getattr(self,attr)
+            if not (attr.find("_") == 0):
+                d[str(attr)] = getattr(self, attr)
         return d
 
-def hArray_setUnit(self,*arg):
+
+def hArray_setUnit(self, *arg):
     self.setUnit_(*arg)
     return self
+
 
 def hArray_mprint(self):
     """ary.mprint() - > print the array in matrix style"""
     self[...].pprint(-1)
 
-def hArray_transpose(self,ary=None):
+
+def hArray_transpose(self, ary=None):
     """
     Usage:
     aryT=ary.Transpose() -> return newly created transposed array from ary
@@ -656,18 +733,22 @@ def hArray_transpose(self,ary=None):
     >> ary.transpose().mprint()
 
     """
-    if ary==None:
-        ary=self.new()
-        dim=self.shape(); ncols=dim[-1]; nrows=dim[-2];
-        dim=dim[:-2]+(ncols,nrows)
+    if ary == None:
+        ary = self.new()
+        dim = self.shape()
+        ncols = dim[-1]
+        nrows = dim[-2]
+        dim = dim[:-2] + (ncols, nrows)
         ary.reshape(dim)
-        hTranspose(ary,self,ncols)
+        hTranspose(ary, self, ncols)
         return ary
     else:
-        dim=ary.shape(); ncols=dim[-1]; nrows=dim[-2];
-        dim=dim[:-2]+[ncols,nrows]
+        dim = ary.shape()
+        ncols = dim[-1]
+        nrows = dim[-2]
+        dim = dim[:-2] + [ncols, nrows]
         self.reshape(dim)
-        hTranspose(self,ary,ncols)
+        hTranspose(self, ary, ncols)
         return self
 
 
@@ -684,21 +765,22 @@ def asharray(self):
     """
     Return the argument as an hArray, if possible, otherwise as list. If None, return None.
     """
-    typ=type(self)
+    typ = type(self)
     if typ in hAllArrayTypes:
         return self
     elif typ in hAllVectorTypes:
         return hArray(self)
     elif typ in hBaseTypes:
         return hArray([self])
-    elif typ==list:
+    elif typ == list:
         return hArray(self)
-    elif typ in [set,tuple]:
+    elif typ in [set, tuple]:
         return hArray(list(self))
-    elif self==None:
+    elif self == None:
         return self
     else:
         return [self]
+
 
 def hArray_toNumpy(self):
     """Returns a copy of the array as a numpy.ndarray object with the correct dimensions."""
@@ -717,16 +799,19 @@ def hArray_toNumpy(self):
 
     return array
 
+
 def hArray_checksum(self):
     """ array.checksum() -> Returns CRC32 checksum of a 'list' representation of the array
     Used for (bug)checking if subsequent calls to the same function with the same inputs yields the same result.
 
     Uses crc32 from the module zlib. Converts array to list, list to string, then takes the checksum of that.
     """
-    from zlib import crc32 # here?
+    from zlib import crc32  # here?
     return hex(crc32(str(self.val())) & 0xffffffff)
 
 # Pickling
+
+
 def hArray_getinitargs(self):
     """Get arguments for hArray constructor.
 
@@ -735,10 +820,12 @@ def hArray_getinitargs(self):
     """
     return ()
 
+
 def hArray_getstate(self):
     """Get current state of hArray object for pickling.
     """
     return (hTypeNamesDictionary[basetype(self)], self.shape(), self.writeRaw())
+
 
 def hArray_setstate(self, state):
     """Restore state of hArray object for unpickling.
@@ -747,24 +834,26 @@ def hArray_setstate(self, state):
     for d in state[1]:
         size *= d
 
-    self.__stored_vector=Vector(eval(state[0]), size)
+    self.__stored_vector = Vector(eval(state[0]), size)
     self.setVector(self.__stored_vector)
     self.reshape(state[1])
     self.readRaw(state[2])
 
-def hArray_hasHeader(self,parameter_name=None):
+
+def hArray_hasHeader(self, parameter_name=None):
     """
     Usage:
 
     ary.hasHeader() -> return true if array has a header par
     ary.getHeader('parameter_name') -> return true if array has a header par and a key word with name parameter_name
     """
-    hasheader=hasattr(self,"par") and hasattr(self.par,"hdr")
-    if type(parameter_name)==str and hasheader:
-        hasheader=self.par.hdr.has_key(parameter_name)
+    hasheader = hasattr(self, "par") and hasattr(self.par, "hdr")
+    if type(parameter_name) == str and hasheader:
+        hasheader = parameter_name in self.par.hdr
     return hasheader
 
-def hArray_setHeader(self,**kwargs):
+
+def hArray_setHeader(self, **kwargs):
     """
     Usage:
 
@@ -773,13 +862,14 @@ def hArray_setHeader(self,**kwargs):
     Set the parameters parN in the header of the array to the values
     valN. The header is stored as a dict in ary.par.hdr.
     """
-    if not hasattr(self,"par"):
-        setattr(self,"par",hArray_par())
-    if not hasattr(self.par,"hdr"):
-        setattr(self.par,"hdr",{})
+    if not hasattr(self, "par"):
+        setattr(self, "par", hArray_par())
+    if not hasattr(self.par, "hdr"):
+        setattr(self.par, "hdr", {})
     self.par.hdr.update(kwargs)
 
-def hArray_getHeader(self,parameter_name=None):
+
+def hArray_getHeader(self, parameter_name=None):
     """
     Usage:
 
@@ -790,22 +880,23 @@ def hArray_getHeader(self,parameter_name=None):
     return the entire dict, if no parameter name is specified. The
     header is stored as a dict in ary.par.hdr.
     """
-    if hasattr(self,"par") and hasattr(self.par,"hdr"):
-        if parameter_name==None:
+    if hasattr(self, "par") and hasattr(self.par, "hdr"):
+        if parameter_name == None:
             return self.par.hdr
-        elif self.par.hdr.has_key(parameter_name):
+        elif parameter_name in self.par.hdr:
             return self.par.hdr[parameter_name]
         else:
-            print "Error: Header keyword ",parameter_name,"not known."
+            print "Error: Header keyword ", parameter_name, "not known."
             return None
 
 
 #------------------------------------------------------------------------
 # Reading and Writing an array
 #------------------------------------------------------------------------
-default_blockedIOnames=set(["par.xvalues"])
+default_blockedIOnames = set(["par.xvalues"])
 
-def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varname='',clearfile=None,blockedIOnames=default_blockedIOnames,ext='.pcr'):
+
+def hArray_write(self, filename, nblocks=1, block=0, dim=None, writeheader=None, varname='', clearfile=None, blockedIOnames=default_blockedIOnames, ext='.pcr'):
     """
     Usage:
 
@@ -884,99 +975,103 @@ def hArray_write(self, filename,nblocks=1,block=0,dim=None,writeheader=None,varn
 
     """
 
-    if type(self)==StringArray:
+    if type(self) == StringArray:
         print "Attention: StringArrays cannot be dumped to disk!"
         return
 
-    #Add proper ending if missing
-    fn,ext = get_filename(filename,ext)
-    binfile=os.path.join(fn,"data.bin")
+    # Add proper ending if missing
+    fn, ext = get_filename(filename, ext)
+    binfile = os.path.join(fn, "data.bin")
 
-    #Check if data and header directory is available
+    # Check if data and header directory is available
     if not os.path.exists(fn):
         os.mkdir(fn)
     elif not os.path.isdir(fn):
-        print "Error: Cannot write File. File",fn,"already exists and is not a directory!"
+        print "Error: Cannot write File. File", fn, "already exists and is not a directory!"
         return
 
-    #Write header file if requested
-    if not (writeheader==False):
-        hArray_writeheader(self,fn,nblocks=nblocks,block=block,dim=dim,varname=varname,blockedIOnames=blockedIOnames,writeheader=writeheader,clearfile=clearfile,ext=ext)
-        if (block==0) and not (clearfile==False):
+    # Write header file if requested
+    if not (writeheader == False):
+        hArray_writeheader(self, fn, nblocks=nblocks, block=block, dim=dim, varname=varname, blockedIOnames=blockedIOnames, writeheader=writeheader, clearfile=clearfile, ext=ext)
+        if (block == 0) and not (clearfile == False):
             if os.path.exists(binfile):
                 os.remove(binfile)
 
     if (clearfile):
         if os.path.exists(binfile):
             os.remove(binfile)
-    self.writefilebinary(binfile,block*self.getSize())
+    self.writefilebinary(binfile, block * self.getSize())
+
 
 class hFileContainer():
     """
     Dummy class to hold a filename where an hArray is stored.
     """
-    def __init__(self,path,name,vector=False):
-        self.path=path
-        self.name=name
-        self.vector=vector
-        self.__hFileContainer__=True
-    def __call__(self,path,name):
-        self.path=path
-        self.name=name
-        self.vector=vector
+    def __init__(self, path, name, vector=False):
+        self.path = path
+        self.name = name
+        self.vector = vector
+        self.__hFileContainer__ = True
+
+    def __call__(self, path, name):
+        self.path = path
+        self.name = name
+        self.vector = vector
 
 
-def hArrayReadDictArray(dictionary,path,block=-1,blockedIOnames=default_blockedIOnames,amalgateblocks=True):
+def hArrayReadDictArray(dictionary, path, block=-1, blockedIOnames=default_blockedIOnames, amalgateblocks=True):
     """
     Recursively goes through a dict (of dicts) and replaces all placeholder (hFileContainer) with hArrays or Vectors read from disk.
     """
-    newdictionary=dictionary.copy()
-    for k,v in newdictionary.items():
-        if hasattr(v,"__hFileContainer__"):
-            filename=os.path.join(path,v.name)
-            parname=v.name[:-4]
+    newdictionary = dictionary.copy()
+    for k, v in newdictionary.items():
+        if hasattr(v, "__hFileContainer__"):
+            filename = os.path.join(path, v.name)
+            parname = v.name[:-4]
             if parname in blockedIOnames:
-                bblock=block
+                bblock = block
             else:
-                bblock=-1
+                bblock = -1
             if v.vector:
-                newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False).vec()
+                newdictionary[k] = hArrayRead(filename, block=bblock, amalgateblocks=amalgateblocks, restorevar=False).vec()
             else:
-                newdictionary[k]=hArrayRead(filename,block=bblock,amalgateblocks=amalgateblocks,restorevar=False)
+                newdictionary[k] = hArrayRead(filename, block=bblock, amalgateblocks=amalgateblocks, restorevar=False)
         elif type(v) == dict:
-            newdictionary[k]=hArrayReadDictArray(v,path)
+            newdictionary[k] = hArrayReadDictArray(v, path)
     return newdictionary
 
-def hArrayWriteDictArray(dictionary,path,prefix,nblocks=1,block=0,writeheader=None,clearfile=None,blockedIOnames=default_blockedIOnames,ext='.pcr'):
+
+def hArrayWriteDictArray(dictionary, path, prefix, nblocks=1, block=0, writeheader=None, clearfile=None, blockedIOnames=default_blockedIOnames, ext='.pcr'):
     """
     Recursively goes through a dict (of dicts) and replaces all values which are hArray with a placeholder and writes the array to disk.
     """
-    newdictionary=dictionary.copy()
-    for k,v in newdictionary.items():
-        if type(v) in [StringArray,StringVec]:
-            newdictionary[k]=list(v)
+    newdictionary = dictionary.copy()
+    for k, v in newdictionary.items():
+        if type(v) in [StringArray, StringVec]:
+            newdictionary[k] = list(v)
         elif type(v) in hAllVectorTypes:
-            parname=prefix+"."+str(k)
-            filename=parname+ext
+            parname = prefix + "." + str(k)
+            filename = parname + ext
             if parname in blockedIOnames:
-                hArray_write(hArray(v), os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
+                hArray_write(hArray(v), os.path.join(path, filename), nblocks=nblocks, block=block, dim=None, writeheader=writeheader, varname=str(k), clearfile=clearfile)
             else:
-                hArray_write(hArray(v), os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
-            newdictionary[k]=hFileContainer(path,filename,vector=True)
+                hArray_write(hArray(v), os.path.join(path, filename), nblocks=1, block=0, dim=None, writeheader=writeheader, varname=str(k), clearfile=clearfile)
+            newdictionary[k] = hFileContainer(path, filename, vector=True)
         elif type(v) in hAllArrayTypes:
-            parname=prefix+"."+str(k)
-            filename=parname+ext
-            filename=prefix+"."+str(k)+ext
+            parname = prefix + "." + str(k)
+            filename = parname + ext
+            filename = prefix + "." + str(k) + ext
             if parname in blockedIOnames:
-                hArray_write(v, os.path.join(path,filename),nblocks=nblocks,block=block,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
+                hArray_write(v, os.path.join(path, filename), nblocks=nblocks, block=block, dim=None, writeheader=writeheader, varname=str(k), clearfile=clearfile)
             else:
-                hArray_write(v, os.path.join(path,filename),nblocks=1,block=0,dim=None,writeheader=writeheader,varname=str(k),clearfile=clearfile)
-            newdictionary[k]=hFileContainer(path,filename)
+                hArray_write(v, os.path.join(path, filename), nblocks=1, block=0, dim=None, writeheader=writeheader, varname=str(k), clearfile=clearfile)
+            newdictionary[k] = hFileContainer(path, filename)
         elif type(v) == dict:
-            newdictionary[k]=hArrayWriteDictArray(v,path,prefix+"."+str(k))
+            newdictionary[k] = hArrayWriteDictArray(v, path, prefix + "." + str(k))
     return newdictionary
 
-def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,blockedIOnames=default_blockedIOnames,writeheader=None,clearfile=None,ext='.pcr'):
+
+def hArray_writeheader(self, filename, nblocks=None, block=0, varname='', dim=None, blockedIOnames=default_blockedIOnames, writeheader=None, clearfile=None, ext='.pcr'):
     """
     Usage:
 
@@ -1019,47 +1114,51 @@ def hArray_writeheader(self, filename,nblocks=None,block=0,varname='',dim=None,b
 
     """
 
-    fn,ext = get_filename(filename,ext)
+    fn, ext = get_filename(filename, ext)
 
     if not os.path.exists(fn):
         os.mkdir(fn)
     elif not os.path.isdir(fn):
-        print "Error: Cannot write header. File",fn,"already exists!"
+        print "Error: Cannot write header. File", fn, "already exists!"
         return
-    f=open(os.path.join(fn,"header.hdr"),"wb")
-    slicelength=self.getEnd()-self.getBegin()
-    if self and hasattr(self,"par"):
-        if hasattr(self.par,"nblocks") and not nblocks:
-            nblocks=self.par.nblocks
-        if hasattr(self.par,"dim") and not dim:
-            dim=self.par.dim
-    if not nblocks: nblocks=1
-    arydim=self.shape()
-    if not slicelength==len(self): arydim=[slicelength]
-    if dim: arydim=dim
-    f.write("# Header for hArray vector written on "+time.ctime()+"\n")
-    f.write("ha_filename = '"+filename+"'\n")
-    f.write("ha_type = "+typename(basetype(self))+"\n")
-    f.write("ha_dim = "+str(arydim)+"\n")
-    f.write("ha_nblocks = "+str(nblocks)+"\n")
-    f.write("ha_name = '" + self.getKey("name")+"'\n")
+    f = open(os.path.join(fn, "header.hdr"), "wb")
+    slicelength = self.getEnd() - self.getBegin()
+    if self and hasattr(self, "par"):
+        if hasattr(self.par, "nblocks") and not nblocks:
+            nblocks = self.par.nblocks
+        if hasattr(self.par, "dim") and not dim:
+            dim = self.par.dim
+    if not nblocks:
+        nblocks = 1
+    arydim = self.shape()
+    if not slicelength == len(self):
+        arydim = [slicelength]
+    if dim:
+        arydim = dim
+    f.write("# Header for hArray vector written on " + time.ctime() + "\n")
+    f.write("ha_filename = '" + filename + "'\n")
+    f.write("ha_type = " + typename(basetype(self)) + "\n")
+    f.write("ha_dim = " + str(arydim) + "\n")
+    f.write("ha_nblocks = " + str(nblocks) + "\n")
+    f.write("ha_name = '" + self.getKey("name") + "'\n")
     if basetype(self) in hNumericalTypes:
-        f.write("ha_units = ('" +self.getUnitPrefix()+"', '" + self.getUnitName()+"')\n")
+        f.write("ha_units = ('" + self.getUnitPrefix() + "', '" + self.getUnitName() + "')\n")
     else:
         f.write("ha_units = None\n")
-    if hasattr(self,"__slice__"):
-        f.write("ha_slice = " + str(self.__slice__)+"\n")
+    if hasattr(self, "__slice__"):
+        f.write("ha_slice = " + str(self.__slice__) + "\n")
     else:
         f.write("ha_slice = None\n")
-    f.write("ha_varname = '" + varname+"'\n")
-    if hasattr(self,"par"):
-        par=hArrayWriteDictArray(self.par.__dict__,fn,"par",nblocks=nblocks,block=block,writeheader=writeheader,clearfile=clearfile,ext=ext)
-        f.write('ha_parameters="""'+pickle.dumps(par)+'"""\n')
+    f.write("ha_varname = '" + varname + "'\n")
+    if hasattr(self, "par"):
+        par = hArrayWriteDictArray(self.par.__dict__, fn, "par", nblocks=nblocks, block=block, writeheader=writeheader, clearfile=clearfile, ext=ext)
+        f.write('ha_parameters="""' + pickle.dumps(par) + '"""\n')
     else:
         f.write('ha_parameters=None\n')
     f.close()
 
-def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blockedIOnames,amalgateblocks=True,ext='.pcr'):
+
+def hArrayRead(filename, block=-1, restorevar=False, blockedIOnames=default_blockedIOnames, amalgateblocks=True, ext='.pcr'):
     """
     Usage::
 
@@ -1114,52 +1213,53 @@ def hArrayRead(filename,block=-1,restorevar=False,blockedIOnames=default_blocked
       y -> hArray(float, [2, 4], name="test" # len=8, slice=[0:8], vec -> [1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0])
 
     """
-    ha_slice=None # Put there to assure backward compatibility
+    ha_slice = None  # Put there to assure backward compatibility
 
-    fn,ext = get_filename(filename,ext)
-    binfile=os.path.join(fn,"data.bin")
-    hdrfile=os.path.join(fn,"header.hdr")
+    fn, ext = get_filename(filename, ext)
+    binfile = os.path.join(fn, "data.bin")
+    hdrfile = os.path.join(fn, "header.hdr")
     if not os.path.exists(fn):
-        print "Error hArrayRead: data directory ",fn," does not exist!"
+        print "Error hArrayRead: data directory ", fn, " does not exist!"
         return -1
     if not os.path.exists(hdrfile):
-        print "Error hArrayRead: data file ",hdrfile," does not exist!"
+        print "Error hArrayRead: data file ", hdrfile, " does not exist!"
         return -1
-    f=open(hdrfile,"rb")
+    f = open(hdrfile, "rb")
     exec f in locals()
     f.close()
-    if ha_nblocks == 1 :
-        block=0
-    if block<0:
+    if ha_nblocks == 1:
+        block = 0
+    if block < 0:
         if amalgateblocks:
-            dim = (ha_dim[0]*ha_nblocks,)+ha_dim[1:]
+            dim = (ha_dim[0] * ha_nblocks,) + ha_dim[1:]
         else:
-            dim = (ha_nblocks,)+ha_dim
-        block=0
+            dim = (ha_nblocks,) + ha_dim
+        block = 0
     else:
-        dim=ha_dim
+        dim = ha_dim
     if ha_parameters:
-        par=pickle.loads(ha_parameters)
-        par=hArrayReadDictArray(par,fn,blockedIOnames=blockedIOnames,amalgateblocks=amalgateblocks)
+        par = pickle.loads(ha_parameters)
+        par = hArrayReadDictArray(par, fn, blockedIOnames=blockedIOnames, amalgateblocks=amalgateblocks)
     else:
-        par=hArray_par()
+        par = hArray_par()
     if ha_slice:
-        ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)[ha_slice]
+        ary = hArray(ha_type, dim, name=ha_name, units=ha_units, par=par)[ha_slice]
     else:
-        ary=hArray(ha_type,dim,name=ha_name,units=ha_units,par=par)
-    ary.par.nblocks=ha_nblocks
-    ary.par.dim=ha_dim
-    if sum(dim)>0:
+        ary = hArray(ha_type, dim, name=ha_name, units=ha_units, par=par)
+    ary.par.nblocks = ha_nblocks
+    ary.par.dim = ha_dim
+    if sum(dim) > 0:
         if not os.path.exists(binfile):
-            print "Error hArrayRead: data file ",binfile," does not exist!"
+            print "Error hArrayRead: data file ", binfile, " does not exist!"
         else:
-            ary.readfilebinary(binfile,block*ary.getSize())
+            ary.readfilebinary(binfile, block * ary.getSize())
 #    if restorevar & (not l["ha_varname"] == ''):
 #        print "Creating new object",l["ha_varname"]
 #        exec ("global "+l["ha_varname"]+"\n"+l["ha_varname"]+" = ary")
     return ary
 
-def get_filename(filename,ext):
+
+def get_filename(filename, ext):
     '''
     Returns the folder name and its proper extention.
 
@@ -1174,13 +1274,14 @@ def get_filename(filename,ext):
     '''
 
     fn = os.path.expandvars(os.path.expanduser(filename))
-    ext=str(ext)
+    ext = str(ext)
     if '.' not in ext:
         ext = '.' + ext
 
     fn = os.path.splitext(fn)[0] + ext
 
-    return fn,ext
+    return fn, ext
+
 
 def ashArray(val):
     """Usage::
@@ -1204,6 +1305,7 @@ def ashArray(val):
     else:
         return hArray([val])
 
+
 def asList(val):
     """Usage::
 
@@ -1223,26 +1325,27 @@ def asList(val):
       [3]
 
     """
-    if type(val)==list:
+    if type(val) == list:
         return val
-    elif type(val)==str:
+    elif type(val) == str:
         return [val]
     else:
         return list(val)
 
-hArray_Find_functions={
-    "=":(hCount,hFind),
-    ">":(hCountGreaterThan,hFindGreaterThan),
-    "<":(hCountLessThan,hFindLessThan),
-    ">=":(hCountGreaterEqual,hFindGreaterEqual),
-    "<=":(hCountLessEqual,hFindLessEqual),
-    "even":(hCountEven,hFindEven),
-    "odd":(hCountOdd,hFindOdd),
-    "between":(hCountBetween,hFindBetween),
-    "outside":(hCountOutside,hFindOutside)
+hArray_Find_functions = {
+    "=": (hCount, hFind),
+    ">": (hCountGreaterThan, hFindGreaterThan),
+    "<": (hCountLessThan, hFindLessThan),
+    ">=": (hCountGreaterEqual, hFindGreaterEqual),
+    "<=": (hCountLessEqual, hFindLessEqual),
+    "even": (hCountEven, hFindEven),
+    "odd": (hCountOdd, hFindOdd),
+    "between": (hCountBetween, hFindBetween),
+    "outside": (hCountOutside, hFindOutside)
     }
 
-def hArray_Find(self,operator,threshold1=None,threshold2=None):
+
+def hArray_Find(self, operator, threshold1=None, threshold2=None):
     """
     Usage:
 
@@ -1268,33 +1371,33 @@ def hArray_Find(self,operator,threshold1=None,threshold2=None):
         >>> v.Find(">",7) -> hArray(int, [2L], fill=[8,9]) # len=2 slice=[0:2])
 
     """
-    #Find how many elements satisfy condition
+    # Find how many elements satisfy condition
     if threshold1 == None:
         n = hArray_Find_functions[operator][0](self)
     elif threshold2 == None:
-        n = hArray_Find_functions[operator][0](self,threshold1)
+        n = hArray_Find_functions[operator][0](self, threshold1)
     else:
-        n = hArray_Find_functions[operator][0](self,threshold1,threshold2)
+        n = hArray_Find_functions[operator][0](self, threshold1, threshold2)
 
-    #Now create a fitting vector or hArray with the right size
+    # Now create a fitting vector or hArray with the right size
     if type(self) in hAllVectorTypes:
-        indexlist=Vector(int,n)
+        indexlist = Vector(int, n)
     elif type(self) in hAllArrayTypes:
-        indexlist=hArray(int,[n[-1]])
+        indexlist = hArray(int, [n[-1]])
     else:
         return None
 
-    #Search and return the respective element indices
+    # Search and return the respective element indices
     if threshold1 == None:
-        hArray_Find_functions[operator][1](indexlist,self)
+        hArray_Find_functions[operator][1](indexlist, self)
     elif threshold2 == None:
-        hArray_Find_functions[operator][1](indexlist,self,threshold1)
+        hArray_Find_functions[operator][1](indexlist, self, threshold1)
     else:
-        hArray_Find_functions[operator][1](indexlist,self,threshold1,threshold2)
+        hArray_Find_functions[operator][1](indexlist, self, threshold1, threshold2)
     return indexlist
 
 
-def hArray_Select(self,*args,**kwargs):
+def hArray_Select(self, *args, **kwargs):
     """
     Usage:
 
@@ -1328,9 +1431,10 @@ def hArray_Select(self,*args,**kwargs):
         a=hArray(['0','1','2']); a.Select("even") -> ['0','2']
 
     """
-    return self[self.Find(*args,**kwargs)]
+    return self[self.Find(*args, **kwargs)]
 
-def hArray_Set(self,value,*args,**kwargs):
+
+def hArray_Set(self, value, *args, **kwargs):
     """
     **Usage:**
 
@@ -1360,84 +1464,93 @@ def hArray_Set(self,value,*args,**kwargs):
         v.Set(-99,">",7) # -> hArray(int, [10L], fill=[0,1,2,3,4,5,6,7,-99,-99]) # len=10 slice=[0:10])
 
     """
-    self.set(self.Find(*args,**kwargs),value)
+    self.set(self.Find(*args, **kwargs), value)
     return self
 
 # Fourier Transforms
-setattr(FloatArray,"fft",hFFTCasa)
+setattr(FloatArray, "fft", hFFTCasa)
 
-setattr(IntArray,"toslice",hArray_toslice)
+setattr(IntArray, "toslice", hArray_toslice)
 
 for v in hAllArrayTypes:
-    setattr(v,"__repr__",hArray_repr)
-    setattr(v,"__getinitargs__",hArray_getinitargs)
-    setattr(v,"__getstate__",hArray_getstate)
-    setattr(v,"__setstate__",hArray_setstate)
-    setattr(v,"__getstate_manages_dict__",1)
-    setattr(v,"toNumpy", hArray_toNumpy)
-    setattr(v,"checksum", hArray_checksum)
-    setattr(v,"setPar",hArray_setPar)
-    setattr(v,"array",hArray_array)
-    setattr(v,"vec",hArray_vec)
-    setattr(v,"val",hArray_val)
-    setattr(v,"new",hArray_new)
-    setattr(v,"none",hArray_none)
-    setattr(v,"read",hArray_read)
-    setattr(v,"list",hArray_list)
-    setattr(v,"write",hArray_write)
-    setattr(v,"writeheader",hArray_writeheader)
-    setattr(v,"mprint",hArray_mprint)
-    setattr(v,"Transpose",hArray_transpose)
-    setattr(v,"copy_resize",hArray_copy_resize)
-    setattr(v,"newreference",hArray_newreference)
-    setattr(v,"getSlicedArray",hArray_getSlicedArray)
-    setattr(v,"__getitem__",hArray_getitem)
-    setattr(v,"__setitem__",hArray_setitem)
-    setattr(v,"setUnit",hArray_setUnit)
-    setattr(v,"hasHeader",hArray_hasHeader)
-    setattr(v,"getHeader",hArray_getHeader)
-    setattr(v,"setHeader",hArray_setHeader)
+    setattr(v, "__repr__", hArray_repr)
+    setattr(v, "__getinitargs__", hArray_getinitargs)
+    setattr(v, "__getstate__", hArray_getstate)
+    setattr(v, "__setstate__", hArray_setstate)
+    setattr(v, "__getstate_manages_dict__", 1)
+    setattr(v, "toNumpy", hArray_toNumpy)
+    setattr(v, "checksum", hArray_checksum)
+    setattr(v, "setPar", hArray_setPar)
+    setattr(v, "array", hArray_array)
+    setattr(v, "vec", hArray_vec)
+    setattr(v, "val", hArray_val)
+    setattr(v, "new", hArray_new)
+    setattr(v, "none", hArray_none)
+    setattr(v, "read", hArray_read)
+    setattr(v, "list", hArray_list)
+    setattr(v, "write", hArray_write)
+    setattr(v, "writeheader", hArray_writeheader)
+    setattr(v, "mprint", hArray_mprint)
+    setattr(v, "Transpose", hArray_transpose)
+    setattr(v, "copy_resize", hArray_copy_resize)
+    setattr(v, "newreference", hArray_newreference)
+    setattr(v, "getSlicedArray", hArray_getSlicedArray)
+    setattr(v, "__getitem__", hArray_getitem)
+    setattr(v, "__setitem__", hArray_setitem)
+    setattr(v, "setUnit", hArray_setUnit)
+    setattr(v, "hasHeader", hArray_hasHeader)
+    setattr(v, "getHeader", hArray_getHeader)
+    setattr(v, "setHeader", hArray_setHeader)
 
 
 for v in hAllContainerTypes:
-    setattr(v,"Find",hArray_Find)
-    setattr(v,"Select",hArray_Select)
-    setattr(v,"Set",hArray_Set)
+    setattr(v, "Find", hArray_Find)
+    setattr(v, "Select", hArray_Select)
+    setattr(v, "Set", hArray_Set)
     for s in hAllContainerMethods:
-        if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning hAllContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        if s in locals():
+            setattr(v, s[1:].lower(), eval(s))
+        else:
+            print "Warning hAllContainerMethods(a): function ", s, " is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
-    setattr(v,"__pow__",Vec_pow)
+    setattr(v, "__pow__", Vec_pow)
     for s in hRealContainerMethods:
-        if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning hRealContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        if s in locals():
+            setattr(v, s[1:].lower(), eval(s))
+        else:
+            print "Warning hRealContainerMethods(a): function ", s, " is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hComplexContainerTypes:
     for s in hComplexContainerMethods:
-        if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning hComplexContainerTypes(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        if s in locals():
+            setattr(v, s[1:].lower(), eval(s))
+        else:
+            print "Warning hComplexContainerTypes(a): function ", s, " is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hNumericalContainerTypes:
-    setattr(v,"__add__",Vec_add)
-    setattr(v,"__radd__",Vec_add)
-    setattr(v,"__sub__",Vec_sub)
-    setattr(v,"__rsub__",Vec_rsub)
-    setattr(v,"__div__",Vec_div)
-    setattr(v,"__rdiv__",Vec_rdiv)
-    setattr(v,"__mul__",Vec_mul)
-    setattr(v,"__rmul__",Vec_mul)
-    setattr(v,"__iadd__",Vec_iadd)
-    setattr(v,"__imul__",Vec_imul)
-    setattr(v,"__idiv__",Vec_idiv)
-    setattr(v,"__isub__",Vec_isub)
+    setattr(v, "__add__", Vec_add)
+    setattr(v, "__radd__", Vec_add)
+    setattr(v, "__sub__", Vec_sub)
+    setattr(v, "__rsub__", Vec_rsub)
+    setattr(v, "__div__", Vec_div)
+    setattr(v, "__rdiv__", Vec_rdiv)
+    setattr(v, "__mul__", Vec_mul)
+    setattr(v, "__rmul__", Vec_mul)
+    setattr(v, "__iadd__", Vec_iadd)
+    setattr(v, "__imul__", Vec_imul)
+    setattr(v, "__idiv__", Vec_idiv)
+    setattr(v, "__isub__", Vec_isub)
     v.phase = hArg
     for s in hNumericalContainerMethods:
-        if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning hNumericalContainerMethods(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+        if s in locals():
+            setattr(v, s[1:].lower(), eval(s))
+        else:
+            print "Warning hNumericalContainerMethods(a): function ", s, " is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hNumericalAndStringContainerTypes:
     for s in hNumericalAndStringContainerMethods:
-        if s in locals(): setattr(v,s[1:].lower(),eval(s))
-        else: print "Warning hNumericalAndStringContainerTypes(a): function ",s," is not defined. Likely due to a missing library in hftools.cc."
-
+        if s in locals():
+            setattr(v, s[1:].lower(), eval(s))
+        else:
+            print "Warning hNumericalAndStringContainerTypes(a): function ", s, " is not defined. Likely due to a missing library in hftools.cc."

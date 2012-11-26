@@ -45,16 +45,16 @@ import iocalibration as ioc
 
 # Defines whether the crfile objects can return the selected RCUs or
 # can only return all of them regardless of selection
-CANNOT_SELECT=True
+CANNOT_SELECT = True
 
 # Use this to force the calibration to be turned off
-TURN_CAL_OFF=False
+TURN_CAL_OFF = False
 
 # standard verbose definition - though I don't check this as much as I ought!
-VERBOSE=True
+VERBOSE = True
 
 # controls whether cable lengths and clock delays have been already accounted for in delay buffers
-SET_CAL_SHIFTS=True
+SET_CAL_SHIFTS = True
 
 
 class calData(interfaces.IObase):
@@ -171,11 +171,10 @@ fftMethod="fftcasa", checkMethod=None, genFFTArray=True)
 
     """
 
-
-    def __init__(self, fileList, antennaSet, blockSize=1024,\
-antennaSelection=None, startBlock=0, filterType='Hanning',\
-calMethod=True, shiftYN=True, forceRCUorder=False,\
-fftMethod='FFTW', checkMethod=None, ownArrays=True,\
+    def __init__(self, fileList, antennaSet, blockSize=1024,
+antennaSelection=None, startBlock=0, filterType='Hanning',
+calMethod=True, shiftYN=True, forceRCUorder=False,
+fftMethod='FFTW', checkMethod=None, ownArrays=True,
 genFFTArray=True, genTimeArray=True, frequencySelection=None,
 fmin=None, fmax=None):
 
@@ -200,17 +199,17 @@ fmin=None, fmax=None):
         if TURN_CAL_OFF:
             if calMethod:
                 print 'Sorry, calibration does not currently work'
-                calMethod=False
+                calMethod = False
 
         # checks for file existence and opens files, returning cr file objects
-        self.crfiles=None
-        self.nFiles=None
-        self.shiftYN=shiftYN
-        self.blockSize=blockSize
-        self.fileList=fileList
+        self.crfiles = None
+        self.nFiles = None
+        self.shiftYN = shiftYN
+        self.blockSize = blockSize
+        self.fileList = fileList
         if startBlock < 0:
             print 'bad startblock specification'
-            startBlock=0
+            startBlock = 0
         self.startBlock = startBlock
         self.currentBlock = startBlock
 
@@ -218,28 +217,28 @@ fmin=None, fmax=None):
         self.initFiles()
 
         # gets file data for th above and checks it is consistent.
-        (nyquistZone, sampleFrequency, frequencyRange)=self.getFileData()
-        self.nyquistZone=nyquistZone
-        self.sampleFrequency=sampleFrequency
-        self.frequencyRange=frequencyRange
+        (nyquistZone, sampleFrequency, frequencyRange) = self.getFileData()
+        self.nyquistZone = nyquistZone
+        self.sampleFrequency = sampleFrequency
+        self.frequencyRange = frequencyRange
 
         # converts specified fft method to something sensible
-        self.fftMethod=self.interpret_fftMethod(fftMethod)
+        self.fftMethod = self.interpret_fftMethod(fftMethod)
 
         # converts specified filter type to something sensible
-        self.filterType=self.interpret_filterType(filterType)
+        self.filterType = self.interpret_filterType(filterType)
 
         # checcking antennaset inputs
         if antennaSet == None:
             print 'we still need to get an antenna set automatically\
  - arbitrarily setting this to LBA Outer'
-            antennaSet="LBA_Outer"
+            antennaSet = "LBA_Outer"
 
         # checking file-list inputs
         if fileList != None:
-            nFiles=len(fileList)
+            nFiles = len(fileList)
         else:
-            nFiles=0
+            nFiles = 0
 
 # sets own values. Some are then altered later, but this is an exhaustive list
         self.ppf = None
@@ -249,28 +248,28 @@ fmin=None, fmax=None):
         self.calMethod = calMethod
         self.checkMethod = checkMethod
         self.antennaSet = antennaSet
-        self.fileList=fileList
+        self.fileList = fileList
         self.readBlocks = 0
         self.timeData = None
         self.freqData = None
-        self.calObject=None
+        self.calObject = None
         self.ready = 0
         self.genFFTArray = genFFTArray
         self.genTimeArray = genTimeArray
-        self.ownArrays=ownArrays
-        self.initialised=False
-        self.relativeAntennaPositions=None
-        self.initialised=False
-        self.forceRCUorder=forceRCUorder
-        self.mapping=None
-        self.opDim=None
+        self.ownArrays = ownArrays
+        self.initialised = False
+        self.relativeAntennaPositions = None
+        self.initialised = False
+        self.forceRCUorder = forceRCUorder
+        self.mapping = None
+        self.opDim = None
 
         self.nSelectedFrequencies = None
         self.frequencyIndices = None
         self.selectFrequencies = False
 
         if self.fftMethod:
-            self.fftSize=self.blockSize/2+1
+            self.fftSize = self.blockSize / 2 + 1
         else:
             self.fftSize = None
 
@@ -283,18 +282,16 @@ fmin=None, fmax=None):
         elif frequencySelection:
             self.setFrequencySelection(frequencySelection)
         else:
-            self.selectFrequencies=False
+            self.selectFrequencies = False
             self.setReturnedFrequencies()
-
-
 
         # checks and gets antenna selection from specified inputs
         # also sets self.RCU selection
         if antennaSelection:
             self.setAntennaSelection(antennaSelection)
         else:
-            self.antennaSelection=None
-            self.nAntennas=None
+            self.antennaSelection = None
+            self.nAntennas = None
 
     def getTimeDim(self):
         """
@@ -327,7 +324,7 @@ fmin=None, fmax=None):
         initialises arrays, caldata objects etc
         This routine only gets called when an antenna selection is made
         """
-        if (self.initialised==True):
+        if (self.initialised == True):
             print 'Already initialised! Memory leaks may be generated'
 
         if not self.antennaSelection:
@@ -338,37 +335,37 @@ fmin=None, fmax=None):
         if self.calMethod:
             self.getCalibrator()
         else:
-            self.calArray=cr.hArray(complex,self.getOPDim(),)
+            self.calArray = cr.hArray(complex, self.getOPDim(),)
 
         self.getAntennaPositions()
 
         ## initialises the filter arrays
         if self.filterType == 'PPF':
             self.ppf = PPF.PPF()
-            self.filter=None
+            self.filter = None
         elif self.filterType == 'HANNING':
-            hfilter=cr.hArray(float,[self.blockSize])
+            hfilter = cr.hArray(float, [self.blockSize])
             hfilter.gethanningfilter()
-            self.filter=hfilter
-            self.ppf=None
+            self.filter = hfilter
+            self.ppf = None
         elif self.filterType == 'NONE':
-            self.filter=None
-            self.ppf=None
+            self.filter = None
+            self.ppf = None
         ## initialises the raw data array ##
         if self.genTimeArray:
-            self.timeData=cr.hArray(float, [self.nAntennas, self.blockSize])
+            self.timeData = cr.hArray(float, [self.nAntennas, self.blockSize])
         else:
             # the time-data array must be provided each time
-            self.timeData=None
+            self.timeData = None
 
         ## initialises the FFT array ##
-        if self.fftMethod=='NONE':
+        if self.fftMethod == 'NONE':
             # we are not returning fft data!
-            self.freqData=None
-            self.allFreqData=None
-            self.opDim=[self.nAntennas, self.blockSize]
+            self.freqData = None
+            self.allFreqData = None
+            self.opDim = [self.nAntennas, self.blockSize]
         else:
-            self.fftSize = self.blockSize/2+1
+            self.fftSize = self.blockSize / 2 + 1
             if self.selectFrequencies:
                 self.opDim = [self.nAntennas, self.nSelectedFrequencies]
             else:
@@ -379,13 +376,13 @@ fmin=None, fmax=None):
                     self.allFreqData = cr.hArray(complex, [self.nAntennas, self.fftSize])
                     self.freqData = cr.hArray(complex, [self.nAntennas, self.nSelectedFrequencies])
                 else:
-                    self.allFreqData=None
+                    self.allFreqData = None
                     self.freqData = cr.hArray(complex, [self.nAntennas, self.fftSize])
             else:
                 self.allFreqData = None
-                self.freqData=None
+                self.freqData = None
 
-        self.initialised=True
+        self.initialised = True
         return None
 
     def interpret_fftMethod(self, fftMethod):
@@ -408,7 +405,7 @@ or fftMethod == 'NONE':
         """
         converts possible filterType specifications into something sensible
         """
-        if filterType == 'None' or filterType==None or filterType == 'none':
+        if filterType == 'None' or filterType == None or filterType == 'none':
             filterType = 'NONE'
         elif filterType == 'Hanning' or filterType == 'hanning':
             filterType = 'HANNING'
@@ -444,11 +441,10 @@ or fftMethod == 'NONE':
         Simply tells the routine to use all available frequencies
         """
 
-        self.frequencyIndices=range(self.fftSize)
-        self.selectFrequencies=False
-        self.nSelectedFrequencies=self.fftSize
+        self.frequencyIndices = range(self.fftSize)
+        self.selectFrequencies = False
+        self.nSelectedFrequencies = self.fftSize
         self.setReturnedFrequencies()
-
 
     def setFrequencyRange(self, selectedfmin, selectedfmax, inclusive=True):
         """
@@ -467,28 +463,28 @@ or fftMethod == 'NONE':
         indices of the freqData array which will be picked out.
         """
 
-        fmin=(self.nyquistZone-1)*self.sampleFrequency
-        fmax=self.nyquistZone*self.sampleFrequency
-        df = self.sampleFrequency/self.fftSize
+        fmin = (self.nyquistZone - 1) * self.sampleFrequency
+        fmax = self.nyquistZone * self.sampleFrequency
+        df = self.sampleFrequency / self.fftSize
 
         if self.fftMethod == 'FFTW':
-            temp=fmin
-            fmin=fmax
-            fmax=temp
+            temp = fmin
+            fmin = fmax
+            fmax = temp
             df = -df
 
-        i1=int((selectedfmin-fmin)/df)
-        i2=int((selectedfmax-fmin)/df)
+        i1 = int((selectedfmin - fmin) / df)
+        i2 = int((selectedfmax - fmin) / df)
 
-        imin=min(i1,i2)
-        imax=max(i1,i2)
+        imin = min(i1, i2)
+        imax = max(i1, i2)
 
 # applies the inclusive/exclusive part, accounts for fs being out of range
         if inclusive:
             if imin < 0:
-                imin=0
-            if imax >= self.fftSize-1:
-                imax = self.fftSize-1
+                imin = 0
+            if imax >= self.fftSize - 1:
+                imax = self.fftSize - 1
             else:
                 imax += 1
         else:
@@ -496,38 +492,37 @@ or fftMethod == 'NONE':
                 imin = 0
             else:
                 imin += 1
-            if imax >= self.fftSize-1:
-                imax = self.fftSize-1
+            if imax >= self.fftSize - 1:
+                imax = self.fftSize - 1
 
         if imax <= imin:
             print 'No frequencies in this range!'
             return None
 
-        ownFreqs = range(imin,imax)
+        ownFreqs = range(imin, imax)
 
-        self.nSelectedFrequencies = imax-imin
-        self.frequencyIndices=ownFreqs
-        self.selectFrequencies=True
+        self.nSelectedFrequencies = imax - imin
+        self.frequencyIndices = ownFreqs
+        self.selectFrequencies = True
         self.setReturnedFrequencies()
-        self.initialised=False
-
+        self.initialised = False
 
     def setFrequencyIndices(self, indices):
         """
         Sets the returned frequencies to the desired indices
         """
-        npi=np.array(indices)
-        correct=np.where(npi >= 0)
-        modindices=indices[correct]
-        correct=np.where(modindices < self.fftSize)
-        modindices=modindices[correct]
+        npi = np.array(indices)
+        correct = np.where(npi >= 0)
+        modindices = indices[correct]
+        correct = np.where(modindices < self.fftSize)
+        modindices = modindices[correct]
         if len(modindices) < len(npi):
             print 'Not all indices were available!'
-        self.nSelectedFrequencies=len(modindices)
-        self.frequencyIndices=modindices
-        self.selectFrequencies=True
+        self.nSelectedFrequencies = len(modindices)
+        self.frequencyIndices = modindices
+        self.selectFrequencies = True
         self.setReturnedFrequencies()
-        self.initialised=False
+        self.initialised = False
 
     def setFrequencySelection(self, frequencySelection, prune=True):
         """
@@ -546,20 +541,20 @@ or fftMethod == 'NONE':
             print 'No selection specified!'
             return None
 
-        fmin=(self.nyquistZone-1)*self.sampleFrequency
-        fmax=self.nyquistZone*self.sampleFrequency
-        df = self.sampleFrequency/self.fftSize
+        fmin = (self.nyquistZone - 1) * self.sampleFrequency
+        fmax = self.nyquistZone * self.sampleFrequency
+        df = self.sampleFrequency / self.fftSize
 
         if self.fftMethod == 'FFTW':
-            temp=fmin
-            fmin=fmax
-            fmax=temp
+            temp = fmin
+            fmin = fmax
+            fmax = temp
             df = -df
 
-        ownFreqs=range(fmin, fmax, df)
-        frequencyIndices=[]
+        ownFreqs = range(fmin, fmax, df)
+        frequencyIndices = []
         for f in frequencySelection:
-            findex = int((f-fmin)/df)
+            findex = int((f - fmin) / df)
             if not (findex in frequencyIndices) or not prune:
                 if findex >= 0 and findex < fftSize:
                     frequencyIndices.append(findex)
@@ -573,10 +568,10 @@ or fftMethod == 'NONE':
         if prune and self.nSelectedFrequencies == range(self.fftSize):
             print 'All frequencies selected! This is being wasteful! (idiot...)'
 
-        self.frequencyIndices=frequencyIndices
-        self.selectFrequencies=True
+        self.frequencyIndices = frequencyIndices
+        self.selectFrequencies = True
         self.setReturnedFrequencies()
-        self.initialised=False
+        self.initialised = False
 
     def getFrequencies(self):
         """
@@ -591,23 +586,23 @@ or fftMethod == 'NONE':
         returned fftData and sets
         """
         if self.fftMethod == 'None':
-            frequencies=None
+            frequencies = None
         elif self.fftMethod == 'FFTW':
-            f1=self.nyquistZone*self.sampleFrequency/2.
-            f2=(self.nyquistZone-1)*self.sampleFrequency/2.
-            df=(f2-f1)/(self.fftSize-1.)
-            frequencies=iof.frange(f1,f2+df/2.,df)
+            f1 = self.nyquistZone * self.sampleFrequency / 2.
+            f2 = (self.nyquistZone - 1) * self.sampleFrequency / 2.
+            df = (f2 - f1) / (self.fftSize - 1.)
+            frequencies = iof.frange(f1, f2 + df / 2., df)
         else:
-            f1=(self.nyquistZone-1)*self.sampleFrequency/2.
-            f2=self.nyquistZone*self.sampleFrequency/2.
-            df=(f2-f1)/(self.fftSize-1)
-            frequencies=iof.frange(f1,f2+df/2.,df)
+            f1 = (self.nyquistZone - 1) * self.sampleFrequency / 2.
+            f2 = self.nyquistZone * self.sampleFrequency / 2.
+            df = (f2 - f1) / (self.fftSize - 1)
+            frequencies = iof.frange(f1, f2 + df / 2., df)
         if self.selectFrequencies:
-            self.frequencies=[]
+            self.frequencies = []
             for index in self.frequencyIndices:
                 self.frequencies.append(frequencies[index])
         else:
-            self.frequencies=frequencies
+            self.frequencies = frequencies
         #    self.frequencies=frequencies[self.frequencyIndices]
 
     def initStupidSelection(self):
@@ -615,41 +610,40 @@ or fftMethod == 'NONE':
         Initialises methods and data for the current IO which can not return data for specific
         antennas only. Yes, it IS retarded.
         """
-        self.totalAntennas=[]
+        self.totalAntennas = []
 
         for thefile in self.crfiles:
             self.totalAntennas.append(thefile.get("nofAntennas"))
 
-        self.maxUnselectedAnts=max(self.totalAntennas)
+        self.maxUnselectedAnts = max(self.totalAntennas)
 
-        self.unselectedData=cr.hArray(float,[self.maxUnselectedAnts, self.blockSize])
-
+        self.unselectedData = cr.hArray(float, [self.maxUnselectedAnts, self.blockSize])
 
     def setBlock(self, block=None):
         """
         Sets the first block to be read, with '0' being 'start from the beginning'
         """
         if not block:
-            block=self.startBlock
+            block = self.startBlock
         for crfile in self.crfiles:
-            crfile.set("block",block)
+            crfile.set("block", block)
 
     def setBlockSize(self, blockSize=None):
         """
         Sets the block size, using the internal value as default
         """
         if not blockSize:
-            blockSize=self.blockSize
+            blockSize = self.blockSize
         for crfile in self.crfiles:
-            crfile["blocksize"]=blockSize
+            crfile["blocksize"] = blockSize
 
     def openFiles(self):
         """This function opens files using the cr.crfile(filename) method
 
         """
-        fileList=self.fileList
-        listoffiles=[]
-        files=[]
+        fileList = self.fileList
+        listoffiles = []
+        files = []
         ##### APPLY A CHECK TO SEE IF THE FILES EXISTS FIRST!!!!! ########
 
         for filename in fileList:
@@ -659,9 +653,9 @@ or fftMethod == 'NONE':
             else:
                 print 'file ', filename, ' can not be found'
 
-        self.nFiles=len(files)
-        self.crfiles=files
-        self.fileList=listoffiles
+        self.nFiles = len(files)
+        self.crfiles = files
+        self.fileList = listoffiles
 
     def setAntennaSelection(self, SelAntIDs=None):
         """Sets the antenna selection used in subsequent calls to
@@ -686,65 +680,65 @@ or fftMethod == 'NONE':
         sure we are sufficiently careful!
         """
 
-        if SelAntIDs=='ALL' or SelAntIDs=='all' or SelAntIDs == None\
+        if SelAntIDs == 'ALL' or SelAntIDs == 'all' or SelAntIDs == None\
 or SelAntIDs == 'All':
-            SelAntIDs=='All'
-            self.forceRCUorder=False
+            SelAntIDs == 'All'
+            self.forceRCUorder = False
 
         # bool to tell if any duplicate entries have been detected
-        duplicates=False
+        duplicates = False
 
     #   generates a 1-D list of RCU numbers from all the files in order
-        allRCU_1Ds=[]
-        allRCU_2Ds=[]
+        allRCU_1Ds = []
+        allRCU_2Ds = []
 
         for i in range(self.nFiles):
-            theseIDs=self.crfiles[i].get("antennaIDs")
+            theseIDs = self.crfiles[i].get("antennaIDs")
             allRCU_2Ds.append(theseIDs)
             for ID in theseIDs:
                 if ID in allRCU_1Ds:
                     if not duplicates:
                         print 'warning - duplicate RCU detected'
-                        duplicates=True
+                        duplicates = True
                 allRCU_1Ds.append(ID)
-        selection=[]
-        selection2D=[]
-        RCUSelection=[]
-        RCUSelection2D=[]
+        selection = []
+        selection2D = []
+        RCUSelection = []
+        RCUSelection2D = []
 
-        if (SelAntIDs=='All'):
+        if (SelAntIDs == 'All'):
             # uses all of them by default
-            selection=range(len(allRCU_1Ds))
-            self.antennaSelection=selection
-            self.RCUSelection=allRCU_1Ds
+            selection = range(len(allRCU_1Ds))
+            self.antennaSelection = selection
+            self.RCUSelection = allRCU_1Ds
             SelAntIDs = selection
             for crfile in self.crfiles:
                 selection2D.append(range(crfile.get("nofAntennas")))
-            self.antennaSelection2D=selection2D
-            self.RCUSelection2D=allRCU_2Ds
+            self.antennaSelection2D = selection2D
+            self.RCUSelection2D = allRCU_2Ds
         elif SelAntIDs[0] > 1000:
             # specified by RCU number
-            for (num,ant) in enumerate(allRCU_1Ds):
+            for (num, ant) in enumerate(allRCU_1Ds):
                 if ant in SelAntIDs:
                     selection.append(num)
                     RCUSelection.append(ant)
 
-            for (i,IDs) in enumerate(allRCU_2Ds):
+            for (i, IDs) in enumerate(allRCU_2Ds):
                 selection2D.append([])
                 RCUSelection2D.append([])
                 for (j, ID) in enumerate(IDs):
                     if ID in SelAntIDs:
                         selection2D[i].append(j)
                         RCUSelection2D[i].append(ID)
-            self.antennaSelection2D=selection2D
-            self.RCUSelection2D=RCUSelection2D
-            self.antennaSelection=selection
-            self.RCUSelection=RCUSelection
+            self.antennaSelection2D = selection2D
+            self.RCUSelection2D = RCUSelection2D
+            self.antennaSelection = selection
+            self.RCUSelection = RCUSelection
 
         else:
             # specified by integer numbers in the file
-            nAvailable=len(allRCU_1Ds)
-            maxRequired=max(SelAntIDs)
+            nAvailable = len(allRCU_1Ds)
+            maxRequired = max(SelAntIDs)
             if nAvailable < maxRequired:
                 print 'Not enough antennas to satisfy request'
                 for ID in SelAntIDs:
@@ -753,30 +747,30 @@ or SelAntIDs == 'All':
                     else:
                         print 'Antenna number ', ID, ' unavailable'
             else:
-                selection=SelAntIDs
+                selection = SelAntIDs
 
             self.antennaSelection = selection
-            start=0
-            for (i,IDs) in enumerate(allRCU_2Ds):
+            start = 0
+            for (i, IDs) in enumerate(allRCU_2Ds):
                 selection2D.append([])
                 RCUSelection2D.append([])
-                these=range(start,start+len(IDs))
+                these = range(start, start + len(IDs))
                 for sel in self.antennaSelection:
                     if sel in these:
                         selection2D[i].append(sel)
                         RCUSelection2D[i].append(allRCU_2Ds[i][sel])
-            self.antennaSelection2D=selection2D
+            self.antennaSelection2D = selection2D
 
-            self.RCUSelection=[]
+            self.RCUSelection = []
             for ID in self.antennaSelection:
                 self.RCUSelection.append(allRCU_1Ds[ID])
 
         if duplicates:
-            temp_selection=[]
-            temp_selection2D=[]
-            temp_RCUSelection=[]
-            temp_RCUSelection2D=[]
-            for (num1,ID1) in enumerate(self.antennaSelection2D):
+            temp_selection = []
+            temp_selection2D = []
+            temp_RCUSelection = []
+            temp_RCUSelection2D = []
+            for (num1, ID1) in enumerate(self.antennaSelection2D):
                 temp_RCUSelection2D.append([])
                 temp_selection2D.append([])
                 for (num2, ID2) in enumerate(ID1):
@@ -785,10 +779,10 @@ or SelAntIDs == 'All':
                         temp_RCUSelection.append(self.RCUSelection2D[num1][num2])
                         temp_RCUSelection2D[num1].append(self.RCUSelection2D[num1][num2])
                         temp_selection2D[num1].append(ID2)
-            self.RCUSelection2D=temp_RCUSelection2D
-            self.RCUSelection=temp_RCUSelection
-            self.antennaSelection=temp_selection
-            self.antennaSelection2D=temp_selection2D
+            self.RCUSelection2D = temp_RCUSelection2D
+            self.RCUSelection = temp_RCUSelection
+            self.antennaSelection = temp_selection
+            self.antennaSelection2D = temp_selection2D
 
         if not len(self.antennaSelection) == len(SelAntIDs):
             print 'some RCU numbers could not be found'
@@ -796,41 +790,40 @@ or SelAntIDs == 'All':
         #           if not (ID in self.antennaSelection or ID in self.RCUSelection):
         #               print 'Requested RCU ', ID, ' not present'
 
-        self.nAntennas=len(self.antennaSelection)
+        self.nAntennas = len(self.antennaSelection)
         if self.forceRCUorder:
             generate_mapping(SelAntIDs)
         else:
-            self.mapping=None
-
+            self.mapping = None
 
     def generate_mapping(self, orderedIDs):
         """
         generates a map that says that the xth requested antenna can be found
         in the yth crfile at position z, via an array of A[x]=[y,z]
         """
-        mapping=[]
-        allids=[]
+        mapping = []
+        allids = []
         for crfile in self.crfiles:
             allids.append(crfile.get("antennaIDs"))
         if orderedIDs[0] > 1000:
             ### RCU numbers
             for rcu in orderedIDs:
-                for (anum,ifile) in allids:
-                    for (num,ant) in enumerate(ifile):
+                for (anum, ifile) in allids:
+                    for (num, ant) in enumerate(ifile):
                         if ant == rcu:
-                            mapping.append[anum,num]
+                            mapping.append[anum, num]
         else:
             for ID in orderedIDs:
-                start=0
-                for (anum,ifile) in allids:
-                    length=len(ifile)
-                    for (num,ant) in enumerate(range(start,start+length)):
+                start = 0
+                for (anum, ifile) in allids:
+                    length = len(ifile)
+                    for (num, ant) in enumerate(range(start, start + length)):
                         if ant == ID:
-                            mapping.append[anum,num]
+                            mapping.append[anum, num]
                     start += length
-        self.mapping=mapping
+        self.mapping = mapping
 
-    def setAntennaSet(self, antennaSet = "LBA_Outer"):
+    def setAntennaSet(self, antennaSet="LBA_Outer"):
         """ sets the antenna set - currently, no method to do this
         automatically, which should be chaged. Stupid thing!
         Sets it to LBA_Outer automatically now
@@ -852,26 +845,26 @@ or SelAntIDs == 'All':
         frequencyRange = self.crfiles[0].frequencyRange
 
         if (self.nFiles > 1):
-            for i in range(self.nFiles-1):
-                if (not nyquistZone == None) and (not self.crfiles[i+1].nyquistZone == nyquistZone):
+            for i in range(self.nFiles - 1):
+                if (not nyquistZone == None) and (not self.crfiles[i + 1].nyquistZone == nyquistZone):
                     print 'Nyquist zones differ between files'
                     nyquistZone = None
-                if (not sampleFrequency == None) and (not self.crfiles[i+1].sampleFrequency == sampleFrequency):
+                if (not sampleFrequency == None) and (not self.crfiles[i + 1].sampleFrequency == sampleFrequency):
                     print 'sampleFrequencies differ between files'
-                    sampleFrequency=None
-                if (not frequencyRange == None) and (not self.crfiles[i+1].frequencyRange == frequencyRange):
+                    sampleFrequency = None
+                if (not frequencyRange == None) and (not self.crfiles[i + 1].frequencyRange == frequencyRange):
                     print 'frequencyRanges differ between files'
-                    frequencyRange=None
+                    frequencyRange = None
 
         # gets the minimum number of blocks
-        self.nBlocks=999999999
+        self.nBlocks = 999999999
         for i in range(self.nFiles):
-            size=self.crfiles[i].filesize/self.crfiles[i].nofAntennas/self.blockSize
+            size = self.crfiles[i].filesize / self.crfiles[i].nofAntennas / self.blockSize
             if size < self.nBlocks:
-                self.nBlocks=size
-        self.nyquistZone=nyquistZone
-        self.sampleFrequency=sampleFrequency
-        self.frequencyRange=frequencyRange
+                self.nBlocks = size
+        self.nyquistZone = nyquistZone
+        self.sampleFrequency = sampleFrequency
+        self.frequencyRange = frequencyRange
 
         return (nyquistZone, sampleFrequency, frequencyRange)
 
@@ -896,7 +889,7 @@ or SelAntIDs == 'All':
         if self.RCUSelection == None or self.antennaSet == None:
             print 'Not enough info - please specify antennaSet and RCUSelection'
             return None
-        if self.relativeAntennaPositions==None:
+        if self.relativeAntennaPositions == None:
             self.relativeAntennaPositions = md.get("RelativeAntennaPositions", self.RCUSelection, self.antennaSet, True)
 
         return self.relativeAntennaPositions
@@ -917,7 +910,7 @@ or SelAntIDs == 'All':
             print 'can not get calibrator - no antenna set specified!'
             return None
         else:
-            self.calObject=ioCal.AntennaCalibration(self.crfiles,self.antennaSet,self.antennaSelection)
+            self.calObject = ioCal.AntennaCalibration(self.crfiles, self.antennaSet, self.antennaSelection)
 
     def applyShifts(self):
         """
@@ -925,34 +918,34 @@ or SelAntIDs == 'All':
         all antennas. It shifts everything relative to the earliest
         start time.
         """
-        crfiles=self.crfiles
-        nFiles=self.nFiles
+        crfiles = self.crfiles
+        nFiles = self.nFiles
         print crfiles, 'look here!!!'
-        times=iof.get(crfiles,"TIME", False)
-        tmin=times.min()
-        tmax=times.max()
-        #time stamp cannot be handled by integer function
-        assert tmax -tmin < 22
+        times = iof.get(crfiles, "TIME", False)
+        tmin = times.min()
+        tmax = times.max()
+        # time stamp cannot be handled by integer function
+        assert tmax - tmin < 22
 
-        shifts=[]
+        shifts = []
         for i in range(nFiles):
 #           crfiles[i]["blocksize"]=self.blockSize
             shifts.append(crfiles[i]["SAMPLE_NUMBER"])
-            shifts[i].muladd(crfiles[i]["TIME"]-tmin,\
-cr.Vector(int,crfiles[i]["nofSelectedAntennas"], int(crfiles[i]["sampleFrequency"])))
+            shifts[i].muladd(crfiles[i]["TIME"] - tmin,
+cr.Vector(int, crfiles[i]["nofSelectedAntennas"], int(crfiles[i]["sampleFrequency"])))
 
 # search for maximum in shifts
-        shiftmax=0
-        for i in range(0,nFiles):
-            localmax=shifts[i].max()
-            if localmax>shiftmax:
-                shiftmax=localmax
+        shiftmax = 0
+        for i in range(0, nFiles):
+            localmax = shifts[i].max()
+            if localmax > shiftmax:
+                shiftmax = localmax
 
-        for i in range(0,nFiles):
-            shifts2=[]
-            for j in range(0,len(shifts[i])):
-                shifts2.append(shiftmax-shifts[i][j])
-            crfiles[i]["ShiftVector"]=shifts2
+        for i in range(0, nFiles):
+            shifts2 = []
+            for j in range(0, len(shifts[i])):
+                shifts2.append(shiftmax - shifts[i][j])
+            crfiles[i]["ShiftVector"] = shifts2
 
     ###########
     def assignArrays(self, timeData=None, finalFreqData=None, tempFreqData=None):
@@ -969,16 +962,16 @@ cr.Vector(int,crfiles[i]["nofSelectedAntennas"], int(crfiles[i]["sampleFrequency
 ' - must be a cr.FloatArray with dimensions ', self.timeDim
                 return None
         else:
-            timeData=self.timeData
+            timeData = self.timeData
             if not self.timeData:
                 print 'No array for time-domain data specified! Please call with timeData set'
                 return None
 
         ### handles temp data correctly ###
-        if self.fftMethod=='None':
+        if self.fftMethod == 'None':
             if tempFreqData:
                 print 'warning: No fft specified - the provided freq data will not be altered'
-                tempFreqData=None
+                tempFreqData = None
         else:
             if tempFreqData:
                 if not self.selectFrequencies:
@@ -989,31 +982,30 @@ tempFreqData.getDim() == [self.nAntennas, self.fftSize]:
                     pass
                 else:
                     print 'incorrect temp freq specification'
-                    tempFreqData=None
+                    tempFreqData = None
             elif self.selectFrequencies == True:
-                tempFreqData=self.allFreqData
+                tempFreqData = self.allFreqData
             else:
                 print 'it is false!'
-                tempFreqData=self.freqData
+                tempFreqData = self.freqData
 
         ### handles final frequency data ###
         if self.fftMethod == 'None':
             if finalFreqData:
                 print 'warning: No fft specified - the provided freq data will not be altered'
-                finalFreqData=None
+                finalFreqData = None
         elif finalFreqData:
-            if (isinstance(finalFreqData, cr.ComplexArray) and\
+            if (isinstance(finalFreqData, cr.ComplexArray) and
 finalFreqData.getDim() == self.getOPDim()):
                 pass
             else:
                 print 'incorrect freqData specified',\
 ' - must be a cr.FloatArray with dimensions ', self.getOPDim()
-                finalFreqData=None
+                finalFreqData = None
         else:
-            finalFreqData=self.freqData
+            finalFreqData = self.freqData
 
         return (timeData, finalFreqData, tempFreqData)
-
 
     def getAntennaSelection(self, RCUs=False, return2D=True):
         """
@@ -1029,14 +1021,14 @@ finalFreqData.getDim() == self.getOPDim()):
 
         if RCUs:
             if return2D:
-                toreturn=self.RCUSelection2D
+                toreturn = self.RCUSelection2D
             else:
-                toreturn=self.RCUSelection
+                toreturn = self.RCUSelection
         else:
             if return2D:
-                toreturn=self.antennaSelection2D
+                toreturn = self.antennaSelection2D
             else:
-                toreturn=self.antennaSelection
+                toreturn = self.antennaSelection
         return toreturn
 
     def getFFTData(self, timeData=None, finalFreqData=None, allFreqData=None):
@@ -1061,8 +1053,7 @@ finalFreqData.getDim() == self.getOPDim()):
             print 'Object not initialised - cannot return data'
             return None
 
-
-        (timeData,finalFreqData, freqData) = self.assignArrays(timeData, finalFreqData, allFreqData)
+        (timeData, finalFreqData, freqData) = self.assignArrays(timeData, finalFreqData, allFreqData)
 # sets the crfile object antenna selection and reads in the data
 
         self.getTimeData(timeData, self.currentBlock)
@@ -1085,7 +1076,7 @@ finalFreqData.getDim() == self.getOPDim()):
 # performs the Fourier Transform if appllicable
         if self.fftMethod == 'CASA':
             # note here that the ... will loop over antennas in the antenna selection
-            freqData[...].fftcasa(timeData[...],self.nyquistZone)
+            freqData[...].fftcasa(timeData[...], self.nyquistZone)
         elif self.fftMethod == 'FFTW':
             freqData[...].fftw(timeData[...])
         else:
@@ -1099,13 +1090,12 @@ finalFreqData.getDim() == self.getOPDim()):
         # returns only some frequency data. Needless to say, this is very wasteful!
         if self.selectFrequencies:
             for i in range(self.nAntennas):
-                finalFreqData[i].copy(freqData[i,self.frequencyIndices])
-            #finalFreqData[...].copy(freqData[...,self.frequencyIndices])
+                finalFreqData[i].copy(freqData[i, self.frequencyIndices])
+            # finalFreqData[...].copy(freqData[...,self.frequencyIndices])
         else:
-            finalFreqData=freqData
+            finalFreqData = freqData
 
         return finalFreqData
-
 
     def getFrequencies(self):
         """
@@ -1120,18 +1110,17 @@ finalFreqData.getDim() == self.getOPDim()):
         Artificially applies data selection the LONG way, unless all data is required
         Eventually, this function will be removed (I hope!).
         """
-        nants=crfile.get("nofAntennas")
+        nants = crfile.get("nofAntennas")
         if selection == range(nants):
-            timeData[starti:starti + nants].read(crfile,"Fx")
+            timeData[starti:starti + nants].read(crfile, "Fx")
         else:
             if not self.unselectedData:
-                self.unselectedData = cr.hArray(float,[self.maxUnselectedAnts, self.blockSize])
+                self.unselectedData = cr.hArray(float, [self.maxUnselectedAnts, self.blockSize])
 
             self.unselectedData[0:crfile.get("nofAntennas")].read(crfile, "Fx")
 
-            for j,which in enumerate(selection):
-                timeData[starti+j].copy(self.unselectedData[which])
-
+            for j, which in enumerate(selection):
+                timeData[starti + j].copy(self.unselectedData[which])
 
     def getTimeData(self, timeData=None, block=None):
         """
@@ -1141,46 +1130,46 @@ finalFreqData.getDim() == self.getOPDim()):
             self.initialise()
 
         if not block:
-            block=self.currentBlock
+            block = self.currentBlock
 
         if not timeData:
-            timeData=self.assignArrays()[0]
+            timeData = self.assignArrays()[0]
 
         self.setBlock(block)
 
-        #gets the right time data array to read in to
+        # gets the right time data array to read in to
         if not timeData:
             if not self.timeData:
                 print 'no time data array specified - please do so!'
                 return None
             else:
-                timeData=self.timeData
+                timeData = self.timeData
 
         # this forces the output order to be in the same order as the requested inputs
         # the mapping reminds us which file and antenna to get what data from
         if self.forceRCUorder:
-            for j,themap in enumerate(mapping):
+            for j, themap in enumerate(mapping):
                 if CANNOT_SELECT:
-                    self.getSelectedData(timeData, j, crfile[themap[0]],[themap[1]])
+                    self.getSelectedData(timeData, j, crfile[themap[0]], [themap[1]])
                 else:
                     self.crfiles[themap[0]].set("antennaSelection", [themap[1]])
-                    timeData[j].read(crfiles[themap[0]],"Fx")
+                    timeData[j].read(crfiles[themap[0]], "Fx")
         else:
-            start=0
-            end=0
+            start = 0
+            end = 0
             for i in range(self.nFiles):
                 end += len(self.antennaSelection2D[i])
                 if CANNOT_SELECT:
-                    self.getSelectedData(timeData, start,self.crfiles[i], self.antennaSelection2D[i])
+                    self.getSelectedData(timeData, start, self.crfiles[i], self.antennaSelection2D[i])
                 else:
-                    timeData[start:end].read(self.crfiles[i],"Fx")
+                    timeData[start:end].read(self.crfiles[i], "Fx")
                 start = end
 
     def setCalibration(self):
         """
         defines the calibration matrix for the chosen frequencies and antennas
         """
-        self.calibrator=ioc.AntennaCalibration(self.crfiles, self.antennaSet)
+        self.calibrator = ioc.AntennaCalibration(self.crfiles, self.antennaSet)
 
     def getCalibrator(self):
         """
@@ -1195,67 +1184,68 @@ finalFreqData.getDim() == self.getOPDim()):
         # CableDelays
         # calculates the delay time in terms of whole numbers of samples
         # (CableTimeDelays) and fractions (CableFractionalDelays)
-        CableDelays=md.get("CableDelays",self.RCUSelection,self.antennaSet,True)
-        CableFractionalDelays=CableDelays.new()
-        CableFractionalDelays.fmod(CableDelays,1./self.sampleFrequency)
-        CableTimeDelays=CableDelays.new()
-        CableTimeDelays.sub(CableDelays,CableFractionalDelays)
+        CableDelays = md.get("CableDelays", self.RCUSelection, self.antennaSet, True)
+        CableFractionalDelays = CableDelays.new()
+        CableFractionalDelays.fmod(CableDelays, 1. / self.sampleFrequency)
+        CableTimeDelays = CableDelays.new()
+        CableTimeDelays.sub(CableDelays, CableFractionalDelays)
 
         # Clock Offsets
         # gets the clock offsets, and converts them into whole and fractional
         # parts of the sampling time, as with the cable delays above
-        ClockDelays=md.get("ClockCorrection",self.RCUSelection,self.antennaSet,True)
-        ClockFractionalDelays=ClockDelays.new()
-        ClockFractionalDelays.fmod(ClockDelays,1./self.sampleFrequency)
-        ClockTimeDelays=ClockDelays.new()
-        ClockTimeDelays.sub(ClockDelays,ClockFractionalDelays)
+        ClockDelays = md.get("ClockCorrection", self.RCUSelection, self.antennaSet, True)
+        ClockFractionalDelays = ClockDelays.new()
+        ClockFractionalDelays.fmod(ClockDelays, 1. / self.sampleFrequency)
+        ClockTimeDelays = ClockDelays.new()
+        ClockTimeDelays.sub(ClockDelays, ClockFractionalDelays)
 
     #### Calculates and applies the total shift (coarse calibration) ####
         # note that this can already be done in delay buffers, so in general
         # this method is turned off
         if SET_CAL_SHIFTS:
-            totalShift=ClockTimeDelays.new()
+            totalShift = ClockTimeDelays.new()
             totalShift.copy(ClockTimeDelays)
 
-            nrAnts=iof.get(self.crfiles,"nofSelectedAntennas",True)
+            nrAnts = iof.get(self.crfiles, "nofSelectedAntennas", True)
 
-            allinitialShift=cr.hArray(iof.get(self.crfiles,"shift",False))
+            allinitialShift = cr.hArray(iof.get(self.crfiles, "shift", False))
             allinitialShift.add(totalShift)
-            shifts=[]
-            startAnt=0
-            endAnt=0
-            for num,nAnts in enumerate(nrAnts):
-                startAnt=endAnt
-                endAnt+=nAnts
+            shifts = []
+            startAnt = 0
+            endAnt = 0
+            for num, nAnts in enumerate(nrAnts):
+                startAnt = endAnt
+                endAnt += nAnts
                 shifts.append(allinitialShift[startAnt:endAnt].val())
-            iof.set(self.crfiles,"shiftVector",shifts)
+            iof.set(self.crfiles, "shiftVector", shifts)
 
     #### calculates the fractional shift ####
     # retrieves an array of nSelectedAntennas x n SelectedFrequencies
 
         # gets the fine phase calibration table for the standard frequencies
-        rawCalTable=md.get("StationPhaseCalibration", self.RCUSelection, self.antennaSet, True)
+        rawCalTable = md.get("StationPhaseCalibration", self.RCUSelection, self.antennaSet, True)
 
         # gets the standard 512 frequencies of the normal data channels
-        fullFreqs=range((self.nyquistZone-1)*self.sampleFrequency/2., (self.nyquistZone-1./512.)*self.sampleFrequency/2., self.sampleFrequency/(1024.))
+        fullFreqs = range((self.nyquistZone - 1) * self.sampleFrequency / 2., (self.nyquistZone - 1. / 512.) * self.sampleFrequency / 2., self.sampleFrequency / (1024.))
 
         # interpolates the raw cal table for the selected frequencies over all antennas
-        self.calTable=iof.getInterpolatedCalTable(rawCalTable, fullFreqs, range(self.nAntennas), self.frequencies)
+        self.calTable = iof.getInterpolatedCalTable(rawCalTable, fullFreqs, range(self.nAntennas), self.frequencies)
 
         # calculates the total fractional delay excess in seconds
-        totalFractionalDelays=ClockFractionalDelays.new()
+        totalFractionalDelays = ClockFractionalDelays.new()
         totalFractionalDelays.sub(ClockFractionalDelays, CableFractionalDelays)
 
         # checks if a fine correction existed, and if not, then uses the fractional delays to calculate a phase offset
         # CHECK TO SEE IF THE SIGN IF CORRECT HERE
 
-        hfrequencies=cr.hArray(self.frequencies)
+        hfrequencies = cr.hArray(self.frequencies)
         for i in range(self.nAntennas):
-            if self.calTable[i,0]==1. and self.calTable[i,1]==1.:
+            if self.calTable[i, 0] == 1. and self.calTable[i, 1] == 1.:
                 # then no solution was available, and we use the excess fractions
                 self.calTable[i].copy(hfrequencies)
                 # phase delay is 2 pi time*frequency
-                self.calTable[i].mul(2.*cr.pi*totalFractionalDelays[i])
+                self.calTable[i].mul(2. * cr.pi * totalFractionalDelays[i])
+
 
 def getSpecWeights(cal):
     """
@@ -1266,40 +1256,39 @@ def getSpecWeights(cal):
     """
     if not cal.initialised:
         cal.initialise()
-    maxBlocks=1000
+    maxBlocks = 1000
     if maxBlocks > cal.nBlocks:
-        maxBlocks=cal.nBlocks
+        maxBlocks = cal.nBlocks
         print 'max blocks being reduced to ', maxBlocks
 
     # saves original info
-    orig_block=cal.currentBlock
-    orig_cal_method=cal.calMethod
-    cal.calMethod=False
+    orig_block = cal.currentBlock
+    orig_cal_method = cal.calMethod
+    cal.calMethod = False
     # initialises array
-    avgspec=cr.hArray(float,cal.getOPDim(),fill=0.)
+    avgspec = cr.hArray(float, cal.getOPDim(), fill=0.)
 
     for i in range(maxBlocks):
-        this_spec=cal.getFFTData()
+        this_spec = cal.getFFTData()
         this_spec.square(this_spec)
         this_spec.abs(this_spec)
-        avgspec.add(avgspec,this_spec)
+        avgspec.add(avgspec, this_spec)
     avgspec.div(float(maxBlocks))
 
-    nFreqs=cal.nSelectedFrequencies
-    nAntennas=cal.nAntennas
+    nFreqs = cal.nSelectedFrequencies
+    nAntennas = cal.nAntennas
 
-    npavg=avgspec.toNumpy()
-    OK, vetoed,runsum, thresholds, npavg=get_veto_bands(npavg,nFreqs,nAntennas,(1.+5./maxBlocks**0.5), nRepeat=2)
+    npavg = avgspec.toNumpy()
+    OK, vetoed, runsum, thresholds, npavg = get_veto_bands(npavg, nFreqs, nAntennas, (1. + 5. / maxBlocks ** 0.5), nRepeat=2)
 #    print '\n\nthe various dimensions involved are: '
 #    print 'runsum: ', runsum.shape
 #    print 'thresholds: ', thresholds.shape
 #    print 'vetoed: ', vetoed
 
-    cal.currentBlock=orig_block
-    cal.calMethod=orig_cal_method
+    cal.currentBlock = orig_block
+    cal.calMethod = orig_cal_method
 
-    return (OK, vetoed,runsum, thresholds, npavg)
-
+    return (OK, vetoed, runsum, thresholds, npavg)
 
 
 def get_veto_bands(npavg, nFreqs, nAntennas, relthresh, navg=None, nRepeat=1):
@@ -1316,56 +1305,50 @@ def get_veto_bands(npavg, nFreqs, nAntennas, relthresh, navg=None, nRepeat=1):
 
     # calculates how many to average over
     if not navg:
-        navg=int(nFreqs**0.5)
+        navg = int(nFreqs ** 0.5)
 
-    navgon2=navg/2
+    navgon2 = navg / 2
 
-
-    runsum=np.copy(npavg)
+    runsum = np.copy(npavg)
     for i in range(nAntennas):
-        runsum[i,0:navgon2]=sum(npavg[i,0:navg])
-        for j in range(nFreqs-navg):
-            runsum[i,navgon2+j]=runsum[i,navgon2+j-1]+npavg[i,navg+j]-npavg[i,j]
-        runsum[i,(nFreqs-navgon2):nFreqs]=sum(npavg[i,nFreqs-navg:nFreqs])
+        runsum[i, 0:navgon2] = sum(npavg[i, 0:navg])
+        for j in range(nFreqs - navg):
+            runsum[i, navgon2 + j] = runsum[i, navgon2 + j - 1] + npavg[i, navg + j] - npavg[i, j]
+        runsum[i, (nFreqs - navgon2):nFreqs] = sum(npavg[i, nFreqs - navg:nFreqs])
     runsum /= navg
 
-    navgon2up=navg-navgon2
-    finalveto=np.zeros(nFreqs)
-
+    navgon2up = navg - navgon2
+    finalveto = np.zeros(nFreqs)
 
     for i in range(nRepeat):
     # calculates approximately a 5-sigma threshold
-        vetoed=np.zeros(nFreqs)
-        veto=np.where(npavg > relthresh*runsum)[1]
-        vetoed[veto]=1
-        finalveto[veto]=1
-        thisveto=np.where(vetoed == 1)[0]
+        vetoed = np.zeros(nFreqs)
+        veto = np.where(npavg > relthresh * runsum)[1]
+        vetoed[veto] = 1
+        finalveto[veto] = 1
+        thisveto = np.where(vetoed == 1)[0]
 
         # extracts these values from runsum
         for index in thisveto:
-            mini=max(0,index-navgon2-1)
-            maxi=min(index+navgon2up-1,nFreqs-1)
+            mini = max(0, index - navgon2 - 1)
+            maxi = min(index + navgon2up - 1, nFreqs - 1)
             for j in range(nAntennas):
-                runsum[j,mini:maxi] -= npavg[j,index]/navg
+                runsum[j, mini:maxi] -= npavg[j, index] / navg
 
-    OK=np.where(finalveto==0)[0]
-    finalveto=np.where(finalveto == 1)[0]
-    thresholds=np.copy(runsum)
+    OK = np.where(finalveto == 0)[0]
+    finalveto = np.where(finalveto == 1)[0]
+    thresholds = np.copy(runsum)
     thresholds *= relthresh
-    return OK, finalveto,runsum, thresholds, npavg
-
-
+    return OK, finalveto, runsum, thresholds, npavg
 
 
 # needs to be able to read [blah] blocks ahead in an internal buffer
 # run RFI flagger per block or what?
 # run it over the whole block???
-
-
 ## Executing a module should run doctests.
 #  This examines the docstrings of a module and runs the examples
 #  as a selftest for the module.
 #  See http://docs.python.org/library/doctest.html for more information.
-if __name__=='__main__':
+if __name__ == '__main__':
     import doctest
     doctest.testmod()

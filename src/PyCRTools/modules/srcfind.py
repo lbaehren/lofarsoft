@@ -3,19 +3,20 @@
 .. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 """
 
-#import pycrtools
+# import pycrtools
 import numpy as np
 from numpy import sin, cos, tan, arctan2, sqrt, pi
-import matplotlib.pyplot as plt # want to have plotting in here?
+import matplotlib.pyplot as plt  # want to have plotting in here?
 from scipy.optimize import brute, fmin
 import sys
 
-c = 299792458.0 # speed of light in m/s - air has n ~ 1.0003; and cos(2 degrees) ~ 1 / 1.0003... needed?
+c = 299792458.0  # speed of light in m/s - air has n ~ 1.0003; and cos(2 degrees) ~ 1 / 1.0003... needed?
 twopi = 2 * pi
 halfpi = 0.5 * pi
 rad2deg = 360.0 / twopi
 deg2rad = twopi / 360.0
 nan = float('nan')
+
 
 def GPSplusOffset(startingGPS, offsetXYZ):
     """
@@ -36,8 +37,8 @@ def GPSplusOffset(startingGPS, offsetXYZ):
     *offsetXYZ*   array/list ``[x, y, z]``.
     ============= =================================================
     """
-    R_earth = 6367449 * 1.000# meters; see Wikipedia on Geographic Coordinate System
-    metersPerDegree = 111132.954 * 1.000 # in latitude; ignoring nonspherical components
+    R_earth = 6367449 * 1.000  # meters; see Wikipedia on Geographic Coordinate System
+    metersPerDegree = 111132.954 * 1.000  # in latitude; ignoring nonspherical components
 
     long = startingGPS[0]
     lat = startingGPS[1]
@@ -50,6 +51,7 @@ def GPSplusOffset(startingGPS, offsetXYZ):
 
     return (outLong, outLat)
 
+
 def greatCircleDistance(gps1, gps2):
     """
     Calculate the distance along a great-circle, between 2 GPS points (long, lat) in degrees N, E
@@ -58,18 +60,21 @@ def greatCircleDistance(gps1, gps2):
     Taken from: http://www.movable-type.co.uk/scripts/latlong.html
     """
 
-    lat1 = gps1[1] * deg2rad; lat2 = gps2[1] * deg2rad
-    long1 = gps1[0] * deg2rad; long2 = gps2[0] * deg2rad
+    lat1 = gps1[1] * deg2rad
+    lat2 = gps2[1] * deg2rad
+    long1 = gps1[0] * deg2rad
+    long2 = gps2[0] * deg2rad
 
     delta_lat = lat2 - lat1
     delta_long = long2 - long1
 
-    a = sin(delta_lat / 2)**2 + cos(lat1) * cos(lat2) * sin(delta_long / 2)**2
+    a = sin(delta_lat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(delta_long / 2) ** 2
     b = 2 * arctan2(sqrt(a), sqrt(1 - a))
     R_earth = 6367449 * 1.000
     distance = R_earth * b
 
     return distance
+
 
 def directionFromThreeAntennas(positions, times):
     """
@@ -98,23 +103,31 @@ def directionFromThreeAntennas(positions, times):
     p1 = np.array(positions[0:3])
 
     p2 = np.array(positions[3:6])
-    p3 = np.array(positions[6:9]) # yes, for 10 antennas we'd write it differently...
-    t1 = times[0]; t2 = times[1]; t3 = times[2]
+    p3 = np.array(positions[6:9])  # yes, for 10 antennas we'd write it differently...
+    t1 = times[0]
+    t2 = times[1]
+    t3 = times[2]
 
     # First take by definition p1 = 0, t1 = 0, use translation invariance of the result
-    t2 -= t1; t3 -= t1
-    p2 -= p1; p3 -= p1
-    t1 = 0; p1 = np.array(np.zeros(3))
-    t2 *= c; t3 *= c; # t -> ct
+    t2 -= t1
+    t3 -= t1
+    p2 -= p1
+    p3 -= p1
+    t1 = 0
+    p1 = np.array(np.zeros(3))
+    t2 *= c
+    t3 *= c
+    # t -> ct
 
     p2 = p2.astype(float)
-    p3 = p3.astype(float) # !!! There's nothing that stops you from throwing ints at it, which destroys e.g. the inner product ratio below!
+    p3 = p3.astype(float)  # !!! There's nothing that stops you from throwing ints at it, which destroys e.g. the inner product ratio below!
 
     # Now do a coordinate rotation such that z-coordinates z2, z3 are 0, and p2 is on the x-axis (i.e. y2 = 0).
-    xx = p2 / np.linalg.norm(p2) # make x-axis by normalizing p2
-    yy = p3 - p2 * (np.dot(p2, p3) / np.dot(p2, p2)) # make y-axis by taking the part of p3 that is perpendicular to p2 (cf. Gram-Schmidt)
+    xx = p2 / np.linalg.norm(p2)  # make x-axis by normalizing p2
+    yy = p3 - p2 * (np.dot(p2, p3) / np.dot(p2, p2))  # make y-axis by taking the part of p3 that is perpendicular to p2 (cf. Gram-Schmidt)
     yy = yy / np.linalg.norm(yy)
-    zz = np.cross(xx, yy); zz = zz / np.linalg.norm(zz)   # and make z-axis by the vector perpendicular to both p2 and p3.
+    zz = np.cross(xx, yy)
+    zz = zz / np.linalg.norm(zz)   # and make z-axis by the vector perpendicular to both p2 and p3.
     # We use the fact that we preserve lengths and angles in the new coordinate system.
 
     # We now have to solve for A and B in:
@@ -128,19 +141,19 @@ def directionFromThreeAntennas(positions, times):
     b = np.dot(p3, yy)
 
     A = - t2 / np.linalg.norm(p2)
-    B = (1/b) * (-t3 - A * a)
+    B = (1 / b) * (-t3 - A * a)
 
     # Which gives the incoming-signal vector in the rotated coord. frame as (A, B, C).
     # C is free in this coord. system, but follows from imposing length 1 on the signal vector,
     # consistent with (ct)^2 = x^2 + y^2 + z^2.
-    square = A*A + B*B
+    square = A * A + B * B
     if square < 1:
-        C = np.sqrt(1 - square) # Note! TWO solutions, +/- sqrt(...). No constraints apart from elevation > 0 in the end result - otherwise both can apply.
-        error=0.0
+        C = np.sqrt(1 - square)  # Note! TWO solutions, +/- sqrt(...). No constraints apart from elevation > 0 in the end result - otherwise both can apply.
+        error = 0.0
     #    else (square - 1) < 1e-15: # this does happen because of floating point errors, when time delays 'exactly' match elevation = 0
     else:
         C = 0
-        error=np.sqrt(square-1) # store the complex component as 'closure error'
+        error = np.sqrt(square - 1)  # store the complex component as 'closure error'
         # so this correction is needed to ensure this function correctly inverts timeDelaysFromDirection(...)
 #    else:
 #        return (nan, nan, nan, nan) # calculation fails, arrival times out of bounds!
@@ -148,36 +161,43 @@ def directionFromThreeAntennas(positions, times):
     # Now we have to transform this vector back to normal x-y-z coordinates, and then to (az, el) to get our direction.
     # This is where the above xx, yy, zz vectors come in (normal notation: x', y', z')
 
-    signal  =  A * xx + B * yy + C * zz
-    signal2 =  A * xx + B * yy - C * zz
+    signal = A * xx + B * yy + C * zz
+    signal2 = A * xx + B * yy - C * zz
 
-    r=np.sqrt(signal[0]**2+signal[1]**2+signal[2]**2)
+    r = np.sqrt(signal[0] ** 2 + signal[1] ** 2 + signal[2] ** 2)
 
-    error += abs(r-1.0)  # Make sure the normalized vector is really normalized, if not take it as error
+    error += abs(r - 1.0)  # Make sure the normalized vector is really normalized, if not take it as error
     signal /= r
     signal2 /= r
 
     # Now get az, el from x, y, z...
-    x = signal[0]; y = signal[1]; z = signal[2]
+    x = signal[0]
+    y = signal[1]
+    z = signal[2]
 
-    theta = np.arccos(z) # in fact, z/R with R = 1
-    phi = np.arctan2(y, x) # gets result in [-pi..pi] interval: add pi when needed to go to [0..2 pi]
+    theta = np.arccos(z)  # in fact, z/R with R = 1
+    phi = np.arctan2(y, x)  # gets result in [-pi..pi] interval: add pi when needed to go to [0..2 pi]
     if phi < 0:
         phi += twopi
 
-    az1 = halfpi - phi # phi is w.r.t. x pointing east and y pointing north. So, reverse angle and add 90 degrees...
+    az1 = halfpi - phi  # phi is w.r.t. x pointing east and y pointing north. So, reverse angle and add 90 degrees...
     el1 = halfpi - theta
-    x =  signal2[0]; y =  signal2[1]; z =  signal2[2]
+    x = signal2[0]
+    y = signal2[1]
+    z = signal2[2]
 
-    theta = np.arccos(z) # in fact, z/R with R = 1
-    phi = np.arctan2(y, x) # gets result in [-pi..pi] interval: add pi when needed to go to [0..2 pi]
-    if az1 < 0: az1 += twopi
+    theta = np.arccos(z)  # in fact, z/R with R = 1
+    phi = np.arctan2(y, x)  # gets result in [-pi..pi] interval: add pi when needed to go to [0..2 pi]
+    if az1 < 0:
+        az1 += twopi
 
     az2 = halfpi - phi
     el2 = halfpi - theta
-    if az2 < 0: az2 += twopi
+    if az2 < 0:
+        az2 += twopi
 
     return (az1, el1, az2, el2, error)
+
 
 def timeDelaysFromDirection(positions, direction):
     """
@@ -205,16 +225,17 @@ def timeDelaysFromDirection(positions, direction):
     """
 
     n = len(positions) / 3
-    phi = halfpi - direction[0] # warning, 90 degree? -- Changed to az = 90_deg - phi
-    theta = halfpi - direction[1] # theta as in standard spherical coords, while el=90 means zenith...
+    phi = halfpi - direction[0]  # warning, 90 degree? -- Changed to az = 90_deg - phi
+    theta = halfpi - direction[1]  # theta as in standard spherical coords, while el=90 means zenith...
 
-    cartesianDirection = np.array([sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)])
+    cartesianDirection = np.array([sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)])
     timeDelays = np.zeros(n)
     for i in range(n):
-        thisPosition = np.array(positions[3*i:3*(i+1)])
-        timeDelays[i] = - (1/c) * np.dot(cartesianDirection, thisPosition) # note the minus sign! Signal vector points down from the sky.
+        thisPosition = np.array(positions[3 * i:3 * (i + 1)])
+        timeDelays[i] = - (1 / c) * np.dot(cartesianDirection, thisPosition)  # note the minus sign! Signal vector points down from the sky.
 
     return timeDelays
+
 
 def phaseWrap(phases):
     wrapped = phases - twopi * (phases / twopi).round()
@@ -223,13 +244,15 @@ def phaseWrap(phases):
 #        wrapped[i] = phases[i] - twopi * round(phases[i] / twopi)
     return wrapped
 
-def phasesFromDirection(positions, direction, freq, nowrap = False):
+
+def phasesFromDirection(positions, direction, freq, nowrap=False):
     # return phases instead of time differences
     phases = (twopi * freq) * timeDelaysFromDirection(positions, direction)
     if nowrap:
         return phases
     else:
         return phaseWrap(phases)
+
 
 def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
     """
@@ -253,17 +276,17 @@ def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
     if isinstance(antids[0], basestring):
         stationIDs = np.array([int(x) for x in antids]) / 1000000
     else:
-        stationIDs = np.array(list(antids))/1000000
+        stationIDs = np.array(list(antids)) / 1000000
 
-    #stationGPS = np.array([md.getStationPositions(stationID, antennaset) for stationID in stationIDs])
+    # stationGPS = np.array([md.getStationPositions(stationID, antennaset) for stationID in stationIDs])
     stationGPS = md.getStationPositions('CS002', antennaset)
 #    gpspositions = np.zeros(len(antids))
     timedelays = np.zeros(len(antids))
 #    import pdb; pdb.set_trace()
     for i in range(len(antids)):
 #        import pdb; pdb.set_trace()
-        thisposition = positions[3*i:3*(i+1)]
-        thisGPS = GPSplusOffset(stationGPS, thisposition) # stationGPS[i] if variable...
+        thisposition = positions[3 * i:3 * (i + 1)]
+        thisGPS = GPSplusOffset(stationGPS, thisposition)  # stationGPS[i] if variable...
 #        gpspositions[i] = thisGPS
         timedelays[i] = greatCircleDistance(gps, thisGPS)
 
@@ -271,6 +294,7 @@ def timeDelaysFromGPSPoint(gps, positions, antids, antennaset):
     timedelays /= c
 
     return timedelays
+
 
 def timeDelaysFromDirectionAndDistance(positions, direction):
     """
@@ -298,20 +322,20 @@ def timeDelaysFromDirectionAndDistance(positions, direction):
     """
 
     n = len(positions) / 3
-    phi = halfpi - direction[0] # warning, 90 degree? -- Changed to az = 90_deg - phi
-    theta = halfpi - direction[1] # theta as in standard spherical coords, while el=90 means zenith...
+    phi = halfpi - direction[0]  # warning, 90 degree? -- Changed to az = 90_deg - phi
+    theta = halfpi - direction[1]  # theta as in standard spherical coords, while el=90 means zenith...
     R = direction[2]
 
-    cartesianDirection = np.array([sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)])
+    cartesianDirection = np.array([sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)])
     cartesianSourcePoint = R * cartesianDirection
-    referenceTime = (1/c) * np.linalg.norm(cartesianSourcePoint) # the time delay at position (0, 0, 0)
+    referenceTime = (1 / c) * np.linalg.norm(cartesianSourcePoint)  # the time delay at position (0, 0, 0)
 
     timeDelays = np.zeros(n)
     for i in range(n):
-        thisPosition = np.array(positions[3*i:3*(i+1)])
+        thisPosition = np.array(positions[3 * i:3 * (i + 1)])
         distanceVector = cartesianSourcePoint - thisPosition
 
-        timeDelays[i] = (1/c) * np.linalg.norm(distanceVector) - referenceTime # check accuracy!
+        timeDelays[i] = (1 / c) * np.linalg.norm(distanceVector) - referenceTime  # check accuracy!
 
     return timeDelays
 
@@ -339,7 +363,8 @@ def testDirectionCalculationForThreeAntennas(positions):
         el: 78.0 calculated: 78.0 or: 59.4017926229
 
     """
-    azSteps = 60; elSteps = 15
+    azSteps = 60
+    elSteps = 15
     tolerance = 1e-7
     s = ''
     for i in range(azSteps):
@@ -350,8 +375,9 @@ def testDirectionCalculationForThreeAntennas(positions):
             result = (calc_az, calc_el, calc_az2, calc_el2) = directionFromThreeAntennas(positions, tdelays)
 
             if (abs(calc_az - az) > tolerance or abs(calc_el - el) > tolerance) and (abs(calc_az2 - az) > tolerance or abs(calc_el2 - el) > tolerance):
-                print 'Wrong value for az: ' + str(az*rad2deg) + ' calculated: ' +str(calc_az * rad2deg) + ' or: ' + str(calc_az2 * rad2deg)
-                print 'el: ' + str(el*rad2deg) + ' calculated: ' + str(calc_el * rad2deg) + ' or: ' + str(calc_el2 * rad2deg)
+                print 'Wrong value for az: ' + str(az * rad2deg) + ' calculated: ' + str(calc_az * rad2deg) + ' or: ' + str(calc_az2 * rad2deg)
+                print 'el: ' + str(el * rad2deg) + ' calculated: ' + str(calc_el * rad2deg) + ' or: ' + str(calc_el2 * rad2deg)
+
 
 def mse(az, el, pos, times):
     """
@@ -373,10 +399,11 @@ def mse(az, el, pos, times):
     N = len(times)
     calcTimes = timeDelaysFromDirection(pos, (az, el))
     timeOffsets = calcTimes - times
-    mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
-    mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+    mu = (1.0 / N) * np.sum(timeOffsets)  # overall time offset to be subtracted in MSE
+    mse = (1.0 / N) * np.dot(timeOffsets, timeOffsets) - mu * mu
 
-    return mse * 1.0e18 # output in nanoseconds-squared
+    return mse * 1.0e18  # output in nanoseconds-squared
+
 
 def phaseAverage(phases):
     """ Calculates the average of an array of phases
@@ -391,50 +418,53 @@ def phaseAverage(phases):
 
     return phaseAvg
 
-def phaseErrorFromDifference(deltaPhi, freq, allowOutlierCount = 0):
+
+def phaseErrorFromDifference(deltaPhi, freq, allowOutlierCount=0):
     # Calculate phase error given two arrays of phases
     # mean phase difference is subtracted
     mu = phaseAverage(deltaPhi)
 
-    msePerPhase = ( 2.0 / (freq*twopi) * sin( (deltaPhi - mu) / 2 )) ** 2
+    msePerPhase = (2.0 / (freq * twopi) * sin((deltaPhi - mu) / 2)) ** 2
 
     if allowOutlierCount != 0:
 #        import pdb; pdb.set_trace()
-        sortedAntennas = msePerPhase.argsort() # lists antennas
+        sortedAntennas = msePerPhase.argsort()  # lists antennas
         msePerPhase = msePerPhase[sortedAntennas]
-        #print 'Worst antennas: '
-        #print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
-        msePerPhase[len(msePerPhase) - allowOutlierCount:] = 0.0 # zero out the worst ones
+        # print 'Worst antennas: '
+        # print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
+        msePerPhase[len(msePerPhase) - allowOutlierCount:] = 0.0  # zero out the worst ones
 
     mse = np.average(msePerPhase)
 
-    return mse * 1.0e18 # unit ns^2
+    return mse * 1.0e18  # unit ns^2
+
 
 def phaseError(az, el, pos, phases, freq, allowOutlierCount=0):
 
-    N = len(phases) # phases assumed 0 for phases[0]?
+    N = len(phases)  # phases assumed 0 for phases[0]?
     calcTimes = timeDelaysFromDirection(pos, (az, el))
-    calcTimes -= calcTimes[0] # same phase ref imposed
+    calcTimes -= calcTimes[0]  # same phase ref imposed
     calcPhases = (twopi * freq) * calcTimes
 
     # wrap around into [-pi, pi]? Not strictly needed as the sin^2 function will do that...
-    deltaPhi = (phases - phases[0]) - calcPhases # measured 'phases' and expected 'calcPhases' at the same reference phase
+    deltaPhi = (phases - phases[0]) - calcPhases  # measured 'phases' and expected 'calcPhases' at the same reference phase
     # mu = (1.0/N) * np.sum( 2.0/(freq * twopi) * sin(deltaPhi/2) ) # check; uses same procedure as for 'mse' above.
     mu = phaseAverage(deltaPhi)
 
-    msePerAntenna = ( 2.0/(freq * twopi) * sin( (deltaPhi - mu)/2) ) ** 2 # periodicity 2-pi in deltaPhi needed!
+    msePerAntenna = (2.0 / (freq * twopi) * sin((deltaPhi - mu) / 2)) ** 2  # periodicity 2-pi in deltaPhi needed!
 
     if allowOutlierCount != 0:
 #        import pdb; pdb.set_trace()
-        sortedAntennas = msePerAntenna.argsort() # lists antennas
+        sortedAntennas = msePerAntenna.argsort()  # lists antennas
         msePerAntenna = msePerAntenna[sortedAntennas]
-        #print 'Worst antennas: '
-        #print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
-        msePerAntenna[len(msePerAntenna) - allowOutlierCount:] = 0.0 # zero out the worst ones
+        # print 'Worst antennas: '
+        # print sortedAntennas[len(sortedAntennas) - allowOutlierCount:]
+        msePerAntenna[len(msePerAntenna) - allowOutlierCount:] = 0.0  # zero out the worst ones
 
     mse = np.average(msePerAntenna)
 
-    return mse * 1.0e18 # output in nanoseconds-squared; may want to switch to radians-squared?
+    return mse * 1.0e18  # output in nanoseconds-squared; may want to switch to radians-squared?
+
 
 def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount=0):
     """
@@ -456,23 +486,23 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
     N = len(times)
     calcTimes = timeDelaysFromDirectionAndDistance(pos, (az, el, R))
     timeOffsets = times - calcTimes
-    mu = np.mean(timeOffsets) # overall time offset to be subtracted in MSE
+    mu = np.mean(timeOffsets)  # overall time offset to be subtracted in MSE
     if allowOutlierCount == 0:
-        mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+        mse = (1.0 / N) * np.dot(timeOffsets, timeOffsets) - mu * mu
     else:
-        timeOffsets.sort() # can be done ascending only; we'll throw out the last ones if needed
+        timeOffsets.sort()  # can be done ascending only; we'll throw out the last ones if needed
         # NB. To be implemented: negative offsets at the beginning are not taken care of...
         removeCount = min(len(np.where(timeOffsets - mu > outlierThreshold)[0]), allowOutlierCount)
         # remove at most 'allowOutlierCount', but only those which are larger than OutlierThreshold
         # as we operate on a sorted list, we only need to discard the last 'removeCount' entries...
-        mu = np.mean(timeOffsets[0:-removeCount]) # average only over used entries
+        mu = np.mean(timeOffsets[0:-removeCount])  # average only over used entries
         timeOffsetsSqr = timeOffsets * timeOffsets
-        mse = 1.0 / (N - removeCount) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu*mu
+        mse = 1.0 / (N - removeCount) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu * mu
 
     return mse * c * c
 
 
-def directionBruteForceSearch(positions, times, azSteps = 120, elSteps = 30):
+def directionBruteForceSearch(positions, times, azSteps=120, elSteps=30):
     """
     Given N antenna positions, and (pulse) arrival times for each antenna,
     get a direction of arrival (az, el) assuming a source at infinity (plane wave).
@@ -506,15 +536,15 @@ def directionBruteForceSearch(positions, times, azSteps = 120, elSteps = 30):
     bestFit = (-1, -1)
     minMSE = 1.0e9
 
-    for i in range(elSteps+1):
-        for j in range(azSteps+1):
+    for i in range(elSteps + 1):
+        for j in range(azSteps + 1):
             el = halfpi * float(i) / elSteps
             az = twopi * float(j) / azSteps
 
             calcTimes = timeDelaysFromDirection(positions, (az, el))
             timeOffsets = calcTimes - times
-            mu = (1.0/N) * np.sum(timeOffsets) # overall time offset to be subtracted in MSE
-            mse = (1.0/N) * np.dot(timeOffsets, timeOffsets) - mu*mu
+            mu = (1.0 / N) * np.sum(timeOffsets)  # overall time offset to be subtracted in MSE
+            mse = (1.0 / N) * np.dot(timeOffsets, timeOffsets) - mu * mu
 
             if mse < minMSE:
                 minMSE = mse
@@ -523,7 +553,8 @@ def directionBruteForceSearch(positions, times, azSteps = 120, elSteps = 30):
 
     return bestFit + (minMSE,)
 
-def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 90, allowOutlierCount = 0, showImage = False, verbose=False):
+
+def directionBruteForcePhases(positions, phases, freq, azSteps=360, elSteps=90, allowOutlierCount=0, showImage=False, verbose=False):
     # this can probably be done better by Scipy (brute). But for now this is easy and it works...
     elevations = np.arange(elSteps) * (90.0 / elSteps)
     azimuths = np.arange(azSteps) * (360.0 / azSteps)
@@ -538,17 +569,17 @@ def directionBruteForcePhases(positions, phases, freq, azSteps = 360, elSteps = 
             sys.stdout.flush()
         azstep = 0
         for az in azimuths:
-            badness = phaseError(az*deg2rad, el*deg2rad, positions, phases, freq, allowOutlierCount = allowOutlierCount)
+            badness = phaseError(az * deg2rad, el * deg2rad, positions, phases, freq, allowOutlierCount=allowOutlierCount)
             if badness < minPhaseError:
                 minPhaseError = badness
                 minpos = (az * deg2rad, el * deg2rad)
             if showImage:
-                imarray[elSteps - 1 - elstep, azstep] = badness # hack to get elevations shown bottom to top as 0.0 - 90.0
+                imarray[elSteps - 1 - elstep, azstep] = badness  # hack to get elevations shown bottom to top as 0.0 - 90.0
             azstep += 1
         elstep += 1
 
     if showImage:
-        plt.imshow(imarray, cmap=plt.cm.hot_r,extent=(0, 360.0, 0.0, 90.0))
+        plt.imshow(imarray, cmap=plt.cm.hot_r, extent=(0, 360.0, 0.0, 90.0))
         plt.ylabel("Elevation [deg]")
         plt.xlabel("Azimuth [deg]")
         plt.title("Phase error [ns^2] as function of incoming direction")
@@ -615,14 +646,15 @@ def directionForHorizontalArray(positions, times):
         raise ValueError("Input values of z are nonzero ( > 0.5) !")
         return (-1, -1)
 
-    M = np.vstack([x, y, np.ones(len(x))]).T # says the linalg.lstsq doc
+    M = np.vstack([x, y, np.ones(len(x))]).T  # says the linalg.lstsq doc
 
     (A, B, C) = np.linalg.lstsq(M, c * times)[0]
 
-    el = np.arccos(np.sqrt(A*A + B*B))
-    az = halfpi - np.arctan2(-B, -A) # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
+    el = np.arccos(np.sqrt(A * A + B * B))
+    az = halfpi - np.arctan2(-B, -A)  # note minus sign as we want the direction of the _incoming_ vector (from the sky, not towards it)
     # note: Changed to az = 90_deg - phi
     return (az, el)
+
 
 def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     """
@@ -644,27 +676,27 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
 
     """
 
-    x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
+    x = np.random.rand(N_ant) * 100 - 50  # Antenna positions in a 100x100 m field
     y = np.random.rand(N_ant) * 100 - 50
-    z = np.zeros(N_ant) # for use in the planar fit requires z = 0
+    z = np.zeros(N_ant)  # for use in the planar fit requires z = 0
 
-    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z. This thing can be retained as global if speed is important
+    pos = np.column_stack([x, y, z]).ravel()  # make flat array alternating x,y,z. This thing can be retained as global if speed is important
 
     times = timeDelaysFromDirection(pos, (az, el))
     noise = (2 * np.random.rand(N_ant) - 1.0) * max(abs(times)) * noiselevel
 
     print 'Getting direction from linear fit method, without noise (should return the input):'
     (az, el) = directionForHorizontalArray(pos, times)
-    print '(az, el) = (%f, %f)' %(az, el)
+    print '(az, el) = (%f, %f)' % (az, el)
     print ' '
     print 'Getting direction from brute force search:'
 
     result = directionBruteForceSearch(pos, times)
-    print '(az, el) = (%f, %f)' %(result[0], result[1])
+    print '(az, el) = (%f, %f)' % (result[0], result[1])
     print ' '
     print 'Getting direction from triangle method: '
     result = directionFromAllTriangles(pos, times)
-    print '(az, el) = (%f, %f)' %(result[0], result[1])
+    print '(az, el) = (%f, %f)' % (result[0], result[1])
 #    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
 #    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
 
@@ -672,20 +704,21 @@ def testFitMethodsWithTimingNoise(az, el, N_ant, noiselevel):
     print '\n-----\n'
     print 'Getting direction from linear fit method, WITH noise:'
     (az, el) = directionForHorizontalArray(pos, times)
-    print '(az, el) = (%f, %f)' %(az, el)
+    print '(az, el) = (%f, %f)' % (az, el)
     print ' '
     print 'Getting direction from brute force search:'
 
     result = directionBruteForceSearch(pos, times)
-    print '(az, el) = (%f, %f)' %(result[0], result[1])
+    print '(az, el) = (%f, %f)' % (result[0], result[1])
     print ' '
     print 'Getting direction from triangle method: '
     result = directionFromAllTriangles(pos, times)
-    print '(az, el) = (%f, %f)' %(result[0], result[1])
+    print '(az, el) = (%f, %f)' % (result[0], result[1])
 #    print '(u_az, u_el) = (%f, %f)' %(result[2], result[3])
 #    print 'Better (az, el) = (%f, %f)' %(result[4], result[5])
 
-def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'LinearFit'):
+
+def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType='LinearFit'):
     """
     Do a number of trials with random antenna positions and random timing noise.
     Put in the given (az, el) direction, see what comes out of the fits.
@@ -709,12 +742,12 @@ def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'Lin
 
     """
 
-    print 'Testing for bias using fit type = %s' %fitType
-    x = np.random.rand(N_ant) * 100 - 50 # Antenna positions in a 100x100 m field
+    print 'Testing for bias using fit type = %s' % fitType
+    x = np.random.rand(N_ant) * 100 - 50  # Antenna positions in a 100x100 m field
     y = np.random.rand(N_ant) * 100 - 50
-    z = np.zeros(N_ant) # for use in the planar fit requires z = 0
+    z = np.zeros(N_ant)  # for use in the planar fit requires z = 0
 
-    pos = np.column_stack([x, y, z]).ravel() # make flat array alternating x,y,z
+    pos = np.column_stack([x, y, z]).ravel()  # make flat array alternating x,y,z
 #    az = 1.0
 #    el = 0.1
     exactTimes = timeDelaysFromDirection(pos, (az, el))
@@ -748,14 +781,15 @@ def testForBiasFromNoisyData(n_trials, N_ant, az, el, noiselevel, fitType = 'Lin
     u_az = az_std / np.sqrt(n_trials)
 #    print results_el.nansum
 
-    print 'Average az = %f' %az_avg
-    print 'Average el = %f' %el_avg
+    print 'Average az = %f' % az_avg
+    print 'Average el = %f' % el_avg
     print ' '
-    print 'Difference az = %f' %(az_avg - az)
-    print 'Difference el = %f' %(el_avg - el)
+    print 'Difference az = %f' % (az_avg - az)
+    print 'Difference el = %f' % (el_avg - el)
     print ' '
-    print 'Uncertainty az (stddev / sqrt(n_trials)) = %f' %u_az
-    print 'Uncertainty el = %f' %u_el
+    print 'Uncertainty az (stddev / sqrt(n_trials)) = %f' % u_az
+    print 'Uncertainty el = %f' % u_el
+
 
 def directionFromAllTriangles(positions, times):
     """
@@ -764,19 +798,19 @@ def directionFromAllTriangles(positions, times):
     Average over all directions to find the best (?) estimate...
     """
     N = len(times)
-    trianglecount = N * (N-1) * (N-2) / 6 # that's a whole lot, O(N^3)!
+    trianglecount = N * (N - 1) * (N - 2) / 6  # that's a whole lot, O(N^3)!
     count = 0
     validcount = 0
     solutions_az = np.zeros(trianglecount)
     solutions_el = np.zeros(trianglecount)
     for i in range(N):
-        for j in range(i+1, N):
-            for k in range(j+1, N):
-                pos1 = positions[3*i:3*(i+1)]
-                pos2 = positions[3*j:3*(j+1)]
-                pos3 = positions[3*k:3*(k+1)]
+        for j in range(i + 1, N):
+            for k in range(j + 1, N):
+                pos1 = positions[3 * i:3 * (i + 1)]
+                pos2 = positions[3 * j:3 * (j + 1)]
+                pos3 = positions[3 * k:3 * (k + 1)]
                 count += 1
-                triangle = np.concatenate((pos1, pos2, pos3)) # need to specify the sequence of arrays as a tuple
+                triangle = np.concatenate((pos1, pos2, pos3))  # need to specify the sequence of arrays as a tuple
                 triangleTimes = np.array([times[i], times[j], times[k]])
 
                 (az1, el1, az2, el2) = directionFromThreeAntennas(triangle, triangleTimes)
@@ -786,9 +820,9 @@ def directionFromAllTriangles(positions, times):
                     el = el2
                 else:
                     az = az1
-                    el = el1 # ah, this looks clumsy. Why no (az, el) = (el2 > el1) ? (az2, el2) : (az1, el1)... Hmm, not that pretty either.
+                    el = el1  # ah, this looks clumsy. Why no (az, el) = (el2 > el1) ? (az2, el2) : (az1, el1)... Hmm, not that pretty either.
 
-                if not (np.isnan(el) or np.isnan(az)): # valid solution
+                if not (np.isnan(el) or np.isnan(az)):  # valid solution
                     solutions_az[validcount] = az
                     solutions_el[validcount] = el
                     validcount += 1
@@ -812,8 +846,8 @@ def directionFromAllTriangles(positions, times):
 #    az_avg = np.average(solutions_az)  # This is a wrong way of averaging results! So no longer using it
 #    el_avg = np.average(solutions_el)
 
-    #u_az = np.std(solutions_az) / np.sqrt(validcount) # And then this way of getting the uncertainty is also no longer valid
-    #u_el = np.std(solutions_el) / np.sqrt(validcount)
+    # u_az = np.std(solutions_az) / np.sqrt(validcount) # And then this way of getting the uncertainty is also no longer valid
+    # u_el = np.std(solutions_el) / np.sqrt(validcount)
 
 #    print '# Average az = %f' %az_avg
 #    print '# Average el = %f' %el_avg
@@ -823,8 +857,9 @@ def directionFromAllTriangles(positions, times):
 #    print ' '
 #    print '# Uncertainty az (stddev / sqrt(n_trials)) = %f' %u_az
 #    print '# Uncertainty el = %f' %u_el
-    print '# Total triangles = %d, valid = %d' %(count, validcount)
+    print '# Total triangles = %d, valid = %d' % (count, validcount)
     return (az_avg, el_avg)
+
 
 def timeDelayAzElStandard(position, az, el):
     """Calculate arrival time delays at a set of antennas for
@@ -843,11 +878,12 @@ def timeDelayAzElStandard(position, az, el):
     y = np.cos(el) * np.cos(az)
     z = np.sin(el)
 
-    direction = np.array([x,y,z])
+    direction = np.array([x, y, z])
 
     return (-1.0 / c) * np.dot(position, direction)
 
-def findDirectionBruteAzElStandard(positions, delays, Ns = 100):
+
+def findDirectionBruteAzElStandard(positions, delays, Ns=100):
     """Find direction of plane wave source based on time *delays* measured
     at given *positions* using a brute force grid search.
 
@@ -864,9 +900,10 @@ def findDirectionBruteAzElStandard(positions, delays, Ns = 100):
 
     def inner(params):
         az, el = params
-        return np.sum(np.square(timeDelayAzElStandard(positions, az, el)-delays))
+        return np.sum(np.square(timeDelayAzElStandard(positions, az, el) - delays))
 
-    return brute(inner, ranges=((0., 2*np.pi), (0., np.pi/2)), Ns = Ns)
+    return brute(inner, ranges=((0., 2 * np.pi), (0., np.pi / 2)), Ns = Ns)
+
 
 def findDirectionFminAzElStandard(positions, delays):
     """Find direction of plane wave source based on time *delays* measured
@@ -885,9 +922,9 @@ def findDirectionFminAzElStandard(positions, delays):
 
     def inner(params):
         az, el = params
-        return np.sum(np.square(timeDelayAzElStandard(positions, az, el)-delays))
+        return np.sum(np.square(timeDelayAzElStandard(positions, az, el) - delays))
 
-    return fmin(inner, x0=np.array([np.pi, np.pi/4]))
+    return fmin(inner, x0=np.array([np.pi, np.pi / 4]))
 
 # Execute doctests if module is executed as script
 if __name__ == "__main__":

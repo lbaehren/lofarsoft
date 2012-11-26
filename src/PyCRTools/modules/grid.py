@@ -7,6 +7,7 @@ from datetime import datetime
 import pycrtools as cr
 from pytmf import deg2rad, rad2deg, gregorian2jd
 
+
 def casaRefcodes(**kwargs):
     """Get CASA reference code and projection from standard WCS parameter
     parsing rules.
@@ -25,8 +26,8 @@ def casaRefcodes(**kwargs):
         raise ValueError("Projection for first and second axis do not match.")
 
     # Check for different coordinate types
-    CTYPE1=kwargs['CTYPE1']
-    CTYPE2=kwargs['CTYPE2']
+    CTYPE1 = kwargs['CTYPE1']
+    CTYPE2 = kwargs['CTYPE2']
 
     if CTYPE1[0:4] == 'RA--' and CTYPE2[0:4] == 'DEC-':
         # Coordinate type depends on equinox or epoch
@@ -45,15 +46,16 @@ def casaRefcodes(**kwargs):
     elif CTYPE1[0:4] == 'SLON' and CTYPE2[0:4] == 'SLAT':
         refcode = 'SUPERGAL'
     else:
-        raise ValueError("Unknown coordinate system "+CTYPE2[0:4])
+        raise ValueError("Unknown coordinate system " + CTYPE2[0:4])
 
     # Check for projection
     if CTYPE1[5:8] in ['AZP', 'SZP', 'TAN', 'SIN', 'STG', 'ARC', 'ZPN', 'ZEA', 'AIR', 'CYP', 'CAR', 'MER', 'CEA', 'COP', 'COD', 'COE', 'COO', 'BON', 'PCO', 'SFL', 'PAR', 'AIT', 'MOL', 'CSC', 'QSC', 'TSC', 'HPX']:
         projection = CTYPE1[5:8]
     else:
-        raise ValueError("Invalid projection "+CTYPE1[5:8])
+        raise ValueError("Invalid projection " + CTYPE1[5:8])
 
     return refcode, projection
+
 
 class CoordinateGrid(object):
     """Coordinate grid for images.
@@ -92,18 +94,18 @@ class CoordinateGrid(object):
         """
 
         # Get image parameters
-        self.naxis1=kwargs['NAXIS1']
-        self.naxis2=kwargs['NAXIS2']
-        self.crval1=kwargs['CRVAL1']
-        self.crval2=kwargs['CRVAL2']
-        self.cdelt1=kwargs['CDELT1']
-        self.cdelt2=kwargs['CDELT2']
-        self.crpix1=kwargs['CRPIX1']
-        self.crpix2=kwargs['CRPIX2']
-        self.lonpole=kwargs['LONPOLE']
-        self.latpole=kwargs['LATPOLE']
+        self.naxis1 = kwargs['NAXIS1']
+        self.naxis2 = kwargs['NAXIS2']
+        self.crval1 = kwargs['CRVAL1']
+        self.crval2 = kwargs['CRVAL2']
+        self.cdelt1 = kwargs['CDELT1']
+        self.cdelt2 = kwargs['CDELT2']
+        self.crpix1 = kwargs['CRPIX1']
+        self.crpix2 = kwargs['CRPIX2']
+        self.lonpole = kwargs['LONPOLE']
+        self.latpole = kwargs['LATPOLE']
 
-        self.refcode, self.projection=casaRefcodes(**kwargs)
+        self.refcode, self.projection = casaRefcodes(**kwargs)
 
         print "Coordinate system:", self.refcode
         print "Projection:", self.projection
@@ -114,12 +116,12 @@ class CoordinateGrid(object):
 
         # Convert to radians if nessesary
         if kwargs['CUNIT1'] == 'deg':
-            self.crval1=deg2rad(self.crval1)
-            self.crval2=deg2rad(self.crval2)
-            self.cdelt1=deg2rad(self.cdelt1)
-            self.cdelt2=deg2rad(self.cdelt2)
-            self.lonpole=deg2rad(self.lonpole)
-            self.latpole=deg2rad(self.latpole)
+            self.crval1 = deg2rad(self.crval1)
+            self.crval2 = deg2rad(self.crval2)
+            self.cdelt1 = deg2rad(self.cdelt1)
+            self.cdelt2 = deg2rad(self.cdelt2)
+            self.lonpole = deg2rad(self.lonpole)
+            self.latpole = deg2rad(self.latpole)
 
             print "CRVAL1", self.crval1
             print "CRVAL2", self.crval2
@@ -138,17 +140,17 @@ class CoordinateGrid(object):
             self.obstime = datetime.utcfromtimestamp(obstime)
 
         # Total number of pixels
-        self.npix=self.naxis1*self.naxis2
+        self.npix = self.naxis1 * self.naxis2
 
         # Generate pixel grid for image
-        self.pixel=[]
-        N=0
-        for i in range(1, self.naxis1+1):
-            for j in range(1, self.naxis2+1):
-                self.pixel.extend([float(i),float(j)])
+        self.pixel = []
+        N = 0
+        for i in range(1, self.naxis1 + 1):
+            for j in range(1, self.naxis2 + 1):
+                self.pixel.extend([float(i), float(j)])
 
-        self.pixel=cr.hArray(self.pixel)
-        self.world=self.pixel.new()
+        self.pixel = cr.hArray(self.pixel)
+        self.world = self.pixel.new()
 
         # Generate world coordinates for image grid
         print "Calculating world coordinates"
@@ -166,7 +168,7 @@ class CoordinateGrid(object):
         self.__calculateAzEl()
 
         print "Calculating Cartesian coordinates"
-        self.cartesian=self.azel.new()
+        self.cartesian = self.azel.new()
 
         cr.hCoordinateConvert(self.azel[...], cr.CoordinateTypes.AzElRadius,
             self.cartesian[...], cr.CoordinateTypes.Cartesian, False)
@@ -179,21 +181,21 @@ class CoordinateGrid(object):
         elif self.refcode == 'AZEL':
             self.j2000 = None
         else:
-            raise ValueError("Conversion of world coordinates to J2000 not yet implemented for "+self.refcode+" coordinate system")
+            raise ValueError("Conversion of world coordinates to J2000 not yet implemented for " + self.refcode + " coordinate system")
 
     def __calculateAzEl(self):
         """Get Azimuth/Elevation/Distance coordinates corresponding to world
         coordinates.
         """
 
-        self.azel=cr.hArray(float, dimensions=[self.npix,3])
+        self.azel = cr.hArray(float, dimensions=[self.npix, 3])
 
         # Perform conversion for different coordinate systems
         # specifed by refcode
         if self.refcode == 'AZEL':
-            self.world.reshape((self.npix,2))
-            self.azel[...,0:2]=self.world[...]
-            self.azel[...,2:3]=1.
+            self.world.reshape((self.npix, 2))
+            self.azel[..., 0:2] = self.world[...]
+            self.azel[..., 2:3] = 1.
         else:
             # Convert from J2000 to AZEL
             temp = self.j2000.new()
@@ -210,9 +212,9 @@ class CoordinateGrid(object):
 
             cr.hEquatorial2Horizontal(temp, self.j2000, self.utc, self.ut1_utc, self.L, self.phi)
 
-            temp.reshape((self.npix,2))
-            self.azel[...,0:2]=temp[...]
-            self.azel[...,2:3]=1.
+            temp.reshape((self.npix, 2))
+            self.azel[..., 0:2] = temp[...]
+            self.azel[..., 2:3] = 1.
 
     def __repr__(self):
         """Return string representation.
@@ -238,4 +240,3 @@ class CoordinateGrid(object):
         s += ")"
 
         return s
-

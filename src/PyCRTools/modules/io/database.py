@@ -49,7 +49,6 @@ class Database(object):
 
         self._db = None
 
-
     def open(self):
         """Open the database.
         """
@@ -69,13 +68,11 @@ class Database(object):
             self._db = sqlite3.connect(self._filename, timeout=self._timeout)
             self._dbtype = "sqlite3"
 
-
     def close(self):
         """Close the database."""
         if self._db:
             self._db.close()
             self._db = None
-
 
     def insert(self, sql=""):
         """Insert a new record into the database and return the new primary key.
@@ -113,7 +110,6 @@ class Database(object):
             self.close()
 
         return newID
-
 
     def select(self, sql=""):
         """Select records from the database.
@@ -165,7 +161,6 @@ class Database(object):
 
         return records
 
-
     def tableExists(self, table):
         """Select records from the database.
 
@@ -183,11 +178,11 @@ class Database(object):
         cursor = self._db.cursor()
 
         if self._dbtype == "postgresql":
-            cursor.execute("select exists(select * from information_schema.tables where table_name='%s')" %(table,))
+            cursor.execute("select exists(select * from information_schema.tables where table_name='%s')" % (table,))
             exists = cursor.fetchone()[0]
         elif self._dbtype == "sqlite3":
-            cursor.execute("SELECT EXISTS(SELECT name FROM sqlite_master WHERE type='table' AND name='%s');" %(table,))
-            exists =  cursor.fetchone()[0]
+            cursor.execute("SELECT EXISTS(SELECT name FROM sqlite_master WHERE type='table' AND name='%s');" % (table,))
+            exists = cursor.fetchone()[0]
         else:
             raise ValueError("Unsupported database type")
 
@@ -197,7 +192,6 @@ class Database(object):
             self.close()
 
         return exists
-
 
     def execute(self, sql=""):
         """Execute an sql statement
@@ -232,7 +226,6 @@ class Database(object):
 
         if self._autoclose:
             self.close()
-
 
     def executelist(self, sql_list=[], blocksize=128, verbose=False):
         """Execute a list of SQL statements.
@@ -272,7 +265,6 @@ class Database(object):
         if self._autoclose:
             self.close()
 
-
     def writescript(self, filename, sql_script):
         """Write SQL script to a file.
 
@@ -292,4 +284,3 @@ class Database(object):
 
         if self._autoclose:
             sql_file.close()
-

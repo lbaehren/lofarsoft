@@ -15,7 +15,9 @@ import numpy as np
 import time
 import pyfits
 import os
-import pdb;# pdb.set_trace()
+import pdb
+# pdb.set_trace()
+
 
 def savefits(filename, array, overwrite=True, **kwargs):
     """Save image as standard FITS file.
@@ -38,9 +40,9 @@ def savefits(filename, array, overwrite=True, **kwargs):
 
             # Correct for ugly bug in casaviewer
             if "CTYPE" in key and "ALON" in kwargs[key]:
-                hdr.update(key, "??LN-"+kwargs[key][5:])
+                hdr.update(key, "??LN-" + kwargs[key][5:])
             elif "CTYPE" in key and "ALAT" in kwargs[key]:
-                hdr.update(key, "??LT-"+kwargs[key][5:])
+                hdr.update(key, "??LT-" + kwargs[key][5:])
             else:
                 hdr.update(key, kwargs[key])
 
@@ -57,55 +59,55 @@ class Imager(Task):
     """
 
     parameters = dict(
-        data = dict( default = None,
-                     positional = 1 ),
-        image = dict( default = None ),
-        output = dict( default = "out.fits" ),
-        startblock = dict( default = 0 ),
-        nblocks = dict( default = 1 ),
-        ntimesteps = dict( default = lambda self : self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"]) ),
-        intgrfreq = dict( default = False,
-                          doc = "Output frequency integrated image." ),
-        inversefft = dict( default = False ),
-        rfi_remove = dict(default = None,doc='List of frequency indices to remove.'),
-        FREQMIN = dict( default = None ),
-        FREQMAX = dict( default = None ),
-        OBSTIME = dict( default = lambda self : self.data["TIME"][0] ),
-        OBSLON = dict( default = pytmf.deg2rad(6.869837540),
-                       doc = "Observer longitude in radians" ),
-        OBSLAT = dict( default = pytmf.deg2rad(52.915122495),
-                       doc = "Observer latitude in radians" ),
-        NAXIS = dict( default = 4 ),
-        NAXIS1 = dict( default = 90 ),
-        NAXIS2 = dict( default = 90 ),
-        NAXIS3 = dict( default = 1 ),
-        NAXIS4 = dict( default = 1 ),
-        LONPOLE = dict( default = 0. ),
-        LATPOLE = dict( default = 90. ),
-        CTYPE1 = dict( default = 'ALON-STG' ),
-        CTYPE2 = dict( default = 'ALAT-STG' ),
-        CTYPE3 = dict( default = 'FREQ' ),
-        CTYPE4 = dict( default = 'TIME' ),
-        CRVAL1 = dict( default = 180. ),
-        CRVAL2 = dict( default = 90. ),
-        CRVAL3 = dict( default = 0. ),
-        CRVAL4 = dict( default = 0. ),
-        CRPIX1 = dict( default = lambda self : float(self.NAXIS1) / 2 ),
-        CRPIX2 = dict( default = lambda self : float(self.NAXIS2) / 2 ),
-        CRPIX3 = dict( default = 0. ),
-        CRPIX4 = dict( default = 0. ),
-        CDELT1 = dict( default = 2.566666603088E+00 ),
-        CDELT2 = dict( default = 2.566666603088E+00 ),
-        CDELT3 = dict( default = lambda self : self.data["FREQUENCY_INTERVAL"][0] ),
-        CDELT4 = dict( default = lambda self : self.nblocks * self.data["BLOCKSIZE"] * self.data["SAMPLE_INTERVAL"][0] ),
-        CUNIT1 = dict( default = 'deg' ),
-        CUNIT2 = dict( default = 'deg' ),
-        CUNIT3 = dict( default = 'Hz' ),
-        CUNIT4 = dict( default = 's' ),
-        PC001001 = dict( default = 1.000000000000E+00 ),
-        PC002001 = dict( default = 0.000000000000E+00 ),
-        PC001002 = dict( default = 0.000000000000E+00 ),
-        PC002002 = dict( default = 1.000000000000E+00 )
+        data=dict(default=None,
+                     positional=1),
+        image=dict(default=None),
+        output=dict(default="out.fits"),
+        startblock=dict(default=0),
+        nblocks=dict(default=1),
+        ntimesteps=dict(default=lambda self: self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"])),
+        intgrfreq=dict(default=False,
+                          doc="Output frequency integrated image."),
+        inversefft=dict(default=False),
+        rfi_remove=dict(default=None, doc='List of frequency indices to remove.'),
+        FREQMIN=dict(default=None),
+        FREQMAX=dict(default=None),
+        OBSTIME=dict(default=lambda self: self.data["TIME"][0]),
+        OBSLON=dict(default=pytmf.deg2rad(6.869837540),
+                       doc="Observer longitude in radians"),
+        OBSLAT=dict(default=pytmf.deg2rad(52.915122495),
+                       doc="Observer latitude in radians"),
+        NAXIS=dict(default=4),
+        NAXIS1=dict(default=90),
+        NAXIS2=dict(default=90),
+        NAXIS3=dict(default=1),
+        NAXIS4=dict(default=1),
+        LONPOLE=dict(default=0.),
+        LATPOLE=dict(default=90.),
+        CTYPE1=dict(default='ALON-STG'),
+        CTYPE2=dict(default='ALAT-STG'),
+        CTYPE3=dict(default='FREQ'),
+        CTYPE4=dict(default='TIME'),
+        CRVAL1=dict(default=180.),
+        CRVAL2=dict(default=90.),
+        CRVAL3=dict(default=0.),
+        CRVAL4=dict(default=0.),
+        CRPIX1=dict(default=lambda self: float(self.NAXIS1) / 2),
+        CRPIX2=dict(default=lambda self: float(self.NAXIS2) / 2),
+        CRPIX3=dict(default=0.),
+        CRPIX4=dict(default=0.),
+        CDELT1=dict(default=2.566666603088E+00),
+        CDELT2=dict(default=2.566666603088E+00),
+        CDELT3=dict(default=lambda self: self.data["FREQUENCY_INTERVAL"][0]),
+        CDELT4=dict(default=lambda self: self.nblocks * self.data["BLOCKSIZE"] * self.data["SAMPLE_INTERVAL"][0]),
+        CUNIT1=dict(default='deg'),
+        CUNIT2=dict(default='deg'),
+        CUNIT3=dict(default='Hz'),
+        CUNIT4=dict(default='s'),
+        PC001001=dict(default=1.000000000000E+00),
+        PC002001=dict(default=0.000000000000E+00),
+        PC001002=dict(default=0.000000000000E+00),
+        PC002002=dict(default=1.000000000000E+00)
     )
 
     def init(self):
@@ -115,7 +117,7 @@ class Imager(Task):
         # Generate coordinate grid
         print "Generating grid"
 
-        self.grid=CoordinateGrid(obstime=self.OBSTIME,
+        self.grid = CoordinateGrid(obstime=self.OBSTIME,
                                  L=self.OBSLON,
                                  phi=self.OBSLAT,
                                  NAXIS=self.NAXIS,
@@ -139,23 +141,23 @@ class Imager(Task):
                                  PC002002=self.PC002002)
         print "Grid generation finished"
         print self.grid
-         
+
         # Get frequencies
-        self.frequencies=self.data.getFrequencies()
+        self.frequencies = self.data.getFrequencies()
 
         self.frequency_slice = None
         if self.FREQMIN != None and self.FREQMAX != None:
             self.frequency_slice = cr.hArray(int, 2)
             cr.hFindSequenceBetweenOrEqual(self.frequency_slice, self.frequencies, self.FREQMIN, self.FREQMAX, 0, 0)
-            self.frequencies=cr.hArray(list(self.frequencies[self.frequency_slice[0]:self.frequency_slice[1]].vec()))
+            self.frequencies = cr.hArray(list(self.frequencies[self.frequency_slice[0]:self.frequency_slice[1]].vec()))
 
         self.nfreq = len(self.frequencies)
 
         print "Frequency range:", self.frequencies[0], self.frequencies[-1], "Hz"
 
         # Get antenna positions
-        self.antpos=self.data.getRelativeAntennaPositions()
-        self.nantennas=int(self.antpos.shape()[0])
+        self.antpos = self.data.getRelativeAntennaPositions()
+        self.nantennas = int(self.antpos.shape()[0])
 
         # Calculate geometric delays for all sky positions for all antennas
         self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
@@ -166,23 +168,22 @@ class Imager(Task):
             self.blocksize = (self.nfreq - 1) * 2
             self.plan = cr.FFTWPlanManyDftC2r(self.blocksize, self.NAXIS1 * self.NAXIS2, 1, self.nfreq, 1, self.blocksize, cr.fftw_flags.ESTIMATE)
             print "created inverse fft plan"
-            self.t_image2=cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.)
+            self.t_image2 = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.)
 
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
-        self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
+        self.fftdata = cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
         if not self.intgrfreq:
-            self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+            self.t_image = cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
         # Create image array if none is given as input
-        if self.image==None:
+        if self.image == None:
             if self.intgrfreq:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2), dtype=float)
             elif self.inversefft:
                 self.image = np.zeros(shape=(self.ntimesteps, self.blocksize, self.NAXIS1, self.NAXIS2), dtype=float)
             else:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
-
 
     def run(self):
         """Run the imager.
@@ -192,7 +193,7 @@ class Imager(Task):
         for tstep in range(self.ntimesteps):
             print "processing timestep: %d/%d" % (tstep, self.ntimesteps)
 
-            for block in range(self.startblock, self.startblock+self.nblocks):
+            for block in range(self.startblock, self.startblock + self.nblocks):
 
                 if self.frequency_slice != None:
                     self.data.getFFTData(self.scratchfft, block)
@@ -203,9 +204,9 @@ class Imager(Task):
 
                 cr.hFFTConvert(self.fftdata[...])
 
-                #Revoming RFI
+                # Revoming RFI
                 if self.rfi_remove:
-                    self.fftdata[...,self.rfi_remove] = 0
+                    self.fftdata[..., self.rfi_remove] = 0
 
                 print "reading done"
 
@@ -228,7 +229,7 @@ class Imager(Task):
             self.startblock += self.nblocks
 
         end = time.time()
-        print "total runtime:", end-start, "s"
+        print "total runtime:", end - start, "s"
 
         # Save image to disk
 
@@ -322,4 +323,3 @@ class Imager(Task):
                         PC002001=self.PC002001,
                         PC001002=self.PC001002,
                         PC002002=self.PC002002)
-

@@ -13,6 +13,7 @@ import time
 
 debug_mode = False
 
+
 class CRDatabase(object):
     """Functionality to let the VHECR pipeline communicate with an SQL database."""
 
@@ -70,7 +71,7 @@ class CRDatabase(object):
 
         # Throw an error message when opening a non supported db
         if self.settings.db_version > self.db_required_version:
-            raise ValueError("The database version (v{0}) is larger than the one supported by this module (v{1}).".format(self.settings.db_version,self.db_required_version))
+            raise ValueError("The database version (v{0}) is larger than the one supported by this module (v{1}).".format(self.settings.db_version, self.db_required_version))
 
         # Path settings
         if not basepath:
@@ -101,11 +102,10 @@ class CRDatabase(object):
         if "" != lorapath:
             self.settings.lorapath = os.path.realpath(lorapath)
         elif "" == self.settings.lorapath:
-            self.settings.lorapath =lorapath_DEFAULT
+            self.settings.lorapath = lorapath_DEFAULT
 
         # Name of the file that locks the database file
         self.lockfilename = os.path.join(os.path.dirname(filename), "." + os.path.basename(filename) + ".lock")
-
 
     def __createDatabase(self):
         """***DO NOT UPDATE TABLE DEFINITIONS IN THIS METHOD***.
@@ -162,7 +162,6 @@ class CRDatabase(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def __updateDatabase(self):
         pass
 
@@ -186,7 +185,7 @@ class CRDatabase(object):
         if not grouptype in ["event", "datafile", "station", "polarization"]:
             raise ValueError("Invalid grouptype, should be 'event', 'datafile', 'station' or 'polarization'")
 
-        tablename = grouptype.lower()+"parameters"
+        tablename = grouptype.lower() + "parameters"
         columnname = parametername.lower()
 
         if not self.isLocked():
@@ -210,11 +209,11 @@ class CRDatabase(object):
 
             # Add parametername to table
             sql = "ALTER TABLE {0} ADD COLUMN {1} TEXT;".format(tablename, columnname)
-            if debug_mode: print "SQL: Adding column: ",sql
+            if debug_mode:
+                print "SQL: Adding column: ", sql
             self.db.execute(sql)
         else:
             raise ValueError("DATABASE IS LOCKED: Unable to add a parametername {0} to the database".format(columnname))
-
 
     def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, order="e.timestamp"):
         """Return a list of eventIDs satifying the values of this
@@ -247,9 +246,9 @@ class CRDatabase(object):
         if self.db:
             # Construct SQL table
             sql_fields = "e.eventID"
-            sql_table_e  = "events AS e"
+            sql_table_e = "events AS e"
             sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_e + " ON (ed.eventID=e.eventID)"
-            sql_table_d  = "datafiles AS d INNER JOIN " + sql_table_ed + "AND (d.datafileID=ed.datafileID)"
+            sql_table_d = "datafiles AS d INNER JOIN " + sql_table_ed + "AND (d.datafileID=ed.datafileID)"
             sql_table = sql_table_e
             sql_order = order
             sql_selection_list = []
@@ -290,7 +289,6 @@ class CRDatabase(object):
 
         return result
 
-
     def getEvent(self, id=0):
         """Get the event with a specific *id*.
 
@@ -306,7 +304,6 @@ class CRDatabase(object):
             return Event(self.db, id=id)
         else:
             return None
-
 
     def deleteEvent(self, id=0):
         """Delete an event and its underlying information objects from
@@ -337,7 +334,6 @@ class CRDatabase(object):
                 self.db.executelist(sql_list, verbose=True)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def __getDeleteEventSql(self, id=0):
         """Get a list of SQL statements to delete the event
@@ -376,7 +372,6 @@ class CRDatabase(object):
         sql_list.append(sql)
 
         return sql_list
-
 
     def getDatafileIDs(self, eventID=None, filename=None, status=None, order=""):
         """Return a list of datafileIDs satifying the values of this
@@ -439,7 +434,6 @@ class CRDatabase(object):
 
         return result
 
-
     def getDatafile(self, id=0):
         """Get the Datafile with a specific *id*.
 
@@ -455,7 +449,6 @@ class CRDatabase(object):
             return Datafile(self.db, id=id)
         else:
             return none
-
 
     def deleteDatafile(self, id=0):
         """Delete a datafile and its underlying information objects from
@@ -486,7 +479,6 @@ class CRDatabase(object):
                 self.db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def __getDeleteDatafileSql(self, id=0):
         """Get a list of SQL statements to delete the datafile
@@ -525,7 +517,6 @@ class CRDatabase(object):
         sql_list.append(sql)
 
         return sql_list
-
 
     def getStationIDs(self, eventID=None, datafileID=None, stationname=None, status=None, order="s.stationname"):
         """Return a list of stationIDs that satisfy the values of the
@@ -592,7 +583,6 @@ class CRDatabase(object):
 
         return result
 
-
     def getStation(self, id=0):
         """Get the Station with a specific *id*.
 
@@ -608,7 +598,6 @@ class CRDatabase(object):
             return Station(self.db, id=id)
         else:
             return none
-
 
     def deleteStation(self, id=0):
         """Delete a station and its underlying information objects from
@@ -639,7 +628,6 @@ class CRDatabase(object):
                 self.db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def __getDeleteStationSql(self, id=0):
         """Get a list of SQL statements to delete the station
@@ -678,7 +666,6 @@ class CRDatabase(object):
         sql_list.append(sql)
 
         return sql_list
-
 
     def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None, order=""):
         """Return a list of polarizationIDs that satisfy the values of the
@@ -751,7 +738,6 @@ class CRDatabase(object):
 
         return result
 
-
     def getPolarization(self, id=0):
         """Get the Polarization with a specific *id*.
 
@@ -767,7 +753,6 @@ class CRDatabase(object):
             return Polarization(self.db, id=id)
         else:
             return none
-
 
     def deletePolarization(self, id=0):
         """Delete a polarization and its underlying information objects from
@@ -799,7 +784,6 @@ class CRDatabase(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def __getDeletePolarizationSql(self, id=0):
         """Get a list of SQL statements to delete the polarization
         information from the database.
@@ -825,7 +809,6 @@ class CRDatabase(object):
 
         return sql_list
 
-
     def isLocked(self):
         """Check if the database is locked."""
         result = True
@@ -840,10 +823,10 @@ class CRDatabase(object):
                 else:
                     result = False
 
-        if debug_mode: print "isLocked(): ",result # DEBUG
+        if debug_mode:
+            print "isLocked(): ", result  # DEBUG
 
         return result
-
 
     def unlock(self):
         """Unlock the database to be able to modify it. An unlocked database cannot be locked again!
@@ -860,61 +843,59 @@ class CRDatabase(object):
         else:
            print "Database is already unlocked."
 
-
     def summary(self):
         """Summary of the CRDatabase object."""
         linewidth = 80
 
-        print "="*linewidth
+        print "=" * linewidth
         print "  Summary of the CRDatabase object."
-        print "="*linewidth
+        print "=" * linewidth
 
         if self.db:
             dbstatus = "opened"
         else:
             dbstatus = "closed"
-        print "  %-40s : '%s'" %("Database", dbstatus)
+        print "  %-40s : '%s'" % ("Database", dbstatus)
 
-        print "  %-40s : '%s'" %("Filename", self.filename)
-        print "  %-40s : '%s'" %("Base path", self.basepath)
-        print "  %-40s : '%s'" %("Data path", self.settings.datapath)
-        print "  %-40s : '%s'" %("Results path", self.settings.resultspath)
-        print "  %-40s : %d" %("Version", self.settings.db_version)
+        print "  %-40s : '%s'" % ("Filename", self.filename)
+        print "  %-40s : '%s'" % ("Base path", self.basepath)
+        print "  %-40s : '%s'" % ("Data path", self.settings.datapath)
+        print "  %-40s : '%s'" % ("Results path", self.settings.resultspath)
+        print "  %-40s : %d" % ("Version", self.settings.db_version)
 
         if self.isLocked():
             db_locked_status = "locked"
         else:
             db_locked_status = "unlocked"
-        print "  %-40s : %s" %("Is database locked", db_locked_status)
+        print "  %-40s : %s" % ("Is database locked", db_locked_status)
 
-        print "-"*linewidth
+        print "-" * linewidth
 
         # Events
         if self.db:
             sql = "SELECT COUNT(eventID) AS nevents FROM events"
             n_events = self.db.select(sql)[0][0]
-            print "  %-40s : %d" %("Nr. of events", n_events)
+            print "  %-40s : %d" % ("Nr. of events", n_events)
 
         # Datafiles
         if self.db:
             sql = "SELECT COUNT(datafileID) AS ndatafiles FROM datafiles"
             n_datafiles = self.db.select(sql)[0][0]
-            print "  %-40s : %d" %("Nr. of datafiles", n_datafiles)
+            print "  %-40s : %d" % ("Nr. of datafiles", n_datafiles)
 
         # Stations
         if self.db:
             sql = "SELECT COUNT(stationID) AS nstations FROM stations"
             n_stations = self.db.select(sql)[0][0]
-            print "  %-40s : %d" %("Nr. of stations", n_stations)
+            print "  %-40s : %d" % ("Nr. of stations", n_stations)
 
         # Polarizations
         if self.db:
             sql = "SELECT COUNT(polarizationID) AS npolarizations FROM polarizations"
             n_polarizations = self.db.select(sql)[0][0]
-            print "  %-40s : %d" %("Nr. of polarizations", n_polarizations)
+            print "  %-40s : %d" % ("Nr. of polarizations", n_polarizations)
 
-        print "-"*linewidth
-
+        print "-" * linewidth
 
 
 class Settings(object):
@@ -946,8 +927,7 @@ class Settings(object):
         self._datapath = None
         self._resultspath = None
         self._lorapath = None
-        #self._db_version = None
-
+        # self._db_version = None
 
     @property
     def datapath(self):
@@ -965,7 +945,6 @@ class Settings(object):
                 raise ValueError("Unable to read from database: no database was set.")
 
         return result
-
 
     @datapath.setter
     def datapath(self, value):
@@ -986,7 +965,6 @@ class Settings(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     @property
     def resultspath(self):
         """Get the value of the *resultspath* variable as set in the database."""
@@ -1004,7 +982,6 @@ class Settings(object):
 
         return result
 
-
     @resultspath.setter
     def resultspath(self, value):
         """Set the value of the *resultspath* variable in the database.
@@ -1018,12 +995,11 @@ class Settings(object):
         =========  ===========================================
         """
         if self._db:
-            sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('resultspath',str(value))
+            sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('resultspath', str(value))
             self._db.execute(sql)
             self._resultspath = str(value)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     @property
     def lorapath(self):
@@ -1042,7 +1018,6 @@ class Settings(object):
 
         return result
 
-
     @lorapath.setter
     def lorapath(self, value):
         """Set the value of the *lorapath* variable in the database.
@@ -1056,12 +1031,11 @@ class Settings(object):
         =========  ===========================================
         """
         if self._db:
-            sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('lorapath',str(value))
+            sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('lorapath', str(value))
             self._db.execute(sql)
             self._lorapath = value
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     @property
     def db_version(self):
@@ -1077,20 +1051,18 @@ class Settings(object):
 
         return result
 
-
     def summary(self):
         """Summary of the Settings object."""
         linewidth = 80
 
-        print "="*linewidth
+        print "=" * linewidth
         print "  Summary of the Settings object."
-        print "="*linewidth
+        print "=" * linewidth
 
-        print "  %-40s : %s" %("datapath", self.datapath)
-        print "  %-40s : %s" %("resultspath", self.resultspath)
-        print "  %-40s : %s" %("lorapath", self.lorapath)
-        print "  %-40s : %d" %("db version", self.db_version)
-
+        print "  %-40s : %s" % ("datapath", self.datapath)
+        print "  %-40s : %s" % ("resultspath", self.resultspath)
+        print "  %-40s : %s" % ("lorapath", self.lorapath)
+        print "  %-40s : %d" % ("db version", self.db_version)
 
 
 class BaseParameter(object):
@@ -1102,7 +1074,7 @@ class BaseParameter(object):
         self._parameter = {}
 
         # Check if the parent is of the correct type ()
-        if self._parent_type in ['event','datafile','station','polarization']:
+        if self._parent_type in ['event', 'datafile', 'station', 'polarization']:
             self._tablename = self._parent_type + "parameters"
             self._idlabel = self._parent_type + "ID"
         else:
@@ -1110,38 +1082,31 @@ class BaseParameter(object):
 
         self._keys = self.keys()
 
-
     @property
     def _id(self):
         """Return the ID of the parent object."""
         return self._parent._id
-
 
     @property
     def _db(self):
         """Return the db reference of the parent object."""
         return self._parent._db
 
-
     def __repr__(self):
         """Representation of the parameter object."""
         return self._parameter.__repr__()
-
 
     def __getitem__(self, key):
         """Get the value of the parameter *key*."""
         return self._parameter[key]
 
-
     def __setitem__(self, key, value):
         """Set the value of the parameter *key*."""
         self._parameter[key] = value
 
-
     def __delitem__(self, key):
         """Empty the entry *key* from the list of parameters."""
         self._parameter[key] = None
-
 
     def keys(self):
         """Return a list of valid parameter keys."""
@@ -1161,11 +1126,11 @@ class BaseParameter(object):
 
         return self._keys
 
-
     def read(self):
         """Read parameters from the database."""
         sql = "SELECT * FROM {0} WHERE {1}={2}".format(self._tablename, self._idlabel, self._id)
-        if debug_mode: print sql        # DEBUG
+        if debug_mode:
+            print sql        # DEBUG
         records = self._db.select(sql)
         if records:
             values = [v for v in records[0][1:]]
@@ -1174,7 +1139,6 @@ class BaseParameter(object):
                 value = values[i]
                 if value:
                     self._parameter[key] = self.unpickle_parameter(str(value))
-
 
     def write(self):
         """Write parameters to the database."""
@@ -1190,7 +1154,6 @@ class BaseParameter(object):
 
         if sql != "":
             self._db.insert(sql)
-
 
     def __getUpdateSql(self):
         """Get a list of SQL statements to update the parameter
@@ -1214,14 +1177,12 @@ class BaseParameter(object):
 
         return sql_list
 
-
     def __getDeleteSql(self):
         """Get a list of SQL statements to delete the parameter
         information from the database."""
         sql = "DELETE FROM {0} WHERE {1}={2};".format(self._tablename, self._id_label, self._id)
 
         return sql
-
 
     def pickle_parameter(self, value):
         """Return the parameter as a database friendly pickle
@@ -1237,7 +1198,6 @@ class BaseParameter(object):
         """
         return re.sub("'", '"', pickle.dumps(value))
 
-
     def unpickle_parameter(self, value):
         """Return the parameter value from parsing a database friendly
         representation of the parameter.
@@ -1252,7 +1212,6 @@ class BaseParameter(object):
         """
         return pickle.loads(re.sub('"', "'", str(value)))
 
-
     def summary(self, parent_class_name="BaseParameter"):
         """Summary of the parameter object."""
         linewidth = 80
@@ -1261,15 +1220,14 @@ class BaseParameter(object):
         print "  Summary of the {0} object.".format(parent_class_name)
         print "=" * linewidth
 
-        print "  %-40s : %d" %("Number of parameters", len(self._parameter))
+        print "  %-40s : %d" % ("Number of parameters", len(self._parameter))
 
-        print "="*linewidth
+        print "=" * linewidth
 
         for key in self._parameter.keys():
-            print "    %-38s : %s" %(key, self._parameter[key])
+            print "    %-38s : %s" % (key, self._parameter[key])
 
-        print "="*linewidth
-
+        print "=" * linewidth
 
 
 class Event(object):
@@ -1340,20 +1298,16 @@ class Event(object):
         if self._inDatabase:           # Read from database
             self.read()
 
-
     def __repr__(self):
-        return "EventID=%d   timestampe=%d   status='%s'" %(self._id, self.timestamp, self.status.upper())
-
+        return "EventID=%d   timestampe=%d   status='%s'" % (self._id, self.timestamp, self.status.upper())
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
         return self.parameter[key]
 
-
     def __setitem__(self, key, value):
         """Set parameter value for *key*."""
         self.parameter[key] = value
-
 
     def __delitem__(self, key):
         """Delete parameter value for *key*."""
@@ -1454,7 +1408,6 @@ class Event(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def write(self, recursive=True, parameters=True):
         """Write event information to the database.
 
@@ -1492,7 +1445,6 @@ class Event(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def update(self, recursive=True, parameters=True):
         """Update event information to the database in a buffered (=faster) way.
 
@@ -1511,7 +1463,6 @@ class Event(object):
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def __getUpdateSql(self, recursive=True, parameters=True):
         """Get a list of SQL statements to update the event
@@ -1551,7 +1502,6 @@ class Event(object):
 
         return sql_list
 
-
     def inDatabase(self):
         """Check if event information is available in the database.
 
@@ -1576,12 +1526,10 @@ class Event(object):
 
         return result
 
-
     @property
     def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
-
 
     def addDatafile(self, datafile=None):
         """Add a datafile object to this event.
@@ -1633,7 +1581,6 @@ class Event(object):
 
         return result
 
-
     def removeDatafile(self, datafile=None, datafileID=0):
         """Remove datafile object with id= *datafileID* from this event.
 
@@ -1680,7 +1627,6 @@ class Event(object):
 
         return result
 
-
     def is_cr_found(self, alt_status=False):
         """Check if a polarization with a CR detection is found within
         this event.
@@ -1718,7 +1664,6 @@ class Event(object):
 
         return result
 
-
     def summary(self, showParameters=False):
         """Summary of the Event object.
 
@@ -1733,32 +1678,31 @@ class Event(object):
         """
         linewidth = 80
 
-        print "="*linewidth
+        print "=" * linewidth
         print "  Summary of the Event object."
-        print "="*linewidth
+        print "=" * linewidth
 
         # Event info
-        print "  %-40s : %d" %("ID", self._id)
-        print "  %-40s : %s (%s s)" %("Timestamp", time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(int(self.timestamp))), self.timestamp)
-        print "  %-40s : %s" %("Status", self.status)
-        print "  %-40s : %s" %("Status message", self.statusmessage)
-        print "  %-40s : %s" %("Alt Status", self.alt_status)
-        print "  %-40s : %s" %("Alt Status message", self.alt_statusmessage)
+        print "  %-40s : %d" % ("ID", self._id)
+        print "  %-40s : %s (%s s)" % ("Timestamp", time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(int(self.timestamp))), self.timestamp)
+        print "  %-40s : %s" % ("Status", self.status)
+        print "  %-40s : %s" % ("Status message", self.statusmessage)
+        print "  %-40s : %s" % ("Alt Status", self.alt_status)
+        print "  %-40s : %s" % ("Alt Status message", self.alt_statusmessage)
 
         # Datafiles
         n_datafiles = len(self.datafiles)
-        print "  %-40s : %d" %("Nr. of datafiles", n_datafiles)
+        print "  %-40s : %d" % ("Nr. of datafiles", n_datafiles)
         if self.datafiles:
             print "  Datafiles:"
             for datafile in self.datafiles:
-                print "    %-6d - %s" %(datafile.id, datafile.filename)
+                print "    %-6d - %s" % (datafile.id, datafile.filename)
 
         # Parameters
         if showParameters:
             self.parameter.summary()
 
-        print "="*linewidth
-
+        print "=" * linewidth
 
 
 class EventParameter(BaseParameter):
@@ -1774,11 +1718,9 @@ class EventParameter(BaseParameter):
 
         EventParameter.key_list = self.keys
 
-
     def summary(self):
         """Summary of the EventParameter object."""
         BaseParameter.summary(self, "EventParameter")
-
 
 
 class Datafile(object):
@@ -1820,25 +1762,20 @@ class Datafile(object):
         if self._inDatabase:
             self.read()
 
-
     def __repr__(self):
-        return "DatafileID=%d   filename='%s'   status='%s'" %(self._id, self.filename, self.status.upper())
-
+        return "DatafileID=%d   filename='%s'   status='%s'" % (self._id, self.filename, self.status.upper())
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
         return self.parameter[key]
 
-
     def __setitem__(self, key, value):
         """Set parameter value for *key*."""
         self.parameter[key] = value
 
-
     def __delitem__(self, key):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
-
 
     def read(self):
         """Read datafile information from the database."""
@@ -1872,7 +1809,6 @@ class Datafile(object):
                 print "WARNING: This datafile (id={0}) is not available in the database.".format(self._id)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def write(self, recursive=True, parameters=True):
         """Write datafile information to the database.
@@ -1917,7 +1853,6 @@ class Datafile(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def update(self, recursive=True, parameters=True):
         """Update datafile information to the database in a buffered (=faster) way.
 
@@ -1936,7 +1871,6 @@ class Datafile(object):
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def __getUpdateSql(self, recursive=True, parameters=True):
         """Get a list of SQL statements to update the datafile
@@ -1976,7 +1910,6 @@ class Datafile(object):
 
         return sql_list
 
-
     def inDatabase(self):
         """Check if the datafile information is available in the database.
 
@@ -2001,12 +1934,10 @@ class Datafile(object):
 
         return result
 
-
     @property
     def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
-
 
     def addStation(self, station=None):
         """Add a station object to this event.
@@ -2031,7 +1962,7 @@ class Datafile(object):
             # Update object
             if 0 == station.id:
                 station.write(recursive=False, parameters=False)
-            station.datafile = self     #  Reference to parent (datafile)
+            station.datafile = self  # Reference to parent (datafile)
 
             # Check for duplicate
             isNew = True
@@ -2058,7 +1989,6 @@ class Datafile(object):
                 raise ValueError("Unable to read from database: no database was set.")
 
         return result
-
 
     def removeStation(self, station=None, stationID=0):
         """Remove station object with id= *stationID* from this datafile.
@@ -2106,7 +2036,6 @@ class Datafile(object):
 
         return result
 
-
     def summary(self, showParameters=False):
         """Summary of the Datafile object.
 
@@ -2121,29 +2050,28 @@ class Datafile(object):
         """
         linewidth = 80
 
-        print "="*linewidth
+        print "=" * linewidth
         print "  Summary of the Datafile object."
-        print "="*linewidth
+        print "=" * linewidth
 
         # Datafile info
-        print "  %-40s : %s" %("ID", self._id)
-        print "  %-40s : %s" %("Filename", self.filename)
-        print "  %-40s : %s" %("Status", self.status)
+        print "  %-40s : %s" % ("ID", self._id)
+        print "  %-40s : %s" % ("Filename", self.filename)
+        print "  %-40s : %s" % ("Status", self.status)
 
         # Stations
         n_stations = len(self.stations)
-        print "  %-40s : %d" %("Number of stations", n_stations)
+        print "  %-40s : %d" % ("Number of stations", n_stations)
         if self.stations:
             print "  Stations:"
             for station in self.stations:
-                print "  %-6d - %s" %(station.id, station.stationname)
+                print "  %-6d - %s" % (station.id, station.stationname)
 
         # Parameters
         if showParameters:
             self.parameter.summary()
 
-        print "="*linewidth
-
+        print "=" * linewidth
 
 
 class DatafileParameter(BaseParameter):
@@ -2159,11 +2087,9 @@ class DatafileParameter(BaseParameter):
 
         DatafileParameter.key_list = self.keys
 
-
     def summary(self):
         """Summary of the DatafileParameter object."""
         BaseParameter.summary(self, "DatafileParameter")
-
 
 
 class Station(object):
@@ -2207,25 +2133,21 @@ class Station(object):
         if self._inDatabase:
             self.read()
 
-
     def __repr__(self):
-        return "StationID=%d   stationname='%s'   status='%s'" %(self._id, self.stationname, self.status.upper())
-
+        return "StationID=%d   stationname='%s'   status='%s'" % (self._id, self.stationname, self.status.upper())
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
         return self.parameter[key]
 
-
     def __setitem__(self, key, value):
         """Set parameter value for *key*."""
         self.parameter[key] = value
 
-
     def __delitem__(self, key):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
- 
+
     @property
     def status(self):
         """Get station status
@@ -2315,7 +2237,6 @@ class Station(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def write(self, recursive=True, parameters=True):
         """Write station information to the database.
 
@@ -2353,7 +2274,6 @@ class Station(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def update(self, recursive=True, parameters=True):
         """Update station information to the database in a buffered (=faster) way.
 
@@ -2372,7 +2292,6 @@ class Station(object):
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def __getUpdateSql(self, recursive=True, parameters=True):
         """Get a list of SQL statements to update the station
@@ -2412,7 +2331,6 @@ class Station(object):
 
         return sql_list
 
-
     def inDatabase(self):
         """Check if the station information is available in the database.
 
@@ -2436,12 +2354,10 @@ class Station(object):
 
         return result
 
-
     @property
     def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
-
 
     def addPolarization(self, polarization=None):
         """Add a polarization object to this station.
@@ -2466,7 +2382,7 @@ class Station(object):
             # Update object
             if 0 == polarization.id:
                 polarization.write(recursive=False, parameters=False)
-            polarization.station = self # Reference to parent (station)
+            polarization.station = self  # Reference to parent (station)
             key = polarization.direction
             if 0 == len(key):
                 key = "empty"
@@ -2487,7 +2403,6 @@ class Station(object):
                 raise ValueError("Unable to write to database: no database was set.")
 
         return result
-
 
     def removePolarization(self, polarization=None, key=None, id=0):
         """Remove polarization object with id= *polarizationID* from
@@ -2533,7 +2448,6 @@ class Station(object):
         else:
             print "WARNING: unable to determine polarization!"
 
-
         if pol_key:
             # Update object
             self.polarization.pop(pol_key)
@@ -2549,7 +2463,6 @@ class Station(object):
 
         return result
 
-
     def summary(self, showParameters=False):
         """Summary of the Station object.
 
@@ -2564,33 +2477,32 @@ class Station(object):
         """
         linewidth = 80
 
-        print "="*linewidth
+        print "=" * linewidth
         print "  Summary of the Station object."
-        print "="*linewidth
+        print "=" * linewidth
 
         # Station information
-        print "  %-40s : %d" %("ID", self._id)
-        print "  %-40s : %s" %("Station name", self.stationname)
-        print "  %-40s : %s" %("Status", self.status)
-        print "  %-40s : %s" %("Status message", self.statusmessage)
-        print "  %-40s : %s" %("Alt Status", self.alt_status)
-        print "  %-40s : %s" %("Alt Status message", self.alt_statusmessage)
+        print "  %-40s : %d" % ("ID", self._id)
+        print "  %-40s : %s" % ("Station name", self.stationname)
+        print "  %-40s : %s" % ("Status", self.status)
+        print "  %-40s : %s" % ("Status message", self.statusmessage)
+        print "  %-40s : %s" % ("Alt Status", self.alt_status)
+        print "  %-40s : %s" % ("Alt Status message", self.alt_statusmessage)
 
         # Polarizations
         n_polarizations = len(self.polarization)
-        print "  %-40s : %d" %("Nr. of polarizations",n_polarizations)
+        print "  %-40s : %d" % ("Nr. of polarizations", n_polarizations)
         if self.polarization:
             print "Polarizations:"
             for key in self.polarization:
-                print "  %-6d - %s - %s" %(self.polarization[key].id, key, self.polarization[key].resultsfile)
+                print "  %-6d - %s - %s" % (self.polarization[key].id, key, self.polarization[key].resultsfile)
             pass
 
         # Parameters
         if showParameters:
             self.parameter.summary()
 
-        print "="*linewidth
-
+        print "=" * linewidth
 
 
 class StationParameter(BaseParameter):
@@ -2606,11 +2518,9 @@ class StationParameter(BaseParameter):
 
         StationParameter.key_list = self.keys
 
-
     def summary(self):
         """Summary of the StationParameter object."""
         BaseParameter.summary(self, "StationParameter")
-
 
 
 class Polarization(object):
@@ -2732,20 +2642,16 @@ class Polarization(object):
         if self._inDatabase:
             self.read()
 
-
     def __repr__(self):
-        return "PolarizationID=%d   results='%s'   status='%s'" %(self._id, self.resultsfile, self.status.upper())
-
+        return "PolarizationID=%d   results='%s'   status='%s'" % (self._id, self.resultsfile, self.status.upper())
 
     def __getitem__(self, key):
         """Get parameter value for *key*."""
         return self.parameter[key]
 
-
     def __setitem__(self, key, value):
         """Set parameter value for *key*."""
         self.parameter[key] = value
-
 
     def __delitem__(self, key):
         """Delete parameter value for *key*."""
@@ -2835,7 +2741,6 @@ class Polarization(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def write(self, recursive=True, parameters=True):
         """Write polarization information to the database.
 
@@ -2868,7 +2773,6 @@ class Polarization(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-
     def update(self, parameters=True):
         """Update polarization information to the database in a buffered (=faster) way.
 
@@ -2886,7 +2790,6 @@ class Polarization(object):
             self._db.executelist(sql_list)
         else:
             raise ValueError("Unable to read from database: no database was set.")
-
 
     def __getUpdateSql(self, parameters=True):
         """Get a list of SQL statements to update the polarization
@@ -2919,7 +2822,6 @@ class Polarization(object):
 
         return sql_list
 
-
     def inDatabase(self):
         """Check if the polarization information is available in the
         database.
@@ -2944,12 +2846,10 @@ class Polarization(object):
 
         return result
 
-
     @property
     def id(self):
         """Return the ID of the object as it is identified in the database."""
         return self._id
-
 
     def summary(self, showParameters=False):
         """Summary of the Polarization object.
@@ -2965,28 +2865,27 @@ class Polarization(object):
         """
         linewidth = 80
 
-        print "="*linewidth
+        print "=" * linewidth
         print "  Summary of the Polarization object."
-        print "="*linewidth
+        print "=" * linewidth
 
         # Polarization information
-        print "  %-40s : %d" %("ID", self._id)
-        print "  %-40s : %s" %("Antennaset", self.antennaset)
-        print "  %-40s : %s" %("Direction", self.direction)
-        print "  %-40s : %s" %("Status", self.status)
-        print "  %-40s : %s" %("Status message", self.statusmessage)
-        print "  %-40s : %s" %("Alt Status", self.alt_status)
-        print "  %-40s : %s" %("Alt Status message", self.alt_statusmessage)
-        print "  %-40s : %s" %("Results file", self.resultsfile)
+        print "  %-40s : %d" % ("ID", self._id)
+        print "  %-40s : %s" % ("Antennaset", self.antennaset)
+        print "  %-40s : %s" % ("Direction", self.direction)
+        print "  %-40s : %s" % ("Status", self.status)
+        print "  %-40s : %s" % ("Status message", self.statusmessage)
+        print "  %-40s : %s" % ("Alt Status", self.alt_status)
+        print "  %-40s : %s" % ("Alt Status message", self.alt_statusmessage)
+        print "  %-40s : %s" % ("Results file", self.resultsfile)
 
         # Parameters
         if showParameters:
             self.parameter.summary()
         else:
-            print "  %-40s : %d" %("# Parameters", len(self.parameter.keys()))
+            print "  %-40s : %d" % ("# Parameters", len(self.parameter.keys()))
 
-        print "="*linewidth
-
+        print "=" * linewidth
 
 
 class PolarizationParameter(BaseParameter):
@@ -3002,8 +2901,6 @@ class PolarizationParameter(BaseParameter):
 
         PolarizationParameter.key_list = self.keys
 
-
     def summary(self):
         """Summary of the PolarizationParameter object."""
         BaseParameter.summary(self, "PolarizationParameter")
-

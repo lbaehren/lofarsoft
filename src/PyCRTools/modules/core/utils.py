@@ -6,17 +6,19 @@ from config import *
 from harray import *
 import glob
 
-def root_filename(filename,extension=".PCR"):
+
+def root_filename(filename, extension=".PCR"):
     """
     Will return a filename without the ending ".pcr"
 
     *extension* =".PCR" - extension to remove
     """
-    splt=os.path.splitext(filename)
-    if splt[1].upper()==extension:
+    splt = os.path.splitext(filename)
+    if splt[1].upper() == extension:
         return splt[0]
     else:
         return filename
+
 
 def listFiles(unix_style_filter):
     """
@@ -54,10 +56,11 @@ listFiles(["$LOFARSOFT/*.txt","~/.ema*"])
  '/Users/falcke/.emacs.d',
  '/Users/falcke/.emacs~']
     """
-    ll=[]
+    ll = []
     for l in asList(unix_style_filter):
         ll += glob.glob(os.path.expandvars(os.path.expanduser(l)))
-    if ll.count("."): del ll[ll.index(".")]
+    if ll.count("."):
+        del ll[ll.index(".")]
     ll.sort()
     return ll
 
@@ -84,18 +87,18 @@ def readParfiles(parfile):
       -> {"x":1,"y":2}
 
     """
-    pardict={}
-    if type(parfile)==str:
-        lf=listFiles(parfile)
-        if len(lf)>0:
+    pardict = {}
+    if type(parfile) == str:
+        lf = listFiles(parfile)
+        if len(lf) > 0:
             for l in lf:
-                f=open(l,"r")
+                f = open(l, "r")
                 if f:
-                    exec f in globals(),pardict
+                    exec f in globals(), pardict
                 else:
-                    print "Error: Opening parameter file",l,"failed."
+                    print "Error: Opening parameter file", l, "failed."
         else:
-            print "Error: parameter files",parfile,"not found."
+            print "Error: parameter files", parfile, "not found."
     return pardict
 
 ## {{{ http://code.activestate.com/recipes/208993/ (r1)
@@ -117,38 +120,45 @@ import os
 #     if len(t) < 1: return [h]+rest
 #     return pathsplit(h,[t]+rest)
 
+
 def pathsplit(path):
     """ This version, in contrast to the original version, permits trailing
     slashes in the pathname (in the event that it is a directory).
     It also uses no recursion """
     return path.split(os.path.sep)
 
+
 def commonpath(l1, l2, common=[]):
-    if len(l1) < 1: return (common, l1, l2)
-    if len(l2) < 1: return (common, l1, l2)
-    if l1[0] != l2[0]: return (common, l1, l2)
-    return commonpath(l1[1:], l2[1:], common+[l1[0]])
+    if len(l1) < 1:
+        return (common, l1, l2)
+    if len(l2) < 1:
+        return (common, l1, l2)
+    if l1[0] != l2[0]:
+        return (common, l1, l2)
+    return commonpath(l1[1:], l2[1:], common + [l1[0]])
+
 
 def relpath(p1, p2):
-    #First deal with the issue if both are relative paths
-    if len(p1)==0 or not p1[0]==os.path.sep:
-        if len(p2)==0 or not p2[0]==os.path.sep:
-            if p2[:len(p1)]==p1:
-                s=p2[len(p1):]
-                if len(s)>0 and s[0]==os.path.sep: s=s[1:]
+    # First deal with the issue if both are relative paths
+    if len(p1) == 0 or not p1[0] == os.path.sep:
+        if len(p2) == 0 or not p2[0] == os.path.sep:
+            if p2[:len(p1)] == p1:
+                s = p2[len(p1):]
+                if len(s) > 0 and s[0] == os.path.sep:
+                    s = s[1:]
                 return s
-            
-    (common,l1,l2) = commonpath(pathsplit(p1), pathsplit(p2))
+
+    (common, l1, l2) = commonpath(pathsplit(p1), pathsplit(p2))
     p = []
     if len(l1) > 0:
-        p = [ ('..'+os.path.sep) * len(l1) ]
+        p = [('..' + os.path.sep) * len(l1)]
     p = p + l2
-    return os.path.join( *p )
+    return os.path.join(*p)
 
 
-#def test(p1,p2):
+# def test(p1,p2):
 #    print "from", p1, "to", p2, " -> ", relpath(p1, p2)
 #
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 #    test('/a/b/c/d', '/a/b/c1/d1')
 ## end of http://code.activestate.com/recipes/208993/ }}}

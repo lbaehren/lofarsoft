@@ -11,44 +11,45 @@ import pytmf
 import numpy as np
 import time
 
+
 class ImagerDM(Task):
     """Imager task documentation.
     """
 
     parameters = {
-        'image' : { "default" : None, "positional" : 1 },
-        'data' : { "default" : None, "positional" : 2 },
-        'mask' : { "default" : None, "positional" : 3 },
-        'startblock' : { "default" : 0 },
-        'nblocks' : { "default" : 16 },
-        'ntimesteps' : { "default" : 1 },
-        'nfmin' : { "default" : None },
-        'nfmax' : { "default" : None },
-        'obstime' : { "default" : 0 },
-        'L' : { "default" : pytmf.deg2rad(6.869837540) },
-        'phi' : { "default" : pytmf.deg2rad(52.915122495) },
-        'NAXIS' : { "default" : 2 },
-        'NAXIS1' : { "default" : 90 },
-        'NAXIS2' : { "default" : 90 },
-        'CTYPE1' : { "default" : 'ALON-STG' },
-        'CTYPE2' : { "default" : 'ALAT-STG' },
-        'LONPOLE' : { "default" : 0. },
-        'LATPOLE' : { "default" : 90. },
-        'CRVAL1' : { "default" : 180. },
-        'CRVAL2' : { "default" : 90. },
-        'CRPIX1' : { "default" : 45.5 },
-        'CRPIX2' : { "default" : 45.5 },
-        'CDELT1' : { "default" : 2.566666603088E+00 },
-        'CDELT2' : { "default" : 2.566666603088E+00 },
-        'CUNIT1' : { "default" : 'deg' },
-        'CUNIT2' : { "default" : 'deg' },
-        'PC001001' : { "default" : 1.000000000000E+00 },
-        'PC002001' : { "default" : 0.000000000000E+00 },
-        'PC001002' : { "default" : 0.000000000000E+00 },
-        'PC002002' : { "default" : 1.000000000000E+00 },
-        'DM' : { "default" : None },
-        'dt' : { "default" : None },
-        'inversefft' : { "default" : False }
+        'image': {"default": None, "positional": 1},
+        'data': {"default": None, "positional": 2},
+        'mask': {"default": None, "positional": 3},
+        'startblock': {"default": 0},
+        'nblocks': {"default": 16},
+        'ntimesteps': {"default": 1},
+        'nfmin': {"default": None},
+        'nfmax': {"default": None},
+        'obstime': {"default": 0},
+        'L': {"default": pytmf.deg2rad(6.869837540)},
+        'phi': {"default": pytmf.deg2rad(52.915122495)},
+        'NAXIS': {"default": 2},
+        'NAXIS1': {"default": 90},
+        'NAXIS2': {"default": 90},
+        'CTYPE1': {"default": 'ALON-STG'},
+        'CTYPE2': {"default": 'ALAT-STG'},
+        'LONPOLE': {"default": 0.},
+        'LATPOLE': {"default": 90.},
+        'CRVAL1': {"default": 180.},
+        'CRVAL2': {"default": 90.},
+        'CRPIX1': {"default": 45.5},
+        'CRPIX2': {"default": 45.5},
+        'CDELT1': {"default": 2.566666603088E+00},
+        'CDELT2': {"default": 2.566666603088E+00},
+        'CUNIT1': {"default": 'deg'},
+        'CUNIT2': {"default": 'deg'},
+        'PC001001': {"default": 1.000000000000E+00},
+        'PC002001': {"default": 0.000000000000E+00},
+        'PC001002': {"default": 0.000000000000E+00},
+        'PC002002': {"default": 1.000000000000E+00},
+        'DM': {"default": None},
+        'dt': {"default": None},
+        'inversefft': {"default": False}
     }
 
     def init(self):
@@ -57,7 +58,7 @@ class ImagerDM(Task):
 
         # Generate coordinate grid
         print "Generating grid"
-        self.grid=CoordinateGrid(obstime=self.obstime,
+        self.grid = CoordinateGrid(obstime=self.obstime,
                                  L=self.L,
                                  phi=self.phi,
                                  NAXIS=self.NAXIS,
@@ -83,10 +84,10 @@ class ImagerDM(Task):
         print self.grid
 
         # Get frequencies
-        self.frequencies=self.data.getFrequencies()
+        self.frequencies = self.data.getFrequencies()
 
         if self.nfmin != None and self.nfmax != None:
-            self.frequencies=self.frequencies[range(self.nfmin, self.nfmax)]
+            self.frequencies = self.frequencies[range(self.nfmin, self.nfmax)]
 
         self.nfreq = len(self.frequencies)
 
@@ -100,8 +101,8 @@ class ImagerDM(Task):
             print "Dedispersion shifts", self.dispersion_shifts
 
         # Get antenna positions
-        self.antpos=self.data.getRelativeAntennaPositions()
-        self.nantennas=int(self.antpos.shape()[0])
+        self.antpos = self.data.getRelativeAntennaPositions()
+        self.nantennas = int(self.antpos.shape()[0])
 
         # Calculate geometric delays for all sky positions for all antennas
         self.delays = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.nantennas))
@@ -109,15 +110,15 @@ class ImagerDM(Task):
 
         # Create plan for inverse FFT if needed
         if self.inversefft:
-            self.blocksize = (self.nfreq - 1) * 2#self.data["BLOCKSIZE"]
+            self.blocksize = (self.nfreq - 1) * 2  # self.data["BLOCKSIZE"]
             self.plan = cr.FFTWPlanManyDftC2r(self.blocksize, self.NAXIS1 * self.NAXIS2, 1, self.nfreq, 1, self.blocksize, cr.fftw_flags.ESTIMATE)
             print "created inverse fft plan"
-            self.t_image2=cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.)
+            self.t_image2 = cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.)
 
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
-        self.fftdata=cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
-        self.t_image=cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+        self.fftdata = cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
+        self.t_image = cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
     def run(self):
         """Run the imager.
@@ -130,7 +131,7 @@ class ImagerDM(Task):
 
         start = time.time()
         for tstep in range(self.ntimesteps):
-            for block in range(self.startblock, self.startblock+self.nblocks):
+            for block in range(self.startblock, self.startblock + self.nblocks):
 
                 print "processing block:", block
 
@@ -165,5 +166,4 @@ class ImagerDM(Task):
             self.startblock += self.nblocks
 
         end = time.time()
-        print "total runtime:", end-start, "s"
-
+        print "total runtime:", end - start, "s"

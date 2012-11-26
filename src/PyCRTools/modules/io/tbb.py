@@ -24,6 +24,7 @@ from pycrtools import metadata as md
 # This class implements the IO interface
 from interfaces import IOInterface
 
+
 class TBBData(IOInterface):
     """This class provides an interface to single file Transient Buffer
     Board data.
@@ -33,7 +34,7 @@ class TBBData(IOInterface):
         """Constructor.
         """
         # Useful to do unit conversion
-        self.__conversiondict={"":1,"kHz":1000,"MHz":10**6,"GHz":10**9,"THz":10**12}
+        self.__conversiondict = {"": 1, "kHz": 1000, "MHz": 10 ** 6, "GHz": 10 ** 9, "THz": 10 ** 12}
 
         # Store blocksize for readout
         self.__blocksize = blocksize
@@ -42,10 +43,10 @@ class TBBData(IOInterface):
         self.__block = block
 
         # Open file
-        self.__file = cr.TBBData(filename) # Reference to TBBData, C++ code (?)
+        self.__file = cr.TBBData(filename)  # Reference to TBBData, C++ code (?)
 
         # Get a list of antenna IDs for which data is stored in the file
-        self.__dipoleNames= self.__file.dipoleNames()
+        self.__dipoleNames = self.__file.dipoleNames()
 
         # How many dipoles are there
         self.__nofDipoleDatasets = self.__file.nofDipoleDatasets()
@@ -56,7 +57,7 @@ class TBBData(IOInterface):
         # Find reference antenna
         self.__refAntenna = self.__file.alignment_reference_antenna()
 
-        #Create keyword dict for easy access
+        # Create keyword dict for easy access
         self.__setKeywordDict()
 
         # Selection dependent initialization
@@ -67,80 +68,80 @@ class TBBData(IOInterface):
 
     def __setKeywordDict(self):
 
-        self.__keyworddict={
+        self.__keyworddict = {
             # NON-ICD KEYWORDS
-            "ALIGNMENT_REFERENCE_ANTENNA":self.__file.alignment_reference_antenna,
-            "RELATIVEANTENNA_POSITIONS":self.getRelativeAntennaPositions,
-            "ITRFANTENNA_POSITIONS":self.getITRFAntennaPositions,
-            "ANTENNA_POSITIONS":self.getRelativeAntennaPositions,
-            "TIMESERIES_DATA":lambda:(lambda x:x if self.getTimeseriesData(x) else x)(self.empty("TIMESERIES_DATA")),
-            "TIME_DATA":self.getTimeData,
-            "FREQUENCY_DATA":self.getFrequencies,
-            "FFT_DATA":lambda:(lambda x:x if self.getFFTData(x) else x)(self.empty("FFT_DATA")),
-            "EMPTY_TIMESERIES_DATA":lambda:self.empty("TIMESERIES_DATA"),
-            "EMPTY_FFT_DATA":lambda:self.empty("FFT_DATA"),
-            "SAMPLE_FREQUENCY":lambda:[v*self.__conversiondict[u] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
-            "SAMPLE_INTERVAL":lambda:[1/(v*self.__conversiondict[u]) for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
-            "FREQUENCY_INTERVAL":lambda:[v*self.__conversiondict[u]/self["BLOCKSIZE"] for v,u in zip(self.__file.sample_frequency_value(),self.__file.sample_frequency_unit())],
-            "FREQUENCY_RANGE":lambda:[(f/2*(n-1),f/2*n) for f,n in zip(self["SAMPLE_FREQUENCY"],self["NYQUIST_ZONE"])],
-            "STATION_NAME":lambda:[md.idToStationName(i / 1000000) for i in self["CHANNEL_ID"]],
-            "FFTSIZE":lambda:self["BLOCKSIZE"]/2+1,
-            "BLOCKSIZE":lambda: self.__blocksize,
-            "BLOCK":lambda: self.__block,
-            "MAXIMUM_READ_LENGTH":self.__file.maximum_read_length(self.__refAntenna),
-            "TIME_HR":lambda:[str(datetime.utcfromtimestamp(t)) for t in self["TIME"]],
-            "SELECTED_DIPOLES_INDEX":lambda:[i for i, n in enumerate(self["DIPOLE_NAMES"]) if n in self["SELECTED_DIPOLES"]],
+            "ALIGNMENT_REFERENCE_ANTENNA": self.__file.alignment_reference_antenna,
+            "RELATIVEANTENNA_POSITIONS": self.getRelativeAntennaPositions,
+            "ITRFANTENNA_POSITIONS": self.getITRFAntennaPositions,
+            "ANTENNA_POSITIONS": self.getRelativeAntennaPositions,
+            "TIMESERIES_DATA": lambda: (lambda x: x if self.getTimeseriesData(x) else x)(self.empty("TIMESERIES_DATA")),
+            "TIME_DATA": self.getTimeData,
+            "FREQUENCY_DATA": self.getFrequencies,
+            "FFT_DATA": lambda: (lambda x: x if self.getFFTData(x) else x)(self.empty("FFT_DATA")),
+            "EMPTY_TIMESERIES_DATA": lambda: self.empty("TIMESERIES_DATA"),
+            "EMPTY_FFT_DATA": lambda: self.empty("FFT_DATA"),
+            "SAMPLE_FREQUENCY": lambda: [v * self.__conversiondict[u] for v, u in zip(self.__file.sample_frequency_value(), self.__file.sample_frequency_unit())],
+            "SAMPLE_INTERVAL": lambda: [1 / (v * self.__conversiondict[u]) for v, u in zip(self.__file.sample_frequency_value(), self.__file.sample_frequency_unit())],
+            "FREQUENCY_INTERVAL": lambda: [v * self.__conversiondict[u] / self["BLOCKSIZE"] for v, u in zip(self.__file.sample_frequency_value(), self.__file.sample_frequency_unit())],
+            "FREQUENCY_RANGE": lambda: [(f / 2 * (n - 1), f / 2 * n) for f, n in zip(self["SAMPLE_FREQUENCY"], self["NYQUIST_ZONE"])],
+            "STATION_NAME": lambda: [md.idToStationName(i / 1000000) for i in self["CHANNEL_ID"]],
+            "FFTSIZE": lambda: self["BLOCKSIZE"] / 2 + 1,
+            "BLOCKSIZE": lambda: self.__blocksize,
+            "BLOCK": lambda: self.__block,
+            "MAXIMUM_READ_LENGTH": self.__file.maximum_read_length(self.__refAntenna),
+            "TIME_HR": lambda: [str(datetime.utcfromtimestamp(t)) for t in self["TIME"]],
+            "SELECTED_DIPOLES_INDEX": lambda: [i for i, n in enumerate(self["DIPOLE_NAMES"]) if n in self["SELECTED_DIPOLES"]],
 
             # ICD KEYWORDS
-            "FILENAME":self.__file.filename,
-            "ANTENNA_SET":lambda:self.antenna_set if hasattr(self,"antenna_set") else self.__file.antenna_set(),
-            "ANTENNA_POSITION":self.__file.antenna_position,
-            "ANTENNA_POSITION_ITRF":self.__file.antenna_position_itrf,
-            "NYQUIST_ZONE":lambda:[2 for i in self["SELECTED_DIPOLES"]] if "HBA" in self["ANTENNA_SET"] else [1 for i in self["SELECTED_DIPOLES"]],
-            "TIME":self.__file.time,
-            "SAMPLE_NUMBER":self.__file.sample_number,
-            "SAMPLE_FREQUENCY_VALUE":self.__file.sample_frequency_value,
-            "SAMPLE_FREQUENCY_UNIT":self.__file.sample_frequency_unit,
-            "CABLE_DELAY":self.__file.cable_delay,
-            "CABLE_DELAY_UNIT":self.__file.cable_delay_unit,
-            "DATA_LENGTH":self.__file.data_length,
-            "NOF_STATION_GROUPS":self.__file.nofStationGroups,
-            "NOF_DIPOLE_DATASETS":self.__file.nofDipoleDatasets,
-            "NOF_SELECTED_DATASETS":self.__file.nofSelectedDatasets,
-            "DIPOLE_NAMES":self.__file.dipoleNames,
-            "SELECTED_DIPOLES":self.__file.selectedDipoles,
-            "CHANNEL_ID":self.__file.channelID,
-            "FILETYPE":self.__file.filetype,
-            "FILEDATE":self.__file.filedate,
-            "TELESCOPE":self.__file.telescope,
-            "OBSERVER":self.__file.observer,
-            "CLOCK_OFFSET":self.getClockOffset,
-            "CLOCK_FREQUENCY":self.__file.clockFrequency,
-            "CLOCK_FREQUENCY_UNIT":self.__file.clockFrequencyUnit,
-            "FILTER_SELECTION":self.__file.filterSelection,
-            "TARGET":self.__file.target,
-            "SYSTEM_VERSION":self.__file.systemVersion,
-            "PIPELINE_NAME":self.__file.pipelineName,
-            "PIPELINE_VERSION":self.__file.pipelineVersion,
-            "NOTES":self.__file.notes,
-            "PROJECT_ID":self.__file.projectID,
-            "PROJECT_TITLE":self.__file.projectTitle,
-            "PROJECT_PI":self.__file.projectPI,
-            "PROJECT_CO_I":self.__file.projectCoI,
-            "PROJECT_CONTACT":self.__file.projectContact,
-            "OBSERVATION_ID":self.__file.observationID,
-            "OBSERVATION_START_MJD":self.__file.startMJD,
-            "OBSERVATION_START_TAI":self.__file.startTAI,
-            "OBSERVATION_START_UTC":self.__file.startUTC,
-            "OBSERVATION_END_MJD":self.__file.endMJD,
-            "OBSERVATION_END_TAI":self.__file.endTAI,
-            "OBSERVATION_END_UTC":self.__file.endUTC,
-            "OBSERVATION_NOF_STATIONS":self.__file.nofStations,
-            "OBSERVATION_STATION_LIST":self.__file.stationList,
-            "OBSERVATION_FREQUENCY_MIN":self.__file.frequencyMin,
-            "OBSERVATION_FREQUENCY_MAX":self.__file.frequencyMax,
-            "OBSERVATION_FREQUENCY_CENTER":self.__file.frequencyCenter,
-            "OBSERVATION_FREQUENCY_UNIT":self.__file.frequencyUnit
+            "FILENAME": self.__file.filename,
+            "ANTENNA_SET": lambda: self.antenna_set if hasattr(self, "antenna_set") else self.__file.antenna_set(),
+            "ANTENNA_POSITION": self.__file.antenna_position,
+            "ANTENNA_POSITION_ITRF": self.__file.antenna_position_itrf,
+            "NYQUIST_ZONE": lambda: [2 for i in self["SELECTED_DIPOLES"]] if "HBA" in self["ANTENNA_SET"] else [1 for i in self["SELECTED_DIPOLES"]],
+            "TIME": self.__file.time,
+            "SAMPLE_NUMBER": self.__file.sample_number,
+            "SAMPLE_FREQUENCY_VALUE": self.__file.sample_frequency_value,
+            "SAMPLE_FREQUENCY_UNIT": self.__file.sample_frequency_unit,
+            "CABLE_DELAY": self.__file.cable_delay,
+            "CABLE_DELAY_UNIT": self.__file.cable_delay_unit,
+            "DATA_LENGTH": self.__file.data_length,
+            "NOF_STATION_GROUPS": self.__file.nofStationGroups,
+            "NOF_DIPOLE_DATASETS": self.__file.nofDipoleDatasets,
+            "NOF_SELECTED_DATASETS": self.__file.nofSelectedDatasets,
+            "DIPOLE_NAMES": self.__file.dipoleNames,
+            "SELECTED_DIPOLES": self.__file.selectedDipoles,
+            "CHANNEL_ID": self.__file.channelID,
+            "FILETYPE": self.__file.filetype,
+            "FILEDATE": self.__file.filedate,
+            "TELESCOPE": self.__file.telescope,
+            "OBSERVER": self.__file.observer,
+            "CLOCK_OFFSET": self.getClockOffset,
+            "CLOCK_FREQUENCY": self.__file.clockFrequency,
+            "CLOCK_FREQUENCY_UNIT": self.__file.clockFrequencyUnit,
+            "FILTER_SELECTION": self.__file.filterSelection,
+            "TARGET": self.__file.target,
+            "SYSTEM_VERSION": self.__file.systemVersion,
+            "PIPELINE_NAME": self.__file.pipelineName,
+            "PIPELINE_VERSION": self.__file.pipelineVersion,
+            "NOTES": self.__file.notes,
+            "PROJECT_ID": self.__file.projectID,
+            "PROJECT_TITLE": self.__file.projectTitle,
+            "PROJECT_PI": self.__file.projectPI,
+            "PROJECT_CO_I": self.__file.projectCoI,
+            "PROJECT_CONTACT": self.__file.projectContact,
+            "OBSERVATION_ID": self.__file.observationID,
+            "OBSERVATION_START_MJD": self.__file.startMJD,
+            "OBSERVATION_START_TAI": self.__file.startTAI,
+            "OBSERVATION_START_UTC": self.__file.startUTC,
+            "OBSERVATION_END_MJD": self.__file.endMJD,
+            "OBSERVATION_END_TAI": self.__file.endTAI,
+            "OBSERVATION_END_UTC": self.__file.endUTC,
+            "OBSERVATION_NOF_STATIONS": self.__file.nofStations,
+            "OBSERVATION_STATION_LIST": self.__file.stationList,
+            "OBSERVATION_FREQUENCY_MIN": self.__file.frequencyMin,
+            "OBSERVATION_FREQUENCY_MAX": self.__file.frequencyMax,
+            "OBSERVATION_FREQUENCY_CENTER": self.__file.frequencyCenter,
+            "OBSERVATION_FREQUENCY_UNIT": self.__file.frequencyUnit
             }
 
         if self.__file.version() >= 1:
@@ -160,7 +161,7 @@ class TBBData(IOInterface):
         # user-applied offsets will be lost.
 
         # Get antenna set
-        if not hasattr(self,"antenna_set"):
+        if not hasattr(self, "antenna_set"):
             self.antenna_set = self.__file.antenna_set()
 
         # Get Nyquist zone for each antenna
@@ -176,96 +177,101 @@ class TBBData(IOInterface):
         # Generate FFTW plan
         self.__plan = cr.FFTWPlanManyDftR2c(self.__blocksize, self.__file.nofSelectedDatasets(), 1, self.__blocksize, 1, self.__blocksize / 2 + 1, cr.fftw_flags.ESTIMATE)
 
-
     def info(self, verbose=True, show=True):
         """Display some information about the file. Short and long versions (verbose=False/True)
             .. function_author:: Emilio Enriquez <E.Enriquez@astro.ru.nl>
         """
-        #Selecting a subset of keys.
+        # Selecting a subset of keys.
         if verbose:
-            key=self.keys()
-            key = [k for k in key if 'EMPTY' not in k]
-            key.sort()
+            key = self.keys()
+            key = sorted([k for k in key if 'EMPTY' not in k])
         else:
-            key=['FILENAME','TIME_HR','DATA_LENGTH','DATA_LENGTH_TIME','STATION_NAME','NOF_DIPOLE_DATASETS']
+            key = ['FILENAME', 'TIME_HR', 'DATA_LENGTH', 'DATA_LENGTH_TIME', 'STATION_NAME', 'NOF_DIPOLE_DATASETS']
 
         if self['ANTENNA_SET'] == 'UNDEFINED':
             print "WARNING: ANTENNA_SET == UNDEFINED cannot read antenna positions."
             key = [k for k in key if 'POSITION' not in k]
 
-        output ='[TBB_Timeseries] Summary of object properties'
-        if show: print output.strip()
+        output = '[TBB_Timeseries] Summary of object properties'
+        if show:
+            print output.strip()
 
-        #For the print out format.
-        maxii=0
+        # For the print out format.
+        maxii = 0
         for i in range(len(key)):
-            maxii=max([maxii,len(key[i])])
+            maxii = max([maxii, len(key[i])])
         stringlength = maxii + 5
         und = ''
 
-        #Loop over the selected keys.
+        # Loop over the selected keys.
         for k in key:
             s = ""
             if k == 'DATA_LENGTH_TIME' and not(verbose):
-                s =  k +' '*(stringlength-len(k))+' : '+str(self['DATA_LENGTH'][0]*self['SAMPLE_INTERVAL'][0])+' s'
-                if show: print s
-                output += '\n'+s
+                s = k + ' ' * (stringlength - len(k)) + ' : ' + str(self['DATA_LENGTH'][0] * self['SAMPLE_INTERVAL'][0]) + ' s'
+                if show:
+                    print s
+                output += '\n' + s
                 continue
 
-            ss = k +' '*(stringlength-len(k))+' : '
+            ss = k + ' ' * (stringlength - len(k)) + ' : '
 
             if k == 'DATA_LENGTH' and not(verbose):
-                s =  ss+str(self[k][0])+' Samples ( '+str(self[k][0]/self['BLOCKSIZE'])+' BLOCKS, each of '+str(self['BLOCKSIZE'])+' Samples) '
-                if show: print s
-                output += '\n'+s
+                s = ss + str(self[k][0]) + ' Samples ( ' + str(self[k][0] / self['BLOCKSIZE']) + ' BLOCKS, each of ' + str(self['BLOCKSIZE']) + ' Samples) '
+                if show:
+                    print s
+                output += '\n' + s
                 continue
             if k == 'NOF_DIPOLE_DATASETS' and not(verbose):
-                s =  ss+str(self[k])+'  ( '+str(self['NOF_SELECTED_DATASETS'])+'  NOF_SELECTED_DATASETS ) '
-                if show: print s
-                output += '\n'+s
+                s = ss + str(self[k]) + '  ( ' + str(self['NOF_SELECTED_DATASETS']) + '  NOF_SELECTED_DATASETS ) '
+                if show:
+                    print s
+                output += '\n' + s
                 continue
 
             try:
-                if type(self[k])==type([0,0]) and len(self[k])>7 :
+                if isinstance(self[k], type([0, 0])) and len(self[k]) > 7:
                     if all(x == self[k][0] for x in self[k]):
                         if verbose:
-                            s =  ss+'[ '+str(self[k][0])+', ...] x'+ str(len(self[k]))+' with '+str(type(self[k][0]))
+                            s = ss + '[ ' + str(self[k][0]) + ', ...] x' + str(len(self[k])) + ' with ' + str(type(self[k][0]))
                         else:
-                            s =  ss+str(self[k][0])
+                            s = ss + str(self[k][0])
                     else:
-                        s = ss+str(self[k][:3]+['...']+self[k][-3:])
+                        s = ss + str(self[k][:3] + ['...'] + self[k][-3:])
                 else:
-                    if isinstance(self[k],(cr.core.hftools._hftools.ComplexArray,cr.core.hftools._hftools.IntArray,cr.core.hftools._hftools.BoolArray,cr.core.hftools._hftools.FloatArray,cr.core.hftools._hftools.StringArray)):
+                    if isinstance(self[k], (cr.core.hftools._hftools.ComplexArray, cr.core.hftools._hftools.IntArray, cr.core.hftools._hftools.BoolArray, cr.core.hftools._hftools.FloatArray, cr.core.hftools._hftools.StringArray)):
                         s = ss + str(self[k].__repr__(maxlen=10))
                     else:
-                        if self[k]=='UNDEFINED':
-                            und += k+' , '
+                        if self[k] == 'UNDEFINED':
+                            und += k + ' , '
                             continue
                         else:
                             s = ss + str(self[k])
-                if show: print s
-                output += '\n'+s
+                if show:
+                    print s
+                output += '\n' + s
 
             except IOError:
                 pass
         if len(und) > 0:
-            s = 'These keywords are UNDEFINED : ['+str(und)+']'
-            if show: print s
+            s = 'These keywords are UNDEFINED : [' + str(und) + ']'
+            if show:
+                print s
             output += s
 
         if not show:
             return output.strip()
+
     def __repr__(self):
         """Display summary when printed.
         """
         return self.info(False, False)
 
-    def keys(self,excludedata=False):
+    def keys(self, excludedata=False):
         """Returns list of valid keywords.
         """
-        return [k for k in self.__keyworddict.keys() if not k[-5:]=="_DATA"] if excludedata else self.__keyworddict.keys()
+        return [k for k in self.__keyworddict.keys() if not k[-5:] == "_DATA"] if excludedata else self.__keyworddict.keys()
 
-    def items(self,excludedata=False):
+    def items(self, excludedata=False):
         """Return list of keyword/content tuples of all header variables
         """
 
@@ -273,7 +279,7 @@ class TBBData(IOInterface):
 
         for k in self.keys(excludedata):
             try:
-                lst.append((k,self.__keyworddict[k]() if hasattr(self.__keyworddict[k],"__call__") else self.__keyworddict[k]))
+                lst.append((k, self.__keyworddict[k]() if hasattr(self.__keyworddict[k], "__call__") else self.__keyworddict[k]))
             except IOError:
                 pass
 
@@ -283,25 +289,25 @@ class TBBData(IOInterface):
         """Return a dict with keyword/content pairs for all header variables."""
         return dict(self.items(excludedata=True))
 
-    def next(self,step=1):
+    def next(self, step=1):
         """Advance to next block.
         *step* = 1 - advance by 'step' blocks (optional)
         """
-        self.__block+=step
+        self.__block += step
 
     def __getitem__(self, *keys):
         """Implements keyword access.
         """
-        #If multiple keywords are provided, return a list of results
-        if type(keys[0])==tuple:
+        # If multiple keywords are provided, return a list of results
+        if isinstance(keys[0], tuple):
             return [self[k] for k in keys[0]]
         else:
-            key=keys[0]
+            key = keys[0]
 
         if key not in self.keys():
-            raise KeyError("Invalid keyword: "+key)
+            raise KeyError("Invalid keyword: " + key)
         else:
-            if hasattr(self.__keyworddict[key],"__call__"):
+            if hasattr(self.__keyworddict[key], "__call__"):
                 return self.__keyworddict[key]()
             else:
                 return self.__keyworddict[key]
@@ -405,11 +411,11 @@ class TBBData(IOInterface):
         elif key is "OBSERVATION_FREQUENCY_UNIT":
             return self.__file.frequencyUnit()
 
-    setable_keywords=set(["BLOCKSIZE","BLOCK","SELECTED_DIPOLES","ANTENNA_SET"])
+    setable_keywords = set(["BLOCKSIZE", "BLOCK", "SELECTED_DIPOLES", "ANTENNA_SET"])
 
     def __setitem__(self, key, value):
         if key not in self.setable_keywords:
-            raise KeyError("Invalid keyword '"+str(key)+"' - vailable keywords: "+str(list(self.setable_keywords)))
+            raise KeyError("Invalid keyword '" + str(key) + "' - vailable keywords: " + str(list(self.setable_keywords)))
 
         elif key is "BLOCKSIZE":
             self.__blocksize = value
@@ -419,9 +425,9 @@ class TBBData(IOInterface):
         elif key is "SELECTED_DIPOLES":
             self.setAntennaSelection(value)
         elif key is "ANTENNA_SET":
-            self.antenna_set=value
+            self.antenna_set = value
         else:
-            raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
+            raise KeyError(str(key) + " cannot be set. Available keywords: " + str(list(self.setable_keywords)))
 
     def __contains__(self, key):
         """Allows inquiry if key is implemented.
@@ -429,7 +435,7 @@ class TBBData(IOInterface):
 
         return key in self.keys()
 
-    def getTimeData(self,data=None,block=-1):
+    def getTimeData(self, data=None, block=-1):
         """Calculate time axis depending on sample frequency and
         blocksize (and later also time offset). Create a new array, if
         none is provided, otherwise put data into array.
@@ -438,14 +444,14 @@ class TBBData(IOInterface):
         if not data:
             data = self.empty("TIME_DATA")
 
-        block=cr.asval(block)
+        block = cr.asval(block)
 
-        if block<0:
-            block=self.__block
+        if block < 0:
+            block = self.__block
         else:
-            self.__block=block
+            self.__block = block
 
-        data.fillrange(self["BLOCK"]*self["BLOCKSIZE"]*cr.asval(self["SAMPLE_INTERVAL"]),cr.asval(self["SAMPLE_INTERVAL"]))
+        data.fillrange(self["BLOCK"] * self["BLOCKSIZE"] * cr.asval(self["SAMPLE_INTERVAL"]), cr.asval(self["SAMPLE_INTERVAL"]))
         return data
 
     def __makeScratch(self):
@@ -484,7 +490,7 @@ class TBBData(IOInterface):
         Example:
            file["SELECTED_DIPOLES"]="odd"
         """
-        if type(selection)==str:
+        if isinstance(selection, str):
             if selection.upper() == "ODD":
                 selection = list(cr.hArray(self["DIPOLE_NAMES"]).Select("odd"))
             elif selection.upper() == "EVEN":
@@ -497,14 +503,14 @@ class TBBData(IOInterface):
         if not isinstance(selection, list):
             raise ValueError("Selection needs to be a list.")
 
-        if not len(selection)>0:
+        if not len(selection) > 0:
             raise ValueError("No antennas selected.")
 
-        if type(selection[0])==int or type(selection[0])==long:
+        if isinstance(selection[0], int) or isinstance(selection[0], long):
             # Selection by antenna number
             self.__selectedDipoles = [self.__dipoleNames[i] for i in selection if i < self.__nofDipoleDatasets]
 
-        elif type(selection[0])==str:
+        elif isinstance(selection[0], str):
             # Selection by antenna ID
             self.__selectedDipoles = [antennaID for antennaID in selection if antennaID in self.__dipoleNames]
 
@@ -541,17 +547,16 @@ class TBBData(IOInterface):
         length blocksize of antenna i.
 
         """
-        block=cr.asval(block)
+        block = cr.asval(block)
 
-        if block<0:
-            block=self.__block
+        if block < 0:
+            block = self.__block
         else:
-            self.__block=block
+            self.__block = block
 
 #        print 'Reading from alignment offset %d, block-position %d, sample offset %d' % (self.__alignment_offset.max()[0], block*self.__blocksize, sample_offset)
 
-        cr.hReadTimeseriesData(data, self.__alignment_offset+block*self.__blocksize+sample_offset, self.__blocksize, self.__file)
-
+        cr.hReadTimeseriesData(data, self.__alignment_offset + block * self.__blocksize + sample_offset, self.__blocksize, self.__file)
 
     def shiftTimeseriesData(self, sample_offset=0):
         """Shifts timeseries data for selected antennas.
@@ -566,7 +571,7 @@ class TBBData(IOInterface):
 
         """
 #        print 'shifting %d' % sample_offset
-        if sample_offset > self.__keyworddict["MAXIMUM_READ_LENGTH"] :
+        if sample_offset > self.__keyworddict["MAXIMUM_READ_LENGTH"]:
             raise ValueError('Sample offset > MAXIMUM_READ_LENGTH !!')
 
         self._TBBData__alignment_offset[...] += sample_offset
@@ -595,12 +600,12 @@ class TBBData(IOInterface):
         length (number of frequencies) of antenna i.
 
         """
-        block=cr.asval(block)
+        block = cr.asval(block)
 
-        if block<0:
-            block=self.__block
+        if block < 0:
+            block = self.__block
         else:
-            self.__block=block
+            self.__block = block
 
         # Get timeseries data
         self.getTimeseriesData(self.__scratch, block)
@@ -675,13 +680,13 @@ class TBBData(IOInterface):
         """
 
         if key == "TIMESERIES_DATA":
-            return cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize),name="E-Field(t)",units=("","Counts"))
+            return cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize), name="E-Field(t)", units=("", "Counts"))
         elif key == "TIME_DATA":
-            return cr.hArray(float, self["BLOCKSIZE"],name="Time",units=("","s"))
+            return cr.hArray(float, self["BLOCKSIZE"], name="Time", units=("", "s"))
         elif key == "FREQUENCY_DATA":
-            return cr.hArray(float, self.__blocksize/2+1,name="Frequency",units=("","Hz"))
+            return cr.hArray(float, self.__blocksize / 2 + 1, name="Frequency", units=("", "Hz"))
         elif key == "FFT_DATA":
-            return cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1),name="fft(E-Field)",xvalues=self["FREQUENCY_DATA"],logplot="y")
+            return cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1), name="fft(E-Field)", xvalues=self["FREQUENCY_DATA"], logplot="y")
         else:
             raise KeyError("Unknown key: " + str(key))
 
@@ -725,6 +730,7 @@ class TBBData(IOInterface):
 
         self.closed = True
 
+
 class MultiTBBData(IOInterface):
     """This class provides an interface to single file Transient Buffer
     Board data.
@@ -750,11 +756,11 @@ class MultiTBBData(IOInterface):
         station_startindex = self["STATION_STARTINDEX"]
         station_list = self["STATION_LIST"]
 
-        alignment_offsets = [int(x) for x in (allStartSamples.max() - allStartSamples)] # need to avoid np.int64's in list for hArray conversion
+        alignment_offsets = [int(x) for x in (allStartSamples.max() - allStartSamples)]  # need to avoid np.int64's in list for hArray conversion
         for i in range(len(station_list)):
             start = station_startindex[i]
-            end = station_startindex[i+1]
-            #import pdb; pdb.set_trace()
+            end = station_startindex[i + 1]
+            # import pdb; pdb.set_trace()
             thisStationsOffsets = cr.hArray(alignment_offsets[start:end])
             self.__files[i]._TBBData__alignment_offset = thisStationsOffsets
 
@@ -777,7 +783,7 @@ class MultiTBBData(IOInterface):
                 ret.append(f[key])
             return min(ret)
         elif key == "CLOCK_OFFSET":
-            return [f["CLOCK_OFFSET"][0] for f in self.__files] # assume one station per file; return one number per station
+            return [f["CLOCK_OFFSET"][0] for f in self.__files]  # assume one station per file; return one number per station
         elif key == "SUBSAMPLE_CLOCK_OFFSET":
             return self.__subsample_clockoffsets
         elif key == "FREQUENCY_DATA":
@@ -792,13 +798,13 @@ class MultiTBBData(IOInterface):
             return sum([f[key] for f in self.__files])
         elif key == "BLOCKSIZE":
             return self.__blocksize
-        elif key == "ANTENNA_POSITIONS": # return antenna positions from ITRF, otherwise positions are relative to each station!
+        elif key == "ANTENNA_POSITIONS":  # return antenna positions from ITRF, otherwise positions are relative to each station!
             itrf = self.__files[0]["ITRFANTENNA_POSITIONS"]
 #            antenna_positions_ITRF_m=list(datafile["ITRFANTENNA_POSITIONS"].vec()),
             ret = md.convertITRFToLocal(itrf).toNumpy()
             for f in self.__files[1:]:
                 itrf = f["ITRFANTENNA_POSITIONS"]
-                ret = np.vstack( (ret, md.convertITRFToLocal(itrf).toNumpy()) )
+                ret = np.vstack((ret, md.convertITRFToLocal(itrf).toNumpy()))
             return cr.hArray(ret)
         elif key == "ITRFANTENNA_POSITIONS":
             ret = self.__files[0]["ITRFANTENNA_POSITIONS"].toNumpy()
@@ -808,28 +814,28 @@ class MultiTBBData(IOInterface):
         # Extra key-words specific for multi-station TBB
         elif key == "STATION_LIST":
             ret = []
-            for f in self.__files: # assuming one station per file! Just taking RCU 0
+            for f in self.__files:  # assuming one station per file! Just taking RCU 0
                 stationID = int(f["DIPOLE_NAMES"][0]) / 1000000
                 stationName = md.idToStationName(stationID)
                 ret.append(stationName)
             return ret
-        elif key == "STATION_STARTINDEX": # start (RCU) index of station i in dipole list / timeseries etc.
+        elif key == "STATION_STARTINDEX":  # start (RCU) index of station i in dipole list / timeseries etc.
             ret = []
             nofDatasets = [f["NOF_SELECTED_DATASETS"] for f in self.__files]
             index = 0
             for nofForThisStation in nofDatasets:
                 ret.append(index)
                 index += nofForThisStation
-            ret.append(index) # Last item is end-index + 1, to be used in e.g. data[start:end] with end = station_startindex[i+1]
+            ret.append(index)  # Last item is end-index + 1, to be used in e.g. data[start:end] with end = station_startindex[i+1]
             return ret
         else:
-            raise KeyError("Unsupported key "+key)
+            raise KeyError("Unsupported key " + key)
 
-    setable_keywords=set(["BLOCKSIZE","BLOCK","SELECTED_DIPOLES"]) # ANTENNA_SET not implemented.
+    setable_keywords = set(["BLOCKSIZE", "BLOCK", "SELECTED_DIPOLES"])  # ANTENNA_SET not implemented.
 
     def __setitem__(self, key, value):
         if key not in self.setable_keywords:
-            raise KeyError("Invalid keyword '"+str(key)+"' - available keywords: "+str(list(self.setable_keywords)))
+            raise KeyError("Invalid keyword '" + str(key) + "' - available keywords: " + str(list(self.setable_keywords)))
 
         elif key is "BLOCKSIZE":
             self.__blocksize = value
@@ -843,12 +849,11 @@ class MultiTBBData(IOInterface):
         elif key is "SELECTED_DIPOLES":
             self.setAntennaSelection(value)
             self.__initSelection()
-            #self.applyClockOffsets()
+            # self.applyClockOffsets()
 #        elif key is "ANTENNA_SET":
 #            self.antenna_set=value
         else:
-            raise KeyError(str(key) + " cannot be set. Available keywords: "+str(list(self.setable_keywords)))
-
+            raise KeyError(str(key) + " cannot be set. Available keywords: " + str(list(self.setable_keywords)))
 
     def empty(self, key):
         """Return empty array for keyword data.
@@ -861,9 +866,9 @@ class MultiTBBData(IOInterface):
             nof_datasets += f["NOF_SELECTED_DATASETS"]
 
         if key == "TIMESERIES_DATA":
-            return cr.hArray(float, dimensions=(nof_datasets, self.__blocksize),name="E-Field(t)",units=("","Counts"))
+            return cr.hArray(float, dimensions=(nof_datasets, self.__blocksize), name="E-Field(t)", units=("", "Counts"))
         elif key == "FFT_DATA":
-            return cr.hArray(complex, dimensions=(nof_datasets, self.__blocksize / 2 + 1),name="fft(E-Field)",xvalues=self["FREQUENCY_DATA"],logplot="y")
+            return cr.hArray(complex, dimensions=(nof_datasets, self.__blocksize / 2 + 1), name="fft(E-Field)", xvalues=self["FREQUENCY_DATA"], logplot="y")
         else:
             raise KeyError("Unknown key: " + str(key))
 
@@ -928,8 +933,8 @@ class MultiTBBData(IOInterface):
             No parameters.
         """
         clockoffsets = np.array(self["CLOCK_OFFSET"])
-        clockoffsets *= -1.0 # Get the sign right...!
-        clockoffsets -= min(clockoffsets) # make them all positive
+        clockoffsets *= -1.0  # Get the sign right...!
+        clockoffsets -= min(clockoffsets)  # make them all positive
 
         sample_offset = [int(x / 5.0e-9) for x in clockoffsets]
         self.__subsample_clockoffsets = clockoffsets - np.array(sample_offset) * 5.0e-9
@@ -982,7 +987,6 @@ class MultiTBBData(IOInterface):
 
             start = end
 
-
     def setAntennaSelection(self, selection):
         """Sets the antenna selection used in subsequent calls to
         `getAntennaPositions`, `getFFTData`, `getTimeseriesData`.
@@ -1011,7 +1015,7 @@ class MultiTBBData(IOInterface):
         Example:
            file["SELECTED_DIPOLES"]="odd"
         """
-        if type(selection)==str:
+        if isinstance(selection, str):
             if selection.upper() == "ODD":
                 selection = list(cr.hArray(self["DIPOLE_NAMES"]).Select("odd"))
             elif selection.upper() == "EVEN":
@@ -1024,16 +1028,16 @@ class MultiTBBData(IOInterface):
         if not isinstance(selection, list):
             raise ValueError("Selection needs to be a list.")
 
-        if not len(selection)>0:
+        if not len(selection) > 0:
             raise ValueError("No antennas selected.")
 
-        if type(selection[0])==int or type(selection[0])==long:
+        if isinstance(selection[0], int) or isinstance(selection[0], long):
             # Selection by antenna number
             # convert selection to list of dipole names
-            selection = [self["DIPOLE_NAMES"][i] for i in selection if i < len(self["DIPOLE_NAMES"])] # self.__nofDipoleDatasets - implement?
+            selection = [self["DIPOLE_NAMES"][i] for i in selection if i < len(self["DIPOLE_NAMES"])]  # self.__nofDipoleDatasets - implement?
 
-        elif type(selection[0])==str:
-            pass # selection will be checked below
+        elif isinstance(selection[0], str):
+            pass  # selection will be checked below
             # Selection by antenna ID
 #            self.__selectedDipoles = [antennaID for antennaID in selection if antennaID in self["DIPOLE_NAMES"]]
 
@@ -1046,10 +1050,10 @@ class MultiTBBData(IOInterface):
         count = 0
         for f in self.__files:
             thisSelection = [x for x in selection if x in f["DIPOLE_NAMES"]]
-            f.setAntennaSelection(thisSelection) # call TBBData's method
+            f.setAntennaSelection(thisSelection)  # call TBBData's method
             count += len(thisSelection)
 
-        if count != len(selection): # assume count < len(selection)...
+        if count != len(selection):  # assume count < len(selection)...
             raise Exception("One or more antennas in selection are in none of the files.")
 
 
@@ -1061,7 +1065,6 @@ def open(filename, *args, **kwargs):
         return MultiTBBData(filename, *args, **kwargs)
     else:
         if not os.path.isfile(filename):
-            raise IOError("No such file or directory: "+filename)
+            raise IOError("No such file or directory: " + filename)
         else:
             return TBBData(filename, *args, **kwargs)
-

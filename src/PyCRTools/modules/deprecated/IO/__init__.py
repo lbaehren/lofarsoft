@@ -10,7 +10,8 @@ from interfaces import IOInterface
 from TBB import TBBData, open, set, get, applySelection
 import os
 
-def getFilenames(datadir,root="",extension=".h5"):
+
+def getFilenames(datadir, root="", extension=".h5"):
     """getFilenames(directory,extension) -> [file1.ext, file2.ext, ...]
 
     Returns a list of all files in a directory which start with a
@@ -18,11 +19,11 @@ def getFilenames(datadir,root="",extension=".h5"):
     filenames are returned with their pathname added. If empty strings
     are provided all files will be returned.
     """
-    tempfilenames=os.listdir(datadir)
-    lext=len(extension)
-    lroot=len(root)
-    filenames=[]
+    tempfilenames = os.listdir(datadir)
+    lext = len(extension)
+    lroot = len(root)
+    filenames = []
     for f in tempfilenames:
-        if (f[:lroot]==root) & (f[-lext:]==extension):
-            filenames.append(os.path.join(datadir,f))
+        if (f[:lroot] == root) & (f[-lext:] == extension):
+            filenames.append(os.path.join(datadir, f))
     return filenames

@@ -12,7 +12,8 @@ import tbb
 import beam
 import pyfits
 import pycrtools as cr
-import __builtin__ # Needed because from io import * will cause overloading
+import __builtin__  # Needed because from io import * will cause overloading
+
 
 def open(filename, *args, **kwargs):
     """Open a supported file type or fall back to Python built in open function.
@@ -41,10 +42,10 @@ def open(filename, *args, **kwargs):
             else:
                 ext = list(ext)[0]
     else:
-       filename=os.path.expandvars(os.path.expanduser(filename))
+       filename = os.path.expandvars(os.path.expanduser(filename))
        # Get file extension to determine type
        ext = filename.split(".")[-1].strip().lower()
-    
+
     if ext == "h5":
         # Open file with LOFAR TBB data
         return tbb.open(filename, *args, **kwargs)
@@ -60,4 +61,3 @@ def open(filename, *args, **kwargs):
     else:
         # Fall back to regular Python `open` function
         return __builtin__.open(filename, *args, **kwargs)
-

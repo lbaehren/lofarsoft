@@ -10,7 +10,8 @@ from htypes import *
 # Convenience Vector Constructor
 #========================================================================
 
-def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
+
+def Vector(Type=None, size=-1, fill=None, copy=None, properties=None):
     """
     The basic Boost Python STL vector constructor takes no arguments
     and hence is a litte cumbersome to use. Here we provide a wrapper
@@ -27,7 +28,7 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
     *copy* - a vector which is used to copy content and properties from (other keywords have priority though)
 
     *properties* - assume the properties of this vector if provided (other keywords have priority though)
-    
+
     Usage:
 
     ``Vector(Type)``
@@ -36,7 +37,7 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
       ``complex``, ``str``.
 
     ``Vector(Type,size)``
-      will create an vector of type ``Type``, with length ``size``. 
+      will create an vector of type ``Type``, with length ``size``.
 
     ``Vector(Type,size,fill)``
       will create an vector of type ``Type``, with length ``size`` and
@@ -57,7 +58,7 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
 
 
     Example:
-    
+
     v = Vector(int,10,fill=range(10)) -> v = Vector(int, 10, fill=[0,1,2,3,4,5,6,7,8,9])
     vv = Vector(copy=v) ->  vv = Vector(int, 10, fill=[0,1,2,3,4,5,6,7,8,9])
 
@@ -66,38 +67,38 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
     if isinstance(Type, float) or isinstance(Type, int):
         Type = [Type]
 
-    if not copy==None:
+    if not copy == None:
         if not properties:
-            properties=copy
+            properties = copy
         if not fill:
-            fill=copy
+            fill = copy
 
-    if not properties==None:
+    if not properties == None:
         if not Type:
-            Type=basetype(properties)
-        if size<0:
-            size=len(properties)
+            Type = basetype(properties)
+        if size < 0:
+            size = len(properties)
 
-    vtype=Type
+    vtype = Type
     # Check the 'type' parameter
     if type(size) in hListAndArrayTypes:
-        size=len(size)
+        size = len(size)
     elif isinstance(size, int) or isinstance(size, long):
-        size=size
+        size = size
     else:
         raise TypeError("size must be a list or vector or a scalar of type integer")
 
     if (type(vtype) in hAllArrayTypes):  # hArrayClass
-        vtype=basetype(Type)
-        vec=Vector(Type.vec())
+        vtype = basetype(Type)
+        vec = Vector(Type.vec())
     elif (type(vtype) in hAllListTypes):  # List or Vector
         if len(vtype) == 0:
             vtype = int
             vec = type2vector(vtype)
             size = 0
         else:
-            vtype=type(Type[0])
-            vec=type2vector(vtype)
+            vtype = type(Type[0])
+            vec = type2vector(vtype)
             vec.extend(Type)
     elif type(vtype) == np.ndarray:  # Numpy ndarray
         if vtype.dtype == np.dtype('float'):
@@ -107,21 +108,26 @@ def Vector(Type=None,size=-1,fill=None,copy=None,properties=None):
         elif vtype.dtype == np.dtype('int'):
             vec = IntVec()
         else:
-            raise TypeError("No available copy constructor for dtype: '"+str(vtype.dtype)+"'")
+            raise TypeError("No available copy constructor for dtype: '" + str(vtype.dtype) + "'")
 
         vec.resize(vtype.size)
         hCopy(vec, vtype)
     else:
-        vec=type2vector(vtype)
-    vec.type=vtype
-    if (size>=0): vec.resize(size)
-    if type(fill) in [tuple,list]:
-        if len(fill)>0: fill=Vector(fill)
-        else: fill=None
-    if type(fill) in hAllArrayTypes: fill=fill.vec()
-    if (not fill==None):
+        vec = type2vector(vtype)
+    vec.type = vtype
+    if (size >= 0):
+        vec.resize(size)
+    if type(fill) in [tuple, list]:
+        if len(fill) > 0:
+            fill = Vector(fill)
+        else:
+            fill = None
+    if type(fill) in hAllArrayTypes:
+        fill = fill.vec()
+    if (not fill == None):
         vec.fill(fill)
     return vec
+
 
 def multiply_list(l):
     """
@@ -133,27 +139,29 @@ def multiply_list(l):
       >>> multiply_list([n1,n2,...])
       -> n1*n2*n3 ....
     """
-    return reduce(lambda x,y:x*y,l)
+    return reduce(lambda x, y: x * y, l)
+
 
 def asvec(self):
     """
     Return the argument as a vector, if possible, otherwise as list. If None, return None.
     """
-    typ=type(self)
+    typ = type(self)
     if typ in hAllVectorTypes:
         return self
     elif typ in hAllArrayTypes:
         return self.vec()
     elif typ in hBaseTypes:
         return Vector([self])
-    elif typ==list:
+    elif typ == list:
         return Vector(self)
-    elif typ in [set,tuple]:
+    elif typ in [set, tuple]:
         return Vector(list(self))
-    elif self==None:
+    elif self == None:
         return self
     else:
         return [self]
+
 
 def asval(self):
     """
@@ -163,7 +171,8 @@ def asval(self):
         return self[0]
     else:
         return self
-    
+
+
 def hVector_list(self):
     """
     Retrieve the STL vector as a python list.
@@ -174,6 +183,7 @@ def hVector_list(self):
       -> [x1,x2,x3, ...]
     """
     return list(self)
+
 
 def hVector_val(self):
     """
@@ -188,8 +198,11 @@ def hVector_val(self):
       >>> vec.val()
       -> [a,b,c,...]   (if length > 1)
     """
-    if len(self)==1: return self[0]
-    else: return list(self)
+    if len(self) == 1:
+        return self[0]
+    else:
+        return list(self)
+
 
 def hVector_vec(self):
     """
@@ -201,9 +214,10 @@ def hVector_vec(self):
       >>> vector.vec()
       -> vector
     """
-    return self;
+    return self
 
-def extendflat(self,l):
+
+def extendflat(self, l):
     """
     Appending all elements in a list of lists to a one-dimensional
     vector with a flat data structure (just 1D).
@@ -212,8 +226,9 @@ def extendflat(self,l):
       >>> vector.extendflat([[e1-1,e1-2,...],[e2-1,e2-2,...],..])
       -> [e1-1,e1-2,...,e2-1,e2-2,...]
     """
-    map(lambda x:self.extend(x),l)
+    map(lambda x: self.extend(x), l)
     return self
+
 
 def isVector(vec):
     """
@@ -230,12 +245,14 @@ def isVector(vec):
 #  Pretty Printing
 #======================================================================
 
-#Some definitons to make pretty (and short) output of vectors
+# Some definitons to make pretty (and short) output of vectors
+
+
 def VecToString(self, maxlen=100):
     """
     see help of 'hPrettyString'
     """
-    return hPrettyString(self,maxlen)
+    return hPrettyString(self, maxlen)
     """
     if len(self) == 0:
         return "[]"
@@ -250,11 +267,12 @@ def VecToString(self, maxlen=100):
     return s
 """
 
-def hVector_repr(self,maxlen=100):
+
+def hVector_repr(self, maxlen=100):
     """
     Returns a human readable string representation of the vector.
     """
-    return "Vector("+typename(basetype(self))+", "+str(len(self))+", fill="+hPrettyString(self, maxlen)+")"
+    return "Vector(" + typename(basetype(self)) + ", " + str(len(self)) + ", fill=" + hPrettyString(self, maxlen) + ")"
 
 #======================================================================
 #  Vector Methods/Attributes
@@ -265,7 +283,7 @@ Here we add the functions defined in the hftools as methods/attributes
 to the (STL) vector classes in python.
 """
 
-Vectordoc= """
+Vectordoc = """
 A number of vector types are provided: ``bool``, ``int``, ``float``,
 ``complex``, and ``str``.
 
@@ -291,19 +309,21 @@ Some of the basic arithmetic is available in an intuitve way, e.g.,
 ``vec+1, vec1+vec2, vec+=vec2``.
 """
 
-IntVec.__doc__="c++ standard template library (STL) vector of type 'int'\n"+Vectordoc
-FloatVec.__doc__="c++ standard template library (STL) vector of type 'float'\n"+Vectordoc
-StringVec.__doc__="c++ standard template library (STL) vector of type 'str'\n"+Vectordoc
-BoolVec.__doc__="c++ standard template library (STL) vector of type 'bool'\n"+Vectordoc
-ComplexVec.__doc__="c++ standard template library (STL) vector of type 'complex'\n"+Vectordoc
+IntVec.__doc__ = "c++ standard template library (STL) vector of type 'int'\n" + Vectordoc
+FloatVec.__doc__ = "c++ standard template library (STL) vector of type 'float'\n" + Vectordoc
+StringVec.__doc__ = "c++ standard template library (STL) vector of type 'str'\n" + Vectordoc
+BoolVec.__doc__ = "c++ standard template library (STL) vector of type 'bool'\n" + Vectordoc
+ComplexVec.__doc__ = "c++ standard template library (STL) vector of type 'complex'\n" + Vectordoc
 
-IntVec.__name__="IntVec"
-FloatVec.__name__="FloatVec"
-BoolVec.__name__="BoolVec"
-ComplexVec.__name__="ComplexVec"
-StringVec.__name__="StringVec"
+IntVec.__name__ = "IntVec"
+FloatVec.__name__ = "FloatVec"
+BoolVec.__name__ = "BoolVec"
+ComplexVec.__name__ = "ComplexVec"
+StringVec.__name__ = "StringVec"
 
 # Unary Operator:  +
+
+
 def Vec_pos(vec1):
     """
     Provides the ``+`` operator for a vector (which is its identity: +vec = vec).
@@ -311,135 +331,160 @@ def Vec_pos(vec1):
     return vec1
 
 # Unary Operator:  -
+
+
 def Vec_neg(vec1):
     """
     Provides the ``-`` operator for a vector. Will return a copy of
     the vector where all elmements are multiplied by -1.
     """
-    vecout=vec1.new()
+    vecout = vec1.new()
     vecout.copy(vec1)
     hNegate(vecout)
     return vecout
 
 # Operator:  +=
-def Vec_iadd(vec1,vec2):
+
+
+def Vec_iadd(vec1, vec2):
     """
     Provides the ``+=`` operator for adding two vectors in place.
     ``vec1 += vec2`` will add all elements in ``vec2`` to the
     corresponding elements in ``vec1`` and store the result in
     ``vec1``.
     """
-    hAdd(vec1,vec2)
+    hAdd(vec1, vec2)
     return vec1
 
 # Operator:  -=
-def Vec_isub(vec1,vec2):
+
+
+def Vec_isub(vec1, vec2):
     """
     Provides the ``-=`` operator for adding two vectors in place.
     ``vec1 -= vec2`` will subtract all elements in ``vec2`` from the
     corresponding elements in ``vec1`` and store the result in
     ``vec1``.
     """
-    hSub(vec1,vec2)
+    hSub(vec1, vec2)
     return vec1
 
 # Operator:  /=
-def Vec_idiv(vec1,vec2):
+
+
+def Vec_idiv(vec1, vec2):
     """
     Provides the ``/=`` operator for adding two vectors in place.
     ``vec1 /= vec2`` will divide all elements in ``vec1`` by the
     corresponding elements in ``vec2`` and store the result in
     ``vec1``.
     """
-    hDiv(vec1,vec2)
+    hDiv(vec1, vec2)
     return vec1
 
 # Operator:  *=
-def Vec_imul(vec1,vec2):
+
+
+def Vec_imul(vec1, vec2):
     """
     Provides the ``*=`` operator for addig two vectors in place.
     ``vec1 *= vec2`` will multiply all elements in ``vec1`` with the
     corresponding elements in ``vec2`` and store the result in
     ``vec1``.
     """
-    hMul(vec1,vec2)
+    hMul(vec1, vec2)
     return vec1
 
 # Operator:  +
-def Vec_add(vec1,val):
+
+
+def Vec_add(vec1, val):
     """
     Provides the ``+`` operator for adding two vectors or a vector and
     a scalar. The result will be a new vector.
     """
-    vecout=vec1.new()
-    hAdd(vecout,vec1,val)
+    vecout = vec1.new()
+    hAdd(vecout, vec1, val)
     return vecout
 
 # Operator:  -
-def Vec_sub(vec1,val):
+
+
+def Vec_sub(vec1, val):
     """
     Provides the ``-`` operator for subtracting two vectors or a
     vector and a scalar. The result will be a new vector.
     """
-    vecout=vec1.new()
-    hSub(vecout,vec1,val)
+    vecout = vec1.new()
+    hSub(vecout, vec1, val)
     return vecout
 
 # Operator:  -
-def Vec_rsub(vec1,val):
+
+
+def Vec_rsub(vec1, val):
     """
     Provides the ``-`` operator for subtracting two vectors or a
     vector and a scalar. The result will be a new vector.
     """
-    vecout=vec1.new()
+    vecout = vec1.new()
     vecout.copy(vec1)
     hNegate(vecout)
-    hAdd(vecout,val)
+    hAdd(vecout, val)
     return vecout
 
 # Operator:  *
-def Vec_mul(vec1,val):
+
+
+def Vec_mul(vec1, val):
     """
     Provides the ``*`` operator for multiplying two vectors or a
     vector and a scalar. The result will be a new vector.
     """
-    vecout=vec1.new()
-    hMul(vecout,vec1,val)
+    vecout = vec1.new()
+    hMul(vecout, vec1, val)
     return vecout
 
 # Operator:  /
-def Vec_div(vec1,val):
+
+
+def Vec_div(vec1, val):
     """
     Provides the ``/`` operator for dividing two vectors or a vector
     by a scalar. The result will be a new vector.
     """
-    vecout=vec1.new()
-    hDiv(vecout,vec1,val)
+    vecout = vec1.new()
+    hDiv(vecout, vec1, val)
     return vecout
 
-def Vec_rdiv(vec1,val):
+
+def Vec_rdiv(vec1, val):
     """
     Provides the ``/`` operator for dividing two vectors or a vector
     by a scalar. The result will be a new vector.
     """
-    vecout=vec1.new()
+    vecout = vec1.new()
     vecout.copy(vec1)
     hInverse(vecout)
-    hMul(vecout,val)
+    hMul(vecout, val)
     return vecout
 
 # Operator:  **
-def Vec_pow(vec1,val):
+
+
+def Vec_pow(vec1, val):
     """
     Provides the ``**`` operator for raising a vector to a power.
     Returns a new vector.
     """
-    vecout=vec1.new()
+    vecout = vec1.new()
     vecout.copy(vec1)
-    hPow(vecout,val)
+    hPow(vecout, val)
     return vecout
 
 # Pickling
+
+
 def hVector_getinitargs(self):
     """Get arguments for ``hVector`` constructor.
 
@@ -450,11 +495,13 @@ def hVector_getinitargs(self):
     """
     return ()
 
+
 def hVector_getstate(self):
     """Get current state of ``hVector`` object for pickling.
     """
 
     return (len(self), hWriteRawVector(self))
+
 
 def hVector_setstate(self, state):
     """Restore state of ``hVector`` object for unpickling.
@@ -464,60 +511,60 @@ def hVector_setstate(self, state):
     hReadRawVector(self, state[1])
 
 # Fourier Transforms
-setattr(FloatVec,"fft",hFFTCasa)
+setattr(FloatVec, "fft", hFFTCasa)
 
 for v in hAllVectorTypes:
-    setattr(v,"__repr__",hVector_repr)
-    setattr(v,"__getinitargs__",hVector_getinitargs)
-    setattr(v,"__getstate__",hVector_getstate)
-    setattr(v,"__setstate__",hVector_setstate)
-    setattr(v,"__getstate_manages_dict__",1)
-    setattr(v,"extendflat",extendflat)
-    setattr(v,"val",hVector_val)
-    setattr(v,"vec",hVector_vec)
-    setattr(v,"list",hVector_list)
+    setattr(v, "__repr__", hVector_repr)
+    setattr(v, "__getinitargs__", hVector_getinitargs)
+    setattr(v, "__getstate__", hVector_getstate)
+    setattr(v, "__setstate__", hVector_setstate)
+    setattr(v, "__getstate_manages_dict__", 1)
+    setattr(v, "extendflat", extendflat)
+    setattr(v, "val", hVector_val)
+    setattr(v, "vec", hVector_vec)
+    setattr(v, "list", hVector_list)
     for s in hAllVectorMethods:
         if s in locals():
-            setattr(v,s[1:].lower(),eval(s))
+            setattr(v, s[1:].lower(), eval(s))
         else:
-            print "Warning hAllVectorMethods: function ",s," is not defined. Likely due to a missing library in hftools.cc."
+            print "Warning hAllVectorMethods: function ", s, " is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hAllContainerTypes:
     for s in hAllContainerMethods:
         if s in locals():
-            setattr(v,s[1:].lower(),eval(s))
+            setattr(v, s[1:].lower(), eval(s))
         else:
-            print "Warning hAllContainerMethods(v): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+            print "Warning hAllContainerMethods(v): function ", s, " is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hRealContainerTypes:
-    setattr(v,"__pow__",Vec_pow)
+    setattr(v, "__pow__", Vec_pow)
     for s in hRealContainerMethods:
         if s in locals():
-            setattr(v,s[1:].lower(),eval(s))
+            setattr(v, s[1:].lower(), eval(s))
         else:
-            print "Warning hRealContainerMethods(v): function ",s," is not defined. Likely due to a missing library in hftools.cc."
+            print "Warning hRealContainerMethods(v): function ", s, " is not defined. Likely due to a missing library in hftools.cc."
 
 for v in hComplexContainerTypes:
     for s in hComplexContainerMethods:
         if s in locals():
-            setattr(v,s[1:].lower(),eval(s))
+            setattr(v, s[1:].lower(), eval(s))
         else:
-            print "Warning hComplexContainerTypes(v): function ",s," is not defined. Likely due to a missing library in hftools."
+            print "Warning hComplexContainerTypes(v): function ", s, " is not defined. Likely due to a missing library in hftools."
 
 for v in hNumericalContainerTypes:
-    setattr(v,"__add__",Vec_add)
-    setattr(v,"__sub__",Vec_sub)
-    setattr(v,"__div__",Vec_div)
-    setattr(v,"__mul__",Vec_mul)
-    setattr(v,"__pos__",Vec_pos)
-    setattr(v,"__neg__",Vec_neg)
-    setattr(v,"__iadd__",Vec_iadd)
-    setattr(v,"__imul__",Vec_imul)
-    setattr(v,"__idiv__",Vec_idiv)
-    setattr(v,"__isub__",Vec_isub)
+    setattr(v, "__add__", Vec_add)
+    setattr(v, "__sub__", Vec_sub)
+    setattr(v, "__div__", Vec_div)
+    setattr(v, "__mul__", Vec_mul)
+    setattr(v, "__pos__", Vec_pos)
+    setattr(v, "__neg__", Vec_neg)
+    setattr(v, "__iadd__", Vec_iadd)
+    setattr(v, "__imul__", Vec_imul)
+    setattr(v, "__idiv__", Vec_idiv)
+    setattr(v, "__isub__", Vec_isub)
     v.phase = hArg
     for s in hNumericalContainerMethods:
         if s in locals():
-            setattr(v,s[1:].lower(),eval(s))
+            setattr(v, s[1:].lower(), eval(s))
         else:
-            print "Warning hNumericalContainerMethods(v): function ",s," is not defined. Likely due to a missing library in hftools."
+            print "Warning hNumericalContainerMethods(v): function ", s, " is not defined. Likely due to a missing library in hftools."

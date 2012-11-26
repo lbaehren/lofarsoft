@@ -13,6 +13,7 @@ import time
 import pyfits
 import os
 
+
 def savefits(filename, array, overwrite=True, **kwargs):
     """Save image as standard FITS file.
     """
@@ -34,9 +35,9 @@ def savefits(filename, array, overwrite=True, **kwargs):
 
             # Correct for ugly bug in casaviewer
             if "CTYPE" in key and "ALON" in kwargs[key]:
-                hdr.update(key, "??LN-"+kwargs[key][5:])
+                hdr.update(key, "??LN-" + kwargs[key][5:])
             elif "CTYPE" in key and "ALAT" in kwargs[key]:
-                hdr.update(key, "??LT-"+kwargs[key][5:])
+                hdr.update(key, "??LT-" + kwargs[key][5:])
             else:
                 hdr.update(key, kwargs[key])
 
@@ -47,53 +48,54 @@ def savefits(filename, array, overwrite=True, **kwargs):
         os.remove(filename)
     hdu.writeto(filename)
 
+
 class CRImager(Task):
     """CRImager task documentation.
     """
 
     parameters = dict(
-        output = dict( default = None ),
-        data = dict( default = None ),
-        fftdata = dict( default = None ),
-        frequencies = dict( default = None ),
-        antpos = dict( default = None ),
-        blocksize = dict( default = None ),
-        nf = dict ( default = lambda self : self.blocksize / 2 + 1 ),
-        nantennas = dict ( default = lambda self : self.antpos.shape()[0] ),
-        nyquist_zone = dict( default = 1 ),
-        sample_frequency = dict( default = 200.e6 ),
-        image = dict( default = lambda self : np.zeros(shape=(self.blocksize, self.NAXIS1, self.NAXIS2), dtype=float),
-            doc = "Array to hold output image, needs to be a numpy array because otherwise conversion to FITS will require twice the memory." ),
-        frequency_domain_image = dict( default = lambda self : cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nf), fill=0.) ),
-        time_domain_image = dict( default = lambda self : cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.) ),
-        OBSTIME = dict( default = None ),
-        OBSLON = dict( default = pytmf.deg2rad(6.869837540), doc = "Observer longitude in radians" ),
-        OBSLAT = dict( default = pytmf.deg2rad(52.915122495), doc = "Observer latitude in radians" ),
-        NAXIS = dict( default = 3 ),
-        NAXIS1 = dict( default = 180 ),
-        NAXIS2 = dict( default = 180 ),
-        NAXIS3 = dict( default = 1 ),
-        LONPOLE = dict( default = 0. ),
-        LATPOLE = dict( default = 90. ),
-        CTYPE1 = dict( default = 'ALON-STG' ),
-        CTYPE2 = dict( default = 'ALAT-STG' ),
-        CTYPE3 = dict( default = 'TIME' ),
-        CRVAL1 = dict( default = 180. ),
-        CRVAL2 = dict( default = 90. ),
-        CRVAL3 = dict( default = 0. ),
-        CRPIX1 = dict( default = lambda self : float(self.NAXIS1) / 2 ),
-        CRPIX2 = dict( default = lambda self : float(self.NAXIS2) / 2 ),
-        CRPIX3 = dict( default = 0. ),
-        CDELT1 = dict( default = -1. ),
-        CDELT2 = dict( default = 1. ),
-        CDELT3 = dict( default = lambda self : 1. / self.sample_frequency ),
-        CUNIT1 = dict( default = 'deg' ),
-        CUNIT2 = dict( default = 'deg' ),
-        CUNIT3 = dict( default = 's' ),
-        PC001001 = dict( default = 1.000000000000E+00 ),
-        PC002001 = dict( default = 0.000000000000E+00 ),
-        PC001002 = dict( default = 0.000000000000E+00 ),
-        PC002002 = dict( default = 1.000000000000E+00 )
+        output=dict(default=None),
+        data=dict(default=None),
+        fftdata=dict(default=None),
+        frequencies=dict(default=None),
+        antpos=dict(default=None),
+        blocksize=dict(default=None),
+        nf=dict(default=lambda self: self.blocksize / 2 + 1),
+        nantennas=dict(default=lambda self: self.antpos.shape()[0]),
+        nyquist_zone=dict(default=1),
+        sample_frequency=dict(default=200.e6),
+        image=dict(default=lambda self: np.zeros(shape=(self.blocksize, self.NAXIS1, self.NAXIS2), dtype=float),
+            doc="Array to hold output image, needs to be a numpy array because otherwise conversion to FITS will require twice the memory."),
+        frequency_domain_image = dict(default=lambda self: cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nf), fill=0.)),
+        time_domain_image=dict(default = lambda self: cr.hArray(float, dimensions=(self.NAXIS1, self.NAXIS2, self.blocksize), fill=0.)),
+        OBSTIME=dict(default=None),
+        OBSLON=dict(default=pytmf.deg2rad(6.869837540), doc="Observer longitude in radians"),
+        OBSLAT=dict(default=pytmf.deg2rad(52.915122495), doc="Observer latitude in radians"),
+        NAXIS=dict(default=3),
+        NAXIS1=dict(default=180),
+        NAXIS2=dict(default=180),
+        NAXIS3=dict(default=1),
+        LONPOLE=dict(default=0.),
+        LATPOLE=dict(default=90.),
+        CTYPE1=dict(default='ALON-STG'),
+        CTYPE2=dict(default='ALAT-STG'),
+        CTYPE3=dict(default='TIME'),
+        CRVAL1=dict(default=180.),
+        CRVAL2=dict(default=90.),
+        CRVAL3=dict(default=0.),
+        CRPIX1=dict(default=lambda self: float(self.NAXIS1) / 2),
+        CRPIX2=dict(default=lambda self: float(self.NAXIS2) / 2),
+        CRPIX3=dict(default=0.),
+        CDELT1=dict(default=-1.),
+        CDELT2=dict(default=1.),
+        CDELT3=dict(default=lambda self: 1. / self.sample_frequency),
+        CUNIT1=dict(default='deg'),
+        CUNIT2=dict(default='deg'),
+        CUNIT3=dict(default='s'),
+        PC001001=dict(default=1.000000000000E+00),
+        PC002001=dict(default=0.000000000000E+00),
+        PC001002=dict(default=0.000000000000E+00),
+        PC002002=dict(default=1.000000000000E+00)
     )
 
     def init(self):
@@ -101,7 +103,7 @@ class CRImager(Task):
         """
 
         # Generate coordinate grid
-        self.grid=CoordinateGrid(obstime=self.OBSTIME,
+        self.grid = CoordinateGrid(obstime=self.OBSTIME,
                                  L=self.OBSLON,
                                  phi=self.OBSLAT,
                                  NAXIS=self.NAXIS,
@@ -127,7 +129,7 @@ class CRImager(Task):
 
         # Calculate frequencies if not given
         if self.frequencies is None:
-            self.frequencies=cr.hArray(float, self.nf)
+            self.frequencies = cr.hArray(float, self.nf)
             cr.hFFTFrequencies(self.frequencies, self.sample_frequency, self.nyquist_zone)
 
         # Calculate geometric delays for all sky positions for all antennas
@@ -201,4 +203,3 @@ class CRImager(Task):
                      PC002001=self.PC002001,
                      PC001002=self.PC001002,
                      PC002002=self.PC002002)
-
