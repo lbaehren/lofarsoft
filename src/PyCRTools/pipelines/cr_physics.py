@@ -348,68 +348,66 @@ for station in stations:
     print "finishing station "+station.stationname
     print "-" * 80
 
-# Ensure everything is written to database
-event.write()
-
-# Create list of event level plots
-plotlist = []
-
-# Get combined parameters from (cached) database
-all_station_antenna_positions = []
-all_station_pulse_delays = []
-all_station_pulse_peak_amplitude = []
-all_station_rms = []
-all_station_direction = []
-
-for station in stations:
-    if station.status == "GOOD":
-        try:
-            all_station_direction.append(station["crp_pulse_direction"])
-            p = station.polarization["xyz"]
-            all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
-            all_station_pulse_delays.append(p["crp_pulse_delays"])
-            all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
-            all_station_rms.append(p["crp_rms"])
-        except Exception:
-            event.status = "ERROR"
-            logging.exception("Do not have all pulse parameters for station " + station.stationname)
-
-all_station_antenna_positions = np.vstack(all_station_antenna_positions)
-all_station_pulse_delays = np.vstack(all_station_pulse_delays)
-all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
-all_station_rms = np.vstack(all_station_rms)
-all_station_direction = np.asarray(all_station_direction)
-
-# Convert to contiguous array of correct shape
-shape = all_station_antenna_positions.shape
-all_station_antenna_positions = all_station_antenna_positions.reshape((shape[0] / 2, 2, shape[1]))[:,0]
-all_station_antenna_positions = all_station_antenna_positions.copy()
-
-# Calculate average direction and store it
-average_direction = tools.averageDirectionLOFAR(all_station_direction[:,0], all_station_direction[:,1])
-event["crp_average_direction"] = average_direction
-
-# Beamform with all stations
-
-# Compute LDF and footprint
-core = list(event["lora_core"])
-core_uncertainties = event["lora_coreuncertainties"].toNumpy()
-direction_uncertainties = [3.,3.,0]
-
-ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, timelags = all_station_pulse_delays, core_uncertainties = core_uncertainties, signals = all_station_pulse_peak_amplitude, direction_uncertainties = direction_uncertainties, ldf_enable = True, footprint_enable = True, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+str(options.id)+"-")
-
-# Add LDF and footprint plots to list of event level plots
-plotlist.extend(ldf.plotlist)
-
-# Add list of event level plots to event
-event["crp_plotfiles"] = ["/"+p.lstrip("./") for p in plotlist]
-
-# Update event status
 if cr_found:
+
+    # Create list of event level plots
+    plotlist = []
+    
+    # Get combined parameters from (cached) database
+    all_station_antenna_positions = []
+    all_station_pulse_delays = []
+    all_station_pulse_peak_amplitude = []
+    all_station_rms = []
+    all_station_direction = []
+    
+    for station in stations:
+        if station.status == "GOOD":
+            try:
+                all_station_direction.append(station["crp_pulse_direction"])
+                p = station.polarization["xyz"]
+                all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
+                all_station_pulse_delays.append(p["crp_pulse_delays"])
+                all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
+                all_station_rms.append(p["crp_rms"])
+            except Exception:
+                event.status = "ERROR"
+                logging.exception("Do not have all pulse parameters for station " + station.stationname)
+    
+    all_station_antenna_positions = np.vstack(all_station_antenna_positions)
+    all_station_pulse_delays = np.vstack(all_station_pulse_delays)
+    all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
+    all_station_rms = np.vstack(all_station_rms)
+    all_station_direction = np.asarray(all_station_direction)
+    
+    # Convert to contiguous array of correct shape
+    shape = all_station_antenna_positions.shape
+    all_station_antenna_positions = all_station_antenna_positions.reshape((shape[0] / 2, 2, shape[1]))[:,0]
+    all_station_antenna_positions = all_station_antenna_positions.copy()
+    
+    # Calculate average direction and store it
+    average_direction = tools.averageDirectionLOFAR(all_station_direction[:,0], all_station_direction[:,1])
+    event["crp_average_direction"] = average_direction
+    
+    # Beamform with all stations
+    
+    # Compute LDF and footprint
+    core = list(event["lora_core"])
+    core_uncertainties = event["lora_coreuncertainties"].toNumpy()
+    direction_uncertainties = [3.,3.,0]
+    
+    ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncertainties = all_station_rms, core = core, direction = average_direction, timelags = all_station_pulse_delays, core_uncertainties = core_uncertainties, signals = all_station_pulse_peak_amplitude, direction_uncertainties = direction_uncertainties, ldf_enable = True, footprint_enable = True, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+str(options.id)+"-")
+    
+    # Add LDF and footprint plots to list of event level plots
+    plotlist.extend(ldf.plotlist)
+    
+    # Add list of event level plots to event
+    event["crp_plotfiles"] = ["/"+p.lstrip("./") for p in plotlist]
+
     event.status = "CR_FOUND"
+
 else:
+
     event.status = "CR_NOT_FOUND"
-event.write()
 
 print "[cr_physics] completed in {0:.3f} s".format(time.clock() - start)
 
