@@ -58,7 +58,6 @@ event = crdb.Event(db = db, id = options.id)
 
 # Set the event status
 event.status = "PROCESSING"
-event.write()
 
 cr_found = False
 
@@ -212,25 +211,21 @@ for station in stations:
             p0.status = "GOOD"
         else:
             p0.status = "BAD"
-        p0.write()
 
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
             p1.status = "GOOD"
         else:
             p1.status = "BAD"
-        p1.write()
 
         # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
         # in the LORA direction for at least one of the polarizations
         if cr_found_in_station:
             station.status = "GOOD"
-            station.write()
 
             cr_found = True
         else:
             station.status = "BAD"
-            station.write()
 
             continue
 
@@ -335,8 +330,6 @@ for station in stations:
         else:
             p.status = "GOOD"
                     
-        p.write()
-
     except Exception:
 
         logging.exception("unexpected error occured when processing station "+station.stationname)
@@ -344,12 +337,10 @@ for station in stations:
         p = station.polarization['xyz']
 
         p.status = "BAD"
-        p.write()
 
     print "-" * 80
     print "finishing station "+station.stationname
     print "-" * 80
-    station.write()
 
 # Ensure everything is written to database
 event.write()
