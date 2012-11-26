@@ -202,8 +202,8 @@ for station in stations:
         p0 = station.polarization['0']
         p1 = station.polarization['1']
 
-        p0["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ] + findrfi.plotlist]
-        p1["plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ] + findrfi.plotlist]
+        p0["crp_plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ] + findrfi.plotlist]
+        p1["crp_plotfiles"] = ["/"+s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ] + findrfi.plotlist]
 
         cr_found_in_station = False
         if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
@@ -314,7 +314,7 @@ for station in stations:
         p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
         p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
         p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
-        p["plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
+        p["crp_plotfiles"] = ["/"+s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
 
 
         if direction_fit_plane_wave.fit_failed:
@@ -395,7 +395,7 @@ ldf = cr.trun("Shower", positions = all_station_antenna_positions, signals_uncer
 plotlist.extend(ldf.plotlist)
 
 # Add list of event level plots to event
-event["plotfiles"] = ["/"+p.lstrip("./") for p in plotlist]
+event["crp_plotfiles"] = ["/"+p.lstrip("./") for p in plotlist]
 
 # Update event status
 if cr_found:
