@@ -36,8 +36,6 @@ else:
     print "Opening Sqlite database"
     con = sqlite3.connect(options.database, timeout=60.0)
 
-with con:
-
     # Get cursor on database
     cur = con.cursor()
 
@@ -64,4 +62,10 @@ with con:
         for eid in events:
             print "setting status of event", eid, "to", options.event_status
             cur.execute('UPDATE events SET status=? WHERE eventID=?', (options.event_status, eid))
+
+    con.commit()
+
+    cur.close()
+
+    con.close()
 
