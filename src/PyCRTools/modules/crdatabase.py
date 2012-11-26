@@ -1378,10 +1378,6 @@ class Event(object):
 
         # Set default values
         self.timestamp = 0
-        self.status = "NEW"
-        self.statusmessage = ""
-        self.alt_status = "NEW"
-        self.alt_statusmessage = ""
         self.datafiles = []
         self.stations = []
         self.parameter = EventParameter(parent=self)
@@ -1413,21 +1409,72 @@ class Event(object):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
 
+   @property
+    def status(self):
+        """Get event status
+        """
+        records = self._db.selectone("SELECT status FROM events WHERE eventID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @status.setter
+    def status(self, status):
+        """Set event status
+        """
+        self._db.execute("UPDATE events SET status='{1}' WHERE eventID={0}".format(self._id, str(status.upper()))
+
+    @property
+    def statusmessage(self):
+        """Get event statusmessage
+        """
+        records = self._db.selectone("SELECT statusmessage FROM events WHERE eventID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @statusmessage.setter
+    def statusmessage(self, msg):
+        """Set event statusmessage
+        """
+        self._db.execute("UPDATE events SET statusmessage='{1}' WHERE eventID={0}".format(self._id, str(msg.lower()))
+
+    @property
+    def alt_status(self):
+        """Get event alt_status
+        """
+        records = self._db.selectone("SELECT alt_status FROM events WHERE eventID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @alt_status.setter
+    def alt_status(self, status):
+        """Set event alt_status
+        """
+        self._db.execute("UPDATE events SET alt_status='{1}' WHERE eventID={0}".format(self._id, str(alt_status.upper()))
+
+    @property
+    def alt_statusmessage(self):
+        """Get event alt_statusmessage
+        """
+        records = self._db.selectone("SELECT alt_statusmessage FROM events WHERE eventID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @alt_statusmessage.setter
+    def alt_statusmessage(self, msg):
+        """Set event alt_statusmessage
+        """
+        self._db.execute("UPDATE events SET alt_statusmessage='{1}' WHERE eventID={0}".format(self._id, str(msg.lower())
 
     def read(self):
         """Read event information from the database."""
         if self._db:
             if self._inDatabase:
                 # Read attributes
-                sql = "SELECT eventID, timestamp, status, statusmessage, alt_status, alt_statusmessage FROM events WHERE eventID={0}".format(int(self._id))
+                sql = "SELECT eventID, timestamp FROM events WHERE eventID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
                     self.timestamp = int(records[0][1])
-                    self.status = str(records[0][2]).upper()
-                    self.statusmessage = str(records[0][3]).upper()
-                    self.alt_status = str(records[0][4]).upper()
-                    self.alt_statusmessage = str(records[0][5]).upper()
                 elif 0 == len(records):
                     raise ValueError("No records found for eventID={0}".format(self._id))
                 else:
@@ -1473,13 +1520,13 @@ class Event(object):
         if self._db:
             # Writing attributes
             if self._inDatabase:        # Update values
-                sql = "UPDATE events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE events SET timestamp={1} WHERE eventID={0}".format(self._id, int(self.timestamp))
                 self._db.execute(sql)
             else:                       # Create new record
                 if 0 == self._id:
-                    sql = "INSERT INTO events (timestamp, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')".format(int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                    sql = "INSERT INTO events (timestamp) VALUES ({0})".format(int(self.timestamp))
                 else:
-                    sql = "INSERT INTO events (eventID, timestamp, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, {1},'{2}','{3}','{4}','{5}')".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                    sql = "INSERT INTO events (eventID, timestamp) VALUES ({0}, {1})".format(self._id, int(self.timestamp))
                 self._id = self._db.insert(sql)
                 self._inDatabase = True
 
@@ -1534,7 +1581,7 @@ class Event(object):
         if self._db:
             if self._inDatabase:
                 # Add the event information
-                sql = "UPDATE events SET timestamp={1}, status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE eventID={0}".format(self._id, int(self.timestamp), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE events SET timestamp={1} WHERE eventID={0}".format(self._id, int(self.timestamp))
                 sql_list.append(sql)
 
                 # Add the event parameters
@@ -2200,10 +2247,6 @@ class Station(object):
         self._id = id
 
         self.stationname = ""
-        self.status = "NEW"
-        self.statusmessage = ""
-        self.alt_status = "NEW"
-        self.alt_statusmessage = ""
         self.polarization = {}
         self.parameter = StationParameter(parent=self)
 
@@ -2232,22 +2275,73 @@ class Station(object):
     def __delitem__(self, key):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
+ 
+   @property
+    def status(self):
+        """Get station status
+        """
+        records = self._db.selectone("SELECT status FROM stations WHERE stationID={0}".format(int(self._id)))
 
+        return records[0]
+
+    @status.setter
+    def status(self, status):
+        """Set station status
+        """
+        self._db.execute("UPDATE stations SET status='{1}' WHERE stationID={0}".format(self._id, str(status.upper()))
+
+    @property
+    def statusmessage(self):
+        """Get station statusmessage
+        """
+        records = self._db.selectone("SELECT statusmessage FROM stations WHERE stationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @statusmessage.setter
+    def statusmessage(self, msg):
+        """Set station statusmessage
+        """
+        self._db.execute("UPDATE stations SET statusmessage='{1}' WHERE stationID={0}".format(self._id, str(msg.lower()))
+
+    @property
+    def alt_status(self):
+        """Get station alt_status
+        """
+        records = self._db.selectone("SELECT alt_status FROM stations WHERE stationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @alt_status.setter
+    def alt_status(self, status):
+        """Set station alt_status
+        """
+        self._db.execute("UPDATE stations SET alt_status='{1}' WHERE stationID={0}".format(self._id, str(alt_status.upper()))
+
+    @property
+    def alt_statusmessage(self):
+        """Get station alt_statusmessage
+        """
+        records = self._db.selectone("SELECT alt_statusmessage FROM stations WHERE stationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @alt_statusmessage.setter
+    def alt_statusmessage(self, msg):
+        """Set station alt_statusmessage
+        """
+        self._db.execute("UPDATE stations SET alt_statusmessage='{1}' WHERE stationID={0}".format(self._id, str(msg.lower())
 
     def read(self):
         """Read station information from the database."""
         if self._db:
             if self._inDatabase:
                 # Read attributes
-                sql = "SELECT stationID, stationname, status, statusmessage, alt_status, alt_statusmessage FROM stations WHERE stationID={0}".format(int(self._id))
+                sql = "SELECT stationID, stationname FROM stations WHERE stationID={0}".format(int(self._id))
                 records = self._db.select(sql)
                 if 1 == len(records):
                     self._id = int(records[0][0])
                     self.stationname = str(records[0][1])
-                    self.status = str(records[0][2]).upper()
-                    self.statusmessage = str(records[0][3]).upper()
-                    self.alt_status = str(records[0][4]).upper()
-                    self.alt_statusmessage = str(records[0][5]).upper()
                 elif 0 == len(records):
                     raise ValueError("No records found for stationID={0}".format(self._id))
                 else:
@@ -2287,13 +2381,13 @@ class Station(object):
         if self._db:
             # Write attributes
             if self._inDatabase:
-                sql = "UPDATE stations SET stationname='{1}', status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE stations SET stationname='{1}' WHERE stationID={0}".format(self._id, str(self.stationname))
                 self._db.execute(sql)
             else:
                 if 0 == self._id:
-                    sql = "INSERT INTO stations (stationname, status, statusmessage, alt_status, alt_statusmessage) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')".format(str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper())))
+                    sql = "INSERT INTO stations (stationname) VALUES ('{0}')".format(str(self.stationname))
                 else:
-                    sql = "INSERT INTO stations (stationID, stationname, status, statusmessage, alt_status, alt_statusmessage) VALUES ({0}, '{1}', '{2}', '{3}','{4}', '{5}')".format(self._id, str(self.stationname), str(self.status.upper(), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper())))
+                    sql = "INSERT INTO stations (stationID, stationname) VALUES ({0}, '{1}')".format(self._id, str(self.stationname))
                 self._id = self._db.insert(sql)
                 self._inDatabase = True
 
@@ -2348,7 +2442,7 @@ class Station(object):
         if self._db:
             if self._inDatabase:
                 # Add the station information
-                sql = "UPDATE stations SET stationname='{1}', status='{2}', statusmessage='{3}', alt_status='{4}', alt_statusmessage='{5}' WHERE stationID={0}".format(self._id, str(self.stationname), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()))
+                sql = "UPDATE stations SET stationname='{1}' WHERE stationID={0}".format(self._id, str(self.stationname))
                 sql_list.append(sql)
 
                 # Add the station parameters
@@ -2678,10 +2772,6 @@ class Polarization(object):
 
         self.antennaset = ""
         self.direction = ""
-        self.status = "NEW"
-        self.statusmessage = ""
-        self.alt_status = "NEW"
-        self.alt_statusmessage = ""
         self.resultsfile = ""
         self.parameter = PolarizationParameter(parent=self)
 
@@ -2711,6 +2801,61 @@ class Polarization(object):
         """Delete parameter value for *key*."""
         self.parameter.__delitem__(key)
 
+   @property
+    def status(self):
+        """Get polarization status
+        """
+        records = self._db.selectone("SELECT status FROM polarizations WHERE polarizationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @status.setter
+    def status(self, status):
+        """Set polarization status
+        """
+        self._db.execute("UPDATE polarizations SET status='{1}' WHERE polarizationID={0}".format(self._id, str(status.upper()))
+
+    @property
+    def statusmessage(self):
+        """Get polarization statusmessage
+        """
+        records = self._db.selectone("SELECT statusmessage FROM polarizations WHERE polarizationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @statusmessage.setter
+    def statusmessage(self, msg):
+        """Set polarization statusmessage
+        """
+        self._db.execute("UPDATE polarizations SET statusmessage='{1}' WHERE polarizationID={0}".format(self._id, str(msg.lower()))
+
+    @property
+    def alt_status(self):
+        """Get polarization alt_status
+        """
+        records = self._db.selectone("SELECT alt_status FROM polarizations WHERE polarizationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @alt_status.setter
+    def alt_status(self, status):
+        """Set polarization alt_status
+        """
+        self._db.execute("UPDATE polarizations SET alt_status='{1}' WHERE polarizationID={0}".format(self._id, str(alt_status.upper()))
+
+    @property
+    def alt_statusmessage(self):
+        """Get polarization alt_statusmessage
+        """
+        records = self._db.selectone("SELECT alt_statusmessage FROM polarizations WHERE polarizationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @alt_statusmessage.setter
+    def alt_statusmessage(self, msg):
+        """Set polarization alt_statusmessage
+        """
+        self._db.execute("UPDATE polarizations SET alt_statusmessage='{1}' WHERE polarizationID={0}".format(self._id, str(msg.lower())
 
     def read(self):
         """Read polarization information from the database."""
@@ -2756,13 +2901,13 @@ class Polarization(object):
         if self._db:
             # Write attributes
             if self._inDatabase:
-                sql = "UPDATE polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', alt_status='{5}', alt_statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                sql = "UPDATE polarizations SET antennaset='{1}', direction='{2}', resultsfile='{3}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.resultsfile))
                 self._db.execute(sql)
             else:
                 if 0 == self._id:
-                    sql = "INSERT INTO polarizations (antennaset, direction, status, statusmessage, alt_status, alt_statusmessage, resultsfile) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')".format(str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                    sql = "INSERT INTO polarizations (antennaset, direction, resultsfile) VALUES ('{0}', '{1}', '{2}')".format(str(self.antennaset.upper()), str(self.direction), str(self.resultsfile))
                 else:
-                    sql = "INSERT INTO polarizations (polarizationID, antennaset, direction, status, statusmessage, alt_status, alt_statusmessage, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                    sql = "INSERT INTO polarizations (polarizationID, antennaset, direction, resultsfile) VALUES ({0}, '{1}', '{2}', '{3}')".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.resultsfile))
                 self._id = self._db.insert(sql)
                 self._inDatabase = True
 
@@ -2810,7 +2955,7 @@ class Polarization(object):
         if self._db:
             if self._inDatabase:
                 # Add the station information
-                sql = "UPDATE polarizations SET antennaset='{1}', direction='{2}', status='{3}', statusmessage='{4}', status='{5}', statusmessage='{6}', resultsfile='{7}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.status.upper()), str(self.statusmessage.upper()), str(self.alt_status.upper()), str(self.alt_statusmessage.upper()), str(self.resultsfile))
+                sql = "UPDATE polarizations SET antennaset='{1}', direction='{2}', resultsfile='{3}' WHERE polarizationID={0}".format(self._id, str(self.antennaset.upper()), str(self.direction), str(self.resultsfile))
                 sql_list.append(sql)
 
                 # Add the polarization parameters

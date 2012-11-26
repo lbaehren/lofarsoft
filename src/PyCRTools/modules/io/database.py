@@ -140,6 +140,31 @@ class Database(object):
 
         return records
 
+    def selectone(self, sql=""):
+        """Select one record from the database.
+
+        **Properties**
+
+        =========  =======================================================
+        Parameter  Description
+        =========  =======================================================
+        *sql*      SQL statement to execute.
+        =========  =======================================================
+        """
+        if not self._db:
+            self.open()
+
+        cursor = self._db.cursor()
+
+        cursor.execute(sql)
+        records = cursor.fetchone()
+        cursor.close()
+
+        if self._autoclose:
+            self.close()
+
+        return records
+
 
     def tableExists(self, table):
         """Select records from the database.
