@@ -36,36 +36,36 @@ else:
     print "Opening Sqlite database"
     con = sqlite3.connect(options.database, timeout=60.0)
 
-    # Get cursor on database
-    cur = con.cursor()
+# Get cursor on database
+cur = con.cursor()
 
-    if options.every_event:
-        cur.execute("SELECT eventID FROM events")
+if options.every_event:
+    cur.execute("SELECT eventID FROM events")
 
-        events = [e[0] for e in cur.fetchall()]
-    elif options.old_event_status != "NEW":
-        if options.alt_status:
-            cur.execute("SELECT eventID FROM events WHERE alt_status='{0}'".format(options.old_event_status, ))
-        else:
-            cur.execute("SELECT eventID FROM events WHERE status='{0}'".format(options.old_event_status, ))
-
-        events = [e[0] for e in cur.fetchall()]
-    else:
-        events = args
-
-
+    events = [e[0] for e in cur.fetchall()]
+elif options.old_event_status != "NEW":
     if options.alt_status:
-        for eid in events:
-            print "setting alt_status of event", eid, "to", options.event_status
-            cur.execute("UPDATE events SET alt_status='{0}' WHERE eventID='{1}'".format(options.event_status, eid))
+        cur.execute("SELECT eventID FROM events WHERE alt_status='{0}'".format(options.old_event_status, ))
     else:
-        for eid in events:
-            print "setting status of event", eid, "to", options.event_status
-            cur.execute("UPDATE events SET status='{0}' WHERE eventID='{1}'".format(options.event_status, eid))
+        cur.execute("SELECT eventID FROM events WHERE status='{0}'".format(options.old_event_status, ))
 
-    con.commit()
+    events = [e[0] for e in cur.fetchall()]
+else:
+    events = args
 
-    cur.close()
 
-    con.close()
+if options.alt_status:
+    for eid in events:
+        print "setting alt_status of event", eid, "to", options.event_status
+        cur.execute("UPDATE events SET alt_status='{0}' WHERE eventID='{1}'".format(options.event_status, eid))
+else:
+    for eid in events:
+        print "setting status of event", eid, "to", options.event_status
+        cur.execute("UPDATE events SET status='{0}' WHERE eventID='{1}'".format(options.event_status, eid))
+
+con.commit()
+
+cur.close()
+
+con.close()
 
