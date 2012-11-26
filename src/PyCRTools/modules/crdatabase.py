@@ -216,56 +216,6 @@ class CRDatabase(object):
             raise ValueError("DATABASE IS LOCKED: Unable to add a parametername {0} to the database".format(columnname))
 
 
-    def __convertParameterTable_v0_to_v1(self, tablename="", parameter_keys=[]):
-
-        if not tablename in ["event", "datafile", "station", "polarization"]:
-            raise ValueError("Invalid tablename: should be 'event', 'datafile', 'station' or 'polarization'")
-
-        # Create new parameters table
-        if debug_mode: print "    Creating new table..." # DEBUG
-
-        columns_string = ""
-        for key in parameter_keys:
-            columns_string += ", {0} TEXT".format(key)
-
-        sql_list = []
-        sql_list.append("CREATE TABLE {0}parameters_new ({0}ID INTEGER PRIMARY KEY {1});".format(tablename, columns_string))
-        self.db.executelist(sql_list)
-
-        # Transfer information from old to new parameter table
-        if debug_mode: print "    Transfering data to new table..." # DEBUG
-        if debug_mode: print "      . retrieving data from db..."   # DEBUG
-        id_list = [r[0] for r in self.db.select("SELECT DISTINCT {0}ID FROM {0}parameters;".format(tablename))]
-        records = self.db.select("SELECT {0}ID, lower(key), value FROM {0}parameters ORDER BY {0}ID;".format(tablename))
-
-        if debug_mode: print "      . extracting parameter keys and values..." # DEBUG
-        transfer_keys = {}
-        transfer_values = {}
-        for _id in id_list:
-            transfer_keys[_id] = "{0}ID".format(tablename)
-            transfer_values[_id] = "{0}".format(_id)
-        for r in records:
-            par_id = r[0]
-            k = r[1]
-            v = r[2]
-            if (k in parameter_keys) and (v):
-                transfer_keys[par_id] += ", " + k
-                transfer_values[par_id] += ", '" + v + "'"
-
-        if debug_mode: print "      . building sql statements..." # DEBUG
-        sql_list = []
-        for _id in id_list:
-            sql_list.append("INSERT INTO {0}parameters_new ({1}) VALUES ({2});".format(tablename, transfer_keys[_id], transfer_values[_id]))
-        if debug_mode: print "      . executing sql statements..." # DEBUG
-
-        # Rename new polarizationparameters table
-        if debug_mode: print "    Renaming new table (replacing old table)..." # DEBUG
-        sql_list = []
-        sql_list.append("DROP TABLE {0}parameters;".format(tablename))
-        sql_list.append("ALTER TABLE {0}parameters_new RENAME TO {0}parameters;".format(tablename))
-        self.db.executelist(sql_list)
-
-
     def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, order="e.timestamp"):
         """Return a list of eventIDs satifying the values of this
         functions arguments.
