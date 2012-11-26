@@ -296,7 +296,7 @@ for station in stations:
                 
         # Project polarization onto x,y,z frame
         p = station.polarization['xyz']
-        p.station = "PROCESSING"
+        p.status = "PROCESSING"
 
         xyz_timeseries_data = cr.hArray(float, dimensions = (3*nantennas, options.blocksize))
         cr.hProjectPolarizations(xyz_timeseries_data[0:3*nantennas:3,...], xyz_timeseries_data[1:3*nantennas:3,...], xyz_timeseries_data[2:3*nantennas:3,...], timeseries_data[0:2*nantennas:2,...], timeseries_data[1:2*nantennas:2,...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
