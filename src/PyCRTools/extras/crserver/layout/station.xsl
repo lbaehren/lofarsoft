@@ -85,7 +85,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <caption id="polarizations">Polarizations</caption>
     <tr>
       <th>Polarization</th>
-      <th>Polarization Status</th>
+      <th>Polarization status</th>
+      <th>Polarization alt_status</th>
     </tr>
     <xsl:for-each select="/elements/header/polarizations/polarization">
     <xsl:sort select="name"/>
