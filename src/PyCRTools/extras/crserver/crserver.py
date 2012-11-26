@@ -276,13 +276,23 @@ def event_handler(eventID):
 
             parameter = SubElement(parameters, "parameter")
 
-            if e[0] == "plotfiles":
-                for p in e[1]:
-                    figure = SubElement(figures, "figure")
-                    SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
-            else:
-                SubElement(parameter, "key").text = e[0]
-                SubElement(parameter, "value").text = str(e[1])
+            SubElement(parameter, "key").text = e[0]
+            SubElement(parameter, "value").text = str(e[1])
+
+    # Fetch event level figures
+    sql = "SELECT plotfiles, crp_plotfiles FROM eventparameters WHERE eventID={0}".format(eventID)
+    c.execute(sql)
+
+    v = c.fetchone()
+    if v is not None and len(v) > 1:
+
+        values = [unpickle_parameter(e) for e in v]
+
+        for e in zip(keys, values):
+
+            for p in e[1]:
+                figure = SubElement(figures, "figure")
+                SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
 
     # Open string file descriptor for output
     f = StringIO()
@@ -368,13 +378,27 @@ def station_handler(eventID, station_name):
 
             parameter = SubElement(parameters, "parameter")
 
-            if e[0] == "plotfiles":
-                for p in e[1]:
-                    figure = SubElement(figures, "figure")
-                    SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
-            else:
-                SubElement(parameter, "key").text = e[0]
-                SubElement(parameter, "value").text = str(e[1])
+            SubElement(parameter, "key").text = e[0]
+            SubElement(parameter, "value").text = str(e[1])
+
+    # Fetch station level figures
+    sql = """SELECT sp.plotfiles, sp.crp_plotfiles FROM
+    event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
+    INNER JOIN stations AS s ON (ds.stationID=s.stationID)
+    INNER JOIN stationparameters AS sp ON (s.stationID=sp.stationID)
+    WHERE (ed.eventID={0} AND s.stationname='{1}')""".format(eventID, station_name)
+    c.execute(sql)
+
+    v = c.fetchone()
+    if v is not None and len(v) > 1:
+
+        values = [unpickle_parameter(e) for e in v]
+
+        for e in zip(keys, values):
+
+            for p in e[1]:
+                figure = SubElement(figures, "figure")
+                SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
 
     # Open string file descriptor for output
     f = StringIO()
@@ -463,13 +487,30 @@ def polarization_handler(eventID, station_name, polarization_direction):
 
             parameter = SubElement(parameters, "parameter")
 
-            if e[0] == "plotfiles":
-                for p in e[1]:
-                    figure = SubElement(figures, "figure")
-                    SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
-            else:
-                SubElement(parameter, "key").text = e[0]
-                SubElement(parameter, "value").text = str(e[1])
+            SubElement(parameter, "key").text = e[0]
+            SubElement(parameter, "value").text = str(e[1])
+
+    # Fetch polarization level figures
+    sql = """SELECT pp.plotfiles, pp.crp_plotfiles FROM
+    event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
+    INNER JOIN stations AS s ON (ds.stationID=s.stationID)
+    INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
+    INNER JOIN polarizations AS p ON (sp.polarizationID=p.polarizationID)
+    INNER JOIN polarizationparameters AS pp ON (p.polarizationID=pp.polarizationID)
+    WHERE (ed.eventID={0} AND s.stationname='{1}' AND p.direction='{2}')
+    """.format(eventID, station_name, polarization_direction)
+    c.execute(sql)
+
+    v = c.fetchone()
+    if v is not None and len(v) > 1:
+
+        values = [unpickle_parameter(e) for e in v]
+
+        for e in zip(keys, values):
+
+            for p in e[1]:
+                figure = SubElement(figures, "figure")
+                SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
 
     # Open string file descriptor for output
     f = StringIO()
