@@ -71,20 +71,16 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <table>
   <caption id="logs">Logs</caption>
   <tr><th>Name</th><th>Description</th></tr>
+      <xsl:if test="/elements/header/status='CR_FOUND' or /elements/header/status='CR_NOT_FOUND' or /elements/header/status='PROCESSING'">
+        <tr>
+          <td><a><xsl:attribute name="href">/log/cr_physics-<xsl:value-of select="/elements/header/id"/>.txt</xsl:attribute>cr_physics</a></td>
+          <td>Main pipeline</td>
+        </tr>
+      </xsl:if>
       <xsl:if test="/elements/header/alt_status='CR_FOUND' or /elements/header/alt_status='CR_NOT_FOUND' or /elements/header/alt_status='PROCESSING'">
         <tr>
           <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.txt</xsl:attribute>cr_event</a></td>
-          <td>First stage pipeline</td>
-        </tr>
-      </xsl:if>
-      <xsl:if test="/elements/header/status='CR_FOUND' or /elements/header/status='CR_NOT_FOUND' or /elements/header/status='PROCESSING'">
-        <tr>
-          <td><a><xsl:attribute name="href">/log/cr_event-<xsl:value-of select="/elements/header/id"/>.txt</xsl:attribute>cr_event</a></td>
-          <td>First stage pipeline</td>
-        </tr>
-        <tr>
-          <td><a><xsl:attribute name="href">/log/cr_physics-<xsl:value-of select="/elements/header/id"/>.txt</xsl:attribute>cr_physics</a></td>
-          <td>Second stage pipeline</td>
+          <td>Alternate pipeline</td>
         </tr>
       </xsl:if>
   </table>
