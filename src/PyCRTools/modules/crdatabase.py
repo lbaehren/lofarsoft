@@ -2763,7 +2763,7 @@ class Polarization(object):
     def status(self, status):
         """Set polarization status
         """
-        self._db.execute("UPDATE polarizations SET status='{1}' WHERE polarizationID={0}".format(self._id, str(status.upper()))
+        self._db.execute("UPDATE polarizations SET status='{1}' WHERE polarizationID={0}".format(self._id, str(status.upper())))
 
     @property
     def statusmessage(self):
