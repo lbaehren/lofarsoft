@@ -1399,7 +1399,7 @@ class Event(object):
     def alt_status(self, status):
         """Set event alt_status
         """
-        self._db.execute("UPDATE events SET alt_status='{1}' WHERE eventID={0}".format(self._id, str(alt_status.upper())))
+        self._db.execute("UPDATE events SET alt_status='{1}' WHERE eventID={0}".format(self._id, str(status.upper())))
 
     @property
     def alt_statusmessage(self):
@@ -2266,7 +2266,7 @@ class Station(object):
     def alt_status(self, status):
         """Set station alt_status
         """
-        self._db.execute("UPDATE stations SET alt_status='{1}' WHERE stationID={0}".format(self._id, str(alt_status.upper())))
+        self._db.execute("UPDATE stations SET alt_status='{1}' WHERE stationID={0}".format(self._id, str(status.upper())))
 
     @property
     def alt_statusmessage(self):
@@ -2791,7 +2791,7 @@ class Polarization(object):
     def alt_status(self, status):
         """Set polarization alt_status
         """
-        self._db.execute("UPDATE polarizations SET alt_status='{1}' WHERE polarizationID={0}".format(self._id, str(alt_status.upper())))
+        self._db.execute("UPDATE polarizations SET alt_status='{1}' WHERE polarizationID={0}".format(self._id, str(status.upper())))
 
     @property
     def alt_statusmessage(self):
