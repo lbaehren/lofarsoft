@@ -1371,7 +1371,7 @@ class Event(object):
     def status(self, status):
         """Set event status
         """
-        self._db.execute("UPDATE events SET status='{1}' WHERE eventID={0}".format(self._id, str(status.upper()))
+        self._db.execute("UPDATE events SET status='{1}' WHERE eventID={0}".format(self._id, str(status.upper())))
 
     @property
     def statusmessage(self):
@@ -1385,7 +1385,7 @@ class Event(object):
     def statusmessage(self, msg):
         """Set event statusmessage
         """
-        self._db.execute("UPDATE events SET statusmessage='{1}' WHERE eventID={0}".format(self._id, str(msg.lower()))
+        self._db.execute("UPDATE events SET statusmessage='{1}' WHERE eventID={0}".format(self._id, str(msg.lower())))
 
     @property
     def alt_status(self):
@@ -1399,7 +1399,7 @@ class Event(object):
     def alt_status(self, status):
         """Set event alt_status
         """
-        self._db.execute("UPDATE events SET alt_status='{1}' WHERE eventID={0}".format(self._id, str(alt_status.upper()))
+        self._db.execute("UPDATE events SET alt_status='{1}' WHERE eventID={0}".format(self._id, str(alt_status.upper())))
 
     @property
     def alt_statusmessage(self):
@@ -1413,7 +1413,7 @@ class Event(object):
     def alt_statusmessage(self, msg):
         """Set event alt_statusmessage
         """
-        self._db.execute("UPDATE events SET alt_statusmessage='{1}' WHERE eventID={0}".format(self._id, str(msg.lower())
+        self._db.execute("UPDATE events SET alt_statusmessage='{1}' WHERE eventID={0}".format(self._id, str(msg.lower())))
 
     def read(self):
         """Read event information from the database."""
@@ -2238,7 +2238,7 @@ class Station(object):
     def status(self, status):
         """Set station status
         """
-        self._db.execute("UPDATE stations SET status='{1}' WHERE stationID={0}".format(self._id, str(status.upper()))
+        self._db.execute("UPDATE stations SET status='{1}' WHERE stationID={0}".format(self._id, str(status.upper())))
 
     @property
     def statusmessage(self):
@@ -2252,7 +2252,7 @@ class Station(object):
     def statusmessage(self, msg):
         """Set station statusmessage
         """
-        self._db.execute("UPDATE stations SET statusmessage='{1}' WHERE stationID={0}".format(self._id, str(msg.lower()))
+        self._db.execute("UPDATE stations SET statusmessage='{1}' WHERE stationID={0}".format(self._id, str(msg.lower())))
 
     @property
     def alt_status(self):
@@ -2266,7 +2266,7 @@ class Station(object):
     def alt_status(self, status):
         """Set station alt_status
         """
-        self._db.execute("UPDATE stations SET alt_status='{1}' WHERE stationID={0}".format(self._id, str(alt_status.upper()))
+        self._db.execute("UPDATE stations SET alt_status='{1}' WHERE stationID={0}".format(self._id, str(alt_status.upper())))
 
     @property
     def alt_statusmessage(self):
@@ -2280,7 +2280,7 @@ class Station(object):
     def alt_statusmessage(self, msg):
         """Set station alt_statusmessage
         """
-        self._db.execute("UPDATE stations SET alt_statusmessage='{1}' WHERE stationID={0}".format(self._id, str(msg.lower())
+        self._db.execute("UPDATE stations SET alt_statusmessage='{1}' WHERE stationID={0}".format(self._id, str(msg.lower())))
 
     def read(self):
         """Read station information from the database."""
@@ -2777,7 +2777,7 @@ class Polarization(object):
     def statusmessage(self, msg):
         """Set polarization statusmessage
         """
-        self._db.execute("UPDATE polarizations SET statusmessage='{1}' WHERE polarizationID={0}".format(self._id, str(msg.lower()))
+        self._db.execute("UPDATE polarizations SET statusmessage='{1}' WHERE polarizationID={0}".format(self._id, str(msg.lower())))
 
     @property
     def alt_status(self):
@@ -2791,7 +2791,7 @@ class Polarization(object):
     def alt_status(self, status):
         """Set polarization alt_status
         """
-        self._db.execute("UPDATE polarizations SET alt_status='{1}' WHERE polarizationID={0}".format(self._id, str(alt_status.upper()))
+        self._db.execute("UPDATE polarizations SET alt_status='{1}' WHERE polarizationID={0}".format(self._id, str(alt_status.upper())))
 
     @property
     def alt_statusmessage(self):
@@ -2805,7 +2805,7 @@ class Polarization(object):
     def alt_statusmessage(self, msg):
         """Set polarization alt_statusmessage
         """
-        self._db.execute("UPDATE polarizations SET alt_statusmessage='{1}' WHERE polarizationID={0}".format(self._id, str(msg.lower())
+        self._db.execute("UPDATE polarizations SET alt_statusmessage='{1}' WHERE polarizationID={0}".format(self._id, str(msg.lower())))
 
     def read(self):
         """Read polarization information from the database."""
