@@ -45,9 +45,9 @@ else:
         events = [e[0] for e in cur.fetchall()]
     elif options.old_event_status != "NEW":
         if options.alt_status:
-            cur.execute("SELECT eventID FROM events WHERE alt_status=?", (options.old_event_status, ))
+            cur.execute("SELECT eventID FROM events WHERE alt_status='{0}'".format(options.old_event_status, ))
         else:
-            cur.execute("SELECT eventID FROM events WHERE status=?", (options.old_event_status, ))
+            cur.execute("SELECT eventID FROM events WHERE status='{0}'".format(options.old_event_status, ))
 
         events = [e[0] for e in cur.fetchall()]
     else:
@@ -57,11 +57,11 @@ else:
     if options.alt_status:
         for eid in events:
             print "setting alt_status of event", eid, "to", options.event_status
-            cur.execute('UPDATE events SET alt_status=? WHERE eventID=?', (options.event_status, eid))
+            cur.execute("UPDATE events SET alt_status='{0}' WHERE eventID='{1}'".format(options.event_status, eid))
     else:
         for eid in events:
             print "setting status of event", eid, "to", options.event_status
-            cur.execute('UPDATE events SET status=? WHERE eventID=?', (options.event_status, eid))
+            cur.execute("UPDATE events SET status='{0}' WHERE eventID='{1}'".format(options.event_status, eid))
 
     con.commit()
 
