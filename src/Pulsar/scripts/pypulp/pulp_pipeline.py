@@ -8,7 +8,6 @@ import os, sys, glob, time, re, os.path
 import math
 import numpy as np
 import cPickle
-import logging
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
 import psr_utils as pu
@@ -17,6 +16,7 @@ from pulp_parset import Observation, radial_distance, find_pulsars
 from pulp_usercmd import CMDLine, check_pulsars
 from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
+from pulp_feedback import FeedbackUnit
 
 ### define a global function - recursive glob ####
 
@@ -40,13 +40,19 @@ def rglob(base, pattern, maxdepth=0):
 class Pipeline:
 	def __init__(self, obs, cep2, cmdline, log):
 		self.units = []   # list of processing units
+		self.feedbacks = [] # list of feedback units
 		self.sum_popens = []  # list of Popen make_summary processes
 		self.summary_dirs = {}  # dictionary, key - locus node of the summaries, value - dir
 		# extensions of the files to copy to archive in summary (*_nopfd*.tgz)
-		self.archive_exts=["*.log", "*.txt", "*.pdf", "*.ps", "*.bestprof", "*.inf", "*.rfirep", "*png", "*parset", "*.par"]
+		self.summary_archive_exts=["*.log", "*.txt", "*.pdf", "*.ps", "*.bestprof", "*.inf", "*.rfirep", "*png", "*parset", "*.par"]
 		# prefix and suffix for summary archive name, in between them there will CS, IS, CV code
-		self.archive_prefix="_combined"
-		self.archive_suffix="_nopfd.tar.gz"
+		self.summary_archive_prefix="_combined"
+		self.summary_archive_suffix="_nopfd.tar.gz"
+		# extensions of the files to copy to a full archive (*.tgz)
+		self.full_archive_exts=["*.log", "*.txt", "*parset", "*.par", "*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse", "*.rv", "*.out"]
+		# prefix and suffix for full archive name, in between them there will CS, IS, CV code
+		self.full_archive_prefix="_pulp"
+		self.full_archive_suffix=".tgz"
 
 		# initializing Processing Units based on the list of beams to process
                 for beam in cmdline.beams:
@@ -90,10 +96,14 @@ class Pipeline:
 			cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, \
 			unit.summary_node_dir_suffix) for unit in self.units if unit.summary_node != "" and unit.summary_node_dir_suffix != ""]
 		unique_outdirs=np.unique(unique_outdirs)
+		fbindex = 0  # file index for feedback file; "0" is reserved for general *_pulp.log log-file
 		for uo in unique_outdirs:
 			node=uo.split(":")[0]
 			sumdir=uo.split(":")[1]
 			self.summary_dirs[node] = sumdir
+			fbindex += 1
+			fbunit = FeedbackUnit(fbindex, node, sumdir)
+			self.feedbacks.append(fbunit)
 			# deleting previous results if option --del was set
 			if cmdline.opts.is_delete:
 				log.info("Deleting previous summary results on %s: %s" % (node, sumdir))
@@ -380,12 +390,21 @@ class Pipeline:
 			self.execute(cmd, log, workdir=sumdir)
 
 		# Make a tarball of all the plots (summary archive)
-		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
+		log.info("Making a final summary tarball of all files with extensions: %s" % (", ".join(self.summary_archive_exts)))
 		tar_list=[]
-		for ext in self.archive_exts:
+		for ext in self.summary_archive_exts:
 			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
-		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.archive_prefix, data_code, self.archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		self.execute(cmd, log, workdir=sumdir)
+
+		# Make a full tarball
+		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
+		tar_list=[]
+		for ext in self.full_archive_exts:
+			ext_list=rglob(sumdir, ext, 3)
+			tar_list.extend(ext_list)
+		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 		self.execute(cmd, log, workdir=sumdir)
 
 		# finish
@@ -403,6 +422,17 @@ class Pipeline:
 		# changing the file permissions to be re-writable for group
 		cmd="chmod -R g+w %s" % (sumdir)
 		os.system(cmd)
+
+		# adding summary log file to the full archive anf gzip it
+		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
+		self.execute(cmd, log, workdir=sumdir)
+		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
+		self.execute(cmd, log, workdir=sumdir)
+
+		# updating the Feedback unit
+		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
+		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+		fbunit.flush(cep2)
 
 
 	# run necessary processes to organize summary info on summary nodes for CS and IS data
@@ -604,12 +634,21 @@ class Pipeline:
 			self.execute(cmd, log, workdir=sumdir)
 
 		# Make a tarball of all the plots (summary archive)
-		log.info("Making a final tarball of all files with extensions: %s" % (", ".join(self.archive_exts)))
+		log.info("Making a final summary tarball of all files with extensions: %s" % (", ".join(self.summary_archive_exts)))
 		tar_list=[]
-		for ext in self.archive_exts:
+		for ext in self.summary_archive_exts:
 			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
-		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.archive_prefix, data_code, self.archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		self.execute(cmd, log, workdir=sumdir)
+
+		# Make a full tarball
+		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
+		tar_list=[]
+		for ext in self.full_archive_exts:
+			ext_list=rglob(sumdir, ext, 3)
+			tar_list.extend(ext_list)
+		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 		self.execute(cmd, log, workdir=sumdir)
 
 		# finish
@@ -627,6 +666,18 @@ class Pipeline:
 		# changing the file permissions to be re-writable for group
 		cmd="chmod -R g+w %s" % (sumdir)
 		os.system(cmd)
+
+		# adding summary log file to the full archive anf gzip it
+		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
+		self.execute(cmd, log, workdir=sumdir)
+		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
+		self.execute(cmd, log, workdir=sumdir)
+
+		# updating the Feedback unit
+		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
+		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+		fbunit.flush(cep2)
+
 
 # base class for the single processing (a-ka beam)
 class PipeUnit:
@@ -656,7 +707,7 @@ class PipeUnit:
 		self.end_time = 0    # end time (in s)
 		self.total_time = 0  # total time in s 
 		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*.dat", "*.singlepulse"]
+		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse"]
 		self.procdir = "BEAM%d" % (self.tabid)
 
 		# pulsars to fold for this unit
@@ -1142,9 +1193,16 @@ CLK line will be removed from the parfile!" % (parfile,))
 
 						# scrunching in frequency
 						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
-						for psr in self.psrs:  # pulsar list is empty if --nofold is used
-							cmd="pam --setnchn %d -m %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
+						if self.nrChanPerSub > 1:
+							for psr in self.psrs:  # pulsar list is empty if --nofold is used
+								cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+						else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
+							for psr in self.psrs:  # pulsar list is empty if --nofold is used
+								cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+								cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
 
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
 			# these programs should be run quick, so run them one by one
@@ -1157,13 +1215,13 @@ CLK line will be removed from the parfile!" % (parfile,))
 				pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
 				for psr in self.psrs:  # pulsar list is empty if --nofold is used
 					# creating DSPSR diagnostic plots
-					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
                 	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
@@ -1178,12 +1236,18 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.log.info("Running pdmp...")
 						pdmp_popens=[]  # list of pdmp Popen objects	
 						for psr in self.psrs:
-							psr2=re.sub(r'[BJ]', '', psr)
-							best_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
-							cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
-								(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
-							pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
-							pdmp_popens.append(pdmp_popen)
+							# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
+							# we still provide our own number of bins in --dspsr-extra-opts
+							try:
+								cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+								binsline=os.popen(cmd).readlines()
+								if np.size(binsline) > 0:
+									best_nbins=int(binsline[0][:-1])
+									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
+										(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+									pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
+									pdmp_popens.append(pdmp_popen)
+							except Exception: pass
 		
 				# waiting for prepfold to finish
 				try:
@@ -1323,8 +1387,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 							self.execute(cmd, is_os=True)
 							# reading new DM from the *.per file
 							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-							if np.size(newdm) > 1: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm[-1], psr, self.output_prefix)
-							else: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm, psr, self.output_prefix)
+							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
+							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
@@ -1413,40 +1477,74 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
-			total_chan = self.tab.nrSubbands*self.nrChanPerSub
+			proc_subs = self.nrSubsPerFile * cmdline.opts.nsplits
+			if cmdline.opts.first_freq_split * self.nrSubsPerFile + proc_subs > self.tab.nrSubbands:
+				proc_subs -= (cmdline.opts.first_freq_split * self.nrSubsPerFile + proc_subs - self.tab.nrSubbands)  
+			nsubs_eff = min(self.tab.nrSubbands, proc_subs)
+			total_chan = nsubs_eff * self.nrChanPerSub
 
-			# if we run the whole processing and not just plots
 			if not cmdline.opts.is_plots_only:
-				if not cmdline.opts.is_nofold:	
-					if not cmdline.opts.is_skip_dspsr:
-						zapstr=""
-						if self.nrChanPerSub > 1:
-							zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
-						verbose="-q"
-						if cmdline.opts.is_debug: verbose="-v"
-						dspsr_popens=[] # list of dspsr Popen objects
-						for psr in self.psrs: # pulsar list is empty if --nofold is used
-							psr2=re.sub(r'[BJ]', '', psr)
-							dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
-							cmd="dspsr -b %d -E %s/%s.par %s %s -fft-bench -O %s_%s -K -A -L 60 -t %d %s %s" % \
-								(dspsr_nbins, self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, input_file)
-							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
-							dspsr_popens.append(dspsr_popen)
+				# getting the list of "_S0_" files, the number of which is how many freq splits we have
+				# we also sort this list by split number
+				s0_files=sorted([f for f in input_files if re.search("_S0_", f) is not None], key=lambda input_file: int(input_file.split("_P")[-1].split("_")[0]))
+				if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_dspsr:
+					zapstr=""
+					if self.nrChanPerSub > 1:
+						zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, self.nrSubsPerFile * self.nrChanPerSub, self.nrChanPerSub)]))
+					verbose="-q"
+					if cmdline.opts.is_debug: verbose="-v"
 
-						# waiting for dspsr to finish
-						self.waiting_list("dspsr", dspsr_popens)
+					# running dspsr for every pulsar for all frequency splits
+					self.log.info("Running dspsr for all frequency splits...")
+					# loop on pulsars
+					for psr in self.psrs: # pulsar list is empty if --nofold is used
+						self.log.info("Running dspsr for pulsar %s..." % (psr))
+						psr2=re.sub(r'[BJ]', '', psr)
+						dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
+						# loop on frequency splits
+						for ii in range(len(s0_files)):
+							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
+							cmd="dspsr -b %d -A -L 60 %s %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d %s %s" % \
+								(dspsr_nbins, verbose, zapstr, self.outdir, psr2, \
+								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, s0_files[ii])
+							self.execute(cmd, workdir=self.curdir)
 
-						# zapping channels...
+						# running psradd to add all freq channels together
+						self.log.info("Adding frequency channels together...")
+						ar_files=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
+						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
+						self.execute(cmd, workdir=self.curdir)
+						# removing ar-files from dspsr for every frequency split
+						if not cmdline.opts.is_debug:
+							remove_list=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
+							cmd="rm -f %s" % (" ".join(remove_list))
+							self.execute(cmd, workdir=self.curdir)
+						# zapping rfi
 						self.log.info("Zapping channels using median smoothed difference algorithm...")
-						for psr in self.psrs:  # pulsar list is empty if --nofold is used
-							cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
+						cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+						# dedispersing
+						self.log.info("Dedispersing...")
+						cmd="pam -D -m %s_%s.ar" % (psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+						# scrunching in frequency
+						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (nsubs_eff))
+						if self.nrChanPerSub > 1:
+							cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+						else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
+							cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
-						# scrunching in frequency
-						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
-						for psr in self.psrs:  # pulsar list is empty if --nofold is used
-							cmd="pam --setnchn %d -m %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
+					# removing links for input h5 files
+					if not cmdline.opts.is_debug:
+						cmd="rm -f %s" % (" ".join(input_files))
+						self.execute(cmd, workdir=self.curdir)
+						# removing links for input .raw files
+						cmd="rm -f %s" % (" ".join(["%s.raw" % (f.split(".h5")[0]) for f in input_files]))
+						self.execute(cmd, workdir=self.curdir)
 
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
 			# these programs should be run quick, so run them one by one
@@ -1454,18 +1552,18 @@ CLK line will be removed from the parfile!" % (parfile,))
 			if not cmdline.opts.is_skip_dspsr:
 				# first, calculating the proper max divisor for the number of subbands
 #				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
-				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
+				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
 				# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
-				pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
+				pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
 				for psr in self.psrs:  # pulsar list is empty if --nofold is used
 					# creating DSPSR diagnostic plots
-					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.ar" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
                 	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
@@ -1480,12 +1578,18 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.log.info("Running pdmp...")
 						pdmp_popens=[]  # list of pdmp Popen objects	
 						for psr in self.psrs:
-							psr2=re.sub(r'[BJ]', '', psr)
-							best_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
-							cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.ar" % \
-								(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
-							pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
-							pdmp_popens.append(pdmp_popen)
+							# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
+							# we still provide our own number of bins in --dspsr-extra-opts
+							try:
+								cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+								binsline=os.popen(cmd).readlines()
+								if np.size(binsline) > 0:
+									best_nbins=int(binsline[0][:-1])
+									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
+										(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+									pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
+									pdmp_popens.append(pdmp_popen)
+							except Exception: pass
 		
 			# waiting for pdmp to finish
 			if not cmdline.opts.is_plots_only:
@@ -1500,8 +1604,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 							self.execute(cmd, is_os=True)
 							# reading new DM from the *.per file
 							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-							if np.size(newdm) > 1: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm[-1], psr, self.output_prefix)
-							else: cmd="pam -e AR -d %f -DTp %s_%s.ar" % (newdm, psr, self.output_prefix)
+							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
+							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
@@ -1529,6 +1633,7 @@ class CSUnit(PipeUnit):
 		self.beams_root_dir = "stokes"
 		self.raw2fits_extra_options="-CS -H"
 		self.nrChanPerSub = obs.nrChanPerSubCS
+		self.nrSubsPerFile = obs.nrSubsPerFileCS
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus092"
 		self.summary_node_dir_suffix = "_CSplots" # "_CSplots"
@@ -1562,6 +1667,7 @@ class ISUnit(PipeUnit):
 		self.beams_root_dir = "incoherentstokes"
 		self.raw2fits_extra_options = "-CS -H -IS"
 		self.nrChanPerSub = obs.nrChanPerSubIS
+		self.nrSubsPerFile = obs.nrSubsPerFileIS
 		self.sampling = obs.samplingIS
 		self.summary_node = "locus094"
 		self.summary_node_dir_suffix = "_redIS" # "_redIS"
@@ -1595,13 +1701,14 @@ class CVUnit(PipeUnit):
 		self.beams_root_dir = "rawvoltages"
 		self.raw2fits_extra_options=""
 		self.nrChanPerSub = obs.nrChanPerSubCS
+		self.nrSubsPerFile = obs.nrSubsPerFileCS
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus093"
 		self.summary_node_dir_suffix = "_CVplots"  # "_CVplots"
 		self.archive_suffix = "_plotsCV.tar.gz"
 		self.outdir_suffix = "_red"  # "_red"
 		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*png", "*.AR", "*pdmp*", "*.rv", "*.out"]
+		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", "*.rv", "*.out"]
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
@@ -1681,7 +1788,10 @@ class CVUnit(PipeUnit):
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
 			#total_chan = self.tab.nrSubbands * self.nrChanPerSub
-			nsubs_eff = min(self.tab.nrSubbands, obs.nrSubsPerFileCS * cmdline.opts.nsplits)
+			proc_subs = self.nrSubsPerFile * cmdline.opts.nsplits
+			if cmdline.opts.first_freq_split * self.nrSubsPerFile + proc_subs > self.tab.nrSubbands:
+				proc_subs -= (cmdline.opts.first_freq_split * self.nrSubsPerFile + proc_subs - self.tab.nrSubbands)  
+			nsubs_eff = min(self.tab.nrSubbands, proc_subs)
 			total_chan = nsubs_eff * self.nrChanPerSub
 
 			if not cmdline.opts.is_plots_only:
@@ -1739,10 +1849,17 @@ class CVUnit(PipeUnit):
 					# scrunching in freq
 					#self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (self.tab.nrSubbands))
 					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (nsubs_eff))
-					for psr in self.psrs:
-						#cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
-						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
+					if self.nrChanPerSub > 1:
+						for psr in self.psrs:
+							#cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+							cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+					else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
+						for psr in self.psrs:
+							cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
 
 			# first, calculating the proper min divisir for the number of subbands
 #			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
@@ -1787,6 +1904,42 @@ class CVUnit(PipeUnit):
 						(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
 						psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
+
+			# Running pdmp
+			if not cmdline.opts.is_plots_only:
+				# now running pdmp without waiting...
+				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
+					self.log.info("Running pdmp...")
+					pdmp_popens=[]  # list of pdmp Popen objects	
+					for psr in self.psrs:
+						# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
+						# we still provide our own number of bins in --dspsr-extra-opts
+						try:
+							cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+							binsline=os.popen(cmd).readlines()
+							if np.size(binsline) > 0:
+								best_nbins=int(binsline[0][:-1])
+								cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
+									(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+								pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
+								pdmp_popens.append(pdmp_popen)
+						except Exception: pass
+		
+			# waiting for pdmp to finish
+			if not cmdline.opts.is_plots_only:
+				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
+					self.waiting_list("pdmp", pdmp_popens)
+					# when pdmp is finished do extra actions with files...
+					for psr in self.psrs:
+						cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
+						self.execute(cmd, is_os=True)
+						cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
+						self.execute(cmd, is_os=True)
+						# reading new DM from the *.per file
+						newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
+						if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
+						else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
 			self.finish_off(obs, cep2, cmdline)
@@ -1865,7 +2018,10 @@ class CVUnit(PipeUnit):
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
 
 			#total_chan = self.tab.nrSubbands * self.nrChanPerSub
-			nsubs_eff = min(self.tab.nrSubbands, obs.nrSubsPerFileCS * cmdline.opts.nsplits)
+			proc_subs = self.nrSubsPerFile * cmdline.opts.nsplits
+			if cmdline.opts.first_freq_split * self.nrSubsPerFile + proc_subs > self.tab.nrSubbands:
+				proc_subs -= (cmdline.opts.first_freq_split * self.nrSubsPerFile + proc_subs - self.tab.nrSubbands)  
+			nsubs_eff = min(self.tab.nrSubbands, proc_subs)
 			total_chan = nsubs_eff * self.nrChanPerSub
 
 			if not cmdline.opts.is_plots_only:
@@ -1987,10 +2143,17 @@ class CVUnit(PipeUnit):
 					# scrunching in freq
 					#self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (self.tab.nrSubbands))
 					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (nsubs_eff))
-					for psr in self.psrs:
-						#cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
-						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
+					if self.nrChanPerSub > 1:
+						for psr in self.psrs:
+							#cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+							cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+					else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
+						for psr in self.psrs:
+							cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
 
 			# first, calculating the proper min divisir for the number of subbands
 #			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
@@ -2035,6 +2198,42 @@ class CVUnit(PipeUnit):
 						(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
 						psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
+
+			# Running pdmp
+			if not cmdline.opts.is_plots_only:
+				# now running pdmp without waiting...
+				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
+					self.log.info("Running pdmp...")
+					pdmp_popens=[]  # list of pdmp Popen objects	
+					for psr in self.psrs:
+						# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
+						# we still provide our own number of bins in --dspsr-extra-opts
+						try:
+							cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+							binsline=os.popen(cmd).readlines()
+							if np.size(binsline) > 0:
+								best_nbins=int(binsline[0][:-1])
+								cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
+									(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+								pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
+								pdmp_popens.append(pdmp_popen)
+						except Exception: pass
+		
+			# waiting for pdmp to finish
+			if not cmdline.opts.is_plots_only:
+				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
+					self.waiting_list("pdmp", pdmp_popens)
+					# when pdmp is finished do extra actions with files...
+					for psr in self.psrs:
+						cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
+						self.execute(cmd, is_os=True)
+						cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
+						self.execute(cmd, is_os=True)
+						# reading new DM from the *.per file
+						newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
+						if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
+						else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
 			self.finish_off(obs, cep2, cmdline)

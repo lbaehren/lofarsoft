@@ -6,7 +6,6 @@ import os, sys
 import numpy as np
 from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
-import logging
 import time
 import re
 
@@ -75,6 +74,8 @@ class CMDLine:
                            help="optional parameter to skip decoding the data (2bf2fits/bf2puma2)", default=False)
         	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
                            help="optional parameter to turn off folding of data (prepfold is not run)", default=False)
+        	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
+                           help="turn off running pdmp in the pipeline", default=False)
         	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
                            help="making only summaries on already processed data", default=False)
         	self.cmd.add_option('--plots-only', action="store_true", dest='is_plots_only', 
@@ -114,6 +115,12 @@ class CMDLine:
                            help="specify extra additional options for Dspsr command", default="", type='str')
         	self.cmd.add_option('--prepfold-extra-opts', dest='prepfold_extra_opts', metavar='STRING',
                            help="specify extra additional options for Prepfold command", default="", type='str')
+        	self.cmd.add_option('--first-frequency-split', dest='first_freq_split', metavar='SPLIT#',
+                           help="start processing from this frequency split. For CS/IS it works only for processing with DAL support. \
+                                 Default: %default", default=0, type='int')
+        	self.cmd.add_option('--nsplits', dest='nsplits', metavar='#SPLITS',
+                           help="only process the #SPLITS splits starting from SPLIT# determined by --first-frequency-split. \
+                                 For CS/IS it works only for processing with DAL support. Default: all splits", default=-1, type='int')
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python and intermediate data files are not deleted", default=False)
         	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',
@@ -129,8 +136,6 @@ class CMDLine:
 	        self.groupCS = opt.OptionGroup(self.cmd, "CS/IS/FE extra options")
         	self.groupCS.add_option('--norfi', action="store_true", dest='is_norfi',
                            help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
-        	self.groupCS.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
-                           help="turn off running pdmp in the pipeline", default=False)
         	self.groupCS.add_option('--skip-subdyn', action="store_true", dest='is_skip_subdyn',
                            help="optional parameter to skip subdyn.py only", default=False)
         	self.groupCS.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
@@ -159,10 +164,6 @@ class CMDLine:
                            help="write out also ascii files (.rv) containing complex values", default=False)
         	self.groupCV.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
                            help="skip running rmfit program", default=False)
-        	self.groupCV.add_option('--first-frequency-split', dest='first_freq_split', metavar='SPLIT#',
-                           help="start processing from this frequency split. Default: %default", default=0, type='int')
-        	self.groupCV.add_option('--nsplits', dest='nsplits', metavar='#SPLITS',
-                           help="only process the #SPLITS splits starting from SPLIT# determined by --first-frequency-split. Default: all splits", default=-1, type='int')
 		self.cmd.add_option_group(self.groupCV)
         
 		# reading cmd options
@@ -512,10 +513,10 @@ class CMDLine:
 				else:
 					if obs.CV: 
 						log.info("DSPSR with LOFAR DAL = %s%s" % (self.opts.is_nodal and "no" or "yes", self.opts.is_nodal and "" or " (max RAM = minX%d)" % (self.opts.maxram)))
-						if self.opts.first_freq_split != 0:
-							log.info("FIRST FREQUENCY SPLIT = %d" % (self.opts.first_freq_split))
-						if self.opts.nsplits != -1:
-							log.info("NUMBER OF SPLITS = %d" % (self.opts.nsplits))
+					if self.opts.first_freq_split != 0:
+						log.info("FIRST FREQUENCY SPLIT = %d" % (self.opts.first_freq_split))
+					if self.opts.nsplits != -1:
+						log.info("NUMBER OF SPLITS = %d" % (self.opts.nsplits))
 					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
 					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
 					log.info("Subdyn.py = %s" % ((self.opts.is_skip_subdyn == False and self.opts.is_norfi == False) and "yes" or "no"))
@@ -527,7 +528,6 @@ class CMDLine:
 						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
 					if self.opts.dspsr_extra_opts != "" and not self.opts.is_skip_dspsr:
 						log.info("DSPSR user extra options: %s" % (self.opts.dspsr_extra_opts))
-					if not self.opts.is_skip_dspsr:
-						log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
+					log.info("pdmp = %s" % ((self.opts.is_nopdmp or self.opts.is_nofold) and "no" or "yes"))
 					if obs.CV: log.info("rmfit = %s" % (self.opts.is_skip_rmfit and "no" or "yes"))
 			log.info("")

@@ -359,7 +359,7 @@ class Observation:
 		self.nrSubsPerFileCS = 0    
 		self.nrChanPerSubIS = 0    # number of channels per subband (for IS)
 		self.nrChanPerSubCS = 0    # number of channels per subband (for CS)
-		self.nsplits = 0           # number of frequency splits (for CS, i.e. CV data)
+		self.nsplits = 0           # number of frequency splits for CV (or CS, or IS)
 		self.sampleClock = 0       # clock in MHz (200 or 160)
 		self.downsample_factorIS = 0  # time integration (downsampling) factor, can be different for IS and CS 
 		self.downsample_factorCS = 0  
@@ -639,14 +639,17 @@ only for observations that were taken after this date"
 			except: pass
 
 		# calculate the number of frequency splits
-		self.nsplits = int(self.nrSubbands / self.nrSubsPerFileCS)
-		if self.nrSubbands % self.nrSubsPerFileCS != 0: self.nsplits += 1
+		if self.CS or self.CV:
+			self.nsplits = int(self.nrSubbands / self.nrSubsPerFileCS)
+			if self.nrSubbands % self.nrSubsPerFileCS != 0: self.nsplits += 1
+		else: # we only use values for IS if no CS or CV data recorded
+			self.nsplits = int(self.nrSubbands / self.nrSubsPerFileIS)
+			if self.nrSubbands % self.nrSubsPerFileIS != 0: self.nsplits += 1
 		# changing cmdline split-related options in the _copy_ of Cmdline class
 		if cmdline.opts.first_freq_split >= self.nsplits: cmdline.opts.first_freq_split = 0
 		if cmdline.opts.nsplits == -1: cmdline.opts.nsplits = self.nsplits
 		if cmdline.opts.first_freq_split + cmdline.opts.nsplits > self.nsplits:
 			cmdline.opts.nsplits -= (cmdline.opts.first_freq_split + cmdline.opts.nsplits - self.nsplits)
-
 
 		# Getting the sample clock
 		cmd="grep Observation.sampleClock %s" % (self.parset,)

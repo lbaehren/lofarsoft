@@ -11,14 +11,15 @@ import numpy as np
 import time
 import cPickle
 import re
+import logging
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
-import logging
 from pulp_parset import Observation
 from pulp_usercmd import CMDLine
 from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
 from pulp_pipeline import Pipeline
+from pulp_feedback import FeedbackUnit
 
 # exit function that cleans terminal before exiting
 # after Ctrl-C and when using "ssh -t" terminal gets messed up, so one has to reset it
@@ -86,6 +87,9 @@ if __name__ == "__main__":
         	# if obsid is not given than the log-file will be _pulp.log
 		cep2.set_logdir(cmdline.opts.obsid)
 		cep2.set_logfile(logfile)
+
+		# forming the name of the feedback file
+		cep2.set_feedbackfile("pulp" + cmdline.opts.obsid + "_feedback")
 
 		# adding file handler to our Logger
 		logfh = logging.FileHandler(cep2.get_logfile(), mode='%s' % (cmdline.opts.is_log_append and "a" or "w"))
@@ -172,6 +176,18 @@ if __name__ == "__main__":
 				cmd="rsync -avxP %s %s:%s" % (cep2.get_logfile(), sumnode, sumdir)
                        		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
                        		proc.communicate()
+
+			# append log-file info to the feedback file
+                        fbunit = FeedbackUnit(0, cep2.current_node, cep2.get_logdir())
+                	fbunit.update(cep2.get_logfile(), "LOG", log)
+                	fbunit.flush(cep2)
+
+			# copying feedback file to system directory
+			try:
+				cmd="cp -f %s %s" % (cep2.get_feedbackfile(), cep2.feedback_dir)
+				os.system(cmd)	
+			except Exception:
+				log.error("Can't write feedback file %s to system directory %s!" % (cep2.get_feedbackfile(), cep2.feedback_dir))
 		else:
 			# loading pipeline config from the file
 			if os.path.exists(pipeline_file):

@@ -3,7 +3,6 @@
 # related to pipeline processing
 #
 import os, sys
-import logging
 from pulp_logging import PulpLogger
 import re
 
@@ -35,8 +34,15 @@ class CEP2Info:
 		self.logdir = ""
 		# the logfile will be initialized later when we get info about the ObsID
 		self.logfile = ""
+		# pipeline feedback file to be used by MoM for archive ingest
+		# will be initialized when info about ObsID (pipeline Id in the future) is known
+		self.feedbackfile = ""
 		# directory where all parset files live
 		self.parset_dir="/globalhome/lofarsystem/log"
+		# directory where all feedback files should go (system directory)
+		self.feedback_dir="/globalhome/lofarsystem/log"
+		# keyword prefix for feedback info
+		self.feedback_prefix="LOFAR.ObsSW.Observation.DataProducts.Output_PulsarPipeline"
 		# directory with raw data (can be changed by user from command line)
 		self.rawdir = "/data"
 		# prefix for default directory with processed data
@@ -126,6 +132,10 @@ class CEP2Info:
 	def get_logdir(self):
 		return self.logdir
 
+	# return feedback file
+	def get_feedbackfile(self):
+		return self.feedbackfile
+
 	# set the logdir
 	def set_logdir(self, id):
 		self.logdir = "%s/.pulp/%s" % (self.home, id)
@@ -135,6 +145,10 @@ class CEP2Info:
 	# set the logfile
 	def set_logfile(self, f):
 		self.logfile = self.logdir + "/" + f
+
+	# set the feedback file
+	def set_feedbackfile(self, f):
+		self.feedbackfile = self.logdir + "/" + f
 
 	# print info of all set attributes
 	def print_info(self, cmdline, log=None):
