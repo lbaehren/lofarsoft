@@ -303,7 +303,7 @@ for station in stations:
         pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data = xyz_timeseries_data, pulse_start = pulse_start, pulse_end = pulse_end, resample_factor = 10, save_plots = True, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-", plotlist = [])
 
         # Do noise characterization
-        noise = cr.trun("Noise", timeseries_data = xyz_timeseries_data, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-")
+        noise = cr.trun("Noise", timeseries_data = xyz_timeseries_data, plot_prefix = options.output_dir+"/"+"cr_physics-"+station.stationname+"-"+str(options.id)+"-",histrange=(-3*pulse_envelope_xyz.rms[0],3*pulse_envelope_xyz.rms[0]))
 
         # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas,3))
