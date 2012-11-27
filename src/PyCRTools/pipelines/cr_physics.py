@@ -315,13 +315,13 @@ for station in stations:
         time_delays += float(block_number_lora * options.blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
 
         # Add parameters
-        p["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
-        p["crp_pulse_delays"] = time_delays
-        p["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_xyz.peak_amplitude).toNumpy().reshape((nantennas, 3))
-        p["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
-        p["crp_stokes"] = stokes_parameters.stokes.toNumpy()
-        p["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
-        p["crp_plotfiles"] = ["/" + s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
+        station.polarization['xyz']["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
+        station.polarization['xyz']["crp_pulse_delays"] = time_delays
+        station.polarization['xyz']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_xyz.peak_amplitude).toNumpy().reshape((nantennas, 3))
+        station.polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
+        station.polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
+        station.polarization['xyz']["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
+        station.polarization['xyz']["crp_plotfiles"] = ["/" + s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
 
         if direction_fit_plane_wave.fit_failed:
             station.polarization['xyz'].status = "BAD"
@@ -364,10 +364,10 @@ if cr_found:
             try:
                 all_station_direction.append(station["crp_pulse_direction"])
                 p = station.polarization["xyz"]
-                all_station_antenna_positions.append(p["crp_itrf_antenna_positions"])
-                all_station_pulse_delays.append(p["crp_pulse_delays"])
-                all_station_pulse_peak_amplitude.append(p["crp_pulse_peak_amplitude"])
-                all_station_rms.append(p["crp_rms"])
+                all_station_antenna_positions.append(station.polarization['xyz']["crp_itrf_antenna_positions"])
+                all_station_pulse_delays.append(station.polarization['xyz']["crp_pulse_delays"])
+                all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
+                all_station_rms.append(station.polarization['xyz']["crp_rms"])
             except Exception:
                 event.status = "ERROR"
                 logging.exception("Do not have all pulse parameters for station " + station.stationname)
