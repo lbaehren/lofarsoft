@@ -232,8 +232,6 @@ for station in stations:
         # in the LORA direction for at least one of the polarizations
         if cr_found_in_station:
             station.status = "GOOD"
-
-            cr_found = True
         else:
             station.status = "BAD"
 
@@ -335,6 +333,8 @@ for station in stations:
 
         else:
             station.polarization['xyz'].status = "GOOD"
+
+            cr_found = True
 
     except Exception:
 
