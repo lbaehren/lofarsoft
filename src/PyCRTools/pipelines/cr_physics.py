@@ -274,7 +274,8 @@ for station in stations:
 
             # Check if fitting was succesful
             if direction_fit_plane_wave.fit_failed:
-                print "direction fit failed"
+                station.status = "BAD"
+                station.statusmessage = "direction fit failed"
                 break
 
             # Check for convergence of iterative direction fitting loop
