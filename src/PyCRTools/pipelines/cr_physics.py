@@ -132,7 +132,9 @@ for station in stations:
             if dipole_names[2 * i] in findrfi.good_antennas and dipole_names[2 * i + 1] in findrfi.good_antennas:
                 selected_dipoles.extend([dipole_names[2 * i], dipole_names[2 * i + 1]])
 
-#        f["SELECTED_DIPOLES"] = selected_dipoles
+        f["SELECTED_DIPOLES"] = selected_dipoles
+
+        station["crp_selected_dipoles"] = selected_dipoles
 
         # Read FFT data
         fft_data = f.empty("FFT_DATA")
@@ -165,10 +167,14 @@ for station in stations:
         galactic_noise = cr.trun("GalacticNoise", timestamp=tbb_time)
 
         # Correct to expected level
-        print "findrfi.antennas_cleaned_power", findrfi.antennas_cleaned_power
-        cr.hInverse(findrfi.antennas_cleaned_power)
-        cr.hMul(findrfi.antennas_cleaned_power, galactic_noise.galactic_noise)
-        cr.hMul(fft_data[...], findrfi.antennas_cleaned_power[...])
+        antennas_cleaned_power = cr.hArray([findrfi.antennas_cleaned_power[i] for i in f["SELECTED_DIPOLES_INDEX"]])
+
+        station["crp_antennas_cleaned_power"] = antennas_cleaned_power
+        station["crp_galactic_noise"] = galactic_noise.galactic_noise
+
+        cr.hInverse(antennas_cleaned_power)
+        cr.hMul(antennas_cleaned_power, galactic_noise.galactic_noise)
+        cr.hMul(fft_data[...], antennas_cleaned_power[...])
 
         # Get timeseries data
         timeseries_data = f.empty("TIMESERIES_DATA")
