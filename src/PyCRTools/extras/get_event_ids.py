@@ -24,11 +24,9 @@ parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 # Connect to database
 if have_psycopg2 and options.host:
     # Open PostgreSQL database
-    print "Opening connection to PostgreSQL database"
     conn = psycopg2.connect(host=options.host, user=options.user, password=options.password, dbname=options.dbname)
 else:
     # Open SQLite database
-    print "Opening Sqlite database"
     conn = sqlite3.connect(options.database, timeout=60.0)
 
 # Get cursor on database
