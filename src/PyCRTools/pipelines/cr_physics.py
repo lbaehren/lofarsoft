@@ -149,8 +149,9 @@ for station in stations:
         try:
             cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
         except Exception:
-            print "Error when obtaining DIPOLE_CALIBRATION_DELAY skipping station", f["STATION_NAME"]
+            print "Do not have DIPOLE_CALIBRATION_DELAY, skipping station", f["STATION_NAME"]
             station.status = "ERROR"
+            station.statusmessage = "do not have DIPOLE_CALIBRATION_DELAY"
             p0.status = "ERROR"
             p1.status = "ERROR"
             continue
@@ -198,8 +199,6 @@ for station in stations:
 
         mb0 = cr.trun("MiniBeamformer", fft_data=fft_data_0, frequencies=frequencies, antpos=antenna_positions_one, direction=pulse_direction)
         mb1 = cr.trun("MiniBeamformer", fft_data=fft_data_1, frequencies=frequencies, antpos=antenna_positions_one, direction=pulse_direction)
-
-        print "done with beamforming"
 
         beamformed_timeseries = cr.hArray(float, dimensions=(2, options.blocksize))
 
@@ -330,13 +329,11 @@ for station in stations:
 
         if direction_fit_plane_wave.fit_failed:
             p.status = "BAD"
-            # Add reason that fit failed
-            print "Marked as BAD as plane wave fit failed"
+            p.statusmessage = "plane wave fit failed"
 
         elif np.std(direction_fit_plane_wave.residual_delays.toNumpy()) > options.maximum_spread_delays:
             p.status = "BAD"
-            # Add reason that quality cut for delay spread was applied
-            print "Marked as BAD as spread on residual delays {0} exceeds {1}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
+            p.statusmessage = "spread on residual delays {0} exceeds {1}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
 
         else:
             p.status = "GOOD"

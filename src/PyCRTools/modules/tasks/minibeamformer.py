@@ -45,10 +45,4 @@ class MiniBeamformer(Task):
         self.direction_cartesian = cr.hArray(pytmf.spherical2cartesian(1.0, 2 * np.pi - pytmf.deg2rad(self.direction[1]), 2 * np.pi - pytmf.deg2rad(self.direction[0])))
 
         # Do beamforming using 1 pixel imager
-        print "input for hBeamformImage"
-        print "self.beamformed_fft.shape()", self.beamformed_fft.shape()
-        print "self.fft_data.shape()", self.fft_data.shape()
-        print "self.frequencies.shape()", self.frequencies.shape()
-        print "self.antpos.shape()", self.antpos.shape()
-        print "self.direction_cartesian.shape()", self.direction_cartesian.shape()
         cr.hBeamformImage(self.beamformed_fft, self.fft_data, self.frequencies, self.antpos, self.direction_cartesian)
