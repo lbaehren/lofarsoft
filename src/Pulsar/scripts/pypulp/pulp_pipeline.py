@@ -1490,7 +1490,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 				if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_dspsr:
 					zapstr=""
 					if self.nrChanPerSub > 1:
-						zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, self.nrSubsPerFile * self.nrChanPerSub, self.nrChanPerSub)]))
+						zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, min(self.nrSubsPerFile * self.nrChanPerSub, total_chan), self.nrChanPerSub)]))
 					verbose="-q"
 					if cmdline.opts.is_debug: verbose="-v"
 
