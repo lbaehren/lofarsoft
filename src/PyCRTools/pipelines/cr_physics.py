@@ -218,15 +218,15 @@ for station in stations:
         cr_found_in_station = False
         if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
-            stations.polarization['0'].status = "GOOD"
+            station.polarization['0'].status = "GOOD"
         else:
-            stations.polarization['0'].status = "BAD"
+            station.polarization['0'].status = "BAD"
 
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
-            stations.polarization['1'].status = "GOOD"
+            station.polarization['1'].status = "GOOD"
         else:
-            stations.polarization['1'].status = "BAD"
+            station.polarization['1'].status = "BAD"
 
         # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
         # in the LORA direction for at least one of the polarizations
