@@ -149,7 +149,7 @@ for station in stations:
         try:
             cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
         except Exception:
-            print "Do not have DIPOLE_CALIBRATION_DELAY, skipping station", f["STATION_NAME"]
+            print "Do not have DIPOLE_CALIBRATION_DELAY, skipping station", station.stationname
             station.status = "ERROR"
             station.statusmessage = "do not have DIPOLE_CALIBRATION_DELAY"
             p0.status = "ERROR"
