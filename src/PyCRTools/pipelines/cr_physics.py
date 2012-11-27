@@ -112,10 +112,8 @@ for station in stations:
 
         logging.debug("have LORA data")
 
-        p0 = station.polarization['0']
-        p0.status = "PROCESSING"
-        p1 = station.polarization['1']
-        p1.status = "PROCESSING"
+        station.polarization['0'].status = "PROCESSING"
+        station.polarization['1'].status = "PROCESSING"
 
         # Set file parameters to match LORA block
         f["BLOCKSIZE"] = options.blocksize
@@ -152,8 +150,8 @@ for station in stations:
             print "Do not have DIPOLE_CALIBRATION_DELAY, skipping station", station.stationname
             station.status = "ERROR"
             station.statusmessage = "do not have DIPOLE_CALIBRATION_DELAY"
-            p0.status = "ERROR"
-            p1.status = "ERROR"
+            station.polarization['0'].status = "ERROR"
+            station.polarization['1'].status = "ERROR"
             continue
 
         weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
@@ -214,21 +212,21 @@ for station in stations:
         # Look for significant pulse in beamformed signal
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data=beamformed_timeseries, pulse_start=pulse_search_window_start, pulse_end=pulse_search_window_end, nsigma=options.accept_snr, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-bf-", plotlist=[])
 
-        p0["crp_plotfiles"] = ["/" + s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ] + findrfi.plotlist]
-        p1["crp_plotfiles"] = ["/" + s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ] + findrfi.plotlist]
+        station.polarization['0']["crp_plotfiles"] = ["/" + s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ] + findrfi.plotlist]
+        station.polarization['1']["crp_plotfiles"] = ["/" + s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ] + findrfi.plotlist]
 
         cr_found_in_station = False
         if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
-            p0.status = "GOOD"
+            stations.polarization['0'].status = "GOOD"
         else:
-            p0.status = "BAD"
+            stations.polarization['0'].status = "BAD"
 
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
-            p1.status = "GOOD"
+            stations.polarization['1'].status = "GOOD"
         else:
-            p1.status = "BAD"
+            stations.polarization['1'].status = "BAD"
 
         # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
         # in the LORA direction for at least one of the polarizations
@@ -300,8 +298,7 @@ for station in stations:
                 break
 
         # Project polarization onto x,y,z frame
-        p = station.polarization['xyz']
-        p.status = "PROCESSING"
+        station.polarization['xyz'].status = "PROCESSING"
 
         xyz_timeseries_data = cr.hArray(float, dimensions=(3 * nantennas, options.blocksize))
         cr.hProjectPolarizations(xyz_timeseries_data[0:3 * nantennas:3, ...], xyz_timeseries_data[1:3 * nantennas:3, ...], xyz_timeseries_data[2:3 * nantennas:3, ...], timeseries_data[0:2 * nantennas:2, ...], timeseries_data[1:2 * nantennas:2, ...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
@@ -329,22 +326,22 @@ for station in stations:
         p["crp_plotfiles"] = ["/" + s.lstrip("./") for s in pulse_envelope_xyz.plotlist + noise.plotlist]
 
         if direction_fit_plane_wave.fit_failed:
-            p.status = "BAD"
-            p.statusmessage = "plane wave fit failed"
+            station.polarization['xyz'].status = "BAD"
+            station.polarization['xyz'].statusmessage = "plane wave fit failed"
 
         elif np.std(direction_fit_plane_wave.residual_delays.toNumpy()) > options.maximum_spread_delays:
-            p.status = "BAD"
-            p.statusmessage = "spread on residual delays {0} exceeds {1}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
+            station.polarization['xyz'].status = "BAD"
+            station.polarization['xyz'].statusmessage = "spread on residual delays {0} exceeds {1}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
 
         else:
-            p.status = "GOOD"
+            station.polarization['xyz'].status = "GOOD"
 
     except Exception:
 
         logging.exception("unexpected error occured when processing station " + station.stationname)
 
         station.status = "ERROR"
-        p.status = "ERROR"
+        station.polarization['xyz'].status = "ERROR"
 
     print "-" * 80
     print "finishing station " + station.stationname
