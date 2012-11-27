@@ -411,4 +411,7 @@ else:
 
     event.status = "CR_NOT_FOUND"
 
+# Make sure everything is written to the database
+event.write()
+
 print "[cr_physics] completed in {0:.3f} s".format(time.clock() - start)
