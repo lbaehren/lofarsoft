@@ -78,6 +78,10 @@ class PulseEnvelope(Task):
             doc = "Number of standard deviations that pulse needs to be above noise level in order to be accepted as found."),
         antennas_with_significant_pulses=dict(default = lambda self: [i for i in range(self.nantennas) if self.snr[i] > self.nsigma],
             doc = "Indices of antennas with pulses more than nsigma above the noise limit."),
+        npolarizations=dict(default = 1,
+            doc = "If this parameter > 1 then these are the number of antennas to be considered as one and pulse search is restricted to the one with the strongest SNR on average."),
+        strongest_polarization=dict(default = None,
+            doc = "Polarization that is strongest and is used to find pulse strength."),
         save_plots=dict(default = False,
             doc = "Store plots"),
         plot_prefix=dict(default = "",
@@ -116,6 +120,20 @@ class PulseEnvelope(Task):
 
         # Find signal to noise ratio, maximum, position of maximum and rms
         cr.hMaxSNR(self.snr[...], self.mean[...], self.rms[...], self.peak_amplitude[...], self.maxpos[...], self.envelope[...], (self.pulse_start - self.window_start) * int(self.resample_factor), (self.pulse_end - self.window_start) * int(self.resample_factor))
+
+        if self.npolarizations > 1:
+            
+            # Figure out which polarization has the strongest pulse signal on average
+            self.strongest_polarization = np.argmax(self.snr.toNumpy().reshape((self.nantennas / self.npolarizations, self.npolarizations)).mean(axis=0))
+
+            # Update snr and peak amplitude using position of maximum found in strongest polarization
+            start = (self.pulse_start - self.window_start) * int(self.resample_factor)
+            for i in range(self.nantennas / self.npolarizations):
+                for j in range(self.npolarizations):
+                    k = i*self.npolarizations
+                    n = k + j
+                    self.peak_amplitude[n] = self.envelope(n, start + self.maxpos[k+self.strongest_polarization])
+                    self.snr[n] = self.peak_amplitude[n] / self.rms[n]
 
         # Convert to delay
         self.delays[:] = self.maxpos[:]
