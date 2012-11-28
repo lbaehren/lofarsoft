@@ -73,7 +73,7 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     header = Element("header")
 
     # Get event header
-    sql = "SELECT timestamp, status, alt_status FROM events WHERE eventID={0}".format(eventID)
+    sql = "SELECT timestamp, status, alt_status, statusmessage, alt_statusmessage FROM events WHERE eventID={0}".format(eventID)
     cursor.execute(sql)
 
     e = cursor.fetchone()
@@ -81,12 +81,14 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     SubElement(header, "timestamp").text = str(datetime.utcfromtimestamp(e[0]))
     SubElement(header, "status").text = str(e[1])
     SubElement(header, "alt_status").text = str(e[2])
+    SubElement(header, "statusmessage").text = str(e[3])
+    SubElement(header, "alt_statusmessage").text = str(e[4])
 
     if station:
         s = SubElement(header, "station")
         SubElement(s, "name").text = str(station)
 
-        sql = """SELECT s.status, s.alt_status FROM
+        sql = """SELECT s.status, s.alt_status, s.statusmessage, s.alt_statusmessage FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         WHERE (eventID={0} AND stationName='{1}')
@@ -97,12 +99,14 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
 
         SubElement(s, "status").text = e[0]
         SubElement(s, "alt_status").text = e[1]
+        SubElement(s, "statusmessage").text = e[2]
+        SubElement(s, "alt_statusmessage").text = e[3]
 
     if polarization:
         p = SubElement(header, "polarization")
         SubElement(p, "name").text = str(polarization)
 
-        sql = """SELECT p.status, p.alt_status FROM
+        sql = """SELECT p.status, p.alt_status, p.statusmessage, p.alt_statusmessage FROM
         event_datafile AS ed INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID)
         INNER JOIN stations AS s ON (ds.stationID=s.stationID)
         INNER JOIN station_polarization AS sp ON (ds.stationID=sp.stationID)
@@ -114,6 +118,8 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
 
         SubElement(p, "status").text = e[0]
         SubElement(p, "alt_status").text = e[1]
+        SubElement(p, "statusmessage").text = e[2]
+        SubElement(p, "alt_statusmessage").text = e[3]
 
     # Get all stations in event
     sql = """SELECT s.stationname, s.status, s.alt_status FROM
