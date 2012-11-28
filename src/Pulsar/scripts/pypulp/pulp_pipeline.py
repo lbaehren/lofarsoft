@@ -1488,9 +1488,6 @@ CLK line will be removed from the parfile!" % (parfile,))
 				# we also sort this list by split number
 				s0_files=sorted([f for f in input_files if re.search("_S0_", f) is not None], key=lambda input_file: int(input_file.split("_P")[-1].split("_")[0]))
 				if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_dspsr:
-					zapstr=""
-					if self.nrChanPerSub > 1:
-						zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, min(self.nrSubsPerFile * self.nrChanPerSub, total_chan), self.nrChanPerSub)]))
 					verbose="-q"
 					if cmdline.opts.is_debug: verbose="-v"
 
@@ -1504,6 +1501,12 @@ CLK line will be removed from the parfile!" % (parfile,))
 						# loop on frequency splits
 						for ii in range(len(s0_files)):
 							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
+							zapstr=""
+							if self.nrChanPerSub > 1:
+								proc_subs = self.nrSubsPerFile
+								if (fpart + 1)*self.nrSubsPerFile > self.tab.nrSubbands: 
+									proc_subs = -fpart*self.nrSubsPerFile + self.tab.nrSubbands
+								zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, proc_subs * self.nrChanPerSub, self.nrChanPerSub)]))
 							cmd="dspsr -b %d -A -L 60 %s %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d %s %s" % \
 								(dspsr_nbins, verbose, zapstr, self.outdir, psr2, \
 								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, s0_files[ii])
