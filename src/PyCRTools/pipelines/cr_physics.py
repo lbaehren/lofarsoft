@@ -222,6 +222,7 @@ for station in stations:
         if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
             station.polarization['0'].status = "GOOD"
+            station.polarization['0'].statusmessage = ""
         else:
             station.polarization['0'].status = "BAD"
             station.polarization['0'].statusmessage = "no significant pulse found in beamformed signal"
@@ -229,6 +230,7 @@ for station in stations:
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
             station.polarization['1'].status = "GOOD"
+            station.polarization['1'].statusmessage = ""
         else:
             station.polarization['1'].status = "BAD"
             station.polarization['1'].statusmessage = "no significant pulse found in beamformed signal"
@@ -237,6 +239,7 @@ for station in stations:
         # in the LORA direction for at least one of the polarizations
         if cr_found_in_station:
             station.status = "GOOD"
+            station.statusmessage = ""
         else:
             station.status = "BAD"
             station.polarization['0'].statusmessage = "no significant pulse found in beamformed signal for either polarization"
@@ -339,6 +342,7 @@ for station in stations:
 
         else:
             station.polarization['xyz'].status = "GOOD"
+            station.polarization['xyz'].statusmessage = ""
 
             cr_found = True
 
@@ -412,6 +416,7 @@ if cr_found:
     event["crp_plotfiles"] = ["/" + p.lstrip("./") for p in plotlist]
 
     event.status = "CR_FOUND"
+    event.statusmessage = ""
 
 else:
 
