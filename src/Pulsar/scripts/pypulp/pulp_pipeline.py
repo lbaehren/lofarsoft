@@ -399,13 +399,13 @@ class Pipeline:
 		self.execute(cmd, log, workdir=sumdir)
 
 		# Make a full tarball
-		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
-		tar_list=[]
-		for ext in self.full_archive_exts:
-			ext_list=rglob(sumdir, ext, 3)
-			tar_list.extend(ext_list)
-		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
-		self.execute(cmd, log, workdir=sumdir)
+#		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
+#		tar_list=[]
+#		for ext in self.full_archive_exts:
+#			ext_list=rglob(sumdir, ext, 3)
+#			tar_list.extend(ext_list)
+#		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+#		self.execute(cmd, log, workdir=sumdir)
 
 		# finish
 		end_time=time.time()
@@ -424,14 +424,15 @@ class Pipeline:
 		os.system(cmd)
 
 		# adding summary log file to the full archive anf gzip it
-		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
-		self.execute(cmd, log, workdir=sumdir)
-		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
-		self.execute(cmd, log, workdir=sumdir)
+#		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
+#		self.execute(cmd, log, workdir=sumdir)
+#		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
+#		self.execute(cmd, log, workdir=sumdir)
 
 		# updating the Feedback unit
 		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
-		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
 		fbunit.flush(cep2)
 
 
@@ -643,13 +644,13 @@ class Pipeline:
 		self.execute(cmd, log, workdir=sumdir)
 
 		# Make a full tarball
-		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
-		tar_list=[]
-		for ext in self.full_archive_exts:
-			ext_list=rglob(sumdir, ext, 3)
-			tar_list.extend(ext_list)
-		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
-		self.execute(cmd, log, workdir=sumdir)
+#		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
+#		tar_list=[]
+#		for ext in self.full_archive_exts:
+#			ext_list=rglob(sumdir, ext, 3)
+#			tar_list.extend(ext_list)
+#		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+#		self.execute(cmd, log, workdir=sumdir)
 
 		# finish
 		end_time=time.time()
@@ -668,14 +669,15 @@ class Pipeline:
 		os.system(cmd)
 
 		# adding summary log file to the full archive anf gzip it
-		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
-		self.execute(cmd, log, workdir=sumdir)
-		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
-		self.execute(cmd, log, workdir=sumdir)
+#		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
+#		self.execute(cmd, log, workdir=sumdir)
+#		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
+#		self.execute(cmd, log, workdir=sumdir)
 
 		# updating the Feedback unit
 		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
-		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
 		fbunit.flush(cep2)
 
 
