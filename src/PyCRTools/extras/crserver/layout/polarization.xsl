@@ -54,13 +54,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <caption id="header">Header</caption>
     <tr>
       <th>Id</th>
-      <td colspan=2>
+      <td colspan="2">
         <a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/></xsl:attribute><xsl:value-of select="/elements/header/id"/></a>
       </td>
     </tr>
     <tr>
       <th>Timestamp</th>
-      <td colspan=2>
+      <td colspan="2">
         <xsl:value-of select="/elements/header/timestamp"/>
       </td>
     </tr>
