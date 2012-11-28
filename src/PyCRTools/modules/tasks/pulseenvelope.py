@@ -132,6 +132,7 @@ class PulseEnvelope(Task):
                 for j in range(self.npolarizations):
                     k = i*self.npolarizations
                     n = k + j
+                    self.maxpos[n] = self.maxpos[k+self.strongest_polarization]
                     self.peak_amplitude[n] = self.envelope[n, start + self.maxpos[k+self.strongest_polarization]]
                     self.snr[n] = self.peak_amplitude[n] / self.rms[n]
 
