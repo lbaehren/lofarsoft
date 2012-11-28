@@ -124,7 +124,7 @@ class PulseEnvelope(Task):
         if self.npolarizations > 1:
             
             # Figure out which polarization has the strongest pulse signal on average
-            self.strongest_polarization = np.argmax(self.snr.toNumpy().reshape((self.nantennas / self.npolarizations, self.npolarizations)).mean(axis=0))
+            self.strongest_polarization = int(np.argmax(self.snr.toNumpy().reshape((self.nantennas / self.npolarizations, self.npolarizations)).mean(axis=0)))
 
             # Update snr and peak amplitude using position of maximum found in strongest polarization
             start = (self.pulse_start - self.window_start) * int(self.resample_factor)
@@ -132,7 +132,7 @@ class PulseEnvelope(Task):
                 for j in range(self.npolarizations):
                     k = i*self.npolarizations
                     n = k + j
-                    self.peak_amplitude[n] = self.envelope(n, start + self.maxpos[k+self.strongest_polarization])
+                    self.peak_amplitude[n] = self.envelope[n, start + self.maxpos[k+self.strongest_polarization]]
                     self.snr[n] = self.peak_amplitude[n] / self.rms[n]
 
         # Convert to delay
