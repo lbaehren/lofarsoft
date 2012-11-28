@@ -49,22 +49,32 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <caption id="header">Header</caption>
     <tr>
       <th>Id</th>
-      <th>Timestamp</th>
-      <th>Event status</th>
-      <th>Event alt_status</th>
-    </tr>
-    <tr>
-      <td>
+      <td colspan="2">
         <a><xsl:attribute name="href">/events/<xsl:value-of select="/elements/header/id"/></xsl:attribute><xsl:value-of select="/elements/header/id"/></a>
       </td>
-      <td>
+    </tr>
+    <tr>
+      <th>Timestamp</th>
+      <td colspan="2">
         <xsl:value-of select="/elements/header/timestamp"/>
       </td>
+    </tr>
+    <tr>
+      <th>Event status</th>
       <td>
         <xsl:value-of select="/elements/header/status"/>
       </td>
       <td>
+        <xsl:value-of select="/elements/header/statusmessage"/>
+      </td>
+    </tr>
+    <tr>
+      <th>Event alt_status</th>
+      <td>
         <xsl:value-of select="/elements/header/alt_status"/>
+      </td>
+      <td>
+        <xsl:value-of select="/elements/header/alt_statusmessage"/>
       </td>
     </tr>
   </table>
