@@ -262,7 +262,7 @@ for station in stations:
             timeseries_data /= options.blocksize
 
             # Calculate delays
-            pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10)
+            pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
 
             # Use current direction if not enough significant pulses are found for direction fitting
             if len(pulse_envelope.antennas_with_significant_pulses) < 3:
