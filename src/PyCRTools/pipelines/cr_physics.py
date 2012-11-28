@@ -108,6 +108,7 @@ for station in stations:
         except Exception:
             logging.exception("could not get expected block number from LORA data for station " + station.stationname)
             station.status = "ERROR"
+            station.statusmessage = "could not get expected block number from LORA data for station " + station.stationname
             continue
 
         logging.debug("have LORA data")
@@ -149,9 +150,11 @@ for station in stations:
         except Exception:
             print "Do not have DIPOLE_CALIBRATION_DELAY, skipping station", station.stationname
             station.status = "ERROR"
-            station.statusmessage = "do not have DIPOLE_CALIBRATION_DELAY"
+            station.statusmessage = "DIPOLE_CALIBRATION_DELAY missing"
             station.polarization['0'].status = "ERROR"
+            station.polarization['0'].statusmessage = "DIPOLE_CALIBRATION_DELAY missing"
             station.polarization['1'].status = "ERROR"
+            station.polarization['1'].statusmessage = "DIPOLE_CALIBRATION_DELAY missing"
             continue
 
         weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
@@ -221,12 +224,14 @@ for station in stations:
             station.polarization['0'].status = "GOOD"
         else:
             station.polarization['0'].status = "BAD"
+            station.polarization['0'].statusmessage = "no significant pulse found in beamformed signal"
 
         if 1 in pulse_envelope_bf.antennas_with_significant_pulses:
             cr_found_in_station = True
             station.polarization['1'].status = "GOOD"
         else:
             station.polarization['1'].status = "BAD"
+            station.polarization['1'].statusmessage = "no significant pulse found in beamformed signal"
 
         # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
         # in the LORA direction for at least one of the polarizations
@@ -234,6 +239,7 @@ for station in stations:
             station.status = "GOOD"
         else:
             station.status = "BAD"
+            station.polarization['0'].statusmessage = "no significant pulse found in beamformed signal for either polarization"
 
             continue
 
@@ -329,7 +335,7 @@ for station in stations:
 
         elif np.std(direction_fit_plane_wave.residual_delays.toNumpy()) > options.maximum_spread_delays:
             station.polarization['xyz'].status = "BAD"
-            station.polarization['xyz'].statusmessage = "spread on residual delays {0} exceeds {1}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
+            station.polarization['xyz'].statusmessage = "spread on residual delays {0:.3f} exceeds {1:.3f}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
 
         else:
             station.polarization['xyz'].status = "GOOD"
@@ -341,7 +347,9 @@ for station in stations:
         logging.exception("unexpected error occured when processing station " + station.stationname)
 
         station.status = "ERROR"
+        station.statusmessage = "unexpected error"
         station.polarization['xyz'].status = "ERROR"
+        station.polarization['xyz'].statusmessage = "unexpected error"
 
     print "-" * 80
     print "finishing station " + station.stationname
@@ -370,6 +378,7 @@ if cr_found:
                 all_station_rms.append(station.polarization['xyz']["crp_rms"])
             except Exception:
                 event.status = "ERROR"
+                event.statusmessage = "do not have all pulse parameters for station " + station.stationname
                 logging.exception("Do not have all pulse parameters for station " + station.stationname)
 
     all_station_antenna_positions = np.vstack(all_station_antenna_positions)
