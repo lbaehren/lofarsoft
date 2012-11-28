@@ -335,7 +335,7 @@ for station in stations:
 
         elif np.std(direction_fit_plane_wave.residual_delays.toNumpy()) > options.maximum_spread_delays:
             station.polarization['xyz'].status = "BAD"
-            station.polarization['xyz'].statusmessage = "spread on residual delays {0:.3f} exceeds {1:.3f}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
+            station.polarization['xyz'].statusmessage = "spread on residual delays {0:.3e} exceeds {1:.3e}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
 
         else:
             station.polarization['xyz'].status = "GOOD"
