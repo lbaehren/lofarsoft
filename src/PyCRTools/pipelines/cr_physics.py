@@ -14,6 +14,7 @@ import sys
 import time
 import pytmf
 import numpy as np
+import matplotlib.pyplot as plt
 import pycrtools as cr
 from pycrtools import crdatabase as crdb
 from pycrtools import metadata as md

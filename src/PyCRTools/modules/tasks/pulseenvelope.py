@@ -166,7 +166,7 @@ class PulseEnvelope(Task):
                 p = self.plot_prefix + "pulse_envelope_envelope-{0:d}.png".format(i)
 
                 plt.xlabel(r"Time ($\mu s$)")
-                plt.ylabel("Voltage (ADU)")
+                plt.ylabel("Amplitude (ADU)")
                 plt.legend()
                 plt.title("Pulse envelope for antenna {0:d} {1:f} {2:f}".format(i, self.mean[i], self.rms[i]))
                 plt.savefig(p)
@@ -186,7 +186,7 @@ class PulseEnvelope(Task):
             p = self.plot_prefix + "pulse_envelope_envelope.png"
 
             plt.xlabel(r"Time ($\mu s$)")
-            plt.ylabel("Power (ADU)")
+            plt.ylabel("Amplitude with offset (ADU)")
             plt.title("All pulse envelopes")
             plt.savefig(p)
 
