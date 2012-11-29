@@ -326,8 +326,11 @@ for station in stations:
         time_delays += float(block_number_lora * options.blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
 
         # Add parameters
+        station["crp_pulse_time"] = time_delays
+        station["crp_pulse_delay"] = pulse_envelope.delays.toNumpy()
+        station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
+
         station.polarization['xyz']["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
-        station.polarization['xyz']["crp_pulse_delays"] = time_delays
         station.polarization['xyz']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_xyz.peak_amplitude).toNumpy().reshape((nantennas, 3))
         station.polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
         station.polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
@@ -368,7 +371,7 @@ if cr_found:
 
     # Get combined parameters from (cached) database
     all_station_antenna_positions = []
-    all_station_pulse_delays = []
+#    all_station_pulse_delays = []
     all_station_pulse_peak_amplitude = []
     all_station_rms = []
     all_station_direction = []
@@ -379,7 +382,6 @@ if cr_found:
                 all_station_direction.append(station["crp_pulse_direction"])
                 p = station.polarization["xyz"]
                 all_station_antenna_positions.append(station.polarization['xyz']["crp_itrf_antenna_positions"])
-                all_station_pulse_delays.append(station.polarization['xyz']["crp_pulse_delays"])
                 all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                 all_station_rms.append(station.polarization['xyz']["crp_rms"])
             except Exception:
@@ -388,7 +390,7 @@ if cr_found:
                 logging.exception("Do not have all pulse parameters for station " + station.stationname)
 
     all_station_antenna_positions = np.vstack(all_station_antenna_positions)
-    all_station_pulse_delays = np.vstack(all_station_pulse_delays)
+#    all_station_pulse_delays = np.vstack(all_station_pulse_delays)
     all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
     all_station_rms = np.vstack(all_station_rms)
     all_station_direction = np.asarray(all_station_direction)
@@ -409,7 +411,7 @@ if cr_found:
     core_uncertainties = event["lora_coreuncertainties"].toNumpy()
     direction_uncertainties = [3., 3., 0]
 
-    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + str(options.id) + "-")
+#    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + str(options.id) + "-")
 
     # Add LDF and footprint plots to list of event level plots
     plotlist.extend(ldf.plotlist)
