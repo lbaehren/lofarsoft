@@ -414,7 +414,7 @@ if cr_found:
 #    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + str(options.id) + "-")
 
     # Add LDF and footprint plots to list of event level plots
-    plotlist.extend(ldf.plotlist)
+#    plotlist.extend(ldf.plotlist)
 
     # Add list of event level plots to event
     event["crp_plotfiles"] = ["/" + p.lstrip("./") for p in plotlist]
