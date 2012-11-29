@@ -1508,7 +1508,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 								proc_subs = self.nrSubsPerFile
 								if (fpart + 1)*self.nrSubsPerFile > self.tab.nrSubbands: 
 									proc_subs = -fpart*self.nrSubsPerFile + self.tab.nrSubbands
-								zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, proc_subs * self.nrChanPerSub, self.nrChanPerSub)]))
+								zapstr="-j 'zap chan %s'" % (",".join([str(kk) for kk in range(0, proc_subs * self.nrChanPerSub, self.nrChanPerSub)]))
 							cmd="dspsr -b %d -A -L 60 %s %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d %s %s" % \
 								(dspsr_nbins, verbose, zapstr, self.outdir, psr2, \
 								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, s0_files[ii])
