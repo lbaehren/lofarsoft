@@ -325,6 +325,16 @@ for station in stations:
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas, 3))
         time_delays += float(block_number_lora * options.blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
 
+        # Plot residual delays
+        plt.clf()
+        plt.plot(direction_fit_plane_wave.residual_delays.toNumpy(), "ro")
+        plt.xlabel("Antenna number")
+        plt.ylabel("Residual delay (s)")
+        
+        plotfile = options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-residual-delay" + ".png"
+        plt.savefig(plotfile)
+        station["crp_plotfiles"].append(plotfile)
+
         # Add parameters
         station["crp_pulse_time"] = time_delays
         station["crp_pulse_delay"] = pulse_envelope.delays.toNumpy()
