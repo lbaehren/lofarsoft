@@ -430,10 +430,10 @@ class Pipeline:
 #		self.execute(cmd, log, workdir=sumdir)
 
 		# updating the Feedback unit
-		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
-#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
-		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
-		fbunit.flush(cep2)
+#		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
+##		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
+#		fbunit.flush(cep2)
 
 
 	# run necessary processes to organize summary info on summary nodes for CS and IS data
@@ -675,10 +675,10 @@ class Pipeline:
 #		self.execute(cmd, log, workdir=sumdir)
 
 		# updating the Feedback unit
-		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
-#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
-		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
-		fbunit.flush(cep2)
+#		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
+##		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
+#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
+#		fbunit.flush(cep2)
 
 
 # base class for the single processing (a-ka beam)

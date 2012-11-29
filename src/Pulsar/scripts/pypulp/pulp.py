@@ -183,11 +183,11 @@ if __name__ == "__main__":
                 	fbunit.flush(cep2)
 
 			# copying feedback file to system directory
-			try:
-				cmd="cp -f %s %s" % (cep2.get_feedbackfile(), cep2.feedback_dir)
-				os.system(cmd)	
-			except Exception:
-				log.error("Can't write feedback file %s to system directory %s!" % (cep2.get_feedbackfile(), cep2.feedback_dir))
+#			try:
+#				cmd="cp -f %s %s" % (cep2.get_feedbackfile(), cep2.feedback_dir)
+#				os.system(cmd)	
+#			except Exception:
+#				log.error("Can't write feedback file %s to system directory %s!" % (cep2.get_feedbackfile(), cep2.feedback_dir))
 		else:
 			# loading pipeline config from the file
 			if os.path.exists(pipeline_file):
