@@ -382,7 +382,7 @@ if cr_found:
 
     # Get combined parameters from (cached) database
     all_station_antenna_positions = []
-#    all_station_pulse_delays = []
+    all_station_pulse_delays = []
     all_station_pulse_peak_amplitude = []
     all_station_rms = []
     all_station_direction = []
@@ -391,6 +391,7 @@ if cr_found:
         if station.status == "GOOD":
             try:
                 all_station_direction.append(station["crp_pulse_direction"])
+                all_station_pulse_delays.append(np.repeat(station["crp_pulse_delay"][::2], 3))
                 p = station.polarization["xyz"]
                 all_station_antenna_positions.append(station.polarization['xyz']["crp_itrf_antenna_positions"])
                 all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
@@ -401,7 +402,7 @@ if cr_found:
                 logging.exception("Do not have all pulse parameters for station " + station.stationname)
 
     all_station_antenna_positions = np.vstack(all_station_antenna_positions)
-#    all_station_pulse_delays = np.vstack(all_station_pulse_delays)
+    all_station_pulse_delays = np.vstack(all_station_pulse_delays)
     all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
     all_station_rms = np.vstack(all_station_rms)
     all_station_direction = np.asarray(all_station_direction)
@@ -422,10 +423,10 @@ if cr_found:
     core_uncertainties = event["lora_coreuncertainties"].toNumpy()
     direction_uncertainties = [3., 3., 0]
 
-#    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + str(options.id) + "-")
+    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + str(options.id) + "-")
 
     # Add LDF and footprint plots to list of event level plots
-#    plotlist.extend(ldf.plotlist)
+    plotlist.extend(ldf.plotlist)
 
     # Add list of event level plots to event
     event["crp_plotfiles"] = ["/" + p.lstrip("./") for p in plotlist]
