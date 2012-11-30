@@ -391,7 +391,7 @@ if cr_found:
         if station.status == "GOOD":
             try:
                 all_station_direction.append(station["crp_pulse_direction"])
-                all_station_pulse_delays.append(np.repeat(station["crp_pulse_delay"][::2], 3))
+                all_station_pulse_delays.append(np.repeat(station["crp_pulse_delay"][::2], 3).reshape((nantennas, 3)))
                 p = station.polarization["xyz"]
                 all_station_antenna_positions.append(station.polarization['xyz']["crp_itrf_antenna_positions"])
                 all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
