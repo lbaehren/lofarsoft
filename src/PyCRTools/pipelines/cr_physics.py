@@ -36,7 +36,6 @@ parser.add_option("-s", "--station", action="append", help="only process given s
 parser.add_option("-a", "--accept_snr", default=5, help="accept pulses with snr higher than this in the beamformed timeseries")
 parser.add_option("--maximum_nof_iterations", default=5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default=0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
-parser.add_option("--maximum_spread_delays", default=1e-8, help="maximum remaining spread in delays from a station")
 parser.add_option("--broad_search_window_width", default=2 ** 12, help="width of window around expected location for first pulse search")
 parser.add_option("--narrow_search_window_width", default=2 ** 7, help="width of window around expected location for subsequent pulse search")
 parser.add_option("-l", "--lora_directory", default="./", help="directory containing LORA information")
@@ -305,6 +304,7 @@ for station in stations:
             if n > options.maximum_nof_iterations:
                 print "maximum number of iterations reached"
                 station["crp_pulse_direction"] = pulse_direction
+                station.statusmessage = "maximum number of iterations reached"
                 break
 
         # Project polarization onto x,y,z frame
@@ -352,9 +352,9 @@ for station in stations:
             station.polarization['xyz'].status = "BAD"
             station.polarization['xyz'].statusmessage = "plane wave fit failed"
 
-        elif np.std(direction_fit_plane_wave.residual_delays.toNumpy()) > options.maximum_spread_delays:
+        elif direction_fit_plane_wave.goodcount < nantennas / 2:
             station.polarization['xyz'].status = "BAD"
-            station.polarization['xyz'].statusmessage = "spread on residual delays {0:.3e} exceeds {1:.3e}".format(np.std(direction_fit_plane_wave.residual_delays.toNumpy()), options.maximum_spread_delays)
+            station.polarization['xyz'].statusmessage = "goodcount {0} < nantennas / 2 [= {1}]".format(direction_fit_plane_wave.goodcount, nantennas / 2)
 
         else:
             station.polarization['xyz'].status = "GOOD"

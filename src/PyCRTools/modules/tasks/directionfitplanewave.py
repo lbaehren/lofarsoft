@@ -68,7 +68,10 @@ class DirectionFitPlaneWave(tasks.Task):
 
         meandirection_azel_deg=sc.p_(lambda self: (180 - (self.meandirection_spherical[2] + pi2) / deg, 90 - (self.meandirection_spherical[1]) / deg),
                                        "Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
-        fit_failed=sc.p_(lambda self: False, "Indication if fit failed", output=True)
+        fit_failed=sc.p_(lambda self: False, "Indication if fit failed", output=True),
+
+        goodcount =dict(doc="Number of good antennas.")
+
 
 #        plot_finish = dict(default=lambda self:plotfinish(dopause=False,plotpause=False),
 #                           doc="Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"),
@@ -101,13 +104,13 @@ class DirectionFitPlaneWave(tasks.Task):
             indicesOfGoodAntennas = np.arange(len(times))
             goodSubset = np.arange(len(times))  # start with all 'good'
 
-        goodcount = len(goodSubset)
+        self.goodcount = len(goodSubset)
 
         niter = 0
         while True:
             niter += 1
             # if fit only remains with three antennas (or less) it should not be trusted as it always has a solution (fails)
-            if goodcount < 3:
+            if self.goodcount < 3:
                 print "ERROR: too few good antennas for direction fit."
                 self.meandirection = (0, 0, 1)
                 self.fit_failed = True
@@ -135,12 +138,12 @@ class DirectionFitPlaneWave(tasks.Task):
             if self.verbose:
                 print 'iteration # %d' % niter
                 print 'az = %f, el = %f' % (az * rad2deg, el * rad2deg)
-                print 'good count = %d' % goodcount
+                print 'good count = %d' % self.goodcount
             # if the next iteration has the same number of good antenneas the while loop will be terminated
-            if len(goodSubset[0]) == goodcount:
+            if len(goodSubset[0]) == self.goodcount:
                 break
             else:
-                goodcount = len(goodSubset[0])
+                self.goodcount = len(goodSubset[0])
                 indicesOfGoodAntennas = indicesOfGoodAntennas[goodSubset]
 
         cartesianDirection = [cos(el) * sin(az), cos(el) * cos(az), sin(el)]
