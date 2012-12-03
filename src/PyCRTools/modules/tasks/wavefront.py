@@ -130,12 +130,11 @@ class Wavefront(Task):
     """
 
     parameters = dict(
-        filename = dict( default = None,
-            doc = "Filename, used if no file object is given." ),
+        filefilter = dict(default=None, doc="File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "),
+        filelist = dict(default=None, doc="List of filenames in one event. "),
         f = dict( default = None,
             doc = "File object. Blocksize, polarisation + antenna selection etc. are taken from the given file object, and should have been set before calling this Task." ),
-        blocksize = dict ( default = lambda self : self.f["BLOCKSIZE"],
-            doc = "Blocksize." ),
+        blocksize = dict ( default = 65536, doc = "Blocksize." ),
         nantennas = dict( default = lambda self : self.f["NOF_SELECTED_DATASETS"],
             doc = "Number of selected antennas." ),
 #        nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
@@ -176,42 +175,48 @@ class Wavefront(Task):
         # - all calibration delays, and (station) clock offsets for those ids
         # - array of all reference offsets per antenna id. (starting point of timeseries array)
 
-        pol = 1  # later do both together
+        #pol = 1  # later do both together
+        if not self.f and not self.filefilter and not self.filelist:
+            raise RuntimeError("Give a file object or a filefilter or a filelist")
+        if not self.f:
+            #filefilter = '/Users/acorstanje/triggering/CR/*.986Z*.h5'
+            if not self.filelist:
+                self.filelist = cr.listFiles(self.filefilter)
+            superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007", "CS021"]
+            if len(self.filelist) == 1:
+                print 'There is only 1 file'
+                self.filelist = self.filelist[0]
+            else:  # sort files on station ID
+                sortedlist = []
+                for station in superterpStations:
+                    thisStationsFile = [filename for filename in self.filelist if station in filename]
+                    if len(thisStationsFile) > 0:
+                        sortedlist.append(thisStationsFile[0])
+                self.filelist = sortedlist
+            print '[Wavefront] Processing files: '
+            print self.filelist
+            self.f = cr.open(self.filelist, blocksize=self.blocksize)
+            selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
+            self.f["SELECTED_DIPOLES"] = selected_dipoles
 
-        filefilter = '/Users/acorstanje/triggering/CR/*.986Z*.h5'
-        filelist = cr.listFiles(filefilter)
-        superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007", "CS021"]
-        if len(filelist) == 1:
-            print 'There is only 1 file'
-            filelist = filelist[0]
-        else:  # sort files on station ID
-            sortedlist = []
-            for station in superterpStations:
-                thisStationsFile = [filename for filename in filelist if station in filename]
-                if len(thisStationsFile) > 0:
-                    sortedlist.append(thisStationsFile[0])
-            filelist = sortedlist
-        print '[Wavefront] Processing files: '
-        print filelist
-
-        firstDataset = stations[0][pol]  # obtained from cr_event results (1st stage pipeline), used to locate pulse.
+            
+        firstDataset = stations[0][self.pol]  # obtained from cr_event results (1st stage pipeline), used to locate pulse.
         # assume file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
         block = firstDataset["BLOCK"]
-        blocksize = firstDataset["BLOCKSIZE"]
+        blocksize = firstDataset["BLOCKSIZE"] # REMOVE
         # tbb_samplenr = thisDataset["SAMPLE_NUMBER"]
         pulse_samplenr = firstDataset["pulse_start_sample"]
+        refant = firstDataset["pulses_refant"]
 
-        f = cr.open(filelist, blocksize=65536)  # need to cut out timeseries around pulse
+          # need to cut out timeseries around pulse
         # select only even/odd antennas according to 'pol'
-        selected_dipoles = [x for x in f["DIPOLE_NAMES"] if int(x) % 2 == pol]
-        f["SELECTED_DIPOLES"] = selected_dipoles
-        antennaPositions = f["ANTENNA_POSITIONS"]
 
-        timeseries = f.empty("TIMESERIES_DATA")
+        antennaPositions = self.f["ANTENNA_POSITIONS"]
 
+        timeseries = self.f.empty("TIMESERIES_DATA")
         # get timeseries data with pulse, then cut out a region around the pulse.
         cutoutSize = 1024
-        f.getTimeseriesData(timeseries, block = block)
+        self.f.getTimeseriesData(timeseries, block = block)
         nofChannels = timeseries.shape()[0]
         cutoutTimeseries = cr.hArray(float, dimensions=[nofChannels, cutoutSize])
         start = pulse_samplenr - cutoutSize / 2
@@ -221,8 +226,7 @@ class Wavefront(Task):
         plt.plot(y[0])
         plt.plot(y[140])
 
-        refant = firstDataset["pulses_refant"]
-        sample_interval = 5.0e-9
+        sample_interval = 5.0e-9 # hardcoded...
         # is the index of the ref antenna also in the full list of antids / antpos
 
         # now cross correlate all channels in full_timeseries, get relative times
@@ -248,9 +252,9 @@ class Wavefront(Task):
         arrivaltime[206] = 0.0
 
         # Apply calibration delays (per antenna)
-        arrivaltime -= cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
+        arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
         # Apply sub-sample inter-station clock offsets (LOFAR)
-        subsampleOffsets = f["SUBSAMPLE_CLOCK_OFFSET"]
+        subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"]
         # Apply inter-station delays from RFIlines Task
         # Assuming ordering CS002, 3, 4, 5, 7 for this event (sorted alphabetically)
         # import pdb; pdb.set_trace()
@@ -260,9 +264,9 @@ class Wavefront(Task):
         subsampleOffsets[3] -= -1.32e-9
         subsampleOffsets[4] -= 0.71e-9
 
-        stationList = f["STATION_LIST"]
+        stationList = self.f["STATION_LIST"]
         print stationList
-        stationStartIndex = f["STATION_STARTINDEX"]
+        stationStartIndex = self.f["STATION_STARTINDEX"]
         for i in range(len(subsampleOffsets)):
             arrivaltime[stationStartIndex[i]:stationStartIndex[i + 1]] -= subsampleOffsets[i]
             # Sign + or - ???
@@ -276,17 +280,17 @@ class Wavefront(Task):
         # now make footprint plot of all arrival times
         loradir = '/Users/acorstanje/triggering/CR/LORA'
         # first show originally derived arrival times
-        fptask_orig = cr.trerun("plotfootprint", "0", colormap='jet', filefilter=eventdir, loradir=loradir, plotlora=False, plotlorashower=False, pol=pol)  # no parameters set...
+        fptask_orig = cr.trerun("plotfootprint", "0", colormap='jet', filefilter=eventdir, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
         plt.title('Footprint using original cr_event arrival times')
         plt.figure()
         # now our arrival times and antenna positions
 
-        fptask = cr.trerun("plotfootprint", "1", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * arrivaltime, loradir=loradir, plotlora=False, plotlorashower=False, pol=pol)  # no parameters set...
+        fptask = cr.trerun("plotfootprint", "1", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * arrivaltime, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
         plt.title('Footprint using crosscorrelated arrival times')
         delta = arrivaltime - 1.0e-9 * fptask_orig.arrivaltime
         delta -= delta.mean()
         plt.figure()
-        fptask_delta = cr.trerun("plotfootprint", "2", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * delta, loradir=loradir, plotlora=False, plotlorashower=False, pol=pol)  # no parameters set...
+        fptask_delta = cr.trerun("plotfootprint", "2", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * delta, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
         plt.title('Footprint of difference between cr_event and full-cc method')
         plt.figure()
         delta.plot()
@@ -320,7 +324,7 @@ class Wavefront(Task):
 
         plt.figure()
         # now the good one: difference between measured arrival times and plane wave fit!
-        fptask_delta = cr.trerun("plotfootprint", "3", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=cr.hArray(1.0e9 * residu), power=140, loradir=loradir, plotlora=False, plotlorashower=False, pol=pol)  # no parameters set...
+        fptask_delta = cr.trerun("plotfootprint", "3", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=cr.hArray(1.0e9 * residu), power=140, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
         plt.title('Footprint of residual delays w.r.t. planewave fit')
 
         # Simplex fit point source...
@@ -359,7 +363,7 @@ class Wavefront(Task):
 
         plt.figure()
         # now the good one: difference between measured arrival times and plane wave fit!
-        fptask_delta = cr.trerun("plotfootprint", "4", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=cr.hArray(1.0e9 * residu), power=140, loradir=loradir, plotlora=False, plotlorashower=False, pol=pol)  # no parameters set...
+        fptask_delta = cr.trerun("plotfootprint", "4", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=cr.hArray(1.0e9 * residu), power=140, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
         plt.title('Footprint of residual delays w.r.t. point source fit')
 
         """
