@@ -38,6 +38,7 @@ from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 from datetime import datetime
 from pycrtools import xmldict
+from pycrtools import lora
 
 deg2rad = np.pi / 180
 
@@ -56,7 +57,37 @@ eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-201
 # eventdir = '/Users/acorstanje/triggering/CR/testRFIevent'
 # eventdir = '/data/VHECR/Radiotriggered/results_mailed/L42358_D2012'
 
+def pulseTimeFromLORA(lora_dir, datafile):
+    print "---> Reading pulse timing information from LORA"
+    tbb_starttime = datafile["TIME"][0]
+    tbb_samplenumber = max(datafile["SAMPLE_NUMBER"])
+    blocksize = datafile["BLOCKSIZE"]
+    
+    lora_event_info = 0 # to check with 'if lora_event_info:'
+    lora_logfile = os.path.join(lora_dir,"LORAtime4")
+    if os.path.exists(lora_logfile):
+        (tbb_starttime_sec,tbb_starttime_nsec)=lora.nsecFromSec(tbb_starttime,logfile=lora_logfile)
 
+        if tbb_starttime_sec:
+            try:
+                (block_number_lora,sample_number_lora)=lora.loraTimestampToBlocknumber(tbb_starttime_sec,tbb_starttime_nsec,tbb_starttime,tbb_samplenumber,blocksize=blocksize)
+            except ValueError:
+                raise ValueError("#ERROR - LORA trigger information not found")
+                
+            print "---> Estimated block number from LORA: block =",block_number_lora,"sample =",sample_number_lora
+            block_number = block_number_lora
+            sample_number = sample_number_lora
+            print "---> From LORA: block =",block_number,"sample =",sample_number
+        else:
+            raise ValueError("LORA trigger not found in database")
+            # Write parameters to database
+            # print "WARNING: LORA logfile found but no info for this event time in LORAtime4 file!"
+    else:
+        raise ValueError( "WARNING: No LORA logfile found - " + str(lora_logfile) )
+
+    return (block_number, sample_number)
+    
+    
 def gatherresults(eventdir):
     """
     Gather results from 1st pipeline analysis if status is 'good', group into a list of dicts containing
@@ -200,7 +231,9 @@ class Wavefront(Task):
             self.f["SELECTED_DIPOLES"] = selected_dipoles
 
         self.blocksize = self.f["BLOCKSIZE"]
-            
+        
+        loraInfo = pulseTimeFromLORA('/Users/acorstanje/triggering/CR/LORA', self.f)
+                    
         firstDataset = stations[0][self.pol]  # obtained from cr_event results (1st stage pipeline), used to locate pulse.
         # assume file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
         block = firstDataset["BLOCK"]
