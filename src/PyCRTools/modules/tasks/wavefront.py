@@ -199,6 +199,7 @@ class Wavefront(Task):
             selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
             self.f["SELECTED_DIPOLES"] = selected_dipoles
 
+        self.blocksize = self.f["BLOCKSIZE"]
             
         firstDataset = stations[0][self.pol]  # obtained from cr_event results (1st stage pipeline), used to locate pulse.
         # assume file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
@@ -313,6 +314,8 @@ class Wavefront(Task):
         plt.title('Residual delays after plane wave fit\n to plotfootprint timelags')
 
         residu = direction_fit_plane_wave.residual_delays.toNumpy()
+        bestfitDelays = sf.timeDelaysFromDirection(positions, direction_fit_plane_wave.meandirection_azel)
+        self.planewaveArrivalTimes = bestfitDelays
         # import pdb; pdb.set_trace()
         residu[np.where(abs(residu) > 100e-9)] = 0.0  # hack
         residu -= residu.mean()
@@ -348,7 +351,8 @@ class Wavefront(Task):
         # get the calculated delays according to this plane wave
         # simplexDirection[2] = 4000.0
         bestfitDelays = sf.timeDelaysFromDirectionAndDistance(positions, simplexDirection)
-
+        self.pointsourceArrivalTimes = bestfitDelays
+        
         residu = times - bestfitDelays
         # import pdb; pdb.set_trace()
         # residu[np.where(abs(residu) > 100e-9)] = 0.0 # hack
