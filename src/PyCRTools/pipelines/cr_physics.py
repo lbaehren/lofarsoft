@@ -275,7 +275,7 @@ for station in stations:
                 break
 
             # Fit pulse direction
-            direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=pulse_envelope.delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
+            direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=pulse_delay, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
 
             pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
@@ -338,7 +338,8 @@ for station in stations:
 
         # Add parameters
         station["crp_pulse_time"] = time_delays
-        station["crp_pulse_delay"] = pulse_envelope.delays.toNumpy()
+        station["crp_pulse_delay"] = pulse.envelope.delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
+
         station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
 
         station.polarization['xyz']["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
@@ -391,7 +392,7 @@ if cr_found:
         if station.status == "GOOD":
             try:
                 all_station_direction.append(station["crp_pulse_direction"])
-                all_station_pulse_delays.append(np.repeat(station["crp_pulse_delay"][::2], 3).reshape((nantennas, 3)))
+                all_station_pulse_delays.append(station["crp_pulse_delay"])
                 p = station.polarization["xyz"]
                 all_station_antenna_positions.append(station.polarization['xyz']["crp_itrf_antenna_positions"])
                 all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
@@ -402,7 +403,7 @@ if cr_found:
                 logging.exception("Do not have all pulse parameters for station " + station.stationname)
 
     all_station_antenna_positions = np.vstack(all_station_antenna_positions)
-    all_station_pulse_delays = np.vstack(all_station_pulse_delays)
+    all_station_pulse_delays = np.hstack(all_station_pulse_delays)
     all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
     all_station_rms = np.vstack(all_station_rms)
     all_station_direction = np.asarray(all_station_direction)
