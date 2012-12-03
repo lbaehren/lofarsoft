@@ -408,7 +408,7 @@ class Shower(Task):
 
                     # Signals
                     if self.timelags is not None:
-                        if self.timelags.shape[0] == 1:
+                        if self.timelags.ndim == 1:
                             self.scolors = self.timelags - self.timelags.min()
                         else:
                             self.scolors = self.timelags[:, 1] - self.timelags[:, 1].min()
