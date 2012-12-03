@@ -37,6 +37,7 @@
 //
 // ========================================================================
 
+#include <time.h>
 #include "core.h"
 #include "legacy.h"
 #include "mMath.h"
@@ -1105,6 +1106,8 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   Iter it_freq = frequencies;
   Iter it_delays = delays;
 
+  clock_t start = clock(), diff;
+
   // Loop over pixels (parallel on multi core systems if supported)
 #ifdef _OPENMP
   std::cout<<"Running in parallel mode"<<std::endl;
@@ -1144,6 +1147,10 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       ++it_delays;
     }
   }
+
+  diff = clock() - start;
+
+  std::cout<<"beamforming block done in "<< static_cast<int>(diff) * 1000 / CLOCKS_PER_SEC<<" ms"<<std::endl;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
