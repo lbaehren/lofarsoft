@@ -130,37 +130,40 @@ class Wavefront(Task):
     """
 
     parameters = dict(
-        filename=dict(default=None,
-            doc="Filename, used if no file object is given."),
-        f=dict(default=None,
-            doc="File object."),
-        blocksize=dict(default=lambda self: self.f["BLOCKSIZE"],
-            doc="Blocksize."),
-        nantennas=dict(default=lambda self: self.f["NOF_SELECTED_DATASETS"],
-            doc="Number of selected antennas."),
-        nfreq=dict(default=lambda self: self.blocksize / 2 + 1,
-            doc="Number of frequencies in FFT."),
-        nofblocks=dict(default=-1, doc="Number of data blocks to process. Set to -1 for entire file."),
-        startblock=dict(default=0, doc="Start processing file at this block nr."),
-        refant=dict(default=None, doc="Optional parameter to set reference antenna number."),
+        filename = dict( default = None,
+            doc = "Filename, used if no file object is given." ),
+        f = dict( default = None,
+            doc = "File object. Blocksize, polarisation + antenna selection etc. are taken from the given file object, and should have been set before calling this Task." ),
+        blocksize = dict ( default = lambda self : self.f["BLOCKSIZE"],
+            doc = "Blocksize." ),
+        nantennas = dict( default = lambda self : self.f["NOF_SELECTED_DATASETS"],
+            doc = "Number of selected antennas." ),
+#        nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
+        pulse_block = dict( default = 0, doc = "Block nr. where the pulse is" ),
+        refant = dict(default = None, doc = "Optional parameter to set reference antenna number."),
+        pol = dict(default = 0, doc = "Polarization. Only used if no file object is given."),
 #        timeseries_data = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.blocksize)),
 #            doc = "Timeseries data." ),
-        freq_range=dict(default=None, doc="Optional frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)"),
-        # fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, 1, 1, 1, cr.fftw_flags.MEASURE),
+        #fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, 1, 1, 1, cr.fftw_flags.MEASURE),
         #    doc = "Forward plan for FFTW, by default use a plan that works over all antennas at once and is measured for speed because this is applied many times." ),
-        bad_antennas=dict(default=[],
-            doc="Antennas found to be bad.", output=True),
-        good_antennas=dict(default=lambda self: [name for name in self.f["SELECTED_DIPOLES"] if name not in self.bad_antennas],
-            doc="Antennas found to be good.", output=True),
-        save_plots=dict(default=False,
-            doc="Store plots"),
-        plot_prefix=dict(default="",
-            doc="Prefix for plots"),
-        plotlist=dict(default=[],
-            doc="List of plots"),
-        plot_antennas=dict(default=lambda self: range(self.nantennas),
-            doc="Antennas to create plots for."),
-        verbose=dict(default=True, doc="Verbose output."),
+        arrivalTimes = dict( default = None, doc = "Pulse arrival times per antenna, for antennas in self.f['SELECTED_DIPOLES']", output = True),
+        pointsourceArrivalTimes = dict( default = None, doc = "Arrival times from best-fit point source approximation", output = True),
+        planewaveArrivalTimes = dict( default = None, doc = "Arrival times from best-fit plane-wave approximation.", output = True),  
+        fitPlaneWave = dict( default = None, doc = "Fit results (az, el, mse) for planar fit.", output = True ),
+        fitPointSource = dict( default = None, doc = "Fit results (az, el, R, mse) for point source simplex search.", output = True ),
+        bad_antennas = dict( default = [],
+            doc = "Antennas found to be bad.", output = True ),
+        good_antennas = dict( default = lambda self : [name for name in self.f["SELECTED_DIPOLES"] if name not in self.bad_antennas],
+            doc = "Antennas found to be good.", output = True ),
+        save_plots = dict( default = False,
+            doc = "Store plots" ),
+        plot_prefix = dict( default = "",
+            doc = "Prefix for plots" ),
+        plotlist = dict( default = [],
+            doc = "List of plots" ),
+        plot_antennas = dict( default = lambda self : range(self.nantennas),
+            doc = "Antennas to create plots for." ),
+        verbose = dict( default = True, doc = "Verbose output."),
     )
 
     def run(self):
@@ -207,8 +210,8 @@ class Wavefront(Task):
         timeseries = f.empty("TIMESERIES_DATA")
 
         # get timeseries data with pulse, then cut out a region around the pulse.
-        cutoutSize = 256
-        f.getTimeseriesData(timeseries, block=block)
+        cutoutSize = 1024
+        f.getTimeseriesData(timeseries, block = block)
         nofChannels = timeseries.shape()[0]
         cutoutTimeseries = cr.hArray(float, dimensions=[nofChannels, cutoutSize])
         start = pulse_samplenr - cutoutSize / 2
