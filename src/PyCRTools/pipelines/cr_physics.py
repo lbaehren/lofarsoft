@@ -338,7 +338,7 @@ for station in stations:
 
         # Add parameters
         station["crp_pulse_time"] = time_delays
-        station["crp_pulse_delay"] = pulse.envelope.delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
+        station["crp_pulse_delay"] = pulse_envelope.delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
 
         station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
 
