@@ -352,7 +352,7 @@ class Shower(Task):
                     cr.plt.imshow(bgim, origin='upper', extent=[-375 / 2, 375 / 2, -375 / 2 - 6 * 120 / 227, 375 / 2 - 6 * 120 / 227], alpha=1.0)
 
                 if self.timelags is not None:
-                    if self.timelags.shape[0] == 1:
+                    if self.timelags.ndim == 1:
                         self.scolors = self.timelags - self.timelags.min()
                     else:
                         self.scolors = self.timelags[:, 0] - self.timelags[:, 0].min()
@@ -457,7 +457,7 @@ class Shower(Task):
                     if bgim is not None and self.footprint_use_background:
                         cr.plt.imshow(bgim, origin='upper', extent=[-375 / 2, 375 / 2, -375 / 2 - 6 * 120 / 227, 375 / 2 - 6 * 120 / 227], alpha=1.0)
                     if self.timelags is not None:
-                        if self.timelags.shape[0] == 1:
+                        if self.timelags.ndim == 1:
                             self.scolors = self.timelags - self.timelags.min()
                         else:
                             self.scolors = self.timelags[:, 2] - self.timelags[:, 2].min()
