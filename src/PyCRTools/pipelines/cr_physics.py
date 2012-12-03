@@ -342,7 +342,7 @@ for station in stations:
 
         station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
 
-        station.polarization['xyz']["crp_itrf_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
+        station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
         station.polarization['xyz']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_xyz.peak_amplitude).toNumpy().reshape((nantennas, 3))
         station.polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
         station.polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
@@ -393,8 +393,7 @@ if cr_found:
             try:
                 all_station_direction.append(station["crp_pulse_direction"])
                 all_station_pulse_delays.append(station["crp_pulse_delay"])
-                p = station.polarization["xyz"]
-                all_station_antenna_positions.append(station.polarization['xyz']["crp_itrf_antenna_positions"])
+                all_station_antenna_positions.append(station["local_antenna_positions"])
                 all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                 all_station_rms.append(station.polarization['xyz']["crp_rms"])
             except Exception:
