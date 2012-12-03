@@ -40,7 +40,7 @@ class Shower(Task):
         direction_uncertainties=dict(default=None,
             doc="Uncertainties on the direction of the shower in [eAZ,eEL,Cov]"),
         timelags=dict(default=None,
-            doc="Timelags of signals given in seconds [NAntennas x (X,Y,Z)]"),
+            doc="Timelags of signals given in seconds [NAntennas x (X,Y,Z)] or [NAntennas]"),
         polarization_angle=dict(default=None,
             doc="Polarization angle per station [NAntannas x angle] in radians"),
         eventid=dict(default=None,
@@ -132,7 +132,6 @@ class Shower(Task):
         Propagating the uncertatinties of the core and the directions into the uncertainties of the distance to the shower axis.
 
         """
-
         # Assuming differences in z-coordinates = 0
 
         dist = distances.vec()
@@ -326,8 +325,10 @@ class Shower(Task):
 
                     self.signals = self.signals[scaling_check]
                     self.positions = self.positions[scaling_check]
-                    self.timelags = self.timelags[scaling_check]
-
+                    if len(self.timelags.shape) == 1:
+                        self.timelags = self.timelags[scaling_check[:,0]]
+                    else:
+                        self.timelags = self.timelags[scaling_check]
                 if self.timelags is None:
                    self.scolors = "blue"
                    print "WARNING, footprint does not represent the time, only the signal strength"
@@ -354,7 +355,7 @@ class Shower(Task):
                     cr.plt.imshow(bgim, origin='upper', extent=[-375 / 2, 375 / 2, -375 / 2 - 6 * 120 / 227, 375 / 2 - 6 * 120 / 227], alpha=1.0)
 
                 if self.timelags is not None:
-                    if len(self.signals.shape) == 1:
+                    if self.timelags.shape[0] == 1:
                         self.scolors = self.timelags - self.timelags.min()
                     else:
                         self.scolors = self.timelags[:, 0] - self.timelags[:, 0].min()
@@ -410,7 +411,10 @@ class Shower(Task):
 
                     # Signals
                     if self.timelags is not None:
-                        self.scolors = self.timelags[:, 1] - self.timelags[:, 1].min()
+                        if self.timelags.shape[0] == 1:
+                            self.scolors = self.timelags - self.timelags.min()
+                        else:
+                            self.scolors = self.timelags[:, 1] - self.timelags[:, 1].min()
                         self.scolors *= 1e9
                     cr.plt.scatter(self.positions[:, 0], self.positions[:, 1], s=self.sizes1, c=self.scolors, marker=self.footprint_marker_lofar, cmap=self.footprint_colormap)
                     cr.plt.xlabel("LOFAR East [meters] ")
@@ -456,7 +460,10 @@ class Shower(Task):
                     if bgim is not None and self.footprint_use_background:
                         cr.plt.imshow(bgim, origin='upper', extent=[-375 / 2, 375 / 2, -375 / 2 - 6 * 120 / 227, 375 / 2 - 6 * 120 / 227], alpha=1.0)
                     if self.timelags is not None:
-                        self.scolors = self.timelags[:, 2] - self.timelags[:, 2].min()
+                        if self.timelags.shape[0] == 1:
+                            self.scolors = self.timelags - self.timelags.min()
+                        else:
+                            self.scolors = self.timelags[:, 2] - self.timelags[:, 2].min()
                         self.scolors *= 1e9
                     cr.plt.scatter(self.positions[:, 0], self.positions[:, 1], s=self.sizes2, c=self.scolors, marker=self.footprint_marker_lofar, cmap=self.footprint_colormap)
                     cr.plt.xlabel("LOFAR East [meters] ")
