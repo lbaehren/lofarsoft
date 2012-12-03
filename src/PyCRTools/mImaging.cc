@@ -992,6 +992,8 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
   Iter it_ant = antpos;
   Iter it_sky = skypos;
 
+  clock_t start = clock(), diff;
+
   // Loop over pixels (parallel on multi core systems if supported)
 #ifdef _OPENMP
   std::cout<<"Running in parallel mode"<<std::endl;
@@ -1040,6 +1042,10 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
       it_ant += 3;
     }
   }
+
+  diff = clock() - start;
+
+  std::cout<<"beamforming block done in "<< static_cast<float>(diff) / CLOCKS_PER_SEC<<" s"<<std::endl;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
