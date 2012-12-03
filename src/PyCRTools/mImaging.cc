@@ -1150,7 +1150,7 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
 
   diff = clock() - start;
 
-  std::cout<<"beamforming block done in "<< static_cast<int>(diff) * 1000 / CLOCKS_PER_SEC<<" ms"<<std::endl;
+  std::cout<<"beamforming block done in "<< static_cast<float>(diff) / CLOCKS_PER_SEC<<" s"<<std::endl;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
