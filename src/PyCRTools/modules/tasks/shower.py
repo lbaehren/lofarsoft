@@ -325,18 +325,7 @@ class Shower(Task):
 
                     self.signals = self.signals[scaling_check]
                     self.positions = self.positions[scaling_check]
-                    if self.timelags.ndim == 1:
-                        print "timelags"
-                        print self.timelags.shape
-                        print self.timelags
-                        
-                        print "scaling_check"
-                        print self.scaling_check.shape
-                        print self.scaling_check[:,0]
-
-                        self.timelags = self.timelags[scaling_check[:,0]]
-                    else:
-                        self.timelags = self.timelags[scaling_check]
+                    self.timelags = self.timelags[scaling_check]
                 if self.timelags is None:
                    self.scolors = "blue"
                    print "WARNING, footprint does not represent the time, only the signal strength"
