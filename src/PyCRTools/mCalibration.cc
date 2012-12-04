@@ -912,21 +912,31 @@ template <class CIter>
 void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
     const CIter M, const CIter M_end)
 {
-  // Sanity checks
-  if (std::distance(Minv, Minv_end) != 4 || std::distance(M, M_end) != 4)
+  const HInteger Nout = std::distance(Minv, Minv_end);
+  const HInteger Nin = std::distance(M, M_end);
+  const HInteger Nm = Nout / 4;
+
+  if (Nout != Nin || Nout != Nm * 4)
   {
-    throw PyCR::ValueError("Matrices are not 2D.");
+    throw PyCR::ValueError("Matrices have wrong size.");
   }
 
   CIter Minv_it = Minv;
   CIter M_it = M;
+  HComplex det;
 
-  const HComplex det = M_it[0] * M_it[3] - M_it[1] * M_it[2];
+  for (HInteger i=0; i<Nm; i++)
+  {
+    det = *(M_it + 0) * *(M_it + 3) - *(M_it + 1) * *(M_it + 2);
 
-  Minv_it[0] = M_it[3] / det;
-  Minv_it[1] = -1.0 * M_it[1] / det;
-  Minv_it[2] = -1.0 * M_it[2] / det;
-  Minv_it[3] = M_it[0] / det;
+    *(Minv_it + 0) = *(M_it + 3) / det;
+    *(Minv_it + 1) = -1.0 * *(M_it + 1) / det;
+    *(Minv_it + 2) = -1.0 * *(M_it + 2) / det;
+    *(Minv_it + 3) = *(M_it + 0) / det;
+
+    Minv_it += 4;
+    M_it += 4;
+  }
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
