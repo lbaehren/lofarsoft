@@ -223,7 +223,7 @@ class Shower(Task):
 
                 if self.ldf_logplot:
                     sig_lower = np.copy(self.signals_uncertainties)   # Avoid negative errorbars
-                    sig_lower.fill(0.001)
+                    sig_lower.fill(0.01)
                     sig_lower = np.maximum(sig_lower, self.signals - self.signals_uncertainties)
                     sig_uncer = self.signals - sig_lower
                 else:
