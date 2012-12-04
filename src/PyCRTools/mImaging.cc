@@ -1497,7 +1497,7 @@ void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
   if (Nskypos != 3)
   {
     char error_message[256];
-    sprintf(error_message, "Sky positions array has wrong size: Nskypos [=%d] != 3 x Nskycoord [=%d].", Nskypos, Nskycoord);
+    sprintf(error_message, "Sky positions array has wrong size: Nskypos [=%d] != 3", Nskypos);
     throw PyCR::ValueError(error_message);
   }
   if (Nfftdata != Nfrequencies * Nantennas)
