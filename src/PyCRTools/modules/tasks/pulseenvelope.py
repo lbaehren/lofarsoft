@@ -187,6 +187,7 @@ class PulseEnvelope(Task):
 
             p = self.plot_prefix + "pulse_envelope_envelope.{0}".format(self.plot_type)
 
+            plt.gca().autoscale_view(tight=True)
             plt.xlabel(r"Time ($\mu s$)")
             plt.ylabel("Amplitude with offset (ADU)")
             plt.title("All pulse envelopes")
