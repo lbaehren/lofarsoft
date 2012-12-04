@@ -165,6 +165,7 @@ class Wavefront(Task):
         filelist = dict(default=None, doc="List of filenames in one event. "),
         f = dict( default = None,
             doc = "File object. Blocksize, polarisation + antenna selection etc. are taken from the given file object, and should have been set before calling this Task." ),
+        interStationDelays = dict( default=None, doc="Inter-station delays as a correction on current LOFAR clock offsets. To be obtained e.g. from the CalibrateFM Task. Assumed to be in alphabetic order in the station name e.g. CS002, CS003, ... If not given, zero correction will be assumed." ),
         blocksize = dict ( default = 65536, doc = "Blocksize." ),
         nantennas = dict( default = lambda self : self.f["NOF_SELECTED_DATASETS"],
             doc = "Number of selected antennas." ),
