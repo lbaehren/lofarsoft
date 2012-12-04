@@ -339,7 +339,9 @@ class Shower(Task):
                     self.sizes0 = np.copy(self.signals[:, 0])
                 self.sizes0 = np.log(self.sizes0)
                 if self.sizes0.min() > 0:
-                    self.sizes0 = self.sizes0 - self.sizes0.min()
+                    if self.sizes0.max() != self.sizes0.min():
+                        self.sizes0 = self.sizes0 - self.sizes0.min()
+                        
                 self.sizes0 *= self.footprint_point_scaling
 
                 cr.plt.figure()
@@ -393,7 +395,8 @@ class Shower(Task):
                     self.sizes1 = np.copy(self.signals[:, 1])
                     self.sizes1 = np.log(self.sizes1)
                     if self.sizes1.min() > 0:
-                        self.sizes1 = self.sizes1 - self.sizes1.min()
+                        if self.sizes1.max() != self.sizes1.min():
+                            self.sizes1 = self.sizes1 - self.sizes1.min()
                     self.sizes1 *= self.footprint_point_scaling
 
                     cr.plt.figure()
@@ -445,7 +448,8 @@ class Shower(Task):
                     self.sizes2 = np.copy(self.signals[:, 2])
                     self.sizes2 = np.log(self.sizes2)
                     if self.sizes2.min() > 0:
-                        self.sizes2 = self.sizes2 - self.sizes2.min()
+                        if self.sizes2.max() != self.sizes2.min():
+                            self.sizes2 = self.sizes2 - self.sizes2.min()
                     self.sizes2 *= self.footprint_point_scaling
 
                     cr.plt.figure()
