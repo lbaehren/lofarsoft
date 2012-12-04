@@ -1548,8 +1548,6 @@ void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
   diff = clock() - start;
 
   std::cout<<"beamforming block done in "<< static_cast<float>(diff) / CLOCKS_PER_SEC<<" s"<<std::endl;
-
-  delete delay;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
