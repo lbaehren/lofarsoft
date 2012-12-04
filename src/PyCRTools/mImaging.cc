@@ -1475,7 +1475,7 @@ void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
 {
   // Variables
   HNumber delay = 0.0;
-  NInteger i, j;
+  HInteger i, j;
 
   // Inspect length of input arrays
   const int Nout = std::distance(out, out_end);
