@@ -1542,7 +1542,7 @@ void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
       it_freq++;
     }
 
-    it_ant++;
+    it_ant + 3;
   }
 
   diff = clock() - start;
