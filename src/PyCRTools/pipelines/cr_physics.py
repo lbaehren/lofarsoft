@@ -58,7 +58,7 @@ start = time.clock()
 event = crdb.Event(db=db, id=options.id)
 
 # Create output directory
-directory = os.path.join(options.outputdir, str(id))
+directory = os.path.join(options.output_dir, str(id))
 if not os.path.exists(directory):
     os.makedirs(directory)
 
