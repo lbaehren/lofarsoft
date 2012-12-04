@@ -101,6 +101,8 @@ class FindRFI(Task):
             doc="Store plots"),
         plot_prefix = dict(default="",
             doc="Prefix for plots"),
+        plot_type = dict(default="png",
+            doc="Plot type (e.g. png, jpeg, pdf)"),
         plotlist = dict(default=[],
             doc="List of plots"),
         plot_antennas = dict(default=lambda self: range(self.nantennas),
@@ -307,7 +309,7 @@ class FindRFI(Task):
             plt.ylabel('log-spectral power [adc units]')
 #            self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
 
-            p = self.plot_prefix + "average_spectrum.png"
+            p = self.plot_prefix + "average_spectrum.{0}".format(self.plot_type)
 
             plt.savefig(p)
 
@@ -323,7 +325,7 @@ class FindRFI(Task):
             plt.title('Median-average spectrum of all antennas, cleaned')
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('log-spectral power [adc units]')
-            p = self.plot_prefix + "average_spectrum_cleaned.png"
+            p = self.plot_prefix + "average_spectrum_cleaned.{0}".format(self.plot_type)
 
             plt.savefig(p)
 

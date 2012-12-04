@@ -50,6 +50,8 @@ class Shower(Task):
             doc="Saving plost instead of showing them."),
         plot_prefix=dict(default="",
             doc="Prefix for stored plots"),
+        plot_type=dict(default="png",
+            doc="Plot type (e.g. png, jpeg, pdf)"),
         plotlist=dict(default=[],
             doc="List of output plots.", output=True),
         ldf_enable=dict(default=False,
@@ -267,7 +269,7 @@ class Shower(Task):
                 cr.plt.xlim(0, 500)
 
             if self.save_plots:
-                plotname = self.plot_prefix + "shower_ldf.png"
+                plotname = self.plot_prefix + "shower_ldf.{0}".format(self.plot_type)
                 cr.plt.savefig(plotname)
                 self.plotlist.append(plotname)
             else:
@@ -302,7 +304,7 @@ class Shower(Task):
                     from os import environ
                     from os.path import isfile
                     if "LOFARSOFT" in environ.keys():
-                        bgimname = environ["LOFARSOFT"] + "/src/PyCRTools/extras/LORA_layout_background.png"
+                        bgimname = environ["LOFARSOFT"] + "/src/PyCRTools/extras/LORA_layout_background.{0}".format(self.plot_type)
                         if isfile(bgimname):
                             bgim = cr.plt.imread(bgimname)
                         else:
@@ -381,7 +383,7 @@ class Shower(Task):
                     cr.plt.scatter(self.core[0], self.core[1], marker='x', s=600, color=self.footprint_shower_color, linewidth=4)
 
                 if self.save_plots:
-                    plotname = self.plot_prefix + "shower_footprint_polX.png"
+                    plotname = self.plot_prefix + "shower_footprint_polX.{0}".format(self.plot_type)
                     cr.plt.savefig(plotname)
                     self.plotlist.append(plotname)
 
@@ -432,7 +434,7 @@ class Shower(Task):
                         cr.plt.scatter(self.core[0], self.core[1], marker='x', s=600, color=self.footprint_shower_color, linewidth=4)
 
                     if self.save_plots:
-                        plotname = self.plot_prefix + "shower_footprint_polY.png"
+                        plotname = self.plot_prefix + "shower_footprint_polY.{0}".format(self.plot_type)
                         cr.plt.savefig(plotname)
                         self.plotlist.append(plotname)
 
@@ -482,7 +484,7 @@ class Shower(Task):
                         cr.plt.scatter(self.core[0], self.core[1], marker='x', s=600, color=self.footprint_shower_color, linewidth=4)
 
                     if self.save_plots:
-                        plotname = self.plot_prefix + "shower_footprint_polZ.png"
+                        plotname = self.plot_prefix + "shower_footprint_polZ.{0}".format(self.plot_type)
                         cr.plt.savefig(plotname)
                         self.plotlist.append(plotname)
 
@@ -517,7 +519,7 @@ class Shower(Task):
                 print "Give positions and polarization angles to draw footprint in polarization"
 
             if self.save_plots:
-                plotname = self.plot_prefix + "polarization_footprint.png"
+                plotname = self.plot_prefix + "polarization_footprint.{0}".format(self.plot_type)
                 cr.plt.savefig(plotname)
                 self.plotlist.append(plotname)
             else:
@@ -570,7 +572,7 @@ class Shower(Task):
                 cr.plt.legend(loc='upper right', shadow=False, numpoints=1)
 
                 if self.save_plots:
-                    plotname = self.plot_prefix + "shower_azimuthal_signal.png"
+                    plotname = self.plot_prefix + "shower_azimuthal_signal.{0}".format(self.plot_type)
                     cr.plt.savefig(plotname)
                     self.plotlist.append(plotname)
                 else:

@@ -44,6 +44,7 @@ parser.add_option("--host", default=None, help="PostgreSQL host.")
 parser.add_option("--user", default=None, help="PostgreSQL user.")
 parser.add_option("--password", default=None, help="PostgreSQL password.")
 parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
+parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg, pdf.")
 
 (options, args) = parser.parse_args()
 
@@ -55,6 +56,11 @@ start = time.clock()
 
 # Get event from database
 event = crdb.Event(db=db, id=options.id)
+
+# Create output directory
+directory = os.path.join(options.outputdir, str(id))
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
 # Set the event status
 event.status = "PROCESSING"
@@ -84,6 +90,8 @@ for station in stations:
     print "processing station " + station.stationname
     print "*" * 80
     station.status = "PROCESSING"
+
+    station_plot_prefix = os.path.join(directory, "cr_physics-{0}-{1}-".format((options.id, station.stationname)))
 
     try:
 
@@ -121,7 +129,7 @@ for station in stations:
         f["BLOCK"] = block_number_lora
 
         # Find RFI and bad antennas
-        findrfi = cr.trun("FindRFI", f=f, plot_prefix=options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-", plotlist=[], nofblocks=10, save_plots=True)
+        findrfi = cr.trun("FindRFI", f=f, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], nofblocks=10, save_plots=True)
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
@@ -213,10 +221,7 @@ for station in stations:
         print "starting pulse envelope"
 
         # Look for significant pulse in beamformed signal
-        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data=beamformed_timeseries, pulse_start=pulse_search_window_start, pulse_end=pulse_search_window_end, nsigma=options.accept_snr, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-bf-", plotlist=[])
-
-        station.polarization['0']["crp_plotfiles"] = ["/" + s.lstrip("./") for s in [pulse_envelope_bf.plotlist[0], ] + findrfi.plotlist]
-        station.polarization['1']["crp_plotfiles"] = ["/" + s.lstrip("./") for s in [pulse_envelope_bf.plotlist[1], ] + findrfi.plotlist]
+        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data=beamformed_timeseries, pulse_start=pulse_search_window_start, pulse_end=pulse_search_window_end, nsigma=options.accept_snr)
 
         cr_found_in_station = False
         if 0 in pulse_envelope_bf.antennas_with_significant_pulses:
@@ -265,7 +270,7 @@ for station in stations:
             timeseries_data /= options.blocksize
 
             # Calculate delays
-            pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-unfolded-", plotlist=[])
+            pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
 
             station['crp_plotfiles'] = pulse_envelope.plotlist
 
@@ -317,10 +322,10 @@ for station in stations:
         stokes_parameters = cr.trun("StokesParameters", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10)
 
         # Get pulse strength
-        pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=3, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-projected-", plotlist=[])
+        pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=3, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[])
 
         # Do noise characterization
-        noise = cr.trun("Noise", timeseries_data=xyz_timeseries_data, plot_prefix=options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-", histrange=(-3 * pulse_envelope_xyz.rms[0], 3 * pulse_envelope_xyz.rms[0]))
+        noise = cr.trun("Noise", timeseries_data=xyz_timeseries_data, plot_prefix=station_plot_prefix, plot_type=options.plot_type, histrange=(-3 * pulse_envelope_xyz.rms[0], 3 * pulse_envelope_xyz.rms[0]))
 
         # Calculate time delay of pulse with respect to the start time of the file (e.g. f["TIME"])
         time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas, 3))
@@ -332,7 +337,7 @@ for station in stations:
         plt.xlabel("Antenna number")
         plt.ylabel("Residual delay (s)")
         
-        plotfile = options.output_dir + "/" + "cr_physics-" + station.stationname + "-" + str(options.id) + "-residual-delay" + ".png"
+        plotfile = station_plot_prefix + "residual_delay.{0}".format(options.plot_type)
         plt.savefig(plotfile)
         station["crp_plotfiles"].append(plotfile)
 
@@ -423,7 +428,7 @@ if cr_found:
     core_uncertainties = event["lora_coreuncertainties"].toNumpy()
     direction_uncertainties = [3., 3., 0]
 
-    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=options.output_dir + "/" + "cr_physics-" + str(options.id) + "-")
+    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type)
 
     # Add LDF and footprint plots to list of event level plots
     plotlist.extend(ldf.plotlist)

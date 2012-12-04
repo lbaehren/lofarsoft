@@ -86,6 +86,8 @@ class PulseEnvelope(Task):
             doc = "Store plots"),
         plot_prefix=dict(default = "",
             doc = "Prefix for plots"),
+        plot_type=dict(default = "png",
+            doc = "Plot type (e.g. png, jpeg, pdf)"),
         plotlist=dict(default = [],
             doc = "List of plots"),
         plot_antennas=dict(default = lambda self: range(self.nantennas),
@@ -163,7 +165,7 @@ class PulseEnvelope(Task):
                 plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'r--', label="RMS")
                 plt.annotate("pulse maximum", xy=(x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.peak_amplitude[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
-                p = self.plot_prefix + "pulse_envelope_envelope-{0:d}.png".format(i)
+                p = self.plot_prefix + "pulse_envelope_envelope-{0:d}.{1}".format(i, self.plot_type)
 
                 plt.xlabel(r"Time ($\mu s$)")
                 plt.ylabel("Amplitude (ADU)")
@@ -183,7 +185,7 @@ class PulseEnvelope(Task):
 
                 offset += self.peak_amplitude[i]
 
-            p = self.plot_prefix + "pulse_envelope_envelope.png"
+            p = self.plot_prefix + "pulse_envelope_envelope.{0}".format(self.plot_type)
 
             plt.xlabel(r"Time ($\mu s$)")
             plt.ylabel("Amplitude with offset (ADU)")

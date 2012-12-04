@@ -34,6 +34,8 @@ class Noise(Task):
             doc="Antennas for which the noise is found not to be drawn from a normal distribution (e.g p_value to small)."),
         plot_prefix = dict(default="",
             doc="Prefix for plots"),
+        plot_type = dict(default="png",
+            doc="Plot type (e.g. png, jpeg, pdf)"),
         plotlist = dict(default=[],
             doc="List of plots"),
         plot_only_suspect_antennas = dict(default=True,
@@ -79,7 +81,7 @@ class Noise(Task):
 
             plt.hist(s[i], bins=self.nbins, range=self.histrange, color='g')
 
-            p = self.plot_prefix + "noise_histogram_antenna-{0:d}.png".format(i)
+            p = self.plot_prefix + "noise_histogram_antenna-{0:d}.{1}".format(i, self.plot_type)
 
             plt.title(r"Noise histogram for antenna {0:d}, $\mu={1:f}, \sigma={2:f}$".format(i, self.mean[i], self.std[i]))
             plt.savefig(p)
