@@ -1013,15 +1013,15 @@ void HFPP_FUNC_NAME (const CIter image, const CIter image_end,
     it_ant = antpos;
     it_fft = fftdata;
 
+    // Calculate norm of sky vector
+    norm = sqrt(*it_sky * *it_sky +
+                *(it_sky+1) * *(it_sky+1) +
+                *(it_sky+2) * *(it_sky+2));
+
     for (j=Nantennas; j!=0; --j)
     {
       // Reset image iterator to first frequency of current pixel
       it_im_inner = it_im;
-
-      // Calculate norm of sky vector
-      norm = sqrt(*it_sky * *it_sky +
-                  *(it_sky+1) * *(it_sky+1) +
-                  *(it_sky+2) * *(it_sky+2));
 
       // Calculate geometric delay
       delay = hGeometricDelayFarField(it_ant, it_sky, norm);
