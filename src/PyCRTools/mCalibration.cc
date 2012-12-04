@@ -163,7 +163,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
 
   // Direction in spherical coordinates with +x direction along N-S
   const double theta = (M_PI / 2) - el;
-  const double phi = az - (M_PI / 4);
+  const double phi = (M_PI / 4) - az;
 
   // Get iterators
   NIter pol0_it = pol0;
