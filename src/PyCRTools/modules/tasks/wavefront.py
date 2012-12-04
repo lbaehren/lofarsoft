@@ -264,7 +264,7 @@ class Wavefront(Task):
         
         # Get reference antenna, take the one with the highest maximum.
         y = cutoutTimeseries.toNumpy()
-        refant = int(np.argmax(np.max(y, axis=1)))
+        #refant = int(np.argmax(np.max(y, axis=1)))
         print 'Taking channel %d as reference antenna' % refant
         
         #import pdb; pdb.set_trace()
@@ -333,7 +333,11 @@ class Wavefront(Task):
         plt.figure()
         # now our arrival times and antenna positions
 
-        fptask = cr.trerun("plotfootprint", "1", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * arrivaltime, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  
+        signals = np.copy(arrivaltime)
+        signals.fill(10.0) # signal power not used here; do not give all 1.0 as the log is taken.
+        signals[0] = 0.0
+        fptask = cr.trerun("Shower", "1", positions=antennaPositions.toNumpy(), signals=signals, timelags =arrivaltime.toNumpy(), footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
+#        fptask = cr.trerun("plotfootprint", "1", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * arrivaltime, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  
         
         plt.title('Footprint using crosscorrelated arrival times')
         delta = arrivaltime - 1.0e-9 * fptask_orig.arrivaltime
@@ -382,6 +386,7 @@ class Wavefront(Task):
         (az, el) = direction_fit_plane_wave.meandirection_azel  # check
         startPosition = (az, el, 1.0)  # 1.0 means R = 1000.0 ...
         print 'Doing simplex search for minimum MSE...'
+        times -= times[0]
         optimum = fmin(mseMinimizer, startPosition, (positions, times, 0, 4), xtol=1e-5, ftol=1e-5, full_output=1)
         # raw_input('Done simplex search.')
 
