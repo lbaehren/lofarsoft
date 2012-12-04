@@ -1525,7 +1525,6 @@ void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
   // Calculate norm of sky vector
   const HNumber norm = sqrt(*it_sky * *it_sky + *(it_sky+1) * *(it_sky+1) + *(it_sky+2) * *(it_sky+2));
 
-  // Multiply by geometric weight and add to output
   i = Nantennas;
   while (i--)
   {
