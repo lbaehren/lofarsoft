@@ -179,9 +179,11 @@ class PulseEnvelope(Task):
             plt.clf()
 
             offset = 0
+
+            color = ['#B30424', '#68C8F7', '#FF8C19']
             for i in range(y.shape[0]):
 
-                plt.plot(x, y[i] + offset, linestyle='-')
+                plt.plot(x, y[i] + offset, linestyle='-', color=color[i % self.npolarizations])
 
                 offset += self.peak_amplitude[i]
 
