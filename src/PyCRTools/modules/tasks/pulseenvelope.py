@@ -160,7 +160,7 @@ class PulseEnvelope(Task):
                 y = self.envelope.toNumpy()
                 x = 5.e-6 * self.resample_factor * np.arange(y.shape[1])
 
-                plt.plot(x, s[i], 'c-.', label="Signal")
+                plt.plot(x, s[i], 'c-', label="Signal")
                 plt.plot(x, y[i], 'm-', label="Envelope")
                 plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'r--', label="RMS")
                 plt.annotate("pulse maximum", xy=(x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.peak_amplitude[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
