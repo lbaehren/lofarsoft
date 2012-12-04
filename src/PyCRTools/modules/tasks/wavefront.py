@@ -53,6 +53,7 @@ def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0)
 
     return mse
 
+# REMOVE:
 eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110714T174749.986Z'
 # eventdir = '/Users/acorstanje/triggering/CR/testRFIevent'
 # eventdir = '/data/VHECR/Radiotriggered/results_mailed/L42358_D2012'
@@ -165,6 +166,7 @@ class Wavefront(Task):
         filelist = dict(default=None, doc="List of filenames in one event. "),
         f = dict( default = None,
             doc = "File object. Blocksize, polarisation + antenna selection etc. are taken from the given file object, and should have been set before calling this Task." ),
+        loradir = dict( default = None, doc = "Directory with LORA trigger data. Required for obtaining pulse location in the data. "),
         interStationDelays = dict( default=None, doc="Inter-station delays as a correction on current LOFAR clock offsets. To be obtained e.g. from the CalibrateFM Task. Assumed to be in alphabetic order in the station name e.g. CS002, CS003, ... If not given, zero correction will be assumed." ),
         blocksize = dict ( default = 65536, doc = "Blocksize." ),
         nantennas = dict( default = lambda self : self.f["NOF_SELECTED_DATASETS"],
@@ -233,16 +235,18 @@ class Wavefront(Task):
 
         self.blocksize = self.f["BLOCKSIZE"]
         
-        loraInfo = pulseTimeFromLORA('/Users/acorstanje/triggering/CR/LORA', self.f)
+        # Get the pulse location in the data from LORA timing: block and sample number
+        (block, pulse_samplenr) = pulseTimeFromLORA(self.loradir, self.f)
                     
         firstDataset = stations[0][self.pol]  # obtained from cr_event results (1st stage pipeline), used to locate pulse.
         # assume file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
-        block = firstDataset["BLOCK"]
-        blocksize = firstDataset["BLOCKSIZE"] # REMOVE
+#        block = firstDataset["BLOCK"]
+#        blocksize = firstDataset["BLOCKSIZE"] # REMOVE
         # tbb_samplenr = thisDataset["SAMPLE_NUMBER"]
-        pulse_samplenr = firstDataset["pulse_start_sample"]
+#        pulse_samplenr = firstDataset["pulse_start_sample"]
         refant = firstDataset["pulses_refant"]
-
+        print 'From cr-event results: block = %d, sample nr = %d' % (block, pulse_samplenr)
+        print 'refant = %d' % refant
           # need to cut out timeseries around pulse
         # select only even/odd antennas according to 'pol'
 
@@ -257,7 +261,13 @@ class Wavefront(Task):
         start = pulse_samplenr - cutoutSize / 2
         end = pulse_samplenr + cutoutSize / 2
         cutoutTimeseries[...].copy(timeseries[..., start:end])
+        
+        # Get reference antenna, take the one with the highest maximum.
         y = cutoutTimeseries.toNumpy()
+        refant = int(np.argmax(np.max(y, axis=1)))
+        print 'Taking channel %d as reference antenna' % refant
+        
+        #import pdb; pdb.set_trace()
         plt.plot(y[0])
         plt.plot(y[140])
 
@@ -320,7 +330,8 @@ class Wavefront(Task):
         plt.figure()
         # now our arrival times and antenna positions
 
-        fptask = cr.trerun("plotfootprint", "1", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * arrivaltime, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
+        fptask = cr.trerun("plotfootprint", "1", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * arrivaltime, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  
+        
         plt.title('Footprint using crosscorrelated arrival times')
         delta = arrivaltime - 1.0e-9 * fptask_orig.arrivaltime
         delta -= delta.mean()
@@ -330,7 +341,7 @@ class Wavefront(Task):
         plt.figure()
         delta.plot()
         plt.title('Difference between plotfootprint / cr_event arrival times\nand full crosscorrelation times')
-
+        import pdb; pdb.set_trace()
         # Do plane-wave direction fit on full arrivaltimes
         # Fit pulse direction
         print 'Do plane wave fit on full arrival times (cross correlations here)...'
