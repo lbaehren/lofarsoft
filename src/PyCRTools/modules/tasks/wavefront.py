@@ -299,15 +299,18 @@ class Wavefront(Task):
         # Apply calibration delays (per antenna)
         arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
         # Apply sub-sample inter-station clock offsets (LOFAR)
-        subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"]
+        subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"] # numpy array!
         # Apply inter-station delays from RFIlines Task
         # Assuming ordering CS002, 3, 4, 5, 7 for this event (sorted alphabetically)
         # import pdb; pdb.set_trace()
         # Hack values in here
-        subsampleOffsets[1] -= 0.11e-9
-        subsampleOffsets[2] -= -1.30e-9
-        subsampleOffsets[3] -= -1.32e-9
-        subsampleOffsets[4] -= 0.71e-9
+        if not type(self.interStationDelays) == type(None): # cannot do if self.interStationDelays, apparently...
+            subsampleOffsets -= self.interStationDelays
+            
+#        subsampleOffsets[1] -= 0.11e-9
+#        subsampleOffsets[2] -= -1.30e-9
+#        subsampleOffsets[3] -= -1.32e-9
+#        subsampleOffsets[4] -= 0.71e-9
 
         stationList = self.f["STATION_LIST"]
         print stationList
