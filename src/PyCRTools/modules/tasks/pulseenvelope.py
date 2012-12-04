@@ -160,8 +160,8 @@ class PulseEnvelope(Task):
                 y = self.envelope.toNumpy()
                 x = 5.e-6 * self.resample_factor * np.arange(y.shape[1])
 
-                plt.plot(x, s[i], 'c-', label="Signal")
-                plt.plot(x, y[i], 'k-', label="Envelope")
+                plt.plot(x, s[i], linestyle='-', color='#68C8F7', label="Signal")
+                plt.plot(x, y[i], linestyle='-', color='#B30424', label="Envelope")
                 plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'k--', label="RMS")
                 plt.annotate("pulse maximum", xy=(x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.peak_amplitude[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
@@ -181,7 +181,7 @@ class PulseEnvelope(Task):
             offset = 0
             for i in range(y.shape[0]):
 
-                plt.plot(x, y[i] + offset, 'k-')
+                plt.plot(x, y[i] + offset, linestyle='-', color='#B30424')
 
                 offset += self.peak_amplitude[i]
 
