@@ -1449,3 +1449,108 @@ void HFPP_FUNC_NAME (const IIter shifts, const IIter shifts_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Beamform block 
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBeamformBlock
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(out)()("Beamformer output.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("Array with FFT data of each antenna. Expects data to be stored as ``[f(0,0), f(0,1), ..., f(0,nf), f(1,0), f(1,1), ..., f(1,nf), ..., f(na, 0), f(na,1), ..., f(na,nf)]`` e.g. ``f(i,j)`` where ``i`` is the antenna number and ``j`` is the frequency.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Array with frequencies [Hz] stored as ``[f_0, f_1, ..., f_n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(antpos)()("Array with antenna positions in the local Cartesian frame [meter]. Stored as ``[x_0, y_0, z_0, x_1, y_1, z_1, ... x_na, y_na, z_na]`` where ``na`` is the number of antennas.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(skypos)()("Array with sky position in the local cartesian frame [Hz]. Stored as ``[x, y, z]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class Iter>
+void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
+    const CIter fftdata, const CIter fftdata_end,
+    const Iter frequencies, const Iter frequencies_end,
+    const Iter antpos, const Iter antpos_end,
+    const Iter skypos, const Iter skypos_end
+    )
+{
+  // Variables
+  HNumber delay = 0.0;
+  NInteger i, j;
+
+  // Inspect length of input arrays
+  const int Nout = std::distance(out, out_end);
+  const int Nfftdata = std::distance(fftdata, fftdata_end);
+  const int Nfrequencies = std::distance(frequencies, frequencies_end);
+  const int Nantpos = std::distance(antpos, antpos_end);
+  const int Nskypos = std::distance(skypos, skypos_end);
+
+  // Get relevant numbers
+  const int Nantennas = Nantpos / 3;
+
+  // Sanity checks
+  if (Nantpos != Nantennas * 3)
+  {
+    char error_message[256];
+    sprintf(error_message, "Antenna positions array has wrong size: Nantpos [=%d] != 3 x Nantennas [=%d].", Nantpos, Nantennas);
+    throw PyCR::ValueError(error_message);
+  }
+  if (Nskypos != 3)
+  {
+    char error_message[256];
+    sprintf(error_message, "Sky positions array has wrong size: Nskypos [=%d] != 3 x Nskycoord [=%d].", Nskypos, Nskycoord);
+    throw PyCR::ValueError(error_message);
+  }
+  if (Nfftdata != Nfrequencies * Nantennas)
+  {
+    char error_message[256];
+    sprintf(error_message, "FFT data array has wrong size: Nfftdata[=%d] != Nfrequencies[=%d] * Nantennas[=%d]", Nfftdata, Nfrequencies, Nantennas);
+    throw PyCR::ValueError(error_message);
+  }
+  if (Nout != Nfrequencies)
+  {
+    char error_message[256];
+    sprintf(error_message, "Output array has wrong size: Nout[=%d] != Nfrequencies[=%d]", Nout, Nfrequencies);
+    throw PyCR::ValueError(error_message);
+  }
+
+  // Get iterators
+  CIter it_out = out;
+  CIter it_fft = fftdata;
+  Iter it_freq = frequencies;
+  Iter it_ant = antpos;
+  Iter it_sky = skypos;
+
+  clock_t start = clock(), diff;
+
+  // Calculate norm of sky vector
+  const HNumber norm = sqrt(*it_sky * *it_sky + *(it_sky+1) * *(it_sky+1) + *(it_sky+2) * *(it_sky+2));
+
+  // Multiply by geometric weight and add to output
+  i = Nantennas;
+  while (i--)
+  {
+    delay = hGeometricDelayFarField(it_ant, it_sky, norm);
+
+    it_out = out;
+    it_freq = frequencies;
+
+    j = Nfrequencies;
+    while (j--)
+    {
+      *it_out += (*it_fft) * polar(1.0, (2*M_PI)*((*it_freq) * delay));
+      it_fft++;
+      it_out++;
+      it_freq++;
+    }
+
+    it_ant++;
+  }
+
+  diff = clock() - start;
+
+  std::cout<<"beamforming block done in "<< static_cast<float>(diff) / CLOCKS_PER_SEC<<" s"<<std::endl;
+
+  delete delay;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
