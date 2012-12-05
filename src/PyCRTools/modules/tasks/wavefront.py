@@ -194,7 +194,6 @@ class Wavefront(Task):
 
         # plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
 
-        plt.figure()
         cr.hArray(maxima_cc.lags).plot()
 
         # Plot arrival times, do plane-wave fit, plot residuals wrt plane wave
@@ -203,7 +202,7 @@ class Wavefront(Task):
         positions = antennaPositions.toNumpy().ravel()
 
         # HACK out outlying values
-        arrivaltime[206] = 0.0
+        #arrivaltime[206] = 0.0
 
         # Apply calibration delays (per antenna)
         arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
@@ -233,7 +232,6 @@ class Wavefront(Task):
         positions = antennaPositions.toNumpy().ravel()
         positions2D = antennaPositions.toNumpy()
         # now make footprint plot of all arrival times
-        plt.figure()
 
         signals = np.copy(times)
         signals.fill(2.71) # signal power not used here; do not give all 1.0 as the log is taken.
@@ -245,7 +243,6 @@ class Wavefront(Task):
         print 'Do plane wave fit on full arrival times (cross correlations here)...'
         direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antennaPositions, timelags=arrivaltime, verbose=True)
 
-        plt.figure()
         direction_fit_plane_wave.residual_delays.plot()
         plt.title('Residual delays after plane wave fit')
 
@@ -260,7 +257,6 @@ class Wavefront(Task):
         residu[np.argmin(residu)] = 0.0
         residu -= min(residu)
 
-        plt.figure()
         # now the good one: difference between measured arrival times and plane wave fit!
 #        import pdb; pdb.set_trace()
         fptask_delta = cr.trerun("Shower", "3", positions=positions2D, signals=signals, timelags=residu, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
@@ -302,7 +298,6 @@ class Wavefront(Task):
         residu[np.argmin(residu)] = 0.0
         # residu -= min(residu)
 
-        plt.figure()
         # Difference between measured arrival times and point source fit. Check plot for fit errors!
  
         fptask_delta_pointsource = cr.trerun("Shower", "4", positions=positions2D, signals=signals, timelags=residu, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
