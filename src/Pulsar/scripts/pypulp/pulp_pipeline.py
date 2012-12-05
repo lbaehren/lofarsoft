@@ -395,7 +395,7 @@ class Pipeline:
 		for ext in self.summary_archive_exts:
 			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
-		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		cmd="tar -cvz --ignore-failed-read -f %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 		self.execute(cmd, log, workdir=sumdir)
 
 		# Make a full tarball
@@ -404,7 +404,7 @@ class Pipeline:
 #		for ext in self.full_archive_exts:
 #			ext_list=rglob(sumdir, ext, 3)
 #			tar_list.extend(ext_list)
-#		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+#		cmd="tar -cv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 #		self.execute(cmd, log, workdir=sumdir)
 
 		# finish
@@ -424,7 +424,7 @@ class Pipeline:
 		os.system(cmd)
 
 		# adding summary log file to the full archive anf gzip it
-#		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
+#		cmd="tar -rv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
 #		self.execute(cmd, log, workdir=sumdir)
 #		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
 #		self.execute(cmd, log, workdir=sumdir)
@@ -640,7 +640,7 @@ class Pipeline:
 		for ext in self.summary_archive_exts:
 			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
-		cmd="tar cvfz %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		cmd="tar -cvz --ignore-failed-read -f %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 		self.execute(cmd, log, workdir=sumdir)
 
 		# Make a full tarball
@@ -649,7 +649,7 @@ class Pipeline:
 #		for ext in self.full_archive_exts:
 #			ext_list=rglob(sumdir, ext, 3)
 #			tar_list.extend(ext_list)
-#		cmd="tar cvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+#		cmd="tar -cv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
 #		self.execute(cmd, log, workdir=sumdir)
 
 		# finish
@@ -669,7 +669,7 @@ class Pipeline:
 		os.system(cmd)
 
 		# adding summary log file to the full archive anf gzip it
-#		cmd="tar rvf %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
+#		cmd="tar -rv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
 #		self.execute(cmd, log, workdir=sumdir)
 #		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
 #		self.execute(cmd, log, workdir=sumdir)
@@ -1006,7 +1006,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			tar_list.extend(ext_list)
 		tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
 		tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
-		cmd="tar cvfz %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
+		cmd="tar -cvz --ignore-failed-read -f %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
 		self.execute(cmd, workdir=self.outdir)
 
 		# copying archive file to summary node
