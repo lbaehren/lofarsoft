@@ -249,18 +249,29 @@ class Wavefront(Task):
         residu = direction_fit_plane_wave.residual_delays.toNumpy()
         bestfitDelays = sf.timeDelaysFromDirection(positions, direction_fit_plane_wave.meandirection_azel)
         self.planewaveArrivalTimes = bestfitDelays
-        residu[np.where(abs(residu) > 100e-9)] = 0.0  # hack
-        residu -= residu.mean()
-        residu[np.where(abs(residu) > 15e-9)] = 0.0  # hack
 
-        residu[np.argmax(residu)] = 0.0
-        residu[np.argmin(residu)] = 0.0
-        residu -= min(residu)
+        # Flag outlying residues. Determine valid range for residues, and set the zero-offset value
+        n = len(residu)
+        sortedResidues = np.sort(residu)
+        median = np.median(sortedResidues)
+        noise = 0.5 * (sortedResidues[0.7*n] - sortedResidues[0.3*n]) # ~ sigma estimator, robust against 30% bad data
+        trimmedResidues = sortedResidues[np.where( abs(sortedResidues - median) < 6 * noise )]
+        rangemin = min(trimmedResidues)
+        rangemax = max(trimmedResidues)
+        import pdb; pdb.set_trace()
 
+#        residu[np.where(abs(residu) > 100e-9)] = 0.0  
+#        residu -= residu.mean()
+#        residu[np.where(abs(residu) > 15e-9)] = 0.0  # hack
+
+#        residu[np.argmax(residu)] = 0.0
+#        residu[np.argmin(residu)] = 0.0
+        residu -= rangemin
+        rangemax -= rangemin
         # now the good one: difference between measured arrival times and plane wave fit!
 #        import pdb; pdb.set_trace()
         fptask_delta = cr.trerun("Shower", "3", positions=positions2D, signals=signals, timelags=residu, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
-        
+        plt.clim(0.0, rangemax)
         plt.title('Footprint of residual delays w.r.t. planewave fit')
 
         # Simplex fit point source...
