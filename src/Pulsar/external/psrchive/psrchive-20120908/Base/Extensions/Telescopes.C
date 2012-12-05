@@ -52,6 +52,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
   case 'g':
     Telescopes::Effelsberg(t);
     break;
+
+  case 't':
+    Telescopes::LOFAR(t);
+    break;
     
   default: 
     // Unknown code, throw error after calling Telecope::set_coordinates
@@ -141,3 +145,7 @@ void Pulsar::Telescopes::Parkes(Telescope *t)
   t->set_focus (Telescope::PrimeFocus);
 }
 
+void Pulsar::Telescopes::LOFAR(Telescope *t)
+{
+  t->set_name ("LOFAR");
+}
