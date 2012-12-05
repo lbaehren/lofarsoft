@@ -482,7 +482,9 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
     *times*     Times as in the other functions
     =========== =================================================
     """
-
+    
+    if allowOutlierCount % 2 == 1:
+        print 'Warning: allowOutlierCount should be even! Discarding k/2 lowest and k/2 highest data points'
     N = len(times)
     calcTimes = timeDelaysFromDirectionAndDistance(pos, (az, el, R))
     timeOffsets = times - calcTimes
@@ -495,9 +497,9 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
         removeCount = min(len(np.where(timeOffsets - mu > outlierThreshold)[0]), allowOutlierCount)
         # remove at most 'allowOutlierCount', but only those which are larger than OutlierThreshold
         # as we operate on a sorted list, we only need to discard the last 'removeCount' entries...
-        mu = np.mean(timeOffsets[0:-removeCount])  # average only over used entries
+        mu = np.mean(timeOffsets[removeCount/2:-removeCount/2]) # average only over used entries
         timeOffsetsSqr = timeOffsets * timeOffsets
-        mse = 1.0 / (N - removeCount) * np.sum(timeOffsetsSqr[0:-removeCount]) - mu * mu
+        mse = 1.0 / (N - removeCount) * np.sum(timeOffsetsSqr[removeCount/2:-removeCount/2]) - mu*mu
 
     return mse * c * c
 
