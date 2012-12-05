@@ -126,7 +126,7 @@ if __name__ == '__main__':
 	plt.ylabel("Declination Offset [deg]", fontsize=12)
 
 	# label the plot
-	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(x)) + " (out of " + str(nbeams) + ")\nSimultaneous Tied-Array Beams [Linear Scale]", fontsize=14)
+	fig.suptitle("SAP #" + options.sap +". Cumulative S/N of PSR " + options.target + " in " + str(np.size(x)) + " (out of " + str(nbeams) + ")\nSimultaneous Tied-Array Beams [Linear Scale]", fontsize=14)
 	cb = plb.colorbar()
 	cb.ax.set_ylabel("Cumulative S/N", fontsize=14)
 	# rotating labels on colorbar 90 deg
@@ -164,7 +164,7 @@ if __name__ == '__main__':
 	plt.ylabel("Declination Offset [deg]", fontsize=12)
 
 	# label the plot
-	fig.suptitle("Cumulative S/N of PSR " + options.target + " in " + str(np.size(x)) + " (out of " + str(nbeams) + ")\nSimultaneous Tied-Array Beams [Log Scale]", fontsize=14)
+	fig.suptitle("SAP #" + options.sap +". Cumulative S/N of PSR " + options.target + " in " + str(np.size(x)) + " (out of " + str(nbeams) + ")\nSimultaneous Tied-Array Beams [Log Scale]", fontsize=14)
 	cb = plb.colorbar()
 	cb.ax.set_ylabel("Cumulative S/N", fontsize=14)
 	# rotating labels on colorbar 90 deg
