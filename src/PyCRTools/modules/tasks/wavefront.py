@@ -24,24 +24,16 @@ Module documentation
 """
 
 from pycrtools.tasks import Task
-import numpy as np
 import pycrtools as cr
-import matplotlib.pyplot as plt
-
 from pycrtools import srcfind as sf
+from pycrtools import lora
 import os
 # from pycrtools.tasks.shortcuts import *
-from pycrtools import metadata as md
-
 import numpy as np
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
-from datetime import datetime
-from pycrtools import xmldict
-from pycrtools import lora
 
 deg2rad = np.pi / 180
-
 
 def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0):
     # Quality function for simplex search
@@ -53,10 +45,6 @@ def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0)
 
     return mse
 
-# REMOVE:
-eventdir = '/Users/acorstanje/triggering/CR/results_withcaltables/VHECR_LORA-20110714T174749.986Z'
-# eventdir = '/Users/acorstanje/triggering/CR/testRFIevent'
-# eventdir = '/data/VHECR/Radiotriggered/results_mailed/L42358_D2012'
 
 def pulseTimeFromLORA(lora_dir, datafile):
     print "---> Reading pulse timing information from LORA"
@@ -87,8 +75,7 @@ def pulseTimeFromLORA(lora_dir, datafile):
         raise ValueError( "WARNING: No LORA logfile found - " + str(lora_logfile) )
 
     return (block_number, sample_number)
-    
-    
+       
 
 class Wavefront(Task):
     """
@@ -142,14 +129,7 @@ class Wavefront(Task):
     def run(self):
         """Run the task.
         """
-#        stations = gatherresults(eventdir)
-        # now accumulate arrays with:
-        # - all timeseries data for all stations
-        # - all corresponding antenna ids and positions
-        # - all calibration delays, and (station) clock offsets for those ids
-        # - array of all reference offsets per antenna id. (starting point of timeseries array)
 
-        #pol = 1  # later do both together
         if not self.f and not self.filefilter and not self.filelist:
             raise RuntimeError("Give a file object or a filefilter or a filelist")
         if not self.f:
@@ -178,17 +158,7 @@ class Wavefront(Task):
         # Get the pulse location in the data from LORA timing: block and sample number
         (block, pulse_samplenr) = pulseTimeFromLORA(self.loradir, self.f)
                     
-#        firstDataset = stations[0][self.pol]  # obtained from cr_event results (1st stage pipeline), used to locate pulse.
-        # assume file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
-#        block = firstDataset["BLOCK"]
-#        blocksize = firstDataset["BLOCKSIZE"] # REMOVE
-        # tbb_samplenr = thisDataset["SAMPLE_NUMBER"]
-#        pulse_samplenr = firstDataset["pulse_start_sample"]
-#        refant = firstDataset["pulses_refant"]
-        print 'From cr-event results: block = %d, sample nr = %d' % (block, pulse_samplenr)
-#        print 'refant = %d' % refant
-          # need to cut out timeseries around pulse
-        # select only even/odd antennas according to 'pol'
+        # assume LORA-LOFAR delay and file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
 
         antennaPositions = self.f["ANTENNA_POSITIONS"]
 
@@ -222,9 +192,6 @@ class Wavefront(Task):
         # And determine the relative offsets between them
         maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot=True, plotend=5, sampleinterval=sample_interval / crosscorr.oversamplefactor, peak_width=11, splineorder=3, refant=refant)
 
-        # print startTimes
-        # print maxima_cc.lags
-
         # plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
 
         plt.figure()
@@ -244,8 +211,6 @@ class Wavefront(Task):
         subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"] # numpy array!
         # Apply inter-station delays from RFIlines Task
         # Assuming ordering CS002, 3, 4, 5, 7 for this event (sorted alphabetically)
-        # import pdb; pdb.set_trace()
-        # Hack values in here
         if not type(self.interStationDelays) == type(None): # cannot do if self.interStationDelays, apparently...
             subsampleOffsets -= self.interStationDelays
             
@@ -268,29 +233,13 @@ class Wavefront(Task):
         positions = antennaPositions.toNumpy().ravel()
         positions2D = antennaPositions.toNumpy()
         # now make footprint plot of all arrival times
-#        loradir = '/Users/acorstanje/triggering/CR/LORA'
-        # first show originally derived arrival times
-#        fptask_orig = cr.trerun("plotfootprint", "0", colormap='jet', filefilter=eventdir, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
-#        plt.title('Footprint using original cr_event arrival times')
         plt.figure()
-        # now our arrival times and antenna positions
 
         signals = np.copy(times)
         signals.fill(2.71) # signal power not used here; do not give all 1.0 as the log is taken.
-#        signals[0] = 0.0
         fptask = cr.trerun("Shower", "1", positions=positions2D, signals=signals, timelags=times, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
-#        fptask = cr.trerun("plotfootprint", "1", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * arrivaltime, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  
         
         plt.title('Footprint using crosscorrelated arrival times')
-#        delta = arrivaltime - 1.0e-9 * fptask_orig.arrivaltime
-#        delta -= delta.mean()
-#        plt.figure()
-#        fptask_delta = cr.trerun("plotfootprint", "2", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=1.0e9 * delta, loradir=loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
-#        plt.title('Footprint of difference between cr_event and full-cc method')
-#        plt.figure()
-#        delta.plot()
-#        plt.title('Difference between plotfootprint / cr_event arrival times\nand full crosscorrelation times')
-#        import pdb; pdb.set_trace()
         # Do plane-wave direction fit on full arrivaltimes
         # Fit pulse direction
         print 'Do plane wave fit on full arrival times (cross correlations here)...'
@@ -300,17 +249,9 @@ class Wavefront(Task):
         direction_fit_plane_wave.residual_delays.plot()
         plt.title('Residual delays after plane wave fit')
 
-#        print 'Do plane wave fit on stored arrival times, from plotfootprint...'
-#        direction_fit_plane_wave_orig = cr.trun("DirectionFitPlaneWave", positions=fptask_orig.positions, timelags=1.0e-9 * fptask_orig.arrivaltime, verbose=True)
-
-#        plt.figure()
-#        direction_fit_plane_wave_orig.residual_delays.plot()
-#        plt.title('Residual delays after plane wave fit\n to plotfootprint timelags')
-
         residu = direction_fit_plane_wave.residual_delays.toNumpy()
         bestfitDelays = sf.timeDelaysFromDirection(positions, direction_fit_plane_wave.meandirection_azel)
         self.planewaveArrivalTimes = bestfitDelays
-        # import pdb; pdb.set_trace()
         residu[np.where(abs(residu) > 100e-9)] = 0.0  # hack
         residu -= residu.mean()
         residu[np.where(abs(residu) > 15e-9)] = 0.0  # hack
@@ -321,8 +262,7 @@ class Wavefront(Task):
 
         plt.figure()
         # now the good one: difference between measured arrival times and plane wave fit!
-#        fptask_delta = cr.trerun("plotfootprint", "3", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=cr.hArray(1.0e9 * residu), power=140, loradir=self.loradir, plotlora=False, plotlorashower=False, pol=self.pol)  
-        import pdb; pdb.set_trace()
+#        import pdb; pdb.set_trace()
         fptask_delta = cr.trerun("Shower", "3", positions=positions2D, signals=signals, timelags=residu, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
         
         plt.title('Footprint of residual delays w.r.t. planewave fit')
@@ -352,7 +292,6 @@ class Wavefront(Task):
         self.pointsourceArrivalTimes = bestfitDelays
         
         residu = times - bestfitDelays
-        # import pdb; pdb.set_trace()
         # residu[np.where(abs(residu) > 100e-9)] = 0.0 # hack
         residu -= residu.mean()
         # residu[np.where(abs(residu) > 15e-9)] = np.float('nan') # hack
@@ -365,7 +304,6 @@ class Wavefront(Task):
 
         plt.figure()
         # Difference between measured arrival times and point source fit. Check plot for fit errors!
-#        fptask_delta = cr.trerun("plotfootprint", "4", colormap='jet', filefilter=eventdir, positions=antennaPositions, arrivaltime=cr.hArray(1.0e9 * residu), power=140, loradir=self.loradir, plotlora=False, plotlorashower=False, pol=self.pol)  # no parameters set...
  
         fptask_delta_pointsource = cr.trerun("Shower", "4", positions=positions2D, signals=signals, timelags=residu, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
         
