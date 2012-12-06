@@ -373,9 +373,9 @@ def getCableDelays(station, antennaset, return_as_hArray=False):
 
     if return_as_hArray:
         # import pycrtools as hf
-        cable_delays = cr.hArray(float, dimensions=[96])
+        cable_length = cr.hArray(float, dimensions=[96])
     else:
-        cable_delays = np.zeros(96)
+        cable_length = np.zeros(96)
 
     str_line = ''
     while "RCUnr" not in str_line:
@@ -389,13 +389,13 @@ def getCableDelays(station, antennaset, return_as_hArray=False):
         str_line = cabfile.readline()
         sep_line = str_line.split()
         if rcu_connection == "LBL":
-            cable_delays[int(sep_line[0])] = float(sep_line[2]) * 1e-9
+            cable_length[int(sep_line[0])] = float(sep_line[2]) * 1e-9
         elif rcu_connection == "LBH":
-            cable_delays[int(sep_line[0])] = float(sep_line[4]) * 1e-9
+            cable_length[int(sep_line[0])] = float(sep_line[4]) * 1e-9
         elif rcu_connection == "HBA":
-            cable_delays[int(sep_line[0])] = float(sep_line[6]) * 1e-9
+            cable_length[int(sep_line[0])] = float(sep_line[6]) * 1e-9
 
-    return cable_delays
+    return cable_length
 
 def antennaset2rcumode(antennaset,filter):
     rcumode=dict()
@@ -411,7 +411,54 @@ def antennaset2rcumode(antennaset,filter):
     return rcumode[(antennaset,filter)]
 
 def getCableAttenuation(station,antennaset,return_as_hArray=False,filter=None):
-    cabledelays=getCableDelays(station, antennaset, return_as_hArray=False)     
+
+    # Check station id type
+    if isinstance(station, int):
+        # Convert a station id to a station name
+        station = idToStationName(station)
+    # LBA_OUTER = LBL
+    # LBA_INNER = LBH
+    # HBA = HBA
+    if "LBA_OUTER" in antennaset:
+        rcu_connection = "LBL"
+    elif "LBA_INNER" in antennaset:
+        rcu_connection = "LBH"
+    elif "HBA" in antennaset:
+        rcu_connection = "HBA"
+    else:
+        print "Antenna set not yet supported"
+        return "Antenna set not yet supported"
+
+    LOFARSOFT = os.environ["LOFARSOFT"].rstrip('/') + '/'
+    cabfilename = LOFARSOFT + '/data/lofar/StaticMetaData/CableDelays/' + station + '-CableDelays.conf'
+    cabfile = open(cabfilename)
+
+    if return_as_hArray:
+        # import pycrtools as hf
+        cable_length = cr.hArray(float, dimensions=[96])
+    else:
+        cable_length = np.zeros(96)
+
+    str_line = ''
+    while "RCUnr" not in str_line:
+        str_line = cabfile.readline()
+        if len(str_line) == 0:
+            # end of file reached, no data available
+            assert False
+
+    str_line = cabfile.readline()
+    for i in range(96):
+        str_line = cabfile.readline()
+        sep_line = str_line.split()
+        if rcu_connection == "LBL":
+            cable_length[int(sep_line[0])] = float(sep_line[1])
+        elif rcu_connection == "LBH":
+            cable_length[int(sep_line[0])] = float(sep_line[3])
+        elif rcu_connection == "HBA":
+            cable_length[int(sep_line[0])] = float(sep_line[5])
+
+    print cable_length
+
     attenuationFactor=dict()
     attenuationFactor[1]=-0.0414#{50:-2.05,80:-3.32,85:-3.53,115:-4.74,130:-5.40}
     attenuationFactor[2]=attenuationFactor[1]
@@ -427,13 +474,7 @@ def getCableAttenuation(station,antennaset,return_as_hArray=False,filter=None):
             print "Please specify the filter"
     rcumode=antennaset2rcumode(antennaset,filter)
     att=attenuationFactor[rcumode]
-    return cabledelays*att
-    
-    
-
-
-
-
+    return cable_length*att
 
 def idToStationName(station_id):
     """Returns the station name from a station_id

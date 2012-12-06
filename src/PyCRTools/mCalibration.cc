@@ -163,7 +163,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
 
   // Direction in spherical coordinates with +x direction along N-S
   const double theta = (M_PI / 2) - el;
-  const double phi = (M_PI / 4) - az;
+  const double phi = az - (M_PI / 4);
 
   // Get iterators
   NIter pol0_it = pol0;
@@ -229,7 +229,7 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
     throw PyCR::ValueError("[hProjectPolarizationsInverse] input vectors have incompatible sizes.");
   }
 
-  // Direction in spherical coordinates with +x direction along N-S
+  // Direction in spherical coordinates with +x direction towards N
   const double theta = (M_PI / 2) - el;
   const double phi = az - (M_PI / 4);
 
@@ -407,7 +407,7 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
 
 template <class CIter>
 void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
-    const HNumber f, const HNumber theta, HNumber phi,
+    const HNumber f, const HNumber az, HNumber el,
     const CIter Vtheta, const CIter Vtheta_end,
     const CIter Vphi, const CIter Vphi_end,
     const HNumber fstart, const HNumber fstep, const HInteger fn,
@@ -418,6 +418,10 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   HComplex V[8];
   HInteger fi, ti, pi, fe, te, pe;
   HNumber x, y, z_xdipole, z_ydipole, x0, y0, z0, x1, y1, z1;
+
+  // Direction in spherical coordinates in degrees with +x direction towards N
+  const double theta = 90. - el;
+  const double phi = az - 45.;
 
   const HNumber fend = fstart + fstep * fn;
 
