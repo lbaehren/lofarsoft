@@ -1,10 +1,12 @@
 # Test script to get relative arrival times of pulses from the octocopter data.
+# Started by Arthur Corstanje, Oct 2012.
 
 import pycrtools as cr
 import numpy as np
 import matplotlib.pyplot as plt
 
-filefilter = '/Volumes/WDdata/octocopter/L65331_D20120919T094039.104Z_CS003_R000_tbb.h5'
+#filefilter = '/Volumes/WDdata/octocopter/L65331_D20120919T094039.104Z_CS003_R000_tbb.h5'
+filefilter = '/Users/acorstanje/triggering/CR/octocopter_test/L65331_D20120919T094039.104Z_CS003_R000_tbb.h5'
 
 filelist = cr.listFiles(filefilter)
 if len(filelist) == 1:
