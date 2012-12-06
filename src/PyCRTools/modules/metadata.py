@@ -98,6 +98,10 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
         dim2 = 1
     elif keyword is "StationPositions":
         functionname = getStationPositions
+    elif keyword is "CableLength":
+        functionname = getCableLength
+    elif keyword is "CableAttenuation":
+        functionname = getCableAttenuation
     else:
         print "function not supported."
         return False
