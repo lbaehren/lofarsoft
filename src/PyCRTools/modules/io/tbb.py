@@ -142,6 +142,8 @@ class TBBData(IOInterface):
             "OBSERVATION_FREQUENCY_MAX": self.__file.frequencyMax,
             "OBSERVATION_FREQUENCY_CENTER": self.__file.frequencyCenter,
             "OBSERVATION_FREQUENCY_UNIT": self.__file.frequencyUnit
+            "CABLE_LENGTH": lambda: md.get("CableLength", self.__selectedDipoles, self.antenna_set, True),
+            "CABLE_ATTENUATION": lambda: md.get("CableAttenuation", self.__selectedDipoles, self.antenna_set, True),
             }
 
         if self.__file.version() >= 1:
@@ -410,10 +412,6 @@ class TBBData(IOInterface):
             return self.__file.frequencyCenter()
         elif key is "OBSERVATION_FREQUENCY_UNIT":
             return self.__file.frequencyUnit()
-        elif key is "CABLE_LENGTH":
-            return md.get("CableLength", self.__selectedDipoles, self.antenna_set, True)
-        elif key is "CABLE_ATTENUATION":
-            return md.get("CableAttenuation", self.__selectedDipoles, self.antenna_set, True)
 
     setable_keywords = set(["BLOCKSIZE", "BLOCK", "SELECTED_DIPOLES", "ANTENNA_SET"])
 
