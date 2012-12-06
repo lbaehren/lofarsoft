@@ -397,6 +397,43 @@ def getCableDelays(station, antennaset, return_as_hArray=False):
 
     return cable_delays
 
+def antennaset2rcumode(antennaset,filter):
+    rcumode=dict()
+    rcumode[('LBA_INNER','LBA_10_90')]=1 
+    rcumode[('LBA_OUTER','LBA_10_90')]=2 
+    rcumode[('LBA_INNER','LBA_30_90')]=3 
+    rcumode[('LBA_OUTER','LBA_30_90')]=4
+    rcumode[('HBA','HBA_110_190')]=5
+    rcumode[('HBA','HBA_170_230')]=6
+    rcumode[('HBA','HBA_210_250')]=7
+    if 'HBA' in antennaset:
+        antennaset='HBA'
+    return rcumode[(antennaset,filter)]
+
+def getCableAttenuation(station,antennaset,return_as_hArray=False,filter=None):
+    cabledelays=getCableDelays(station, antennaset, return_as_hArray=False)     
+    attenuationFactor=dict()
+    attenuationFactor[1]=-0.0414#{50:-2.05,80:-3.32,85:-3.53,115:-4.74,130:-5.40}
+    attenuationFactor[2]=attenuationFactor[1]
+    attenuationFactor[3]=attenuationFactor[1]
+    attenuationFactor[4]=attenuationFactor[1]
+    attenuationFactor[5]=-0.0734#{50:-3.64,80:-5.87,85:-6.22,115:-8.53,130:-9.52}
+    attenuationFactor[6]=-0.0848#{50:-4.24,80:-6.82,85:-7.21,115:-9.70,130:-11.06}
+    attenuationFactor[7]=-0.0892#{50:-4.46,80:-7.19,85:-7.58,115:-10.18,130:-11.61}
+    if filter==None:
+        if 'LBA' in antennaset:
+            filter='LBA_30_90'
+        else:
+            print "Please specify the filter"
+    rcumode=antennaset2rcumode(antennaset,filter)
+    att=attenuationFactor[rcumode]
+    return cabledelays*att
+    
+    
+
+
+
+
 
 def idToStationName(station_id):
     """Returns the station name from a station_id
