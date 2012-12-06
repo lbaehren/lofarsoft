@@ -410,7 +410,7 @@ def antennaset2rcumode(antennaset,filter):
         antennaset='HBA'
     return rcumode[(antennaset,filter)]
 
-def getCableAttenuation(station,antennaset,return_as_hArray=False,filter=None):
+def getCableLength(station,antennaset,return_as_hArray=False,filter=None):
 
     # Check station id type
     if isinstance(station, int):
@@ -457,7 +457,11 @@ def getCableAttenuation(station,antennaset,return_as_hArray=False,filter=None):
         elif rcu_connection == "HBA":
             cable_length[int(sep_line[0])] = float(sep_line[5])
 
-    print cable_length
+    return cable_length
+
+def getCableAttenuation(station,antennaset,return_as_hArray=False,filter=None):
+
+    cable_length = getCableLength(station, antennaset, return_as_hArray, filter)
 
     attenuationFactor=dict()
     attenuationFactor[1]=-0.0414#{50:-2.05,80:-3.32,85:-3.53,115:-4.74,130:-5.40}
