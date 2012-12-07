@@ -1,0 +1,18 @@
+"""""""""""""""""""""""""""""""
+On the 21 th November 2012
+by Nicolas Vilchez
+LPC2E/Nançay Radioastonomy station
+nicolas.vilchez@cnrs-orleans.fr
+"""""""""""""""""""""""""""""""
+
+IN this directory, you will find a python script which allow to rapatriate Beam
+formed data (ICD3 Format) nodes to one directory for one precise observation. 
+
+When you launch the script: ./run.py 
+it appear this message for right usage: 
+
+MISSING Observation ID or Output directory
+Usage: ./run.py --id=Lxxxxx --output=/PATH [optionnal: --RAM=x(in Go, default 1Go)]
+
+ex: ./run.py --id=L64589 --output=/home/vilchez
+
