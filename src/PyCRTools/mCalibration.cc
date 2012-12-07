@@ -119,7 +119,7 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
 
     theta = c0 * (1 - zd) + c1 * zd;
 
-    return polar(rho, theta);
+    return polar(rho, (M_PI / 180.) * theta);
 }
 
 //$DOCSTRING: Project on-sky polarizations onto x,y,z.
@@ -132,8 +132,8 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
 #define HFPP_PARDEF_2 (HNumber)(polz)()("Polarization Z.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (HNumber)(pol0)()("Polarization 0.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_4 (HNumber)(pol1)()("Polarization 1.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_5 (HNumber)(az)()("Azimuth with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_6 (HNumber)(el)()("Elevation with respect to antenna frame.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_5 (HNumber)(az)()("Azimuth in radians East positive from North.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_6 (HNumber)(el)()("Elevation in radians positive up.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -163,7 +163,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
 
   // Direction in spherical coordinates with +x direction along N-S
   const double theta = (M_PI / 2) - el;
-  const double phi = az - (M_PI / 4);
+  const double phi = (M_PI / 2) - az;
 
   // Get iterators
   NIter pol0_it = pol0;
@@ -175,9 +175,9 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
   for (int i=0; i<N; i++)
   {
     // Project onto new coordinate frame
-    *polx_it = cos(theta) * cos(phi) * *pol0_it - sin(phi) * *pol1_it;
-    *poly_it = cos(theta) * sin(phi) * *pol0_it + cos(phi) * *pol1_it;
-    *polz_it = -1.0 * sin(theta) * *pol0_it;
+    *polx_it = -1.0 * cos(phi) * cos(theta) * *pol0_it - sin(phi) * *pol1_it;
+    *poly_it = -1.0 * sin(phi) * cos(theta) * *pol0_it + cos(phi) * *pol1_it;
+    *polz_it = sin(theta) * *pol1_it;
 
     ++pol0_it;
     ++pol1_it;
@@ -219,7 +219,9 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
     const NIter polz, const NIter polz_end,
     const HNumber az, const HNumber el)
 {
+  throw PyCR::ValueError("hProjectPolarizationsInverse is not defined.");
   
+  /*
   // Get length of output vector
   const int N = std::distance(pol0, pol0_end);
 
@@ -279,6 +281,7 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
     ++poly_it;
     ++polz_it;
   }
+  */
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
@@ -385,8 +388,8 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(J)()("Jones matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(f)()("Frequency.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_2 (HNumber)(theta)()("Theta.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (HNumber)(phi)()("Phi.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HNumber)(az)()("Azimuth in degrees East positive from North.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HNumber)(el)()("Elevation in degrees positive up.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_4 (HComplex)(Vtheta)()("Table with response of theta polarization.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_5 (HComplex)(Vphi)()("Table with response of phi polarization.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_6 (HNumber)(fstart)()("")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
@@ -421,7 +424,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 
   // Direction in spherical coordinates in degrees with +x direction towards N
   const double theta = 90. - el;
-  double phi = az - 45.;
+  const double phi = 225. - az;
 
   const HNumber fend = fstart + fstep * fn;
 
