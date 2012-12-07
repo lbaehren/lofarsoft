@@ -423,8 +423,8 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   HNumber x, y, z_xdipole, z_ydipole, x0, y0, z0, x1, y1, z1;
 
   // Direction in spherical coordinates in degrees with +x direction towards N
-  const double theta = 90. - el;
-  const double phi = 225. - az;
+  double theta = 90. - el;
+  double phi = 225. - az;
 
   const HNumber fend = fstart + fstep * fn;
 
