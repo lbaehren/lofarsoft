@@ -7,19 +7,19 @@
 #
 # DESCRIPTION:
 #
-#       This script configures the user's environment for the LOFAR 
+#       This script configures the user's environment for the LOFAR
 #       user software package.
 #
 #       When the script is sourced, it checks for the existence of a
 #       LOFARSOFT environment variable. If not found, an error message
-#       is issued. If found, the script proceeds to add the path to 
+#       is issued. If found, the script proceeds to add the path to
 #       the executables to the user's path variable.
 #
 #       Similarly, the existence of the PYTHONPATH variable is examined
-#       and if not present is defined. This addition allows user's to 
+#       and if not present is defined. This addition allows user's to
 #       utilize the included python modules.
 #
-#       This version of the script is written in the sh language, 
+#       This version of the script is written in the sh language,
 #       and is compatible bash, too.
 #
 #############################################################################
@@ -28,7 +28,7 @@ SYSTEM_NAME=`uname -s`
 
 # If not running interactively, don't do anything
  [ -z "$PS1" ] && return
- 
+
 ##______________________________________________________________________________
 ## Check for the existence of the LOFARSOFT  environment variable
 
@@ -46,7 +46,7 @@ export PATH=$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/bin:$LOFARSOF
 
 if [ "$SYSTEM_NAME" == "Darwin" ] ; then
     export DYLD_LIBRARY_PATH=$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:$DYLD_LIBRARY_PATH
-else 
+else
     export LD_LIBRARY_PATH=$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:$LD_LIBRARY_PATH
 fi
 
@@ -59,7 +59,7 @@ else
   export PYTHONPATH=$LOFARSOFT/release/lib/python:$LOFARSOFT/release/share/pulsar/bin:$LOFARSOFT/release/share/pulsar/lib/python:$PYTHONPATH
 fi
 
-for PY_VERSION in 2.6 2.5 2.4 
+for PY_VERSION in 2.7 2.6 2.5 2.4
 do
   if test -d $LOFARSOFT/release/lib/python$PY_VERSION ; then
     export PYTHONPATH=$LOFARSOFT/release/lib/python$PY_VERSION:$PYTHONPATH
@@ -125,7 +125,7 @@ fi
 export PSRCAT_FILE=${LOFARSOFT}/release/share/pulsar/data/psrcat.db
 
 #############################################################################
-#                    Finished configuration                                 #  
+#                    Finished configuration                                 #
 #############################################################################
 
 fi # end of: if test -z "$LOFARSOFT" ; then
