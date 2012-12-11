@@ -50,9 +50,14 @@ td
     color: #303030;
 }
 
-table tr.highlight td
+table tr.good td
 {
     color: green;
+}
+
+table tr.error td
+{
+    color: red;
 }
 
 /* Navigation */

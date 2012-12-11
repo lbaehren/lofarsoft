@@ -43,7 +43,26 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <xsl:if test="status='CR_FOUND' or alt_status='CR_FOUND'">
       <xsl:choose>
          <xsl:when test="lora/@good_reconstruction">
-           <tr class="highlight">
+           <tr class="good">
+             <td>
+               <a><xsl:attribute name="href">
+               events/<xsl:value-of select="id"/></xsl:attribute> 
+               <xsl:value-of select="id"/> 
+               </a>
+             </td>
+             <td><xsl:value-of select="timestamp"/></td>
+             <td><xsl:value-of select="status"/></td>
+             <td><xsl:value-of select="alt_status"/></td>
+             <td><xsl:value-of select="lora/energy"/></td>
+             <td><xsl:value-of select="lora/core_x"/></td>
+             <td><xsl:value-of select="lora/core_y"/></td>
+             <td><xsl:value-of select="lora/azimuth"/></td>
+             <td><xsl:value-of select="lora/elevation"/></td>
+             <td><xsl:value-of select="lora/moliere"/></td>
+           </tr>
+         </xsl:when>
+         <xsl:when test="status='ERROR' or alt_status='ERROR'">
+           <tr class="error">
              <td>
                <a><xsl:attribute name="href">
                events/<xsl:value-of select="id"/></xsl:attribute> 
