@@ -76,13 +76,14 @@ class Shower(Task):
         footprint_colormap=dict(default="autumn", doc="colormap to use for LOFAR timing"),
         footprint_marker_lofar=dict(default='o', doc="Marker for LOFAR stations in footprint"),
         footprint_use_background=dict(default=True, doc="Use LOFAR map as background for footprint"),
-        footprint_point_scaling=dict(default=100, doc="Scaling factor for point size in LOFAR plot"),
+        footprint_point_scaling=dict(default=70, doc="Scaling factor for point size in LOFAR plot"),
         footprint_use_title=dict(default=True, doc="Draw title indicating polarizations and event id (if given)"),
 
         footprint_shower_enable=dict(default=True, doc='Draw shower geometry in footprint'),
         footprint_shower_color=dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),
         footprint_scale=dict(default=True, doc="Scale footprint to display superterp only."),
         footprint_scale_box=dict(default=200, doc="Box around coordinate center which will be plotted"),
+        footprint_scale_to_max=dict(default="False", doc="Scale circle size of the footprint to subtract minimum occuring value"),
 
         footprint_lora_enable=dict(default=True,
             doc="Draw Information from LORA"),
@@ -338,9 +339,10 @@ class Shower(Task):
                 else:
                     self.sizes0 = np.copy(self.signals[:, 0])
                 self.sizes0 = np.log(self.sizes0)
-                if self.sizes0.min() > 0:
-                    if self.sizes0.max() != self.sizes0.min():
-                        self.sizes0 = self.sizes0 - self.sizes0.min()
+                if self.footprint_scale_to_max == "True":
+                    if self.sizes0.min() > 0:
+                        if self.sizes0.max() != self.sizes0.min():
+                            self.sizes0 = self.sizes0 - self.sizes0.min()
                         
                 self.sizes0 *= self.footprint_point_scaling
 
@@ -394,9 +396,10 @@ class Shower(Task):
                   if self.signals.shape[1] > 1:
                     self.sizes1 = np.copy(self.signals[:, 1])
                     self.sizes1 = np.log(self.sizes1)
-                    if self.sizes1.min() > 0:
-                        if self.sizes1.max() != self.sizes1.min():
-                            self.sizes1 = self.sizes1 - self.sizes1.min()
+                    if self.footprint_scale_to_max == "True":
+                        if self.sizes1.min() > 0:
+                            if self.sizes1.max() != self.sizes1.min():
+                                self.sizes1 = self.sizes1 - self.sizes1.min()
                     self.sizes1 *= self.footprint_point_scaling
 
                     cr.plt.figure()
@@ -447,9 +450,10 @@ class Shower(Task):
 
                     self.sizes2 = np.copy(self.signals[:, 2])
                     self.sizes2 = np.log(self.sizes2)
-                    if self.sizes2.min() > 0:
-                        if self.sizes2.max() != self.sizes2.min():
-                            self.sizes2 = self.sizes2 - self.sizes2.min()
+                    if self.footprint_scale_to_max == "True":
+                        if self.sizes2.min() > 0:
+                            if self.sizes2.max() != self.sizes2.min():
+                                self.sizes2 = self.sizes2 - self.sizes2.min()
                     self.sizes2 *= self.footprint_point_scaling
 
                     cr.plt.figure()
