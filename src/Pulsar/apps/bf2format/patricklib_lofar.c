@@ -297,8 +297,8 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   float dummy_float;
   double dummy_double;
   long i, j;
-  int year, month, day, hours, minutes;
-  float seconds;
+  //  int year, month, day, hours, minutes;
+  //  float seconds;
 
   /* Create primary header */
 

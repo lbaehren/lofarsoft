@@ -189,7 +189,7 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
   }stokesdata_struct;
     
 
-  time_t t1,t2;
+  //  time_t t1,t2;
   stokesdata_struct *stokesdata;
  int prev_seqnr = -1;
  unsigned timeT;
@@ -487,45 +487,72 @@ int convert_nocollapse(datafile_definition fout, FILE *input, int beamnr, datafi
 
 void *stokesdata_h5_ptr = NULL;
 
+  double time_read = 0;
+  double time_swapfloats = 0;
+  double time_calcrms = 0;
+  double time_calcscales = 0;
+  double time_clipscale = 0;
+  double time_packing = 0;
+  double time_writing = 0;
+
 /* Returns 1 if successful, 0 on error */
 /* Only for H5 data */
 int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int subbandnr, datafile_definition *subintdata, int *firstseq, int *lastseq, int findseq, float sigmalimit, int clipav, int verbose, int debugpacking, int is_append, long skipNrBlocks, long truncNrBlocks, double *gains)
 {
-
   /* Used to be SAMPLES|2, but that is apparently no longer the case
      for the new H5 format. */
   typedef struct {
-    float	samples[BEAMS][SAMPLES][SUBBANDS][CHANNELS][STOKES];
+    float samples[BEAMS][SAMPLES][SUBBANDS][CHANNELS][STOKES];
   }stokesdata_h5_struct;
+
   
   stokesdata_h5_struct *stokesdata_h5;
 
-  time_t t1,t2;  
- unsigned timeT;
- unsigned output_samples = 0;
- unsigned nul_samples = 0;
- /* unsigned toobig = 0, toosmall = 0; */
- unsigned num;
- int x;
- long filesize, currentblock;
- int doneprocessing = 0;
+  //  time_t t1,t2;  
+  unsigned timeT;
+  unsigned output_samples = 0;
+  unsigned nul_samples = 0;
+  /* unsigned toobig = 0, toosmall = 0; */
+  unsigned num;
+  int x;
+  long filesize, currentblock;
+  int doneprocessing = 0;
+  int skip_calc_rms = 0;
+  float *average, *rms;
+  
+  clock_t tstart, tend;
 
- if(stokesdata_h5_ptr == NULL) {
-   //   printf("XXXXX Alloc %ld\n",AVERAGE_OVER * sizeof(stokesdata_h5_struct) );
-   stokesdata_h5 = (stokesdata_h5_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_h5_struct) );
-   if(stokesdata_h5 == NULL) {
-     fprintf(stderr, "convert_nocollapse_H5: Memory allocation error\n");
-     perror("");
-     return 0;
-   }
-   stokesdata_h5_ptr = (void *)stokesdata_h5;
- }else {
-   stokesdata_h5 = (stokesdata_h5_struct *)stokesdata_h5_ptr;
- }
+  //  fprintf(stderr, "Entering convert_nocollapse_H5 and start memory allocation\n");
+  if(stokesdata_h5_ptr == NULL) {
+    //   printf("XXXXX Alloc %ld\n",AVERAGE_OVER * sizeof(stokesdata_h5_struct) );
+    stokesdata_h5 = (stokesdata_h5_struct *) malloc( AVERAGE_OVER * sizeof(stokesdata_h5_struct) );
+    if(stokesdata_h5 == NULL) {
+      fprintf(stderr, "convert_nocollapse_H5: Memory allocation error\n");
+      perror("");
+      return 0;
+    }
+    stokesdata_h5_ptr = (void *)stokesdata_h5;
+  }else {
+    stokesdata_h5 = (stokesdata_h5_struct *)stokesdata_h5_ptr;
+  }
+  if(is_append) {
+    average = calloc(SUBBANDS*CHANNELS, sizeof(float));
+    rms = calloc(SUBBANDS*CHANNELS, sizeof(float));
+  }else {
+    average = calloc(CHANNELS, sizeof(float));
+    rms = calloc(CHANNELS, sizeof(float));
+  }
+  if(average == NULL || rms == NULL) {
+    fprintf(stderr, "convert_nocollapse_H5: Memory allocation error\n");
+    perror("");
+    return 0;
+  }
+  //  fprintf(stderr, "  memory allocation done\n");
 
  currentblock = 0;
  /* Only find out how many blocks (including gaps) are in the data, then quit function. */
  if(findseq) {
+   //   fprintf(stderr, "  Finding number of blocks in file\n");
    fseek( input, 0, SEEK_SET );
    num = fread( &stokesdata_h5[0], sizeof stokesdata_h5[0], 1, input );
    if(num != 1) {
@@ -547,17 +574,20 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
    /* No sequence numbers anymore in H5 format */
    *lastseq = filesize-1;
    
+   //   fprintf(stderr, "  Finding number of blocks in file done\n");
    return 1;
  }
 
 
  /* Allocate temporary memory for packed data */
+ // fprintf(stderr, "  Allocate temporary memory for packed data\n");
  unsigned char *packeddata;
  float *scales, *offsets;
  if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 0, 1, 0) != 1) {
    fprintf(stderr, "ERROR writeFITSfile: Cannot allocate temporary memory               \n");      
    return 0;
  }
+ // fprintf(stderr, "  Allocate temporary memory for packed data done\n");
 
  /* 
     - Reads AVERAGE_OVER (10) blocks of data at the time from the input data. 
@@ -584,15 +614,23 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
  x = 0;
  currentblock = 0;
  fseek( input, 0, SEEK_SET );
+ // fprintf(stderr, "  Entering data read loop\n");
  while( !feof( input ) ) {
    if (x == NUM_BLOCKGROUPS) break;
    x++;
    unsigned i,c;
 
+
+   //   fprintf(stderr, "  Read data\n");
+   tstart = clock();
    /* read data */
    num = fread( &stokesdata_h5[0], sizeof stokesdata_h5[0], AVERAGE_OVER, input );
+   tend = clock()-tstart;
+   time_read += tend/(double)CLOCKS_PER_SEC;
    currentblock += num;
 
+   //   fprintf(stderr, "  Float swap\n");
+   tstart = clock();
    /* i loops over the blocks of data read in */
    for( i = 0; i < num; i++ ) {
      for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
@@ -612,7 +650,9 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
        }
      }
    }
-
+   tend = clock()-tstart;
+   time_swapfloats += tend/(double)CLOCKS_PER_SEC;
+   //   fprintf(stderr, "  Float swap done\n");
 
 /*
   int oo;
@@ -637,172 +677,175 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 
    /* Calculate average. RMS not used right now. */
    //   float average[CHANNELS], rms[CHANNELS];
-
+ 
    //(void) time(&t1);
-   float *average, *rms;
-   if(is_append) {
-     average = calloc(SUBBANDS*CHANNELS, sizeof(float));
-     rms = calloc(SUBBANDS*CHANNELS, sizeof(float));
-   }else {
-     average = calloc(CHANNELS, sizeof(float));
-     rms = calloc(CHANNELS, sizeof(float));
-   }
-   for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
-     for( c = 0; c < CHANNELS; c++ ) {
-       float sum = 0.0f;
-       float ms = 0.0f;
-       int N = 0;
-       int l;
-       unsigned validsamples = 0;
-       float median = 0.0f;
-       /* compute average */
-       for( i = 0; i < num; i++ ) {
-	 float mvalue[SAMPLES];
-	 /*	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
-	   mvalue[timeT] = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
-	   }*/
+   //   fprintf(stderr, "  Calculate rms\n");
+   tstart = clock();
+   if(skip_calc_rms == 0) {
+     for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
+       for( c = 0; c < CHANNELS; c++ ) {
+	 float sum = 0.0f;
+	 float ms = 0.0f;
+	 int N = 0;
+	 //	 int l;
+	 unsigned validsamples = 0;
+	 //	 float median = 0.0f;
+	 /* compute average */
+	 for( i = 0; i < num; i++ ) {
+	   //	   float mvalue[SAMPLES];
+	   /*	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
+	     mvalue[timeT] = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
+	     }*/
+	   
+	   /* Massive kludge - BWS - Skip first 4 samples always due to distortion of rms */
+	   /* Added 2011-11-16 */
+	   for( timeT = 0; timeT < SAMPLES; timeT++ ) {
+	     float value;
+	     //	     float mtemp;
+	     value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
+	     // if (c == 8) printf("BWS AVG time %d num %d channel %d nsub %ld value %f prev %f sum %f\n",time,i,c,nsub,value,prev,sum);
+	     
+	     // Try median
+	     /* for (l=timeT+1;l<SAMPLES;l++)
+		{
+		if (!isnan(mvalue[l]) && !isnan(mvalue[timeT])) 
+		{
+		if (mvalue[timeT] > mvalue[l])
+		{
+		mtemp = mvalue[l];
+		mvalue[l] = mvalue[timeT];
+		mvalue[timeT] = mtemp;
+		}
+		}
+		}
+		if (SAMPLES%2 == 0) median = (mvalue[SAMPLES/2]+mvalue[SAMPLES/2-1])/2;
+		else median = mvalue[SAMPLES/2];*/
+	     
+	     // Mean method 
+	     if( !isnan( value ) ) {
+	       sum += value;
+	       ms += value*value;
+	       validsamples++;
+	     }
+	   }
+	 }
+	 
+	 N = validsamples;
+	 if(is_append) {
+	   if(N == 0) {
+	     average[nsub*CHANNELS+c] = 0;
+	     rms[nsub*CHANNELS+c] = 0;
+	   }else if(N == 1) {
+	     average[nsub*CHANNELS+c] = sum;
+	     rms[nsub*CHANNELS+c] = 0;
+	   }else {
+	     average[nsub*CHANNELS+c] = sum/N;
+	     rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
+	   }
+	   if (debugpacking) printf("N = %d average[%ld] = %lf rms[%ld] = %lf\n",N,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
+	 }else {
+	   if(N == 0) {
+	     average[c] = 0;
+	     rms[c] = 0;
+	   }else if(N == 1) {
+	     average[c] = sum;
+	     rms[c] = 0;
+	   }else {
+	     average[c] = sum/N;
+	     rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
+	   }
+	   if (debugpacking) printf("N = %d average[%d] = %lf rms[%d] = %lf\n",N,c,average[c],c,rms[c]);
+	 }
 
-	 /* Massive kludge - BWS - Skip first 4 samples always due to distortion of rms */
-	 /* Added 2011-11-16 */
-	 for( timeT = 0; timeT < SAMPLES; timeT++ ) {
-	   float value;
-	   float mtemp;
-	   value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
-	   // if (c == 8) printf("BWS AVG time %d num %d channel %d nsub %ld value %f prev %f sum %f\n",time,i,c,nsub,value,prev,sum);
-
-	   // Try median
-	   /* for (l=timeT+1;l<SAMPLES;l++)
-	     {
-	       if (!isnan(mvalue[l]) && !isnan(mvalue[timeT])) 
-		 {
-		   if (mvalue[timeT] > mvalue[l])
+	 /* BWS: Ideal loop would count how many samples over the limit, but that requires more passes through
+	    the data, so for now, just do it brute force, with three loops.... */
+	 
+	 int avgloops = 20;
+	 int al;
+	 float previous_rms,current_rms;
+	 for ( al = 0; al < avgloops; al++)
+	   {
+	     sum = 0.0f;
+	     ms = 0.0f;
+	     validsamples = 0;
+	     
+	     for( i = 0; i < num; i++ ) {
+	       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
+		 float value;
+		 value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
+		 // if (nsub == 237 && c == 1) printf("BWS AVG timeT %d num %d channel %d nsub %ld value %f sum %f %f %f\n",timeT,i,c,nsub,value,sum,average[nsub*CHANNELS+c],rms[nsub*CHANNELS+c]);
+		 if(is_append) {
+		   if (!isnan( value ) && value > average[nsub*CHANNELS+c] - 3.0 * rms[nsub*CHANNELS+c] && value < average[nsub*CHANNELS+c] + 3.0 *rms[nsub*CHANNELS+c]) 
 		     {
-		       mtemp = mvalue[l];
-		       mvalue[l] = mvalue[timeT];
-		       mvalue[timeT] = mtemp;
+		       sum += value;
+		       ms += value*value;
+		       validsamples++;
+		     }
+		 }else {
+		   if (!isnan( value ) && value > average[c] - 3.0 * rms[c] && value < average[c] + 3.0 *rms[c]) 
+		     {
+		       sum += value;
+		       ms += value*value;
+		       validsamples++;
 		     }
 		 }
-	     }
-	   if (SAMPLES%2 == 0) median = (mvalue[SAMPLES/2]+mvalue[SAMPLES/2-1])/2;
-	   else median = mvalue[SAMPLES/2];*/
-
-	   // Mean method 
-	   if( !isnan( value ) ) {
-	     sum += value;
-	     ms += value*value;
-	     validsamples++;
-	   }
-	 }
-       }
-   
-       N = validsamples;
-       if(is_append) {
-	 if(N == 0) {
-	   average[nsub*CHANNELS+c] = 0;
-	   rms[nsub*CHANNELS+c] = 0;
-	 }else if(N == 1) {
-	   average[nsub*CHANNELS+c] = sum;
-	   rms[nsub*CHANNELS+c] = 0;
-	 }else {
-	   average[nsub*CHANNELS+c] = sum/N;
-	   rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
-	 }
-	 if (debugpacking) printf("N = %d average[%ld] = %lf rms[%ld] = %lf\n",N,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
-       }else {
-	 if(N == 0) {
-	   average[c] = 0;
-	   rms[c] = 0;
-	 }else if(N == 1) {
-	   average[c] = sum;
-	   rms[c] = 0;
-	 }else {
-	   average[c] = sum/N;
-	   rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
-	 }
-	 if (debugpacking) printf("N = %d average[%d] = %lf rms[%d] = %lf\n",N,c,average[c],c,rms[c]);
-       }
-
-       /* BWS: Ideal loop would count how many samples over the limit, but that requires more passes through
-	  the data, so for now, just do it brute force, with three loops.... */
-
-       int avgloops = 20;
-       int al;
-       float previous_rms,current_rms;
-       for ( al = 0; al < avgloops; al++)
-	 {
-	   sum = 0.0f;
-	   ms = 0.0f;
-	   validsamples = 0;
-
-	   for( i = 0; i < num; i++ ) {
-	     for( timeT = 0; timeT < SAMPLES; timeT++ ) {
-	       float value;
-	       value = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
-	       // if (nsub == 237 && c == 1) printf("BWS AVG timeT %d num %d channel %d nsub %ld value %f sum %f %f %f\n",timeT,i,c,nsub,value,sum,average[nsub*CHANNELS+c],rms[nsub*CHANNELS+c]);
-	       if(is_append) {
-		 if (!isnan( value ) && value > average[nsub*CHANNELS+c] - 3.0 * rms[nsub*CHANNELS+c] && value < average[nsub*CHANNELS+c] + 3.0 *rms[nsub*CHANNELS+c]) 
-		   {
-		     sum += value;
-		     ms += value*value;
-		     validsamples++;
-		   }
-	       }else {
-		 if (!isnan( value ) && value > average[c] - 3.0 * rms[c] && value < average[c] + 3.0 *rms[c]) 
-		   {
-		     sum += value;
-		     ms += value*value;
-		     validsamples++;
-		   }
 	       }
 	     }
-	   }
-   
-	   N = validsamples;
-	   if(is_append) {
-	     previous_rms = rms[nsub*CHANNELS+c];
-	     if(N == 0) {
-	       average[nsub*CHANNELS+c] = 0;
-	       rms[nsub*CHANNELS+c] = 0;
-	     }else if(N == 1) {
-	       average[nsub*CHANNELS+c] = sum;
-	       rms[nsub*CHANNELS+c] = 0;
+	     
+	     N = validsamples;
+	     if(is_append) {
+	       previous_rms = rms[nsub*CHANNELS+c];
+	       if(N == 0) {
+		 average[nsub*CHANNELS+c] = 0;
+		 rms[nsub*CHANNELS+c] = 0;
+	       }else if(N == 1) {
+		 average[nsub*CHANNELS+c] = sum;
+		 rms[nsub*CHANNELS+c] = 0;
+	       }else {
+		 average[nsub*CHANNELS+c] = sum/N;
+		 rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
+	       }
+	       if (debugpacking) printf("N %d avloop %d average[%ld] = %lf rms[%ld] = %lf\n",N,al,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
+	       current_rms = rms[nsub*CHANNELS+c];
 	     }else {
-	       average[nsub*CHANNELS+c] = sum/N;
-	       rms[nsub*CHANNELS+c] = sqrt((ms-(N*average[nsub*CHANNELS+c]*average[nsub*CHANNELS+c]))/(N-1));
+	       previous_rms = rms[c];
+	       if(N == 0) {
+		 average[c] = 0;
+		 rms[c] = 0;
+	       }else if(N == 1) {
+		 average[c] = sum;
+		 rms[c] = 0;
+	       }else {
+		 average[c] = sum/N;
+		 rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
+	       }
+	       if (debugpacking) printf("N %d avloop %d average[%d] = %lf rms[%d] = %lf\n",N,al,c,average[c],c,rms[c]);
+	       current_rms = rms[c];
 	     }
-	     if (debugpacking) printf("N %d avloop %d average[%ld] = %lf rms[%ld] = %lf\n",N,al,nsub*CHANNELS+c,average[nsub*CHANNELS+c],nsub*CHANNELS+c,rms[nsub*CHANNELS+c]);
-	     current_rms = rms[nsub*CHANNELS+c];
-	   }else {
-	     previous_rms = rms[c];
-	     if(N == 0) {
-	       average[c] = 0;
-	       rms[c] = 0;
-	     }else if(N == 1) {
-	       average[c] = sum;
-	       rms[c] = 0;
-	     }else {
-	       average[c] = sum/N;
-	       rms[c] = sqrt((ms-(N*average[c]*average[c]))/(N-1));
-	     }
-	     if (debugpacking) printf("N %d avloop %d average[%d] = %lf rms[%d] = %lf\n",N,al,c,average[c],c,rms[c]);
-	     current_rms = rms[c];
+	     if ( previous_rms / current_rms < 1.05 || current_rms == 0.0 ) break;
 	   }
-	   if ( previous_rms / current_rms < 1.05 || current_rms == 0.0 ) break;
-	 }
+       }
+       //(void) time(&t2);
+       //   printf("nsub = %ld Time to process is %lf seconds\n",nsub,(double)(t2-t1));
      }
-     //(void) time(&t2);
-   //   printf("nsub = %ld Time to process is %lf seconds\n",nsub,(double)(t2-t1));
-   }
- 
+   }  /* End of skip_calc_rms */
+   /* If only once want to calc rms'es etc, set flag to 1 */
+   skip_calc_rms = 0;
+   tend = clock()-tstart;
+   time_calcrms += tend/(double)CLOCKS_PER_SEC;
+   //   fprintf(stderr, "  Calculate rms done\n");
+
   /* convert and write the data */
-   float powerNbits = (float)(pow(2,subintdata->NrBits)-1);
-   for( i = 0; i < num; i++ ) {
+   //    fprintf(stderr, "  Starting converting/writing\n");
+    float powerNbits = (float)(pow(2,subintdata->NrBits)-1);
+    for( i = 0; i < num; i++ ) {
      // (void) time(&t1);
 
      /*     fprintf(stderr, "XXXXXXXX %d - 2\n", i); */
    
        /* patrick */
-     if(sigmalimit > 0 && i == 0) {
+      tstart = clock();
+    if(sigmalimit > 0 && i == 0) {
        for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
 	 for( c = 0; c < CHANNELS; c++ ) {
 	   if(is_append == 0) {
@@ -819,86 +862,95 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 }
        }
      }
+    tend = clock()-tstart;
+    time_calcscales += tend/(double)CLOCKS_PER_SEC;
 
      /* process data */
-     for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
-     for( c = 0; c < CHANNELS; c++ ) {
-       for( timeT = 0; timeT < SAMPLES; timeT++ ) {
-         float sum;
+    //     fprintf(stderr, "  Start clipping/scaling\n");
+    tstart = clock();
+    float sum, gainfac, pwr_2_nbitsMin1, pwr_2_max, scalefac, leveloffset, channelaverage;
+    float min_sum, max_sum;
+    long channel_idx, cur_idx;
+    pwr_2_nbitsMin1 = pow(2,subintdata->NrBits-1);
+    pwr_2_max = pow(2,subintdata->NrBits)-1;
+    for(nsub = subbandnr_start; nsub <= subbandnr_end; nsub++) {
+      for( c = 0; c < CHANNELS; c++ ) {
+	/* Calculate some constants that are used in the time-critical time loop. */
+	gainfac = 1.0/gains[(nsub-subbandnr_start)*CHANNELS+c];
+	if(is_append) {
+	  channel_idx = nsub*CHANNELS+c;
+	}else {
+	  channel_idx = c;
+	}
+	scalefac = 1.0/scales[channel_idx];
+	leveloffset = offsets[channel_idx];
+	channelaverage = average[channel_idx];
+	if(clipav) {
+	  min_sum = (channelaverage - leveloffset)*scalefac;
+	}else {
+	  min_sum = 0;
+	}
+	if(clipav) {
+	  max_sum = (channelaverage - leveloffset)*scalefac;
+	}else {
+	  max_sum = pwr_2_max;
+	}
+	cur_idx = (subintdata->NrBins)*((subintdata->NrPols)*(channel_idx));
+	for( timeT = 0; timeT < SAMPLES; timeT++ ) {
 	 
-	 /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
-	 sum = stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH] / gains[(nsub-subbandnr_start)*CHANNELS+c];
-	 if(is_append) {
-	   sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[nsub*CHANNELS+c] : sum;
-	 }else {
-	   sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? average[c] : sum;
-	 }
+	  sum = gainfac*stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH];
+	  /* not sure; replacing sum by average if (NaN or within 0.01 of zero)? */
+	  sum = (isnan(sum) || (sum <= 0.01f && sum >= -0.01f)) ? channelaverage : sum;
 	   
-	 if(sigmalimit > 0) {
-	   if(debugpacking && nsub == 237)
-	     printf("printf channel %d time %d value %e ", c, timeT, sum);
-	   if(is_append)
-	     sum = (sum - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c] + (float)(pow(2,subintdata->NrBits-1));
-	   else
-	     sum = (sum - offsets[c])/scales[c] + (float)(pow(2,subintdata->NrBits-1));
-	   if(debugpacking && nsub == 237)
-	     printf(" %e ", sum);
-	   if(sum < 0) {
-	     if(clipav) {
-	       if(is_append)
-		 sum = (average[nsub*CHANNELS+c] - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c];
-	       else
-		 sum = (average[c] - offsets[c])/scales[c];
-	     }else {
-	       sum = 0;
-	     }
-	     /*	     printf("Underflow! %e\n", sum); */
-	   }
-	   if(sum > pow(2,subintdata->NrBits)-1) {
-	     if(clipav) {
-	       if(is_append)
-		 sum = (average[nsub*CHANNELS+c] - offsets[nsub*CHANNELS+c])/scales[nsub*CHANNELS+c];
-	       else
-		 sum = (average[c] - offsets[c])/scales[c];
-	     }else {
-	       sum = pow(2,subintdata->NrBits)-1;
-	     }
-	     /*	     printf("Overflow! %e\n", sum); */
-	   }
-	   if(debugpacking && nsub == 237)
-	     printf(" %e \n", sum);
+	  if(sigmalimit > 0) {
+	    /*	    if(debugpacking && nsub == 237)
+	      printf("printf channel %d time %d value %e ", c, timeT, sum);
+	    */
+	    sum = (sum - leveloffset)*scalefac + pwr_2_nbitsMin1;
+	    /*	    if(debugpacking && nsub == 237)
+	      printf(" %e ", sum);*/
 
-	   /*	   printf("value %e\n", sum); */
-	 }
-	 //     (void) time(&t2);
-	 // printf("Time to process num %d is %lf seconds\n",i,(double)(t2-t1));
+	    if(sum < 0) {
+	      sum = min_sum;
+	    }else if(sum > pwr_2_max) {
+	      sum = max_sum;
+	    }
+	    /*	    if(debugpacking && nsub == 237)
+	      printf(" %e \n", sum);
+	    */
+	  }
 
-	 /* BWS */
-	 // if (nsub*CHANNELS+c == 20 && i == 0 ) printf("BWS %d %d %f %f %f %f\n",c,timeT,sum,stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH],offsets[nsub*CHANNELS+c], scales[nsub*CHANNELS+c]);
+	  //     (void) time(&t2);
+	  // printf("Time to process num %d is %lf seconds\n",i,(double)(t2-t1));
+	  
+	  /* BWS */
+	  // if (nsub*CHANNELS+c == 20 && i == 0 ) printf("BWS %d %d %f %f %f %f\n",c,timeT,sum,stokesdata_h5[i].samples[beamnr][timeT][nsub][c][STOKES_SWITCH],offsets[nsub*CHANNELS+c], scales[nsub*CHANNELS+c]);
+	  
+	  
+	  
+	  
+	  /* patrick: put polarization to 0, assume only one pol
+	     written out. Think x is the current bin nr */
+	  
+	  /* Replace function calls with the actual code 
+	  if(writePulsePSRData(*subintdata, 0, 0, channel_idx, timeT, 1, &sum) == 0) { 
+	    fprintf(stderr, "Error writing to temporary memory\n");
+	    return 0;
+	  }
+	  */	  
+	  subintdata->data[cur_idx++] = sum;
 
-
-
-	 
-	 /* patrick: put polarization to 0, assume only one pol
-	    written out. Think x is the current bin nr */
-	 if(is_append) {
-	   if(writePulsePSRData(*subintdata, 0, 0, nsub*CHANNELS+c, timeT, 1, &sum) == 0) { 
-	     fprintf(stderr, "Error writing to temporary memory\n");
-	     return 0;
-	   }
-	 }else {
-	   if(writePulsePSRData(*subintdata, 0, 0, c, timeT, 1, &sum) == 0) { 
-	     fprintf(stderr, "Error writing to temporary memory\n");
-	     return 0;
-	   }
-	 }
-	   /*	   fwrite( &sum, sizeof sum, 1, outputfile[c] ); */ /* single sample written to channel file*/
-	 output_samples++;
-	 if( sum == 0 ) nul_samples++;
-
-       } // for( timeT = 0; timeT < SAMPLES; timeT++ ) 
-     }
-     }
+	  /*	   fwrite( &sum, sizeof sum, 1, outputfile[c] ); */ /* single sample written to channel file*/
+	  output_samples++;
+	  if( sum == 0 ) nul_samples++;
+	  
+	} // for( timeT = 0; timeT < SAMPLES; timeT++ ) 
+      } // Loop over channels
+    } // Loop over subbands 
+    tend = clock()-tstart;
+    time_clipscale += tend/(double)CLOCKS_PER_SEC;
+     //     fprintf(stderr, "  clipping/scaling done\n");
+ 
 
    
      /*     fprintf(stderr, "XXXXXXXX %d - 3\n", i); */
@@ -911,6 +963,9 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
        }
        fflush(stdout);
      }
+     
+     tstart = clock();
+     //     fprintf(stderr, "  start packing data\n");
      /* Pack data */
      if(sigmalimit > 0) {
        if(constructFITSsearchsubint(fout, subintdata->data, 0, &packeddata, &scales, &offsets, 1, 0, 0) != 1) {
@@ -926,8 +981,15 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 return 0;
        }
      }
+     tend = clock()-tstart;
+     time_packing += tend/(double)CLOCKS_PER_SEC;
+    //     fprintf(stderr, "  packing data done\n");
+
+
      /*     fprintf(stderr, "XXXXXXXX %d - 4\n", (x-1)*AVERAGE_OVER+i); */
      /* Write out subint */
+     //     fprintf(stderr, "  start writing\n");
+     tstart = clock();
      if((x-1)*AVERAGE_OVER+i - skipNrBlocks >= truncNrBlocks && truncNrBlocks > 0) {
        doneprocessing = 1;
      }else {
@@ -938,11 +1000,15 @@ int convert_nocollapse_H5(datafile_definition fout, FILE *input, int beamnr, int
 	 }
        }
      }
+     //     fprintf(stderr, "  writing done\n");
+     tend = clock()-tstart;
+     time_writing += tend/(double)CLOCKS_PER_SEC;
      /*     fprintf(stderr, "XXXXXXXX %d - 5\n", (x-1)*AVERAGE_OVER+i); */
      if(doneprocessing)
        break;
      
-   }
+   } /* End of process loop: for( i = 0; i < num; i++ ) { */
+    //    fprintf(stderr, "  Converting/writing done\n");
 
    /*   fprintf(stderr, "XXXXXXXX X - 6\n"); */
 
@@ -1779,7 +1845,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
 int main( int argc, char **argv ) 
 {
   int i,j,b, index, firstseq, lastseq, readparset, totalnrchannels, subbandnr, nrbits, debugpacking;
-  int *seqseek; // only for IS data in append mode
+  //  int *seqseek; // only for IS data in append mode
                 // array that will keep the seek offsets for input files due to possible differences 
                 // between firstseq (same for all subbands) and actual first sequence number of each file
   int is_CS = 0; // if 1 then input file is CS data
@@ -1793,18 +1859,25 @@ int main( int argc, char **argv )
   char *s_ptr, dummy_string[parsetmaxlinelength], dummy_string2[parsetmaxlinelength];
   int channellist[1000];
   char tmpname[40];
-  char channellist_name[100];
+  //  char channellist_name[100];
   int nrlines, ret;
   int blocksperStokes, integrationSteps, clockparam, subbandFirst, nsubbands, clipav;
   float lowerBandFreq, lowerBandEdge, subband_width, bw, sigma_limit;
   double lofreq;
   long skipNrBlocks, truncNrBlocks;
-  int  is_IS2 = 0; // 0 for old/orginal names ; 1 = Incoherentstokes 2nd transpose parset names 
+  //  int  is_IS2 = 0; // 0 for old/orginal names ; 1 = Incoherentstokes 2nd transpose parset names 
   char IncoherentStokesAreTransposed[6]="";  // exists and True for Incoherentstokes 2nd transpose parset names
   double *gains;   // array with gains, if gains are not given then has all ones...
 
   //  char header_txt[parsetmaxnrlines][1001], *txt[parsetmaxnrlines],;
   char *header_txt[parsetmaxnrlines];
+
+  clock_t tstart, tend;
+  tstart = clock();
+		
+
+
+
   for(i = 0; i < parsetmaxnrlines; i++) {
     header_txt[i] = calloc(parsetmaxlinelength+1, 1);
     if(header_txt[i] == NULL) {
@@ -1822,6 +1895,7 @@ int main( int argc, char **argv )
   subbandnr = 0;
   skipNrBlocks = 0;
   truncNrBlocks = 0;
+  subband_width = 0;
   cleanPRSData(&subintdata);
 
   sigma_limit = -1;
@@ -2516,6 +2590,24 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
 
   closePSRData(&subintdata);
   free (gains);
+  tend = clock();
+
+
+  if(application.verbose) {
+    tend -= tstart;
+    double tottime = tend/(double)CLOCKS_PER_SEC;
+    printf("\n\n");
+    printf("Total execution time: %10.2lf seconds\n", tottime);
+    printf("Data reading:         %10.2lf seconds (%6.3lf%%)\n", time_read, 100.0*time_read/tottime);
+    printf("Swapping floats:      %10.2lf seconds (%6.3lf%%)\n", time_swapfloats, 100.0*time_swapfloats/tottime);
+    printf("Calculating rms:      %10.2lf seconds (%6.3lf%%)\n", time_calcrms, 100.0*time_calcrms/tottime);
+    printf("Calculating scales:   %10.2lf seconds (%6.3lf%%)\n", time_calcscales, 100.0*time_calcscales/tottime);
+    printf("Clipping and scaling: %10.2lf seconds (%6.3lf%%)\n", time_clipscale, 100.0*time_clipscale/tottime);
+    printf("Packing:              %10.2lf seconds (%6.3lf%%)\n", time_packing, 100.0*time_packing/tottime);
+    printf("Writing:              %10.2lf seconds (%6.3lf%%)\n", time_writing, 100.0*time_writing/tottime);
+    double overhead = tottime - time_read - time_swapfloats - time_calcrms - time_calcscales - time_clipscale - time_packing - time_writing;
+    printf("Overhead:             %10.2lf seconds (%6.3lf%%)\n", overhead, 100.0*overhead/tottime);
+  }
 
   return 0;
 }
