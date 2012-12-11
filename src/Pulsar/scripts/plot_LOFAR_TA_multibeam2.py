@@ -64,6 +64,8 @@ if __name__ == '__main__':
 	#CS_SAP0_BEAM0_
 	file = open(options.chisq,"r")
 	for line in file.readlines():
+		psr=line.split("_")[-1].split(" chi")[0]
+		if psr != options.target: continue
 		beam = int(line.split("CS_SAP%s_BEAM" % (options.sap))[1].split("_")[0])
 		chisq = float(line.split("chi-sq=")[1])
 		Chisqs.append([beam,chisq])    
