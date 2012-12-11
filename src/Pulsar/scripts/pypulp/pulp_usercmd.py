@@ -51,7 +51,7 @@ class CMDLine:
 		self.user_beams = [] # list of User beams to process
 		self.user_excluded_beams = [] # list of User excluded beams
 		self.psrbs = self.psrjs = [] # list of B and J names of pulsars from ATNF catalog
-		self.ras = self.decs = self.s400 = [] # lists of RA, DEC, and S400 of catalog pulsars
+		self.ras = self.decs = self.s400 = self.DMs = self.P0s = [] # lists of RA, DEC, S400, DM, and P0 of catalog pulsars
         	self.usage = "Usage: %prog <--id ObsID> [-h|--help] [OPTIONS]"
         	self.cmd = opt.OptionParser(self.usage, version="%prog " + self.version)
         	self.cmd.add_option('--id', '--obsid', dest='obsid', metavar='ObsID',
@@ -78,6 +78,8 @@ class CMDLine:
                            help="turn off running pdmp in the pipeline", default=False)
         	self.cmd.add_option('--summary', action="store_true", dest='is_summary', 
                            help="making only summaries on already processed data", default=False)
+        	self.cmd.add_option('--feedback', action="store_true", dest='is_feedback', 
+                           help="making only feedback files on already processed data", default=False)
         	self.cmd.add_option('--plots-only', action="store_true", dest='is_plots_only', 
                            help="creating diagnostic plots only on processing nodes assuming the data required for plots is there already", default=False)
         	self.cmd.add_option('--single-pulse', action="store_true", dest='is_single_pulse', 
@@ -121,6 +123,12 @@ class CMDLine:
         	self.cmd.add_option('--nsplits', dest='nsplits', metavar='#SPLITS',
                            help="only process the #SPLITS splits starting from SPLIT# determined by --first-frequency-split. \
                                  For CS/IS it works only for processing with DAL support. Default: all splits", default=-1, type='int')
+        	self.cmd.add_option('--fwhm-CS', dest='fwhm_CS', metavar='FWHM (deg)',
+                           help="set the full-width at half maximum (in degrees) for CS beams. Default is 1 deg for HBA and 2 deg for LBA that \
+                                 corresponds roughly to the beam sizes of Superterp at 120 and 60 MHz", default=-1., type='float')
+        	self.cmd.add_option('--fwhm-IS', dest='fwhm_IS', metavar='FWHM (deg)',
+                           help="set the full-width at half maximum (in degrees) for IS beams. Default is 6 deg for HBA and 12 deg for LBA that \
+                                 corresponds roughly to the beam sizes of Superterp at 120 and 60 MHz", default=-1., type='float')
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python and intermediate data files are not deleted", default=False)
         	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',
@@ -212,10 +220,10 @@ class CMDLine:
 			if log != None: log.error(msg)
 			else: print msg
 			quit(1)
-	
+
 		# when do only summaries (or plots-only or --nodecode) then ignore --del option if given, otherwise 
 		# everything will be deleted and if raw data are already erased then we are screwed
-		if (self.opts.is_summary or self.opts.is_plots_only or self.opts.is_nodecode) and self.opts.is_delete:
+		if (self.opts.is_summary or self.opts.is_plots_only or self.opts.is_nodecode or self.opts.is_feedback) and self.opts.is_delete:
 			self.opts.is_delete = False
 			msg="***\n*** Warning: You give --del with one of other options (--summary or --plots-only or --nodecode).\n\
 *** Deleting of previous results will be ignored and new results will be overwritten.\n***"
@@ -223,7 +231,7 @@ class CMDLine:
 			else: print msg
 
 		# set to ignore checking for rawdata if one of the flags below is true:
-		if self.opts.is_summary or self.opts.is_plots_only or self.opts.is_nodecode:
+		if self.opts.is_summary or self.opts.is_plots_only or self.opts.is_nodecode or self.opts.is_feedback:
 			self.opts.is_skip_check_rawdata = True
 
 		# checking that if --beams used then beams are specified correctly
@@ -315,8 +323,17 @@ class CMDLine:
 		if not self.opts.is_nofold:
 			# reading B1950 and J2000 pulsar names from the catalog and checking if our pulsars are listed there
 			# also reading coordinates and flux
-			self.psrbs, self.psrjs, self.s400 = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(1,2,9), dtype=str, unpack=True)
+			self.psrbs, self.psrjs, self.P0s, self.DMs, self.s400 = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(1,2,7,8,9), dtype=str, unpack=True)
 			self.ras, self.decs = np.loadtxt(cep2.psrcatalog, comments='#', usecols=(5,6), dtype=float, unpack=True)
+			# filtering out those pulsars that do not have known values of either P0 or DM
+			crit=(self.P0s != "*")&(self.DMs != "*")
+			self.psrbs = self.psrbs[crit]
+			self.psrjs = self.psrjs[crit]
+			self.P0s = self.P0s[crit]
+			self.DMs = self.DMs[crit]
+			self.s400 = self.s400[crit]
+			self.ras = self.ras[crit]
+			self.decs = self.decs[crit]
 
 			# checking if given psr(s) names are valid, and these pulsars are in the catalog
 			if len(self.psrs) != 0 and self.psrs[0] != "parset" and self.psrs[0] != "sapfind" and \
@@ -448,11 +465,20 @@ class CMDLine:
 
 	# updating cmdline default parameters based on obtained info about Observation
 	# such as, number of frequency splits
-	def update_default_values(self, obs, log=None):
+	# and about FWHMs of CS and IS beams (depends on what observation is, HBA or LBA)
+	def update_default_values(self, obs, cep2, log=None):
+		# updating number of splits...
 		if self.opts.first_freq_split >= obs.nsplits: self.opts.first_freq_split = 0
 		if self.opts.nsplits == -1: self.opts.nsplits = obs.nsplits
 		if self.opts.first_freq_split + self.opts.nsplits > obs.nsplits:
 			self.opts.nsplits -= (self.opts.first_freq_split + self.opts.nsplits - obs.nsplits)
+		# updating the real values of FWHM to use
+		if self.opts.fwhm_CS < 0.0:
+			if obs.antenna == "HBA": self.opts.fwhm_CS = cep2.fwhm_hba
+			if obs.antenna == "LBA": self.opts.fwhm_CS = cep2.fwhm_lba
+		if self.opts.fwhm_IS < 0.0:
+			if obs.antenna == "HBA": self.opts.fwhm_IS = cep2.fov_hba
+			if obs.antenna == "LBA": self.opts.fwhm_IS = cep2.fov_lba
 
 	# print summary of all set input parameters
 	def print_summary(self, cep2, obs, log=None):
@@ -497,6 +523,7 @@ class CMDLine:
 			log.info("Delete previous results = %s" % (self.opts.is_delete and "yes" or "no"))
 			log.info("Log files mode = %s" % (self.opts.is_log_append and "append" or "overwrite"))
 			if self.opts.is_summary: log.info("Summaries ONLY")
+			elif self.opts.is_feedback: log.info("Feedbacks ONLY")
 			else:
 				skipped=""
 				if obs.CS and self.opts.is_noCS: skipped += " CS"

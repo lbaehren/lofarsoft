@@ -46,13 +46,15 @@ class Pipeline:
 		# extensions of the files to copy to archive in summary (*_nopfd*.tgz)
 		self.summary_archive_exts=["*.log", "*.txt", "*.pdf", "*.ps", "*.bestprof", "*.inf", "*.rfirep", "*png", "*parset", "*.par"]
 		# prefix and suffix for summary archive name, in between them there will CS, IS, CV code
-		self.summary_archive_prefix="_combined"
-		self.summary_archive_suffix="_nopfd.tar.gz"
+		self.summary_archive_prefix="_summary"
+		self.summary_archive_suffix=".tar"
 		# extensions of the files to copy to a full archive (*.tgz)
-		self.full_archive_exts=["*.log", "*.txt", "*parset", "*.par", "*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse", "*.rv", "*.out"]
+		self.full_archive_exts=["*.log", "*.txt", "*parset", "*.par", "*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse", "*.rv", "*.out", "*.h5"]
 		# prefix and suffix for full archive name, in between them there will CS, IS, CV code
 		self.full_archive_prefix="_pulp"
 		self.full_archive_suffix=".tgz"
+		self.number_failed_pipes = 0   # number of failed pipelines
+		self.number_failed_summaries = 0  # number of failed summaries
 
 		# initializing Processing Units based on the list of beams to process
                 for beam in cmdline.beams:
@@ -96,14 +98,14 @@ class Pipeline:
 			cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, \
 			unit.summary_node_dir_suffix) for unit in self.units if unit.summary_node != "" and unit.summary_node_dir_suffix != ""]
 		unique_outdirs=np.unique(unique_outdirs)
-		fbindex = 0  # file index for feedback file; "0" is reserved for general *_pulp.log log-file
+		fbindex = obs.nrTiedArrayBeams  # file index for feedback file, the offset accounts for total number of TABs (each has its own feedback)
 		for uo in unique_outdirs:
 			node=uo.split(":")[0]
 			sumdir=uo.split(":")[1]
 			self.summary_dirs[node] = sumdir
-			fbindex += 1
-			fbunit = FeedbackUnit(fbindex, node, sumdir)
+			fbunit = FeedbackUnit(fbindex, node, sumdir, cmdline.opts.obsid, -1, -1)
 			self.feedbacks.append(fbunit)
+			fbindex += 1
 			# deleting previous results if option --del was set
 			if cmdline.opts.is_delete:
 				log.info("Deleting previous summary results on %s: %s" % (node, sumdir))
@@ -205,8 +207,9 @@ class Pipeline:
 				# loop over finished processes to see if they all finished OK
 				failed_units = [u for u in self.units if u.parent.returncode > 0]
 				Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
-				log.info("Failed beams [%d]: %s" % (len(failed_units), ", ".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
-				if len(failed_units) > 0:
+				self.number_failed_pipes = len(failed_units)
+				log.info("Failed beams [%d]: %s" % (self.number_failed_pipes, ",".join(["%s:%s" % (u.sapid, u.tabid) for u in failed_units])))
+				if self.number_failed_pipes > 0:
 					log.info("*** Summaries will not be complete! Re-run processing for the failed beams using --beams option. ***")
 
 			self.sum_popens=[]
@@ -242,12 +245,21 @@ class Pipeline:
 			# loop over finished summaries to see if they all finished OK
 			failed_summaries = [s for s in self.sum_popens if s.returncode > 0]
 			Popen(shlex.split("stty sane"), stderr=open(os.devnull, 'rb')).wait()
-			log.info("%d failed summaries" % (len(failed_summaries)))
+			self.number_failed_summaries = len(failed_summaries)
+			log.info("%d failed summaries" % (self.number_failed_summaries))
 
 		except Exception:
 			log.exception("Oops... 'finish' function of the pipeline has crashed!")
 			self.kill(log)
 			quit(1)
+
+	# return number of failed pipelines
+	def get_number_failed_pipes(self):
+		return self.number_failed_pipes
+
+	# return number of failed summaries
+	def get_number_failed_summaries(self):
+		return self.number_failed_summaries
 
 	# execute command on local node (similar to execute in PipeUnit)
 	def execute(self, cmd, log, workdir=None, shell=False, is_os=False):
@@ -297,6 +309,36 @@ class Pipeline:
 				if sum_popen != None: sum_popen.poll()
 		self.sum_popens=[]
 
+	# make feedback file
+	def make_feedback(self, obs, cep2, cmdline, log):
+		sumnode=cep2.get_current_node()
+		sumdir=self.summary_dirs[sumnode]
+
+		# moving log-files to corresponding directory
+		log.info("Moving log-files...")
+		for unit in [u for u in self.units if u.summary_node == sumnode]: 
+			if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
+				if not cmdline.opts.is_log_append:	
+					cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
+						(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
+					self.execute(cmd, log, workdir=sumdir)
+				else:
+					# appending log from sumdir to the one in corresponing beam directory
+					cmd="cat %s/%s_sap%03d_beam%04d.log >> %s/%s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
+						(sumdir, obs.id, unit.sapid, unit.tabid, sumdir, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
+					self.execute(cmd, log, is_os=True)
+					# removing log from sumdir
+					cmd="rm -f %s_sap%03d_beam%04d.log" % (obs.id, unit.sapid, unit.tabid)
+					self.execute(cmd, log, workdir=sumdir)
+
+                # either "CS", "IS", "CV", ..
+                data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
+		tarname="%s%s%s%s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix)
+		# updating the Feedback unit
+		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
+		fbunit.update("%s/%s.gz" % (sumdir, tarname), data_code, True)
+		fbunit.flush("%s/.%s%s%s.fb" % (cep2.get_logdir(), obs.id, self.summary_archive_prefix, data_code), cep2, True)
+
 	# run necessary processes to organize summary info on summary nodes
 	# to be run locally on summary node
 	def make_summary(self, obs, cep2, cmdline, log):
@@ -304,10 +346,13 @@ class Pipeline:
 			sumnode=cep2.get_current_node()
 			data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
 
-			if data_code == "CS" or data_code == "IS":
-				self.make_summary_CS_IS(obs, cep2, cmdline, log)
-			if data_code == "CV":
-				self.make_summary_CV(obs, cep2, cmdline, log)
+			if cmdline.opts.is_feedback: 
+				self.make_feedback(obs, cep2, cmdline, log)
+			else:
+				if data_code == "CS" or data_code == "IS":
+					self.make_summary_CS_IS(obs, cep2, cmdline, log)
+				if data_code == "CV":
+					self.make_summary_CV(obs, cep2, cmdline, log)
 
 		except Exception:
 			log.exception("Oops... 'make_summary' function on %s has crashed!" % (cep2.get_current_node()))
@@ -391,21 +436,16 @@ class Pipeline:
 
 		# Make a tarball of all the plots (summary archive)
 		log.info("Making a final summary tarball of all files with extensions: %s" % (", ".join(self.summary_archive_exts)))
+		tarname="%s%s%s%s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix)
 		tar_list=[]
 		for ext in self.summary_archive_exts:
 			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
-		cmd="tar -cvz --ignore-failed-read -f %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
-		self.execute(cmd, log, workdir=sumdir)
-
-		# Make a full tarball
-#		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
-#		tar_list=[]
-#		for ext in self.full_archive_exts:
-#			ext_list=rglob(sumdir, ext, 3)
-#			tar_list.extend(ext_list)
-#		cmd="tar -cv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
-#		self.execute(cmd, log, workdir=sumdir)
+		cmd="tar -cv --ignore-failed-read -f %s %s" % (tarname, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		try: # --ignore-failed-read does not seem to help with tar failing for some beams
+                     # like file was changed during the tar, though tarball seem to be fine
+			self.execute(cmd, log, workdir=sumdir)
+		except: pass
 
 		# finish
 		end_time=time.time()
@@ -423,17 +463,17 @@ class Pipeline:
 		cmd="chmod -R g+w %s" % (sumdir)
 		os.system(cmd)
 
-		# adding summary log file to the full archive anf gzip it
-#		cmd="tar -rv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
-#		self.execute(cmd, log, workdir=sumdir)
-#		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
-#		self.execute(cmd, log, workdir=sumdir)
+		# adding log file to the archive and gzip it
+		cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
+		try: # --ignore-failed-read does not seem to help with tar failing for some beams
+                     # like file was changed during the tar, though tarball seem to be fine
+			self.execute(cmd, log, workdir=sumdir)
+		except: pass
+		cmd="gzip %s" % (tarname)
+		self.execute(cmd, log, workdir=sumdir)
 
 		# updating the Feedback unit
-#		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
-##		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
-#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
-#		fbunit.flush(cep2)
+		self.make_feedback(obs, cep2, cmdline, log)
 
 
 	# run necessary processes to organize summary info on summary nodes for CS and IS data
@@ -636,21 +676,16 @@ class Pipeline:
 
 		# Make a tarball of all the plots (summary archive)
 		log.info("Making a final summary tarball of all files with extensions: %s" % (", ".join(self.summary_archive_exts)))
+		tarname="%s%s%s%s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix)
 		tar_list=[]
 		for ext in self.summary_archive_exts:
 			ext_list=rglob(sumdir, ext, 3)
 			tar_list.extend(ext_list)
-		cmd="tar -cvz --ignore-failed-read -f %s%s%s%s %s" % (obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
-		self.execute(cmd, log, workdir=sumdir)
-
-		# Make a full tarball
-#		log.info("Making a final full tarball of all files with extensions: %s" % (", ".join(self.full_archive_exts)))
-#		tar_list=[]
-#		for ext in self.full_archive_exts:
-#			ext_list=rglob(sumdir, ext, 3)
-#			tar_list.extend(ext_list)
-#		cmd="tar -cv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
-#		self.execute(cmd, log, workdir=sumdir)
+		cmd="tar -cv --ignore-failed-read -f %s %s" % (tarname, " ".join([f.split(sumdir+"/")[1] for f in tar_list]))
+		try: # --ignore-failed-read does not seem to help with tar failing for some beams
+                     # like file was changed during the tar, though tarball seem to be fine
+			self.execute(cmd, log, workdir=sumdir)
+		except: pass
 
 		# finish
 		end_time=time.time()
@@ -668,17 +703,17 @@ class Pipeline:
 		cmd="chmod -R g+w %s" % (sumdir)
 		os.system(cmd)
 
-		# adding summary log file to the full archive anf gzip it
-#		cmd="tar -rv --ignore-failed-read -f %s%s%s %s" % (obs.id, self.full_archive_prefix, data_code, cep2.get_logfile().split("/")[-1])
-#		self.execute(cmd, log, workdir=sumdir)
-#		cmd="gzip -S %s %s%s%s" % (self.full_archive_suffix, obs.id, self.full_archive_prefix, data_code)
-#		self.execute(cmd, log, workdir=sumdir)
+		# adding log file to the archive and gzip it
+		cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
+		try: # --ignore-failed-read does not seem to help with tar failing for some beams
+                     # like file was changed during the tar, though tarball seem to be fine
+			self.execute(cmd, log, workdir=sumdir)
+		except: pass
+		cmd="gzip %s" % (tarname)
+		self.execute(cmd, log, workdir=sumdir)
 
 		# updating the Feedback unit
-#		fbunit=[u for u in self.feedbacks if u.node == sumnode and u.path == sumdir][0]
-##		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.full_archive_prefix, data_code, self.full_archive_suffix), data_code, log)
-#		fbunit.update("%s/%s%s%s%s" % (sumdir, obs.id, self.summary_archive_prefix, data_code, self.summary_archive_suffix), data_code, log)
-#		fbunit.flush(cep2)
+		self.make_feedback(obs, cep2, cmdline, log)
 
 
 # base class for the single processing (a-ka beam)
@@ -709,7 +744,7 @@ class PipeUnit:
 		self.end_time = 0    # end time (in s)
 		self.total_time = 0  # total time in s 
 		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse"]
+		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse", "*.h5"]
 		self.procdir = "BEAM%d" % (self.tabid)
 
 		# pulsars to fold for this unit
@@ -753,7 +788,7 @@ class PipeUnit:
 			# if special word "tabfind" is given
 			if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "tabfind":
 				log.info("Searching for best pulsar for folding in SAP=%d TAB=%d..." % (self.sapid, self.tabid))
-				self.psrs = find_pulsars(self.tab.rarad, self.tab.decrad, cmdline, cep2.tabfind)
+				self.psrs = find_pulsars(self.tab.rarad, self.tab.decrad, cmdline, cmdline.opts.fwhm_CS/2.)
 				if len(self.psrs) > 0: 
 					self.psrs = self.psrs[:1] # leave only one pulsar
 					log.info("%s" % (" ".join(self.psrs)))
@@ -771,16 +806,16 @@ class PipeUnit:
 					cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
 				self.psrs[:] = cmdline.psrs # copying all items
 
-			# if pulsar list is still empty, and we did not set --nofold then exit
-			if len(self.psrs) == 0:
-				log.error("*** No pulsar found to fold and --nofold is not used for SAP=%d TAB=%d. Exiting..." % (self.sapid, self.tabid))
-				sys.exit(1)
-			
 			# checking if pulsars are in ATNF catalog, or if not par-files do exist fo them, if not - exit
 			for psr in self.psrs:
 				if not check_pulsars(psr, cmdline, cep2, log):
 					log.info("*** No parfile found for pulsar %s for SAP=%d TAB=%d. Exiting..." % (psr, self.sapid, self.tabid))
 					sys.exit(1)
+
+			# if pulsar list is still empty, and we did not set --nofold then set is_nofold flag to True
+			if len(self.psrs) == 0:
+				log.warning("*** No pulsar found to fold for SAP=%d TAB=%d. Setting --nofold flag for this beam..." % (self.sapid, self.tabid))
+			
 			return self.psrs
 
 		except Exception:
@@ -993,31 +1028,39 @@ CLK line will be removed from the parfile!" % (parfile,))
 
 	# function that does last steps in processing, creating tarball, copyting it, changing ownership, etc...
 	def finish_off(self, obs, cep2, cmdline):
-		# copying parset file to output directory
-		self.log.info("Copying original parset file to output directory...")
-		cmd="cp -f %s %s" % (obs.parset, self.outdir)
-		self.execute(cmd, workdir=self.outdir)
-		# Make a tarball of all the plots for this beam
-		self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
-		tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
-		tar_list=[]
-		for ext in self.extensions:
-			ext_list=rglob(self.curdir, ext, 3)
-			tar_list.extend(ext_list)
-		tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
-		tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
-		cmd="tar -cvz --ignore-failed-read -f %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
-		self.execute(cmd, workdir=self.outdir)
 
-		# copying archive file to summary node
+		# tarball name
+		tarname="%s_sap%03d_tab%04d%s" % (obs.id, self.sapid, self.tabid, self.archive_suffix)
+		# variables for rsync'ing the data
+		verbose=""
+		if cmdline.opts.is_debug: verbose="-v"
 		output_dir="%s_%s/%s%s" % \
 			(cep2.processed_dir_prefix, self.summary_node, cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix)
 		output_archive="%s/%s" % (output_dir, tarname)
-		self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
-		verbose=""
-		if cmdline.opts.is_debug: verbose="-v"
-		cmd="rsync %s -axP %s %s:%s" % (verbose, tarname, self.summary_node, output_archive)
-		self.execute(cmd, workdir=self.outdir)
+
+		if not cmdline.opts.is_feedback:
+			# copying parset file to output directory
+			self.log.info("Copying original parset file to output directory...")
+			cmd="cp -f %s %s" % (obs.parset, self.outdir)
+			self.execute(cmd, workdir=self.outdir)
+			# Make a tarball of all the plots for this beam
+			self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
+			tar_list=[]
+			for ext in self.extensions:
+				ext_list=rglob(self.curdir, ext, 3)
+				tar_list.extend(ext_list)
+			tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
+			tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
+			cmd="tar -cvz --ignore-failed-read -f %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
+			try: # --ignore-failed-read does not seem to help with tar failing for some beams
+        	             # like file was changed during the tar, though tarball seem to be fine
+				self.execute(cmd, workdir=self.outdir)
+			except: pass
+
+			# copying archive file to summary node
+			self.log.info("Copying archive file to %s:%s" % (self.summary_node, output_dir))
+			cmd="rsync %s -axP %s %s:%s" % (verbose, tarname, self.summary_node, output_archive)
+			self.execute(cmd, workdir=self.outdir)
 
 		# finish
 		self.end_time=time.time()
@@ -1031,15 +1074,41 @@ CLK line will be removed from the parfile!" % (parfile,))
 		else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
 		os.system(cmd)
 		cmd="rsync %s -axP %s %s:%s" % (verbose, cep2.get_logfile(), self.summary_node, output_dir)
-		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
-		proc.communicate()
+		self.execute(cmd, workdir=self.outdir)
 
 		# changing the file permissions to be re-writable for group
 		cmd="chmod -R g+w %s" % (self.outdir)
 		os.system(cmd)
 
+		if not cmdline.opts.is_feedback:
+			# de-gzipping archive, adding log file to the archive and gzip it again
+			cmd="gzip -d %s" % (tarname)
+			self.execute(cmd, workdir=self.outdir)
+			cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname.split(".gz")[0], cep2.get_logfile().split("/")[-1])
+			try: # --ignore-failed-read does not seem to help with tar failing for some beams
+	                     # like file was changed during the tar, though tarball seem to be fine
+				self.execute(cmd, workdir=self.outdir)
+			except: pass
+			cmd="gzip %s" % (tarname.split(".gz")[0])
+			self.execute(cmd, workdir=self.outdir)
+
+		# initializing the Feedback unit
+		fbindex=0
+		for ss in range(self.sapid): 
+			for sap in obs.saps:
+				if sap.sapid == ss:
+					fbindex += sap.nrTiedArrayBeams
+					break
+		fbindex += self.tabid
+		fbunit = FeedbackUnit(fbindex, cep2.current_node, self.outdir, obs.id, self.sapid, self.tabid)
+		fbunit.update("%s/%s" % (self.outdir, tarname), self.code)
+		fbunit.flush("%s/.%s_sap%03d_beam%04d.fb" % (cep2.get_logdir(), obs.id, self.sapid, self.tabid), cep2, False)
+
 	# main processing function
 	def run(self, obs, cep2, cmdline, log):
+		# if there are no pulsars to fold we set --nofold option to True
+		if len(self.psrs) == 0 and cmdline.opts.is_nofold == False:
+			cmdline.opts.is_nofold = True
 		# if we are not using dspsr directly to read *.h5 files
 		if not cmdline.opts.is_with_dal:
 			self.run_nodal(obs, cep2, cmdline, log)
@@ -1071,7 +1140,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.execute(cmd)
 
 			# if we run the whole processing and not just plots
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_nodecode:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_nodecode and not cmdline.opts.is_feedback:
 				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
         		        	                          # also we need to moint locus nodes that we need
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
@@ -1085,12 +1154,20 @@ CLK line will be removed from the parfile!" % (parfile,))
 							process.communicate()
 #							input_file="%s/%s_SAP%03d_B%03d_S*_bf.raw" % (input_dir, obs.id, self.sapid, self.tabid)
 #							input_files.extend(glob.glob(input_file))
-							input_file=["%s/%s/%s" % (input_dir, obs.id, f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
+							input_file=["%s/%s" % (input_dir, f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
 							input_files.extend(input_file)
+							# copy *.h5 files (want to keep them)
+							for f in self.tab.rawfiles[loc]:
+								cmd="cp -f %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
+								self.execute(cmd, workdir=self.curdir)
 					input_file=" ".join(input_files)
 				else:
 					if cep2.current_node in self.tab.rawfiles:
 						input_file=" ".join(self.tab.rawfiles[cep2.current_node])
+						# copy *.h5 files
+						for f in self.tab.rawfiles[cep2.current_node]:
+							cmd="cp -f %s.h5 ." % (f.split(".raw")[0])
+							self.execute(cmd, workdir=self.curdir)
 					else: input_file=""
 #					input_file=glob.glob("%s/%s/%s_SAP%03d_B%03d_S*_bf.raw" % (cep2.rawdir, obs.id, obs.id, self.sapid, self.tabid))[0]
 
@@ -1102,7 +1179,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			total_chan = self.tab.nrSubbands*self.nrChanPerSub
 
 			# if we run the whole processing and not just plots
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 
 				# running data conversion (2bf2fits)
 				if not cmdline.opts.is_nodecode:
@@ -1209,7 +1286,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
 			# these programs should be run quick, so run them one by one
 
-			if not cmdline.opts.is_skip_dspsr:
+			if not cmdline.opts.is_skip_dspsr and not cmdline.opts.is_feedback:
 				# first, calculating the proper max divisor for the number of subbands
 #				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
 				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
@@ -1231,7 +1308,7 @@ CLK line will be removed from the parfile!" % (parfile,))
                                 	      psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_skip_dspsr:
 					# now running pdmp without waiting...
 					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
@@ -1258,7 +1335,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 				except: pass
 
 			# if we want to run prepdata to create a time-series and make a list of TOAs
-			if not cmdline.opts.is_plots_only and cmdline.opts.is_single_pulse:	
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and cmdline.opts.is_single_pulse:	
 				self.log.info("Running single-pulse analysis...")
 				prepdata_popens=[]  # list of prepdata Popen objects
 				for psr in self.psrs:   # pulsar list is empty if --nofold is used
@@ -1282,7 +1359,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 
 			# waiting for prepdata to finish
 			try:
-				if not cmdline.opts.is_plots_only and cmdline.opts.is_single_pulse:
+				if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and cmdline.opts.is_single_pulse:
 					self.waiting_list("prepdata", prepdata_popens)
 					# after all instances of prepdata are finished we run single_pulse_search.py on created .dat files
 					singlepulse_popens=[]  # list of single_pulse_search.py Popen objects
@@ -1307,7 +1384,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			except: pass
 
 			# running convert on prepfold ps to pdf and png
-			if not cmdline.opts.is_nofold:
+			if not cmdline.opts.is_nofold and not cmdline.opts.is_feedback:
 				self.log.info("Running convert on ps to pdf and png of the plots...")
 				prepfold_ps=glob.glob("%s/*.pfd.ps" % (self.curdir))
 				for psfile in prepfold_ps:
@@ -1320,7 +1397,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 					self.execute(cmd, workdir=self.curdir)
 
 			# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
-			if not cmdline.opts.is_nofold:
+			if not cmdline.opts.is_nofold and not cmdline.opts.is_feedback:
 				psr_bestprofs=rglob(self.outdir, "*.pfd.bestprof", 3)
 				if len(psr_bestprofs) > 0:
 					self.log.info("Reading chi-squared values and adding to chi-squared.txt...")
@@ -1372,12 +1449,12 @@ CLK line will be removed from the parfile!" % (parfile,))
 						cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
 						self.execute(cmd, workdir=self.outdir)
 
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_norfi and not cmdline.opts.is_skip_subdyn:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and not cmdline.opts.is_norfi and not cmdline.opts.is_skip_subdyn:
 				# waiting for subdyn to finish
 				self.waiting("subdyn.py", subdyn_popen)
 
 			# waiting for pdmp to finish
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_skip_dspsr:
 					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
 						self.waiting_list("pdmp", pdmp_popens)
@@ -1434,7 +1511,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.execute(cmd)
 
 			# if not just making plots...
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_nodecode:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and not cmdline.opts.is_nodecode:
 				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
         	        	                          # also we need to moint locus nodes that we need
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
@@ -1453,8 +1530,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 								# links to the *.raw files
 								cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
 								self.execute(cmd, workdir=self.curdir)
-								# links to the *.h5 files
-								cmd="ln -sf %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
+								# copy *.h5 files (want to keep them)
+								cmd="cp -f %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
 								self.execute(cmd, workdir=self.curdir)
 							input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
 							input_files.extend(input_file)
@@ -1467,8 +1544,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 							# links to the *.raw files
 							cmd="ln -sf %s ." % (f)
 							self.execute(cmd, workdir=self.curdir)
-							# links to the *.h5 files
-							cmd="ln -sf %s.h5 ." % (f.split(".raw")[0])
+							# copy *.h5 files
+							cmd="cp -f %s.h5 ." % (f.split(".raw")[0])
 							self.execute(cmd, workdir=self.curdir)
 						input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
 						input_file=" ".join(input_files)
@@ -1485,7 +1562,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			nsubs_eff = min(self.tab.nrSubbands, proc_subs)
 			total_chan = nsubs_eff * self.nrChanPerSub
 
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
 				# we also sort this list by split number
 				s0_files=sorted([f for f in input_files if re.search("_S0_", f) is not None], key=lambda input_file: int(input_file.split("_P")[-1].split("_")[0]))
@@ -1543,18 +1620,15 @@ CLK line will be removed from the parfile!" % (parfile,))
 							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
-					# removing links for input h5 files
+					# removing links for input .raw files
 					if not cmdline.opts.is_debug:
-						cmd="rm -f %s" % (" ".join(input_files))
-						self.execute(cmd, workdir=self.curdir)
-						# removing links for input .raw files
 						cmd="rm -f %s" % (" ".join(["%s.raw" % (f.split(".h5")[0]) for f in input_files]))
 						self.execute(cmd, workdir=self.curdir)
 
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
 			# these programs should be run quick, so run them one by one
 
-			if not cmdline.opts.is_skip_dspsr:
+			if not cmdline.opts.is_skip_dspsr and not cmdline.opts.is_feedback:
 				# first, calculating the proper max divisor for the number of subbands
 #				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
 				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
@@ -1576,7 +1650,7 @@ CLK line will be removed from the parfile!" % (parfile,))
                                 	      psr, self.output_prefix, psr, self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_skip_dspsr:
 					# now running pdmp without waiting...
 					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
@@ -1597,7 +1671,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 							except Exception: pass
 		
 			# waiting for pdmp to finish
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_skip_dspsr:
 					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
 						self.waiting_list("pdmp", pdmp_popens)
@@ -1713,12 +1787,15 @@ class CVUnit(PipeUnit):
 		self.archive_suffix = "_plotsCV.tar.gz"
 		self.outdir_suffix = "_red"  # "_red"
 		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", "*.rv", "*.out"]
+		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", "*.rv", "*.out", "*.h5"]
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
 	# main CV processing function
 	def run(self, obs, cep2, cmdline, log):
+		# if there are no pulsars to fold we set --nofold option to True
+		if len(self.psrs) == 0 and cmdline.opts.is_nofold == False:
+			cmdline.opts.is_nofold = True
 		# if we are not using dspsr directly to read *.h5 files
 		if cmdline.opts.is_nodal:
 			self.run_nodal(obs, cep2, cmdline, log)
@@ -1750,7 +1827,7 @@ class CVUnit(PipeUnit):
 			self.execute(cmd)
 
 			# if not just making plots...
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
         	        	                          # also we need to moint locus nodes that we need
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
@@ -1769,8 +1846,8 @@ class CVUnit(PipeUnit):
 								# links to the *.raw files
 								cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
 								self.execute(cmd, workdir=self.curdir)
-								# links to the *.h5 files
-								cmd="ln -sf %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
+								# copy *.h5 files (want to keep them)
+								cmd="cp -f %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
 								self.execute(cmd, workdir=self.curdir)
 							input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
 							input_files.extend(input_file)
@@ -1782,8 +1859,8 @@ class CVUnit(PipeUnit):
 							# links to the *.raw files
 							cmd="ln -sf %s ." % (f)
 							self.execute(cmd, workdir=self.curdir)
-							# links to the *.h5 files
-							cmd="ln -sf %s.h5 ." % (f.split(".raw")[0])
+							# copy *.h5 files
+							cmd="cp -f %s.h5 ." % (f.split(".raw")[0])
 							self.execute(cmd, workdir=self.curdir)
 						input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
 
@@ -1799,7 +1876,7 @@ class CVUnit(PipeUnit):
 			nsubs_eff = min(self.tab.nrSubbands, proc_subs)
 			total_chan = nsubs_eff * self.nrChanPerSub
 
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
 				# we also sort this list by split number
 				s0_files=sorted([f for f in input_files if re.search("_S0_", f) is not None], key=lambda input_file: int(input_file.split("_P")[-1].split("_")[0]))
@@ -1843,11 +1920,8 @@ class CVUnit(PipeUnit):
 							cmd="rm -f %s" % (" ".join(remove_list))
 							self.execute(cmd, workdir=self.curdir)
 
-					# removing links for input h5 files
+					# removing links for input .raw files
 					if not cmdline.opts.is_debug:
-						cmd="rm -f %s" % (" ".join(input_files))
-						self.execute(cmd, workdir=self.curdir)
-						# removing links for input .raw files
 						cmd="rm -f %s" % (" ".join(["%s.raw" % (f.split(".h5")[0]) for f in input_files]))
 						self.execute(cmd, workdir=self.curdir)
 
@@ -1866,52 +1940,53 @@ class CVUnit(PipeUnit):
 							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
-			# first, calculating the proper min divisir for the number of subbands
-#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
-			#self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
-			# calculating the greatest common denominator of self.tab.nrSubbands starting from self.nrChanPerSub
-			#pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
-			pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
-			self.log.info("Creating diagnostic plots...")
-			for psr in self.psrs:
-				# creating DSPSR diagnostic plots
-				cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				if not cmdline.opts.is_skip_rmfit:
-					try:
-						# running rmfit for negative and positive RMs
-						cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
-						cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
-						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
-                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
-							psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
-					except Exception:
-						self.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
+			if not cmdline.opts.is_feedback:
+				# first, calculating the proper min divisir for the number of subbands
+#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
+				#self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
+				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
+				# calculating the greatest common denominator of self.tab.nrSubbands starting from self.nrChanPerSub
+				#pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
+				pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
+				self.log.info("Creating diagnostic plots...")
+				for psr in self.psrs:
+					# creating DSPSR diagnostic plots
+					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					if not cmdline.opts.is_skip_rmfit:
+						try:
+							# running rmfit for negative and positive RMs
+							cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+							cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+							cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
+        	                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+								(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
+								psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+						except Exception:
+							self.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
+							cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
+        	                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+								(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+								psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+					else:
 						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
-                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+                	                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
 							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
 							psr, self.output_prefix, psr, self.output_prefix)
 						self.execute(cmd, workdir=self.curdir)
-				else:
-					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
-                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-						(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
-						psr, self.output_prefix, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
 
 			# Running pdmp
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				# now running pdmp without waiting...
 				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
 					self.log.info("Running pdmp...")
@@ -1931,7 +2006,7 @@ class CVUnit(PipeUnit):
 						except Exception: pass
 		
 			# waiting for pdmp to finish
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
 					self.waiting_list("pdmp", pdmp_popens)
 					# when pdmp is finished do extra actions with files...
@@ -1987,7 +2062,7 @@ class CVUnit(PipeUnit):
 			self.execute(cmd)
 
 			# if not just making plots...
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_nodecode:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and not cmdline.opts.is_nodecode:
 				if len(self.tab.location) > 1: # it means we are on hoover nodes, so dir with the input data is different
         	        	                          # also we need to moint locus nodes that we need
 					self.log.info("Re-mounting locus nodes on 'hoover' node %s: %s" % (cep2.current_node, " ".join(self.tab.location)))
@@ -2004,6 +2079,9 @@ class CVUnit(PipeUnit):
 							self.log.info("Making links to input files in the current directory...")
 							for f in self.tab.rawfiles[loc]:
 								cmd="ln -sf %s/%s ." % (input_dir, f.split("/" + obs.id + "/")[-1])
+								self.execute(cmd, workdir=self.curdir)
+								# copy *.h5 files (want to keep them)
+								cmd="cp -f %s/%s.h5 ." % (input_dir, f.split("/" + obs.id + "/")[-1].split(".raw")[0])
 								self.execute(cmd, workdir=self.curdir)
 							input_file=["%s" % (f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
 							input_files.extend(input_file)
@@ -2029,7 +2107,7 @@ class CVUnit(PipeUnit):
 			nsubs_eff = min(self.tab.nrSubbands, proc_subs)
 			total_chan = nsubs_eff * self.nrChanPerSub
 
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
 				# we also sort this list by split number
@@ -2160,52 +2238,53 @@ class CVUnit(PipeUnit):
 							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
-			# first, calculating the proper min divisir for the number of subbands
-#			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
-			#self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
-			self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
-			# calculating the greatest common denominator of self.tab.nrSubbands starting from self.nrChanPerSub
-			#pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
-			pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
-			self.log.info("Creating diagnostic plots...")
-			for psr in self.psrs:
-				# creating DSPSR diagnostic plots
-				cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-				self.execute(cmd, workdir=self.curdir)
-				if not cmdline.opts.is_skip_rmfit:
-					try:
-						# running rmfit for negative and positive RMs
-						cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
-						cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
-						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
-                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
-							psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
-					except Exception:
-						self.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
+			if not cmdline.opts.is_feedback:
+				# first, calculating the proper min divisir for the number of subbands
+#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
+				#self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
+				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
+				# calculating the greatest common denominator of self.tab.nrSubbands starting from self.nrChanPerSub
+				#pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
+				pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
+				self.log.info("Creating diagnostic plots...")
+				for psr in self.psrs:
+					# creating DSPSR diagnostic plots
+					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					self.execute(cmd, workdir=self.curdir)
+					if not cmdline.opts.is_skip_rmfit:
+						try:
+							# running rmfit for negative and positive RMs
+							cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+							cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+							cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
+                        	                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+								(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix, \
+								psr, self.output_prefix, psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+						except Exception:
+							self.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
+							cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
+                        	                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+								(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
+								psr, self.output_prefix, psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+					else:
 						cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
-                                                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+                	                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
 							(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
 							psr, self.output_prefix, psr, self.output_prefix)
 						self.execute(cmd, workdir=self.curdir)
-				else:
-					cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps +append \) \
-                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-						(psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
-						psr, self.output_prefix, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
 
 			# Running pdmp
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				# now running pdmp without waiting...
 				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
 					self.log.info("Running pdmp...")
@@ -2225,7 +2304,7 @@ class CVUnit(PipeUnit):
 						except Exception: pass
 		
 			# waiting for pdmp to finish
-			if not cmdline.opts.is_plots_only:
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
 					self.waiting_list("pdmp", pdmp_popens)
 					# when pdmp is finished do extra actions with files...

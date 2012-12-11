@@ -149,8 +149,7 @@ class SAPBeam:
 		if not cmdline.opts.is_nofold:
 			if len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind") or \
 				(len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind3"):
-				if root.antenna == "LBA": self.psrs = find_pulsars(self.rarad, self.decrad, cmdline, si.fov_lba)
-				if root.antenna == "HBA": self.psrs = find_pulsars(self.rarad, self.decrad, cmdline, si.fov_hba)
+				self.psrs = find_pulsars(self.rarad, self.decrad, cmdline, cmdline.opts.fwhm_IS/2.)
 				if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind" and len(self.psrs)>0: self.psrs = self.psrs[:1]
 
 		# initializing SAP beams objects and making the list of SAP beams
@@ -336,6 +335,7 @@ class Observation:
 		self.project = "" # the name of the campaign
 		self.projectPI = "" # PI of the project
 
+		self.nrTiedArrayBeams = 0 # total number of TABs in all SAPs
 		self.nrBeams = 0  # number of station beams
 		self.saps=[]      # list of SAP beams (objects of SAPBeam class)
 
@@ -432,12 +432,14 @@ only for observations that were taken after this date"
 			self.duration=time.mktime(c2)-time.mktime(c1)  # difference in seconds
 			self.startdate  = self.startdate.split(" ")[0]
 		
-		# Getting the Antenna info (HBA or LBA)
+		# Getting the Antenna info (HBA or LBA) and Filter setting
         	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
         	status=os.popen(cmd).readlines()
         	if np.size(status)>0:
                 	# Antenna array setting exists in parset file
                 	self.antenna=status[0][:-1].split(" = ")[-1].split("_")[0]
+                	# band filter setting exists in parset file
+                	self.band=status[0][:-1].split(" = ")[-1].split("A_")[-1]
 
 		# Getting the Antenna config (LBA_OUTER, LBA_INNER, HBA_JOINED, etc.)
         	cmd="grep 'Observation.antennaSet' %s" % (self.parset,)
@@ -459,13 +461,6 @@ only for observations that were taken after this date"
         	if np.size(status)>0:
                 	# Campaign's PI name setting exists in parset file
                 	self.projectPI=status[0][:-1].split(" = ")[-1].split("'")[1]
-
-		# Getting the Filter setting
-        	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-                	# band filter setting exists in parset file
-                	self.band=status[0][:-1].split(" = ")[-1].split("A_")[-1]
 
 		# Getting the stations and their number (including separately the number of CS and RS)
         	cmd="grep 'OLAP.storageStationNames' %s" % (self.parset,)
@@ -750,6 +745,10 @@ only for observations that were taken after this date"
 		for sid in np.arange(self.nrBeams):
 			sap=SAPBeam(sid, self.parset, si, cmdline, self, log)
 			self.saps.append(sap)
+
+		# calculating the total number of TABs in all SAPs
+		for sap in self.saps:
+			self.nrTiedArrayBeams += sap.nrTiedArrayBeams
 
 		# updating the nodeslist if we are looking up for raw data in all alive nodes rather than using the nodeslist from Parset
 		if cmdline.opts.is_locate_rawdata:

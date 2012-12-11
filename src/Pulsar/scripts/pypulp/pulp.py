@@ -131,7 +131,8 @@ if __name__ == "__main__":
 
 		# updating cmdline default parameters based on obtained info about Observation
 		# such as, number of frequency splits
-		cmdline.update_default_values(obs, log)
+		# and about FWHMs of CS and IS beams (depends on what observation is, HBA or LBA)
+		cmdline.update_default_values(obs, cep2, log)
 		# printing info about observation
 		obs.print_info(log)
 
@@ -170,6 +171,10 @@ if __name__ == "__main__":
 			log.info("UTC time is:  %s" % (time.asctime(time.gmtime())))
 			log.info("Total wall time:  %.1f s (%.2f hrs)" % (pipe_total_time, pipe_total_time/3600.))
 
+			# get failures
+			nfailures = psrpipe.get_number_failed_pipes()
+			nfailures += psrpipe.get_number_failed_summaries()
+
 	                # flushing log file and copy it to summary nodes
 			log.flush()
 			for (sumnode, sumdir) in psrpipe.summary_dirs.items():
@@ -177,17 +182,25 @@ if __name__ == "__main__":
                        		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
                        		proc.communicate()
 
-			# append log-file info to the feedback file
-                        fbunit = FeedbackUnit(0, cep2.current_node, cep2.get_logdir())
-                	fbunit.update(cep2.get_logfile(), "LOG", log)
-                	fbunit.flush(cep2)
+			# open feedback file
+                        fbunit = FeedbackUnit(-1, cep2.current_node, cep2.get_logdir(), cmdline.opts.obsid, -1, -1)
+                	fbunit.update(cep2.get_logfile(), "Log")
+                	fbunit.flush(cep2.get_feedbackfile(), cep2, False, True)
+			# get list of all other feedback files, open them, append to the main feedback file and delete them
+			fbunits=glob.glob(cep2.get_logdir() + "/" + ".%s*.fb" % (cmdline.opts.obsid))
+			for fb in fbunits:
+				cmd="cat %s >> %s" % (fb, cep2.get_feedbackfile())
+				os.system(cmd)
+				# remove feedback file only if there were no failures
+				if nfailures == 0:
+					cmd="rm -f %s" % (fb)
+					os.system(cmd)
 
 			# copying feedback file to system directory
-#			try:
-#				cmd="cp -f %s %s" % (cep2.get_feedbackfile(), cep2.feedback_dir)
-#				os.system(cmd)	
-#			except Exception:
-#				log.error("Can't write feedback file %s to system directory %s!" % (cep2.get_feedbackfile(), cep2.feedback_dir))
+			try:
+				cmd="cp -f %s %s" % (cep2.get_feedbackfile(), cep2.feedback_dir)
+				os.system(cmd)	
+			except: pass
 		else:
 			# loading pipeline config from the file
 			if os.path.exists(pipeline_file):

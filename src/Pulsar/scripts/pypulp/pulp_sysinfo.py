@@ -22,9 +22,10 @@ class CEP2Info:
 		# Puma2 header file template for bf2puma2
 		self.puma2header = self.lofarsoft + "/release/share/pulsar/data/header.puma2"
 		# maximum radial distance (in deg) to find pulsars in FOV
-		self.fov_lba = 9.
-		self.fov_hba = 3.
-		self.tabfind = 1. # for TABs pulsars usually sit in the center of the beam, so use the same value for both HBA and LBA
+		self.fov_lba = 12. # IS fwhm for LBA
+		self.fov_hba = 6. # IS fwhm for HBA
+		self.fwhm_lba = 2. # CS fwhm for LBA
+		self.fwhm_hba = 1. # CS fwhm for HBA
 		self.pythonpath = os.environ['PYTHONPATH']
 		# get the node where the scripts run
 		self.current_node = os.popen('hostname').readlines()[0][:-1]
@@ -43,6 +44,8 @@ class CEP2Info:
 		self.feedback_dir="/globalhome/lofarsystem/log"
 		# keyword prefix for feedback info
 		self.feedback_prefix="LOFAR.ObsSW.Observation.DataProducts.Output_PulsarPipeline"
+		# keyword prefix for feedback info about general LOG file
+		self.feedback_log_prefix="LOFAR.ObsSW.Observation.Output_PulsarPipeline.log"
 		# directory with raw data (can be changed by user from command line)
 		self.rawdir = "/data"
 		# prefix for default directory with processed data
