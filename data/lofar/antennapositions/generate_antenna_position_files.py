@@ -32,20 +32,26 @@ stations = ["CS001", "CS002", "CS003",
             "CS103", "CS201", "CS301", 
             "CS302", "CS401", "CS501", 
             "RS106", "RS205", "RS208",
-            "RS306", "RS307", "RS406",
-            "RS503", "RS509"]#, "UK608",
-#            "DE601", "DE602", "DE603",
-#            "DE604", "DE605", "FR606",]
+            "RS305", "RS306", "RS307",
+            "RS406", "RS407", "RS503",
+            "RS508", "RS509",
+            "DE601", "DE602", "DE603",
+            "DE604", "DE605", "FR606",
+            "SE607", "UK608"]
 
 for antenna_set in antenna_sets:
     f = open("LOFAR_ITRF_"+antenna_set, 'w')
 
     for station in stations:
         print "LOFAR_ITRF_"+antenna_set, station
-        positions = md.getAbsoluteAntennaPositions(station, md.mapAntennasetKeyword(antenna_set))
+        try:
+            positions = md.getAbsoluteAntennaPositions(station, md.mapAntennasetKeyword(antenna_set))
         
-        for i in range(positions.shape[0]):
-            f.write("{0:03}{1:03}{2:03} {3:7.5f} {4:7.5f} {5:7.5f}\n".format(int(station[2:]), i/8, i, positions[i][0], positions[i][1], positions[i][2]))
+            for i in range(positions.shape[0]):
+                f.write("{0:03}{1:03}{2:03} {3:7.5f} {4:7.5f} {5:7.5f}\n".format(int(station[2:]), i/8, i, positions[i][0], positions[i][1], positions[i][2]))
+
+        except:
+            print "have no input data for station", station
 
     f.close()
     
