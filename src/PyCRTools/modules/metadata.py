@@ -481,7 +481,8 @@ def getCableAttenuation(station,antennaset,return_as_hArray=False,filter=None):
         if 'LBA' in antennaset:
             filter='LBA_30_90'
         else:
-            print "Please specify the filter"
+            print "Please specify the filter!"
+            filter='HBA_110_190'
     rcumode=antennaset2rcumode(antennaset,filter)
     att=attenuationFactor[rcumode]
     return cable_length*att
