@@ -105,7 +105,7 @@ for station in stations:
     print "*" * 80
     station.status = "PROCESSING"
 
-    station_plot_prefix = "./" + os.path.join(directory, "cr_physics-{0}-{1}-".format(options.id, station.stationname)).lstrip("/")
+    station_plot_prefix = os.path.join(directory, "cr_physics-{0}-{1}-".format(options.id, station.stationname))
 
     try:
 

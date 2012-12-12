@@ -298,7 +298,7 @@ def event_handler(eventID):
 
             for p in e[1]:
                 figure = SubElement(figures, "figure")
-                SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
+                SubElement(figure, "path").text = "/results"+str(p).split("results/")[1]
 
     # Open string file descriptor for output
     f = StringIO()
