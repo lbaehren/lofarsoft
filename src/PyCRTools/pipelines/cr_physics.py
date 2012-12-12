@@ -107,7 +107,7 @@ for station in stations:
     print "*" * 80
     station.status = "PROCESSING"
 
-    station_plot_prefix = event_plot_prefix + "{1}-".format(station.stationname)
+    station_plot_prefix = event_plot_prefix + "{0}-".format(station.stationname)
 
     try:
 
