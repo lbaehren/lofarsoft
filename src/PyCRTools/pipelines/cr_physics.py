@@ -79,6 +79,8 @@ for station in event.stations:
         station.polarization[p].statusmessage = ""
         station.polarization[p]["crp_plotfiles"] = []
 
+cr.write()
+
 cr_found = False
 
 # Create FFTW plans
@@ -148,9 +150,6 @@ for station in stations:
         findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[])
         station.polarization['0']['crp_plotfiles'].append(findrfi.plotlist[0])
         station.polarization['1']['crp_plotfiles'].append(findrfi.plotlist[1])
-
-        print station.polarization['0']['crp_plotfiles']
-        print station.polarization['1']['crp_plotfiles']
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
