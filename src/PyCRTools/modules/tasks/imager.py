@@ -173,8 +173,7 @@ class Imager(Task):
         # Initialize empty arrays
         self.scratchfft = self.data.empty("FFT_DATA")
         self.fftdata = cr.hArray(complex, dimensions=(self.nantennas, self.nfreq))
-        if not self.intgrfreq:
-            self.t_image = cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
+        self.t_image = cr.hArray(complex, dimensions=(self.NAXIS1, self.NAXIS2, self.nfreq), fill=0.)
 
         # Create image array if none is given as input
         if self.image == None:
@@ -207,21 +206,18 @@ class Imager(Task):
                 # Revoming RFI
                 if self.rfi_remove:
                     self.fftdata[..., self.rfi_remove] = 0
-
                 print "reading done"
 
                 print "beamforming started"
+                self.t_image.fill(0.)
+                cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
 
                 if self.intgrfreq:
-                    cr.hBeamformImageAndIntegrate(self.image[tstep], self.fftdata, self.frequencies, self.delays)
+                    cr.hFrequencyIntegratedImage(self.image[tstep], self.t_image)                    
                 elif self.inversefft:
-                    self.t_image.fill(0.)
-                    cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hFFTWExecutePlan(self.t_image2, self.t_image, self.plan)
                     cr.hSquareAddTransposed(self.image[tstep], self.t_image2, self.blocksize)
                 else:
-                    self.t_image.fill(0.)
-                    cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
                     cr.hAbsSquareAdd(self.image[tstep], self.t_image)
 
                 print "beamforming done"
