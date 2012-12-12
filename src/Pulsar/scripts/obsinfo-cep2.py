@@ -145,12 +145,14 @@ process_dir_status_script="%s/release/share/pulsar/bin/cep2_process_dir_status.s
 #storage_nodes=["locus001"]
 storage_nodes=cexec_nodes.keys()  # by default, we'll search all available locus nodes except hoover nodes
 # adding 'hoover' nodes to the table
-hoover_nodes=["locus101", "locus102"]
+#hoover_nodes=["locus101", "locus102"]
+hoover_nodes=["locus101"]
 cexec_nodes["locus101"] = "hoover:0"
-cexec_nodes["locus102"] = "hoover:1"
+#cexec_nodes["locus102"] = "hoover:1"
 
 # list of lse nodes names for use as keys in the dictionary that keeps the sizes of obs directories in outputInfo class
-lsenames = ["locus%03d" % (n, ) for n in np.arange(1,103,1)]  # we have up to 102 nodes, including hoover's
+#lsenames = ["locus%03d" % (n, ) for n in np.arange(1,103,1)]  # we have up to 102 nodes, including hoover's
+lsenames = ["locus%03d" % (n, ) for n in np.arange(1,102,1)]  # we have up to 102 nodes, including hoover's
 
 # list of directories with the data
 data_dirs=["/data"]
@@ -211,6 +213,7 @@ class obsinfo:
 		self.stokes="?"
 		self.nrSubbands = 0        # number of subbands
 		self.subbandList="?"       # range of subbands, e.g. 77..320
+#		self.subbands=[]           # list of subbands
 		self.subbandWidth = 0      # width of subband in kHz
 		self.nrChanPerSubIS = 0    # number of channels per subband (for IS)
 		self.nrChanPerSubCS = 0    # number of channels per subband (for CS)
@@ -385,16 +388,17 @@ class obsinfo:
 		if not is_ok:
 			self.rawdata_search(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
 
-	# parsing the string with ranges of subbands recorded to get the number of subbands
-	def getNrSubbands(self, sblist):
-		nsubs = 0
-		sbparts=sblist.split(",")
-		for ss in sbparts:
-			sedges=ss.split("..")
-			if len(sedges) == 1: nsubs += 1
-			else:
-				nsubs += (int(sedges[1]) - int(sedges[0]) + 1)
-		return nsubs
+        # parsing the string with ranges of subbands recorded to get list of subbands
+        def getSubbands(self, sblist):
+                subs=[]
+                sbparts=sblist.split(",")
+                for ss in sbparts:
+                        sedges=ss.split("..")
+                        if len(sedges) == 1: subs.append(int(sedges[0]))
+                        else: subs.extend(np.arange(int(sedges[0]), int(sedges[1])+1))
+#               subs=np.unique(subs)
+                subs.sort() # sorting with smallest being the first
+                return subs
 
 	# update info based on parset file
 	def update (self):
@@ -808,8 +812,12 @@ class obsinfo:
 		if np.size(status)>0:
 			# getting range of subbands
 			self.subbandList=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
-			# parsing the string with subband ranges to get total number of subbands recorded
-			self.nrSubbands = self.getNrSubbands(self.subbandList)
+                        # parsing the string with subband ranges to get list of subbands
+#                        self.subbands = self.getSubbands(self.subbandList)
+                        subbands = self.getSubbands(self.subbandList)
+                        # getting total number of Subbands
+#                        self.nrSubbands = np.size(self.subbands)
+                        self.nrSubbands = np.size(subbands)
 			# in the subbands range, several ranges can be written, and also subbands can be separated
 			# just by commas. So, we leave only 8 symbols
 			if len(self.subbandList) > 8:
@@ -950,10 +958,10 @@ class obsinfo:
 						lower_band_edge = 80
 					else: lower_band_edge = 0
 
-				if self.subbandList != "?" and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
-					try:
-						subband_first = int(self.subbandList.split("..")[0].split(",")[0])
-						# CS has a priority but we still have chance to modify it below
+#				if np.size(self.subbands) > 0 and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
+				if np.size(subbands) > 0 and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
+                                        try:
+                                                # CS has a priority but we still have chance to modify it below
 						nchanpersub = self.nrChanPerSubCS
 						if self.nrChanPerSubIS == self.nrChanPerSubCS or self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
 			                                nchanspersub = (self.nrChanPerSubIS != 0 and self.nrChanPerSubIS or self.nrChanPerSubCS)
@@ -963,12 +971,19 @@ class obsinfo:
 			                                nchanspersub = self.nrChanPerSubCS
 						else:   # still CS has a priority
 							nchanspersub = self.nrChanPerSubCS
-						if nchanpersub > 1:
-							lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
-						else:
-							lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subband_first - 0.5 * (self.subbandWidth / 1000.)
-						self.cfreq = lofreq + 0.5 * self.bw
-					except: pass
+                                                if nchanpersub > 1: # it means that we ran 2nd polyphase
+#                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * self.subbands[0] - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+#                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (self.subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subbands[0] - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+                                                else:
+#                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * self.subbands[0] - 0.5 * (self.subbandWidth / 1000.)
+#                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (self.subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.)
+                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subbands[0] - 0.5 * (self.subbandWidth / 1000.)
+                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.)
+                                                self.freq_extent = hifreq - lofreq
+                                                self.cfreq = lofreq + self.freq_extent/2.
+                                        except: pass
 			except: pass
 
 		# Getting number of Station beams
