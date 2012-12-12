@@ -274,7 +274,8 @@ class FindRFI(Task):
 
 #        calcbaseline1 = cr.trerun("CalcBaseline",1, avgspectrum,pardict = pardict,invert=False,HanningUp=False,normalize=False,doplot=0)
 #        amplitudes=hArray(copy=calcbaseline1.baseline)
-        amplitude_spectrum = self.cleaned_spectrum.copy()
+        amplitude_spectrum = self.cleaned_spectrum.new()
+        amplitude_spectrum.copy(self.cleaned_spectrum)
         amplitude_spectrum.sqrt()
         
         self.antennas_cleaned_sum_amplitudes =  2 * cr.hArray(self.amplitude_spectrum[...].sum())
