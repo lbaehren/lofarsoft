@@ -437,7 +437,8 @@ class CMDLine:
                 	                if len(tab.location) > 1 and len(avail_hoover_nodes) != len(cep2.hoover_nodes):
                         	       	        loc=""
                                 	       	if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
-						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
+#						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
+						if not tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
 						if loc != "":
         	                                        excluded_beams_id.append(ii)
                 	                       	        msg="Hoover node %s is not available for the beam %d:%d [#locations = %d] - excluded" % (loc, sapid, tabid, len(tab.location))

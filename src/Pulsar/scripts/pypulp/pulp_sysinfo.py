@@ -54,15 +54,15 @@ class CEP2Info:
 		self.hoover_data_dir="/cep2"
 		# full list of nodes and its cexec corresponding table
 		self.locus_nodes=["locus%03d" % (num+1) for num in range(100)]
-		self.hoover_nodes=["locus101", "locus102"]   # first is used to process CS data (if files per beam distributed over many nodes)
-							     # second - to process IS data
+#		self.hoover_nodes=["locus101", "locus102"]   # first is used to process CS data (if files per beam distributed over many nodes), second - to process IS data
+		self.hoover_nodes=["locus101"]   # is used to process data (both CS and IS), if files per beam distributed over many nodes
 		self.cexec_nodes={}
 		for num in range(100): # we have 100 locus nodes
 			key="locus%03d" % (num+1)
 			self.cexec_nodes[key] = "locus:%d" % (num)
 		# adding hoover nodes as well
 		self.cexec_nodes["locus101"] = "hoover:0"
-		self.cexec_nodes["locus102"] = "hoover:1"
+#		self.cexec_nodes["locus102"] = "hoover:1"
 		# cexec command to run. Using this mapfile makes keep mapping of the locus to be always the same
 		self.cexeccmd="cexec -f /etc/c3.conf.full"
 		# list of alive locus nodes
