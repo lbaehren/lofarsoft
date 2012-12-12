@@ -65,17 +65,17 @@ if not os.path.exists(directory):
 # Clean event status and plotlist
 event.status = "PROCESSING"
 event.statusmessage = ""
-event["crp_plotlist"] = []
+event["crp_plotfiles"] = []
 
 for station in event.stations:
     station.status = "NEW"
     station.statusmessage = ""
-    station["crp_plotlist"] = []
+    station["crp_plotfiles"] = []
 
     for p in station.polarization.keys():
         station.polarization[p].status = "NEW"
         station.polarization[p].statusmessage = ""
-        station.polarization[p]["crp_plotlist"] = []
+        station.polarization[p]["crp_plotfiles"] = []
 
 cr_found = False
 
@@ -144,8 +144,8 @@ for station in stations:
 
         # Find RFI and bad antennas
         findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[])
-        station.polarization['0']['crp_plotlist'].append(list(findrfi.plotlist[0]))
-        station.polarization['1']['crp_plotlist'].append(list(findrfi.plotlist[1]))
+        station.polarization['0']['crp_plotfiles'].append(list(findrfi.plotlist[0]))
+        station.polarization['1']['crp_plotfiles'].append(list(findrfi.plotlist[1]))
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
@@ -238,8 +238,8 @@ for station in stations:
 
         # Look for significant pulse in beamformed signal
         pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data=beamformed_timeseries, pulse_start=pulse_search_window_start, pulse_end=pulse_search_window_end, nsigma=options.accept_snr, save_plots=True, plot_prefix=station_plot_prefix+"-bf-", plot_type=options.plot_type, plotlist=[])
-        station.polarization['0']['crp_plotlist'].append(list(pulse_envelope_bf.plotlist[0]))
-        station.polarization['1']['crp_plotlist'].append(list(pulse_envelope_bf.plotlist[1]))
+        station.polarization['0']['crp_plotfiles'].append(list(pulse_envelope_bf.plotlist[0]))
+        station.polarization['1']['crp_plotfiles'].append(list(pulse_envelope_bf.plotlist[1]))
 
         station.polarization['0']['crp_bf_peak_amplitude'] = pulse_envelope_bf.peak_amplitude[0]
         station.polarization['1']['crp_bf_peak_amplitude'] = pulse_envelope_bf.peak_amplitude[1]
