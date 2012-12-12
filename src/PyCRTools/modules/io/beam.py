@@ -362,7 +362,7 @@ class BeamData(IOInterface):
             cr.hDelayToPhase(phases_dm, self['BEAM_FREQUENCIES'], self['DM_OFFSET'][1])  # Using this form of delay2phase since have delays as func. of freq.
             weights_dm[0].phasetocomplex(phases_dm)
             weights_dm[1:] = weights_dm[0]
-            data[...].mul(weights_dm[...])
+            #data[...].mul(weights_dm[...])
 
         # Adding extra calibration delay between stations.
         if np.any(self['CAL_DELAY']):
