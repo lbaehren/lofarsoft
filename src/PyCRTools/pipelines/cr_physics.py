@@ -79,7 +79,7 @@ for station in event.stations:
         station.polarization[p].statusmessage = ""
         station.polarization[p]["crp_plotfiles"] = []
 
-cr.write()
+event.write()
 
 cr_found = False
 
