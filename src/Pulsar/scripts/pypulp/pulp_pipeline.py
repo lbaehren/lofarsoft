@@ -162,7 +162,8 @@ class Pipeline:
 			# if data for this beam are on several nodes, then we have to log in to hoover node...
 			if len(unit.tab.location) > 1:
 				if unit.tab.is_coherent: locus=cep2.hoover_nodes[0] # we choose one hoover node for CS data
-				else: locus=cep2.hoover_nodes[1]                    # and another for IS data
+#				else: locus=cep2.hoover_nodes[1]                    # and another for IS data
+				else: locus=cep2.hoover_nodes[0]                    # and another for IS data
 			else:
 				locus=unit.tab.location[0]
 #			cmd="%s %s 'pulp.py --noinit --local --beams %d:%d %s'" %  \
@@ -756,7 +757,8 @@ class PipeUnit:
 	def set_outdir(self, obs, cep2, cmdline):
 		if len(self.tab.location) > 1 or len(self.tab.location) == 0:  # the last condition is when raw data are erased but still want to run only summaries
 			if self.tab.is_coherent: locus=cep2.hoover_nodes[0] # we choose one hoover node for CS data
-			else: locus=cep2.hoover_nodes[1]                    # and another for IS data
+			else: locus=cep2.hoover_nodes[0]                    # and another for IS data
+#			else: locus=cep2.hoover_nodes[1]                    # and another for IS data
 		else:
 			locus=self.tab.location[0]
 		# if user specified output dir (relative to /data/LOFAR_PULSAR_....)
