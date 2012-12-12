@@ -38,7 +38,7 @@ class Noise(Task):
             doc="Plot type (e.g. png, jpeg, pdf)"),
         plotlist = dict(default=[],
             doc="List of plots"),
-        plot_only_suspect_antennas = dict(default=True,
+        plot_only_suspect_antennas = dict(default=False,
             doc="Plot only those antennas that are suspect."),
     )
 
