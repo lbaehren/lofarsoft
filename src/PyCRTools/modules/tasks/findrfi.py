@@ -97,6 +97,7 @@ class FindRFI(Task):
         phase_RMS = dict(default=None, doc="RMS phase spread for each antenna, per frequency. Can be passed to RF calibration Task. Dimension = nantennas x nfreq", output=True),
         median_phase_spreads = dict(default=None, doc="Median over antennas, of the phase spread measure from all blocks. Dimension = [nfreq]", output=True),
         antennas_cleaned_power = dict(default=None, doc="Cleaned power (sum of squares) from cleaned spectrum, per antenna. ", output=True),
+        antennas_cleaned_sum_amplitudes = dict(default=None, doc="Cleaned sqrt(power) summed from cleaned spectrum, per antenna. ", output=True),
         save_plots = dict(default=False,
             doc="Store plots"),
         plot_prefix = dict(default="",
@@ -273,13 +274,17 @@ class FindRFI(Task):
 
 #        calcbaseline1 = cr.trerun("CalcBaseline",1, avgspectrum,pardict = pardict,invert=False,HanningUp=False,normalize=False,doplot=0)
 #        amplitudes=hArray(copy=calcbaseline1.baseline)
-
+        amplitude_spectrum = self.cleaned_spectrum.copy()
+        amplitude_spectrum.sqrt()
+        
+        self.antennas_cleaned_sum_amplitudes =  2 * cr.hArray(self.amplitude_spectrum[...].sum())
         # Sum up power for avg spectrum
         # Subtract dirty channels
         cleaned_power = 2 * cr.hArray(self.cleaned_spectrum[...].sum())
 #        dirty_power = 2 * cr.hArray(avgspectrum[...].sum() ) - cleaned_power
 #        total_power = 2 * cr.hArray(avgspectrum[...].sum() )
-
+        
+        
         self.antennas_cleaned_power = cleaned_power
 
         # Get bad antennas from outliers in power
