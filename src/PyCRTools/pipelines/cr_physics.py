@@ -62,6 +62,8 @@ directory = os.path.join(options.output_dir, str(options.id))
 if not os.path.exists(directory):
     os.makedirs(directory)
 
+event_plot_prefix = os.path.join(directory, "cr_physics-{0}-".format(options.id))
+
 # Clean event status and plotlist
 event.status = "PROCESSING"
 event.statusmessage = ""
@@ -105,7 +107,7 @@ for station in stations:
     print "*" * 80
     station.status = "PROCESSING"
 
-    station_plot_prefix = os.path.join(directory, "cr_physics-{0}-{1}-".format(options.id, station.stationname))
+    station_plot_prefix = event_plot_prefix + "{1}-".format(station.stationname)
 
     try:
 
@@ -146,6 +148,9 @@ for station in stations:
         findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[])
         station.polarization['0']['crp_plotfiles'].append(list(findrfi.plotlist[0]))
         station.polarization['1']['crp_plotfiles'].append(list(findrfi.plotlist[1]))
+
+        print station.polarization['0']['crp_plotfiles']
+        print station.polarization['1']['crp_plotfiles']
 
         # Select antennas which are marked good for both polarization
         dipole_names = f["DIPOLE_NAMES"]
@@ -237,7 +242,7 @@ for station in stations:
         print "starting pulse envelope"
 
         # Look for significant pulse in beamformed signal
-        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data=beamformed_timeseries, pulse_start=pulse_search_window_start, pulse_end=pulse_search_window_end, nsigma=options.accept_snr, save_plots=True, plot_prefix=station_plot_prefix+"-bf-", plot_type=options.plot_type, plotlist=[])
+        pulse_envelope_bf = cr.trun("PulseEnvelope", timeseries_data=beamformed_timeseries, pulse_start=pulse_search_window_start, pulse_end=pulse_search_window_end, nsigma=options.accept_snr, save_plots=True, plot_prefix=station_plot_prefix+"bf-", plot_type=options.plot_type, plotlist=[])
         station.polarization['0']['crp_plotfiles'].append(list(pulse_envelope_bf.plotlist[0]))
         station.polarization['1']['crp_plotfiles'].append(list(pulse_envelope_bf.plotlist[1]))
 
@@ -449,7 +454,7 @@ if cr_found:
     core_uncertainties = event["lora_coreuncertainties"].toNumpy()
     direction_uncertainties = [3., 3., 0]
 
-    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+    ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
     event.status = "CR_FOUND"
     event.statusmessage = ""
