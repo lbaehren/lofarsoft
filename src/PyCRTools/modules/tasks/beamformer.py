@@ -408,9 +408,9 @@ class BeamFormer(tasks.Task):
                       doc="Cartesian coordinates of the current antenna relative to the phase center of the array.",
                       unit="m"),
 
-        stationpos=dict(default=lambda self: (md.getStationPositions(self.datafile['STATION_NAME'][0], self.datafile['ANTENNA_SET'], True, coordinatesystem='ITRF') if self.single_station else md.ITRFCS002),
-                      doc="ITRF coordinates of the phace center (ussually center of current station).",
-                      unit="m"),
+        stationpos = dict(default = lambda self: (md.getStationPositions(self.datafile['STATION_NAME'][0], self.datafile['ANTENNA_SET'], True, coordinatesystem='ITRF') if self.single_station else md.ITRFCS002),
+                      doc = "ITRF coordinates of the phace center (usually center of current station).",
+                      unit = "m"),
 
         block_duration=dict(default=lambda self: self.sample_interval * self.blocklen,
                               doc="The length of a block in time units.",
@@ -561,9 +561,9 @@ class BeamFormer(tasks.Task):
                         default=True,
                         doc="If **True** plot the beamformed average spectrum at the end, otherwise the time series."),
 
-        single_station=dict(workarray=True,
-                        default=True,
-                        doc="if True using the 'ANTEANNA_POSITONS', otherwise 'ANTENNA_POSITION', info elsewere on their meanings.")
+        single_station = dict(workarray = True,
+                        default = True,
+                        doc = "if True using the 'ANTENNA_POSITONS' (phase center at the center of the station), otherwise 'ANTENNA_POSITION'(phase center at the LOFAR center), info elsewere on their meanings.")
 
     )
 
