@@ -343,6 +343,7 @@ for station in stations:
 
         # Check if result of planewave fit is reasonable
         residual_delays = direction_fit_plane_wave.residual_delays.toNumpy()
+        residual_delays = np.abs(residual_delays)
         
         average_residual = residual_delays.sum()/residual_delays.shape[0]
         
