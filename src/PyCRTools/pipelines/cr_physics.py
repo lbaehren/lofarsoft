@@ -72,7 +72,7 @@ for station in event.stations:
     station.statusmessage = ""
     station["crp_plotlist"] = []
 
-    for p in event.polarizations.keys():
+    for p in event.polarization.keys():
         station.polarization[k].status = "NEW"
         station.polarization[k].statusmessage = ""
         station.polarization[k]["crp_plotlist"] = []
