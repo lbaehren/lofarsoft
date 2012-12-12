@@ -194,8 +194,8 @@ for station in stations:
         # Get expected galactic noise strength
         galactic_noise = cr.trun("GalacticNoise", timestamp=tbb_time)
 
-        # Correct to expected level
-        antennas_cleaned_power = cr.hArray([findrfi.antennas_cleaned_power[i] for i in f["SELECTED_DIPOLES_INDEX"]])
+        # Correct to expected level (power is amplitude in this case)
+        antennas_cleaned_power = cr.hArray([findrfi.antennas_cleaned_sum_amplitudes[i] for i in f["SELECTED_DIPOLES_INDEX"]])
 
         station["crp_antennas_cleaned_power"] = antennas_cleaned_power
         station["crp_galactic_noise"] = galactic_noise.galactic_noise
