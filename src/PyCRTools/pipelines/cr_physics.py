@@ -77,8 +77,6 @@ for station in event.stations:
         station.polarization[p].statusmessage = ""
         station.polarization[p]["crp_plotlist"] = []
 
-event.write()
-
 cr_found = False
 
 # Create FFTW plans
