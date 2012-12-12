@@ -525,7 +525,9 @@ int writePSRFITSHeader(datafile_definition *datafile, int verbose)
   if(datafile->dd_mode == 0 && datafile->Period > 0) {
     sprintf(dummy_txt3, "%ldI", datafile->nrFreqChan*datafile->NrPols*datafile->NrBins);
   }else {   /* search mode */
-    sprintf(dummy_txt3, "%ldb", datafile->nrFreqChan*datafile->NrPols*datafile->NrBins);
+    long nrbytes = ceil((datafile->nrFreqChan*datafile->NrPols*datafile->NrBins*datafile->NrBits)/8.0);
+    sprintf(dummy_txt3, "%ldb", nrbytes);
+    /*    sprintf(dummy_txt3, "%ldb", datafile->nrFreqChan*datafile->NrPols*datafile->NrBins);*/
   }
   /* Instead of writing out a model, simply write periods in table. Works for PSRCHIVE. */
   char *ttypes[] = {"INDEXVAL", "TSUBINT", "OFFS_SUB", "LST_SUB", "RA_SUB", "DEC_SUB", "GLON_SUB", "GLAT_SUB", "FD_ANG", "POS_ANG", "PAR_ANG", "TEL_AZ", "TEL_ZEN", "DAT_FREQ", "DAT_WTS", "DAT_OFFS", "DAT_SCL", "DATA", "PERIOD"};
