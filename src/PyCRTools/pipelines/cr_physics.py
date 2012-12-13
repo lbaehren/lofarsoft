@@ -69,7 +69,7 @@ def process_event(event):
     event["crp_plotfiles"] = []
 
     try:
-        yield
+        yield event
     except EventError as e:
         logging.exception(e.msg)
         event.status = "ERROR"
@@ -95,7 +95,7 @@ def process_station(station):
     station["crp_plotfiles"] = []
 
     try:
-        yield
+        yield station
     except StationError as e:
         logging.exception(e.msg)
         station.status = "ERROR"
@@ -124,7 +124,7 @@ def process_polarization(polarization, *args):
         polarization[p]["crp_plotfiles"] = []
 
     try:
-        yield
+        yield polarization
     except PolarizationError as e:
         logging.exception(e.msg)
         for p in args:
