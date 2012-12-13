@@ -74,10 +74,11 @@ def process_event(event):
         logging.exception(e.msg)
         event.status = "ERROR"
         event.statusmessage = e.msg
-    except Exception as e:
+    except BaseException as e:
         logging.exception(str(e))
         event.status = "ERROR"
         event.statusmessage = str(e)
+        raise
     finally:
         event.write()
         print "event {0} completed in {1:.3f} s".format(event._id, time.clock() - start)
@@ -100,7 +101,7 @@ def process_station(station):
         logging.exception(e.msg)
         station.status = "ERROR"
         station.statusmessage = e.msg
-    except Exception as e:
+    except BaseException as e:
         logging.exception(str(e))
         station.status = "ERROR"
         station.statusmessage = str(e)
@@ -130,7 +131,7 @@ def process_polarization(polarization, *args):
         for p in args:
             polarization[p].status = "ERROR"
             polarization[p].statusmessage = e.msg
-    except Exception as e:
+    except BaseException as e:
         logging.exception(str(e))
         for p in args:
             polarization[p].status = "ERROR"
