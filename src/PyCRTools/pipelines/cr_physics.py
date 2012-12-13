@@ -58,12 +58,10 @@ def process_event(event):
         event.status = "ERROR"
         event.statusmessage = e.message
     except Exception as e:
-        logging.exception(e.message)
         event.status = "ERROR"
         event.statusmessage = e.message
         raise
     except BaseException as e:
-        logging.exception(e.message)
         event.status = "ERROR"
         event.statusmessage = "sigterm recieved"
         raise
@@ -88,12 +86,10 @@ def process_station(station):
         station.status = "ERROR"
         station.statusmessage = e.message
     except Exception as e:
-        logging.exception(e.message)
         station.status = "ERROR"
         station.statusmessage = e.message
         raise
     except BaseException as e:
-        logging.exception(e.message)
         station.status = "ERROR"
         station.statusmessage = "sigterm recieved"
         raise
@@ -122,13 +118,11 @@ def process_polarization(polarization, *args):
             polarization[p].status = "ERROR"
             polarization[p].statusmessage = e.message
     except Exception as e:
-        logging.exception(e.message)
         for p in args:
             polarization[p].status = "ERROR"
             polarization[p].statusmessage = e.message
         raise
     except BaseException as e:
-        logging.exception(e.message)
         for p in args:
             polarization[p].status = "ERROR"
             polarization[p].statusmessage = "sigterm recieved"
