@@ -25,24 +25,9 @@ from optparse import OptionParser
 from contextlib import contextmanager
 
 # Error handling
-class PipelineBaseError(Exception):
+class PipelineError(Exception):
     """Base class for pipeline exceptions."""
-
-class PipelineError(PipelineBaseError):
-    """Error with a description message.
-
-    ========= ====================================
-    Attribute Description
-    ========= ====================================
-    *msg*     message
-    ========= ====================================
-    """
-
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
+    pass
 
 class EventError(PipelineError):
     """Raised when an unhandlable error occurs at event level."""
@@ -71,13 +56,18 @@ def process_event(event):
     try:
         yield event
     except EventError as e:
-        logging.exception(e.msg)
+        logging.exception(e.message)
         event.status = "ERROR"
-        event.statusmessage = e.msg
+        event.statusmessage = e.message
+    except Exception as e:
+        logging.exception(e.message)
+        event.status = "ERROR"
+        event.statusmessage = e.message
+        raise
     except BaseException as e:
-        logging.exception(str(e))
+        logging.exception(e.message)
         event.status = "ERROR"
-        event.statusmessage = str(e)
+        event.statusmessage = "sigterm recieved"
         raise
     finally:
         event.write()
@@ -98,13 +88,18 @@ def process_station(station):
     try:
         yield station
     except StationError as e:
-        logging.exception(e.msg)
+        logging.exception(e.message)
         station.status = "ERROR"
-        station.statusmessage = e.msg
+        station.statusmessage = e.message
+    except Exception as e:
+        logging.exception(e.message)
+        station.status = "ERROR"
+        station.statusmessage = e.message
+        raise
     except BaseException as e:
-        logging.exception(str(e))
+        logging.exception(e.message)
         station.status = "ERROR"
-        station.statusmessage = str(e)
+        station.statusmessage = "sigterm recieved"
         raise
     finally:
         print "station {0} completed in {1:.3f} s".format(station.stationname, time.clock() - start)
@@ -127,15 +122,21 @@ def process_polarization(polarization, *args):
     try:
         yield polarization
     except PolarizationError as e:
-        logging.exception(e.msg)
+        logging.exception(e.message)
         for p in args:
             polarization[p].status = "ERROR"
-            polarization[p].statusmessage = e.msg
+            polarization[p].statusmessage = e.message
+    except Exception as e:
+        logging.exception(e.message)
+        for p in args:
+            polarization[p].status = "ERROR"
+            polarization[p].statusmessage = e.message
+        raise
     except BaseException as e:
-        logging.exception(str(e))
+        logging.exception(e.message)
         for p in args:
             polarization[p].status = "ERROR"
-            polarization[p].statusmessage = str(e)
+            polarization[p].statusmessage = "sigterm recieved"
         raise
     finally:
         print "polarization",
