@@ -45,9 +45,7 @@ class PolarizationError(PipelineError):
 def process_event(event):
     start = time.clock()
 
-    print 50*"#"
-    print "event {0}".format(event._id)
-    print 50*"#"
+    print "-- event {0}".format(event._id)
 
     event.status = "PROCESSING"
     event.statusmessage = ""
@@ -71,15 +69,13 @@ def process_event(event):
         raise
     finally:
         event.write()
-        print "event {0} completed in {1:.3f} s".format(event._id, time.clock() - start)
+        print "-- event {0} completed in {1:.3f} s".format(event._id, time.clock() - start)
 
 @contextmanager
 def process_station(station):
     start = time.clock()
 
-    print 50*"*"
-    print "station {0}".format(station.stationname)
-    print 50*"*"
+    print "-- station {0}".format(station.stationname)
 
     station.status = "PROCESSING"
     station.statusmessage = ""
@@ -102,17 +98,16 @@ def process_station(station):
         station.statusmessage = "sigterm recieved"
         raise
     finally:
-        print "station {0} completed in {1:.3f} s".format(station.stationname, time.clock() - start)
+        print "-- station {0} completed in {1:.3f} s".format(station.stationname, time.clock() - start)
 
 @contextmanager
 def process_polarization(polarization, *args):
     start = time.clock()
 
-    print 50*"-"
-    print "polarization",
+    print "-- polarization",
     for p in args:
         print p,
-    print 50*"-"
+    print "\n"
 
     for p in args:
         polarization[p].status = "PROCESSING"
@@ -139,7 +134,7 @@ def process_polarization(polarization, *args):
             polarization[p].statusmessage = "sigterm recieved"
         raise
     finally:
-        print "polarization",
+        print "-- polarization",
         for p in args:
             print p,
         print "completed in {0:.3f} s".format(time.clock() - start)
