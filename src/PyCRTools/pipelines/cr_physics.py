@@ -22,6 +22,125 @@ from pycrtools import tools
 from pycrtools import lora
 
 from optparse import OptionParser
+from contextlib import contextmanager
+
+# Error handling
+class PipelineBaseError(Exception):
+    """Base class for pipeline exceptions."""
+
+class PipelineError(PipelineBaseError):
+    """Error with a description message.
+
+    ========= ====================================
+    Attribute Description
+    ========= ====================================
+    *msg*     message
+    ========= ====================================
+    """
+
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+class EventError(PipelineError):
+    """Raised when an unhandlable error occurs at event level."""
+    pass
+
+class StationError(PipelineError):
+    """Raised when an unhandlable error occurs at station level."""
+    pass
+
+class PolarizationError(PipelineError):
+    """Raised when an unhandlable error occurs at polarization level."""
+    pass
+
+@contextmanager
+def process_event(event):
+    start = time.clock()
+
+    print 50*"#"
+    print "event {0}".format(event._id)
+    print 50*"#"
+
+    event.status = "PROCESSING"
+    event.statusmessage = ""
+    event["crp_plotfiles"] = []
+
+    try:
+        yield
+    except EventError as e:
+        logging.exception(e.msg)
+        event.status = "ERROR"
+        event.statusmessage = e.msg
+    except Exception as e:
+        logging.exception(str(e))
+        event.status = "ERROR"
+        event.statusmessage = str(e)
+    finally:
+        event.write()
+        print "event {0} completed in {1:.3f} s".format(event._id, time.clock() - start)
+
+@contextmanager
+def process_station(station):
+    start = time.clock()
+
+    print 50*"*"
+    print "station {0}".format(station.stationname)
+    print 50*"*"
+
+    station.status = "PROCESSING"
+    station.statusmessage = ""
+    station["crp_plotfiles"] = []
+
+    try:
+        yield
+    except StationError as e:
+        logging.exception(e.msg)
+        station.status = "ERROR"
+        station.statusmessage = e.msg
+    except Exception as e:
+        logging.exception(str(e))
+        station.status = "ERROR"
+        station.statusmessage = str(e)
+        raise
+    finally:
+        print "station {0} completed in {1:.3f} s".format(station.stationname, time.clock() - start)
+
+@contextmanager
+def process_polarization(polarization, *args):
+    start = time.clock()
+
+    print 50*"-"
+    print "polarization",
+    for p in args:
+        print p,
+    print 50*"-"
+
+    for p in args:
+        polarization[p].status = "PROCESSING"
+        polarization[p].statusmessage = ""
+        polarization[p]["crp_plotfiles"] = []
+
+    try:
+        yield
+    except PolarizationError as e:
+        logging.exception(e.msg)
+        for p in args:
+            polarization[p].status = "ERROR"
+            polarization[p].statusmessage = e.msg
+    except Exception as e:
+        logging.exception(str(e))
+        for p in args:
+            polarization[p].status = "ERROR"
+            polarization[p].statusmessage = str(e)
+        raise
+    finally:
+        print "polarization",
+        for p in args:
+            print p,
+        print "completed in {0:.3f} s".format(time.clock() - start)
 
 # Don't write output to all tasks
 cr.tasks.task_write_parfiles = False
