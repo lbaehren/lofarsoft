@@ -198,6 +198,12 @@ class Shower(Task):
         """Run the task.
         """
 
+        print "DEBUG:"
+        print self.positions
+        print self.signals
+        print self.timelags
+        
+        
         # ---------------------  LDF  ------------------------------ #
 
         if self.ldf_enable:
@@ -321,7 +327,7 @@ class Shower(Task):
                     elev = self.direction[1]
 
             if self.positions is not None and self.signals is not None:
-              if self.signals.shape[0] > 0:
+              if self.signals.shape[0] > 0 and self.timelags.shape[0] > 0:
 
                 if self.footprint_scale:
                     scaling_check = (self.positions[:, 0] > -self.footprint_scale_box) & (self.positions[:, 1] < self.footprint_scale_box) & (self.positions[:, 1] > -self.footprint_scale_box) & (self.positions[:, 0] < self.footprint_scale_box)
