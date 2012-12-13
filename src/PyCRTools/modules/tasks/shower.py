@@ -336,6 +336,11 @@ class Shower(Task):
                     self.signals = self.signals[scaling_check]
                     self.positions = self.positions[scaling_check]
                     self.timelags = self.timelags[scaling_check]
+                    print "DEBUG after scaling:"
+                    print self.positions
+                    print self.signals
+                    print self.timelags
+                    
                 if self.timelags is None:
                    self.scolors = "blue"
                    print "WARNING, footprint does not represent the time, only the signal strength"
