@@ -42,8 +42,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:for-each select="/elements/event">
       <xsl:if test="status='CR_FOUND' or alt_status='CR_FOUND'">
       <xsl:choose>
-         <xsl:when test="lora/@good_reconstruction">
-           <tr class="good">
+         <xsl:when test="status='ERROR' or alt_status='ERROR'">
+           <tr class="error">
              <td>
                <a><xsl:attribute name="href">
                events/<xsl:value-of select="id"/></xsl:attribute> 
@@ -61,8 +61,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              <td><xsl:value-of select="lora/moliere"/></td>
            </tr>
          </xsl:when>
-         <xsl:when test="status='ERROR' or alt_status='ERROR'">
-           <tr class="error">
+         <xsl:when test="lora/@good_reconstruction">
+           <tr class="good">
              <td>
                <a><xsl:attribute name="href">
                events/<xsl:value-of select="id"/></xsl:attribute> 
