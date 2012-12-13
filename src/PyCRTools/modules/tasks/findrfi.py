@@ -167,7 +167,7 @@ class FindRFI(Task):
                 channel_power = 2 * cr.hArray(magspectrum[...].sum())
                 refant = np.argsort(channel_power.toNumpy())[self.nantennas / 2]
                 refant = int(refant)  # numpy.int64 causes problems...
-                print 'Taking channel %d as reference antenna' % refant
+                print 'Taking antenna %d as reference antenna' % refant
                 # the index halfway in the sorted array is the channel with median power
                 magspectrum.sqrt()
 #            magspectrum += 1e-9
