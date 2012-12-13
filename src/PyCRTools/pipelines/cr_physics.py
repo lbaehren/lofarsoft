@@ -359,81 +359,81 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     polarization['1'].status = "BAD"
                     polarization['1'].statusmessage = "no significant pulse found in beamformed signal"
     
-                # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
-                # in the LORA direction for at least one of the polarizations
-                if cr_found_in_station:
-                    station.status = "GOOD"
-                    station.statusmessage = ""
-                else:
+            # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
+            # in the LORA direction for at least one of the polarizations
+            if cr_found_in_station:
+                station.status = "GOOD"
+                station.statusmessage = ""
+            else:
+                station.status = "BAD"
+                station.statusmessage = "no significant pulse found in beamformed signal for either polarization"
+    
+                continue
+    
+            # Get pulse window
+            pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
+            pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
+    
+            print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
+    
+            # Start direction fitting loop
+            n = 0
+            direction_fit_converged = False
+            while True:
+    
+                # Unfold antenna pattern
+                antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
+    
+                # Get timeseries data
+                cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
+                timeseries_data /= options.blocksize
+    
+                # Calculate delays
+                pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
+    
+                # Use current direction if not enough significant pulses are found for direction fitting
+                if len(pulse_envelope.antennas_with_significant_pulses) < 3:
+                    print "not enough antennas with significant pulses, using previous direction"
+                    break
+    
+                # Fit pulse direction
+                direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=pulse_envelope.delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
+    
+                pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
+    
+                # Check if fitting was succesful
+                if direction_fit_plane_wave.fit_failed:
                     station.status = "BAD"
-                    polarization['0'].statusmessage = "no significant pulse found in beamformed signal for either polarization"
+                    station.statusmessage = "direction fit failed"
+                    break
     
-                    continue
+                # Check for convergence of iterative direction fitting loop
+                if n > 0:
+                    angular_diff = np.rad2deg(tools.spaceAngle(np.deg2rad((90 - last_direction[1])), np.deg2rad((90 - last_direction[0])), np.deg2rad((90 - pulse_direction[1])), np.deg2rad((90 - pulse_direction[0]))))
     
-                # Get pulse window
-                pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
-                pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
+                    if angular_diff < options.maximum_angular_diff:
+                        direction_fit_converged = True
     
-                print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
+                last_direction = pulse_direction
     
-                # Start direction fitting loop
-                n = 0
-                direction_fit_converged = False
-                while True:
+                n += 1
+                if direction_fit_converged:
+                    print "fit converged"
+                    station["crp_pulse_direction"] = pulse_direction
+                    break
     
-                    # Unfold antenna pattern
-                    antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
+                # Check if maximum number of iterations is reached (will avoid infinite loop)
+                if n > options.maximum_nof_iterations:
+                    print "maximum number of iterations reached"
+                    station["crp_pulse_direction"] = pulse_direction
+                    station.statusmessage = "maximum number of iterations reached"
+                    break
     
-                    # Get timeseries data
-                    cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
-                    timeseries_data /= options.blocksize
-    
-                    # Calculate delays
-                    pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
-    
-                    # Use current direction if not enough significant pulses are found for direction fitting
-                    if len(pulse_envelope.antennas_with_significant_pulses) < 3:
-                        print "not enough antennas with significant pulses, using previous direction"
-                        break
-    
-                    # Fit pulse direction
-                    direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=pulse_envelope.delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
-    
-                    pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
-    
-                    # Check if fitting was succesful
-                    if direction_fit_plane_wave.fit_failed:
-                        station.status = "BAD"
-                        station.statusmessage = "direction fit failed"
-                        break
-    
-                    # Check for convergence of iterative direction fitting loop
-                    if n > 0:
-                        angular_diff = np.rad2deg(tools.spaceAngle(np.deg2rad((90 - last_direction[1])), np.deg2rad((90 - last_direction[0])), np.deg2rad((90 - pulse_direction[1])), np.deg2rad((90 - pulse_direction[0]))))
-    
-                        if angular_diff < options.maximum_angular_diff:
-                            direction_fit_converged = True
-    
-                    last_direction = pulse_direction
-    
-                    n += 1
-                    if direction_fit_converged:
-                        print "fit converged"
-                        station["crp_pulse_direction"] = pulse_direction
-                        break
-    
-                    # Check if maximum number of iterations is reached (will avoid infinite loop)
-                    if n > options.maximum_nof_iterations:
-                        print "maximum number of iterations reached"
-                        station["crp_pulse_direction"] = pulse_direction
-                        station.statusmessage = "maximum number of iterations reached"
-                        break
-    
-                # Check if result of planewave fit is reasonable
-                residual_delays = direction_fit_plane_wave.residual_delays.toNumpy()
-                residual_delays = np.abs(residual_delays)
-                
-                average_residual = residual_delays.sum()/residual_delays.shape[0]
+            # Check if result of planewave fit is reasonable
+            residual_delays = direction_fit_plane_wave.residual_delays.toNumpy()
+            residual_delays = np.abs(residual_delays)
+            
+            average_residual = residual_delays.sum()/residual_delays.shape[0]
 
             with process_polarization(station.polarization, 'xyz') as polarization:
 
