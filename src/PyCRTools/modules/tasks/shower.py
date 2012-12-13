@@ -189,7 +189,7 @@ class Shower(Task):
         err = err + difft * difft * etheta * etheta
         err = err + 2 * difft * diffp * covangles
         err = err + 2 * diffc1 * diffc2 * covcore
-
+        print "first estinmate", err
         err.sqrt()
 
         return err
