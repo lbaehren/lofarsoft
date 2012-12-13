@@ -51,6 +51,16 @@ def process_event(event):
     event.statusmessage = ""
     event["crp_plotfiles"] = []
 
+    for station in event.stations:
+        station.status = "NEW"
+        station.statusmessage = ""
+        station["crp_plotfiles"] = []
+
+        for p in station.polarization.keys():
+            station.polarization[p].status = "NEW"
+            station.polarization[p].statusmessage = ""
+            station.polarization[p]["crp_plotfiles"] = []
+
     try:
         yield event
     except EventError as e:
