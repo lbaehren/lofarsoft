@@ -93,6 +93,11 @@ class DirectionFitPlaneWave(tasks.Task):
         positions = self.positions.toNumpy()
         times = self.timelags.toNumpy()
 
+        # Allow for self.positions to be specified either as flat array or as 2D-array with shape (NAnt, 3)
+#        import pdb; pdb.set_trace()
+        if len(positions.shape) == 1:
+            positions = positions.reshape(len(positions) / 3, 3)
+        
         if not self.reference_antenna:
             times -= times[0]
 
@@ -157,6 +162,7 @@ class DirectionFitPlaneWave(tasks.Task):
         expectedDelays = srcfind.timeDelaysFromDirection(positions.ravel(), (az, el))  # need positions as flat 1-D array
         expectedDelays -= expectedDelays[0]  # subtract ref ant
         self.residual_delays = times - expectedDelays
+        self.residual_delays -= np.median(self.residual_delays)
         self.delta_delays_mean_history = [np.mean(self.residual_delays)]  # comply with DirectionFitTriangles, return as list...
         self.delta_delays_rms_history = [np.std(self.residual_delays)]
         self.residual_delays = cr.hArray(self.residual_delays)
