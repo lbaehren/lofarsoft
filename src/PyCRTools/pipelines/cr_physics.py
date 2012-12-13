@@ -157,6 +157,7 @@ parser.add_option("-s", "--station", action="append", help="only process given s
 parser.add_option("-a", "--accept_snr", default=5, help="accept pulses with snr higher than this in the beamformed timeseries")
 parser.add_option("--maximum_nof_iterations", default=5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", default=0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
+parser.add_option("--maximum_allowed_residual_delay", default=1e-8, help="average delay that is still allowed for a station to be called good")
 parser.add_option("--broad_search_window_width", default=2 ** 12, help="width of window around expected location for first pulse search")
 parser.add_option("--narrow_search_window_width", default=2 ** 7, help="width of window around expected location for subsequent pulse search")
 parser.add_option("-l", "--lora_directory", default="./", help="directory containing LORA information")
@@ -435,10 +436,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             residual_delays = np.abs(residual_delays)
             
             average_residual = residual_delays.sum()/residual_delays.shape[0]
-            
-            print 'residual delays', residual_delays
-            print 'resulting in an average delay', average_residual
-    
+
             # Project polarization onto x,y,z frame
             station.polarization['xyz'].status = "PROCESSING"
     
@@ -488,6 +486,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 station.polarization['xyz'].status = "BAD"
                 station.polarization['xyz'].statusmessage = "goodcount {0} < nantennas / 2 [= {1}]".format(direction_fit_plane_wave.goodcount, nantennas / 2)
     
+            elif average_residual > options.maximum_allowed_residual_delay: 
+                station.polarization['xyz'].status = "BAD"
+                station.polarization['xyz'].statusmessage = "average_residual = {0}".format(average_residual)
+
             else:
                 station.polarization['xyz'].status = "GOOD"
                 station.polarization['xyz'].statusmessage = ""
