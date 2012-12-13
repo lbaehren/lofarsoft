@@ -511,10 +511,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     all_station_antenna_positions.append(station["local_antenna_positions"])
                     all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                     all_station_rms.append(station.polarization['xyz']["crp_rms"])
-                except Exception:
-                    event.status = "ERROR"
-                    event.statusmessage = "do not have all pulse parameters for station " + station.stationname
-                    logging.exception("Do not have all pulse parameters for station " + station.stationname)
+                except Exception as e:
+                    raise EventError("{0} when attempting to obtain parameters for station {1}".format(e.message, station.stationname))
     
         all_station_antenna_positions = np.vstack(all_station_antenna_positions)
         all_station_pulse_delays = np.hstack(all_station_pulse_delays)
