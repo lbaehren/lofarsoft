@@ -244,17 +244,19 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # See if we need to shift the block a bit to fit the full pulse search window
             start = pulse_search_window_start - options.broad_search_window_width
             if start < 0:
-                f.shiftTimeseriesData(-1 * abs(shift))
-                pulse_search_window_start += abs(shift)
-                pulse_search_window_end += abs(shift)
+                shift = -1 * abs(start)
+                f.shiftTimeseriesData(shift)
+                pulse_search_window_start -= shift
+                pulse_search_window_end -= shift
 
-                print "shifting block by {0} samples".format(-1 * abs(shift))
+                print "shifting block by {0} samples".format(shift)
 
             end = pulse_search_window_end + options.broad_search_window_width
             if end >= options.blocksize:
-                f.shiftTimeseriesData(abs(shift))
-                pulse_search_window_start -= abs(shift)
-                pulse_search_window_end -= abs(shift)
+                shift = end - options.blocksize
+                f.shiftTimeseriesData(shift)
+                pulse_search_window_start -= shift
+                pulse_search_window_end -= shift
                 print "shifting block by {0} samples".format(abs(shift))
     
             with process_polarization(station.polarization, '0', '1') as polarization:
