@@ -8,13 +8,16 @@ blocksize = 700
 
 trace = np.random.randn(blocksize)
 
+# For trace power we choose the convention that sqrt(power) should correspond to sigma, 
+# i.e. the standard deviation (ignoring a possible non-zero mean).
+# Alternatively you could sum up the power over the whole trace (a factor 'blocksize' larger)
 trace_power = np.sum(trace ** 2) / blocksize
 print 'Trace mean = %f, sigma = %f' % (trace.mean(), trace.std() )
 print 'Trace power = %f' % trace_power
-spec=np.fft.rfft(trace) / blocksize # NB. Normalization for FFT.
+spec=np.fft.rfft(trace) # NB. For FFTW a factor 1/blocksize is needed for normalization of FFT.
 print 'dimensions', spec.shape
 power = (spec.real)**2+(spec.imag)**2 
-#power /= blocksize**2
+power /= blocksize**2
 
 amplitude = np.sqrt(power)
 
@@ -27,6 +30,7 @@ cleaned_power_rms = np.sqrt(cleaned_power_power)
 #print "test of commutation", cleaned_power, np.sqrt(cleaned_power_power), cleaned_power/ np.sqrt(cleaned_power_power)
 
 print 'Sum of amplitudes = %f, summed spectral power = %f, RMS spectral power (sqrt taken) = %f' % (cleaned_power_amplitude, cleaned_power_power, cleaned_power_rms )
+print "Check for Parseval's theorem (trace power - spectral power = zero): %f" % (cleaned_power_power - trace_power)
 
 print 'first power', cleaned_power_rms
 inverse_power = 1./cleaned_power_rms
@@ -34,6 +38,7 @@ spec_normed = spec * inverse_power * galactic_noise
 later_power = (spec_normed.real ** 2) + (spec_normed.imag) ** 2
 
 later_power_power = 2 * np.sum(later_power) - later_power[0] - later_power[-1]
+later_power_power /= blocksize ** 2 # again normalize to one-sample power
 print "later power", later_power_power
 print "later power RMS", np.sqrt(later_power_power)
 
