@@ -553,8 +553,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         core = list(event["lora_core"])
         core_uncertainties = event["lora_coreuncertainties"].toNumpy()
         direction_uncertainties = [3., 3., 0]
+        lora_positions = np.array(zip(event["lora_posx"],event["lora_posy"],event["lora_posz"]))
+        lora_signals = event["lora_particle_density__m2"]
     
-        ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+        ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, lora_positions=lora_positions, lora_signals=lora_signals, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
     
         event.status = "CR_FOUND"
         event.statusmessage = ""
