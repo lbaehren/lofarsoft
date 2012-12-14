@@ -154,7 +154,7 @@ class PulseEnvelope(Task):
 
         # Calculate integrated pulse power
         cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[..., self.window_start:self.window_end], self.pulse_start - self.window_start, self.pulse_end - self.window_start)
-        power /= self.sampling_frequency
+        self.integrated_pulse_power /= self.sampling_frequency
 
         if self.save_plots:
 
