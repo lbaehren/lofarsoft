@@ -6137,7 +6137,6 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   }
 
   // Power in pulse window
-  *max = *it;
   for (HInteger i=signal_start; i<signal_end; i++)
   {
     *power += (*it * *it);
