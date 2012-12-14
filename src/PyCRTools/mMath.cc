@@ -6012,7 +6012,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
     throw PyCR::ValueError(error_message);
   }
 
-  if (signal_end < signal_start || signal_end > n)
+  if (signal_end < signal_start)
   {
     char error_message[256];
     sprintf(error_message, "[hMaxSNR] signal_end[=%lld] < signal_start[=%lld]", signal_end, signal_start);
