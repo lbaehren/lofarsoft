@@ -240,6 +240,22 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 raise EventError("could not get expected block number from LORA data")
 
             print "have LORA data"
+
+            # See if we need to shift the block a bit to fit the full pulse search window
+            start = pulse_search_window_start - options.broad_search_window_width
+            if start < 0:
+                f.shiftTimeseriesData(-1 * abs(shift))
+                pulse_search_window_start += abs(shift)
+                pulse_search_window_end += abs(shift)
+
+                print "shifting block by {0} samples".format(-1 * abs(shift))
+
+            end = pulse_search_window_end + options.broad_search_window_width
+            if end >= options.blocksize:
+                f.shiftTimeseriesData(abs(shift))
+                pulse_search_window_start -= abs(shift)
+                pulse_search_window_end -= abs(shift)
+                print "shifting block by {0} samples".format(abs(shift))
     
             with process_polarization(station.polarization, '0', '1') as polarization:
     
