@@ -187,6 +187,12 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     
     cr_found = False
     
+    # Get first estimate of pulse direction
+    try:
+        pulse_direction = list(event["lora_direction"])
+    except KeyError:
+        raise EventError("have no lora_direction")
+    
     # Create FFTW plans
     fftplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
     invfftplan = cr.FFTWPlanManyDftC2r(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
@@ -231,7 +237,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     
                 print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
             except Exception:
-                raise StationError("could not get expected block number from LORA data")
+                raise EventError("could not get expected block number from LORA data")
 
             print "have LORA data"
     
@@ -300,9 +306,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     
                 # Get antennas positions
                 antenna_positions = f["ANTENNA_POSITIONS"]
-    
-                # Get first estimate of pulse direction
-                pulse_direction = list(event["lora_direction"])
     
                 # Beamform in LORA direction for both polarizations
                 fft_data_0 = cr.hArray(complex, dimensions=(nantennas, options.blocksize / 2 + 1))
