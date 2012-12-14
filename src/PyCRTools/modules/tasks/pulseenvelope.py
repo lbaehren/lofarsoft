@@ -62,6 +62,8 @@ class PulseEnvelope(Task):
             doc = "Mean of noise."),
         peak_amplitude=dict(default = lambda self: cr.hArray(float, self.nantennas), output = True,
             doc = "Pulse maximum."),
+        integrated_pulse_power=dict(default = lambda self: cr.hArray(float, self.nantennas), output = True,
+            doc = "Integrated pulse power."),
         maxpos=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
             doc = "Position of pulse maximum relative to *pulse_start*."),
         meanpos=dict(default = lambda self: cr.hMean(cr.hArray([self.maxpos[i] for i in self.antennas_with_significant_pulses]))[0],
@@ -149,6 +151,10 @@ class PulseEnvelope(Task):
 
         # Shift delays to be relative to reference antenna
         self.delays -= self.delays[self.refant]
+
+        # Calculate integrated pulse power
+        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[..., self.window_start:self.window_end], self.pulse_start, self.pulse_end)
+        power /= self.sampling_frequency
 
         if self.save_plots:
 
