@@ -6090,7 +6090,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 
   Calculates the integrated pulse power.
 */
-template <class IIter, class NIter>
+template <class NIter>
 void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
                      const NIter vec, const NIter vec_end,
                      const HInteger signal_start, const HInteger signal_end)
