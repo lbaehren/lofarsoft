@@ -279,18 +279,18 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             print "have LORA data"
 
             # See if we need to shift the block a bit to fit the full pulse search window
-            start = pulse_search_window_start - options.broad_search_window_width
-            if start < 0:
-                shift = -1 * abs(start)
+            start_sample = pulse_search_window_start - options.broad_search_window_width
+            if start_sample < 0:
+                shift = -1 * abs(start_sample)
                 f.shiftTimeseriesData(shift)
                 pulse_search_window_start -= shift
                 pulse_search_window_end -= shift
 
                 print "shifting block by {0} samples".format(shift)
 
-            end = pulse_search_window_end + options.broad_search_window_width
-            if end >= options.blocksize:
-                shift = end - options.blocksize
+            end_sample = pulse_search_window_end + options.broad_search_window_width
+            if end_sample >= options.blocksize:
+                shift = end_sample - options.blocksize
                 f.shiftTimeseriesData(shift)
                 pulse_search_window_start -= shift
                 pulse_search_window_end -= shift
