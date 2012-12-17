@@ -41,6 +41,22 @@ class PolarizationError(PipelineError):
     """Raised when an unhandlable error occurs at polarization level."""
     pass
 
+class Skipped(PipelineError):
+    """Base class for everything that needs to lead to a skipped state."""
+    pass
+
+class EventSkipped(Skipped):
+    """Raised when event is skipped."""
+    pass
+
+class StationSkipped(Skipped):
+    """Raised when station is skipped."""
+    pass
+
+class PolarizationSkipped(Skipped):
+    """Raised when polarization is skipped."""
+    pass
+
 @contextmanager
 def process_event(event):
     start = time.clock()
@@ -63,6 +79,10 @@ def process_event(event):
 
     try:
         yield event
+    except EventSkipped as e:
+        logging.info("event skipped because: {0}".format(e.message))
+        event.status = "SKIPPED"
+        event.statusmessage = e.message
     except EventError as e:
         logging.exception(e.message)
         event.status = "ERROR"
@@ -91,6 +111,10 @@ def process_station(station):
 
     try:
         yield station
+    except StationSkipped as e:
+        logging.info("station skipped because: {0}".format(e.message))
+        event.status = "SKIPPED"
+        event.statusmessage = e.message
     except StationError as e:
         logging.exception(e.message)
         station.status = "ERROR"
@@ -122,6 +146,10 @@ def process_polarization(polarization, *args):
 
     try:
         yield polarization
+    except PolarizationSkipped as e:
+        logging.info("polarization skipped because: {0}".format(e.message))
+        event.status = "SKIPPED"
+        event.statusmessage = e.message
     except PolarizationError as e:
         logging.exception(e.message)
         for p in args:
@@ -220,6 +248,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     
             # Open file
             f = cr.open(station.datafile.settings.datapath + '/' + station.datafile.filename)
+
+            if f["ANTENNA_SET"] not in ["LBA_INNER", "LBA_OUTER"]:
+                raise EventSkipped("unsupported antenna_set {0}".format(f["ANTENNA_SET"]))
     
             # Read LORA information
             tbb_time = f["TIME"][0]
