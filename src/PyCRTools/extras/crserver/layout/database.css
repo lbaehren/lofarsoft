@@ -60,6 +60,11 @@ table tr.error td
     color: red;
 }
 
+table tr.skipped td
+{
+    color: slateblue;
+}
+
 /* Navigation */
 nav ul
 {
