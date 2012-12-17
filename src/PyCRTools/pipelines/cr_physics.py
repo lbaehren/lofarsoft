@@ -113,8 +113,8 @@ def process_station(station):
         yield station
     except StationSkipped as e:
         logging.info("station skipped because: {0}".format(e.message))
-        event.status = "SKIPPED"
-        event.statusmessage = e.message
+        station.status = "SKIPPED"
+        station.statusmessage = e.message
     except Skipped as e:
         raise
     except StationError as e:
@@ -150,8 +150,9 @@ def process_polarization(polarization, *args):
         yield polarization
     except PolarizationSkipped as e:
         logging.info("polarization skipped because: {0}".format(e.message))
-        event.status = "SKIPPED"
-        event.statusmessage = e.message
+        for p in args:
+            polarization[p].status = "SKIPPED"
+            polarization[p].statusmessage = e.message
     except Skipped as e:
         raise
     except PolarizationError as e:
