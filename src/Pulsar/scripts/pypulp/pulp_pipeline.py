@@ -421,19 +421,22 @@ class Pipeline:
 		dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 		if len(dspsr_diags) > 0:
 			log.info("Creating DSPSR summary diagnostic plots...")
-			if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
+			if len(dspsr_diags) > 1: cmd="montage -background none -mode concatenate -tile 10x %s dspsr_status.png" % (" ".join(dspsr_diags))
 			else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
 			self.execute(cmd, log, workdir=sumdir)
 
 		if os.path.exists("%s/dspsr_status.png" % (sumdir)):
-			log.info("Renaming dspsr status file to status.png ...")
-			cmd="mv dspsr_status.png status.png"
+			log.info("Copying dspsr status file to status.png ...")
+			cmd="cp -f dspsr_status.png status.png"
 			self.execute(cmd, log, workdir=sumdir)
-		else: log.info("No status.png created")
+
 		# creating thumbnail version of status.png if it exists
 		if os.path.exists("%s/status.png" % (sumdir)):		
+			log.info("Making a thumbnail version of status.png file...")
 			cmd="convert -scale 200x140-0-0 status.png status.th.png"
 			self.execute(cmd, log, workdir=sumdir)
+		else:
+			log.info("No status.png created")
 
 		# Make a tarball of all the plots (summary archive)
 		log.info("Making a final summary tarball of all files with extensions: %s" % (", ".join(self.summary_archive_exts)))
@@ -639,14 +642,20 @@ class Pipeline:
 				# remove temporary png files
 				cmd="rm -f ta_heatmap_sap*.png"
 				self.execute(cmd, log, workdir=sumdir)
+				# making a thumbnail version of TA heatmap combined plot
+				cmd="convert -scale 200x140-0-0 TAheatmap_status.png TAheatmap_status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
 
 		# creating combined DSPSR plots
 		if not cmdline.opts.is_skip_dspsr:
 			dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 			if len(dspsr_diags) > 0:
 				log.info("Creating DSPSR summary diagnostic plots...")
-				if len(dspsr_diags) > 1: cmd="convert %s -append dspsr_status.png" % (" ".join(dspsr_diags))
+				if len(dspsr_diags) > 1: cmd="montage -background none -mode concatenate -tile 10x %s dspsr_status.png" % (" ".join(dspsr_diags))
 				else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
+				self.execute(cmd, log, workdir=sumdir)
+				# making a thumbnail version of combined DSPSR plot
+				cmd="convert -scale 200x140-0-0 dspsr_status.png dspsr_status.th.png"
 				self.execute(cmd, log, workdir=sumdir)
 
 		# creating FE status maps
@@ -665,25 +674,76 @@ class Pipeline:
 				# removing individual maps
 				cmd="rm -f %s" % (" ".join(femaps))
 				self.execute(cmd, log, workdir=sumdir)
+				# making a thumbnail version of FE status map
+				cmd="convert -scale 200x140-0-0 FE_status.png FE_status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+
+		# removing old version of status.png if exists (could be left over from previous run)
+		if os.path.exists("%s/status.png" % (sumdir)):		
+			cmd="rm -f status.png status.th.png"
+			self.execute(cmd, log, workdir=sumdir)
 
 		# Combining different status maps into one 'status.png' to be shown in web-summary page 
+		# combining FE maps to general status.png
 		if os.path.exists("%s/FE_status.png" % (sumdir)):
-			log.info("Renaming FE status map file to status.png ...")
-			cmd="mv FE_status.png status.png"
+			log.info("Copying FE status map file to status.png ...")
+			cmd="cp -f FE_status.png status.png"
 			self.execute(cmd, log, workdir=sumdir)
-		elif os.path.exists("%s/TAheatmap_status.png" % (sumdir)):
-			log.info("Renaming TA heatmap map file to status.png ...")
-			cmd="mv TAheatmap_status.png status.png"
+			cmd="mv FE_status.th.png status.th.png"
 			self.execute(cmd, log, workdir=sumdir)
-		elif os.path.exists("%s/dspsr_status.png" % (sumdir)):
-			log.info("Renaming dspsr status file to status.png ...")
-			cmd="mv dspsr_status.png status.png"
-			self.execute(cmd, log, workdir=sumdir)
-		else: log.info("No status.png created")
+
+		# combining TA heatmaps to general status.png
+		if os.path.exists("%s/TAheatmap_status.png" % (sumdir)):
+			if os.path.exists("%s/status.png" % (sumdir)): # means that FE maps were created
+				log.info("Appending TA heatmap map file to status.png ...")
+				cmd="montage -background none -mode concatenate -tile 2x status.png TAheatmap_status.png .temp_status.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="montage -background none -mode concatenate -tile 2x status.th.png TAheatmap_status.th.png .temp_status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="mv .temp_status.png status.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="mv .temp_status.th.png status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="rm -f TAheatmap_status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+			else:  # if status.png does not exist yet
+				log.info("Copying TA heatmap map file to status.png ...")
+				cmd="cp -f TAheatmap_status.png status.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="mv TAheatmap_status.th.png status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+
+		# combining dspsr summary plots to general status.png
+		if os.path.exists("%s/dspsr_status.png" % (sumdir)):
+			if os.path.exists("%s/status.png" % (sumdir)): # means that either FE maps or TA heatmap(s) were created
+				log.info("Appending dspsr status file to status.png ...")
+				cmd="montage -background none -mode concatenate -tile 2x status.png dspsr_status.png .temp_status.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="montage -background none -mode concatenate -tile 2x status.th.png dspsr_status.th.png .temp_status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="mv .temp_status.png status.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="mv .temp_status.th.png status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="rm -f dspsr_status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+			else:  # if status.png does not exist yet
+				log.info("Copying dspsr status file to status.png ...")
+				cmd="cp -f dspsr_status.png status.png"
+				self.execute(cmd, log, workdir=sumdir)
+				cmd="mv dspsr_status.th.png status.th.png"
+				self.execute(cmd, log, workdir=sumdir)
+
 		# creating thumbnail version of status.png if it exists
 		if os.path.exists("%s/status.png" % (sumdir)):		
-			cmd="convert -scale 200x140-0-0 status.png status.th.png"
+			log.info("Making a thumbnail version of status.png file...")
+			cmd="convert -scale 200x140-0-0 status.th.png .temp_status.th.png"
 			self.execute(cmd, log, workdir=sumdir)
+			cmd="mv .temp_status.th.png status.th.png"
+			self.execute(cmd, log, workdir=sumdir)
+		else:
+			log.info("No status.png created")
+			
 
 		# Make a tarball of all the plots (summary archive)
 		log.info("Making a final summary tarball of all files with extensions: %s" % (", ".join(self.summary_archive_exts)))
