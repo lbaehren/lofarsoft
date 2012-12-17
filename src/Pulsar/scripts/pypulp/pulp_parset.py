@@ -444,6 +444,14 @@ only for observations that were taken after this date"
                 	# band filter setting exists in parset file
                 	self.band=status[0][:-1].split(" = ")[-1].split("A_")[-1]
 
+		# changing cmdline FWHM-related options in the _copy_ of Cmdline class
+                if cmdline.opts.fwhm_CS < 0.0:
+                        if self.antenna == "HBA": cmdline.opts.fwhm_CS = si.fwhm_hba
+                        if self.antenna == "LBA": cmdline.opts.fwhm_CS = si.fwhm_lba
+                if cmdline.opts.fwhm_IS < 0.0:
+                        if self.antenna == "HBA": cmdline.opts.fwhm_IS = si.fov_hba
+                        if self.antenna == "LBA": cmdline.opts.fwhm_IS = si.fov_lba
+
 		# Getting the Antenna config (LBA_OUTER, LBA_INNER, HBA_JOINED, etc.)
         	cmd="grep 'Observation.antennaSet' %s" % (self.parset,)
         	status=os.popen(cmd).readlines()

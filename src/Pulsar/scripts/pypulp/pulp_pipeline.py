@@ -421,7 +421,7 @@ class Pipeline:
 		dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 		if len(dspsr_diags) > 0:
 			log.info("Creating DSPSR summary diagnostic plots...")
-			if len(dspsr_diags) > 1: cmd="montage -background none -mode concatenate -tile 10x %s dspsr_status.png" % (" ".join(dspsr_diags))
+			if len(dspsr_diags) > 1: cmd="montage %s -background none -mode concatenate -tile 10x dspsr_status.png" % (" ".join(dspsr_diags))
 			else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
 			self.execute(cmd, log, workdir=sumdir)
 
@@ -651,7 +651,7 @@ class Pipeline:
 			dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 			if len(dspsr_diags) > 0:
 				log.info("Creating DSPSR summary diagnostic plots...")
-				if len(dspsr_diags) > 1: cmd="montage -background none -mode concatenate -tile 10x %s dspsr_status.png" % (" ".join(dspsr_diags))
+				if len(dspsr_diags) > 1: cmd="montage %s -background none -mode concatenate -tile 10x dspsr_status.png" % (" ".join(dspsr_diags))
 				else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
 				self.execute(cmd, log, workdir=sumdir)
 				# making a thumbnail version of combined DSPSR plot
@@ -696,9 +696,9 @@ class Pipeline:
 		if os.path.exists("%s/TAheatmap_status.png" % (sumdir)):
 			if os.path.exists("%s/status.png" % (sumdir)): # means that FE maps were created
 				log.info("Appending TA heatmap map file to status.png ...")
-				cmd="montage -background none -mode concatenate -tile 2x status.png TAheatmap_status.png .temp_status.png"
+				cmd="montage status.png TAheatmap_status.png -background none -mode concatenate -tile 2x .temp_status.png"
 				self.execute(cmd, log, workdir=sumdir)
-				cmd="montage -background none -mode concatenate -tile 2x status.th.png TAheatmap_status.th.png .temp_status.th.png"
+				cmd="montage status.th.png TAheatmap_status.th.png -background none -mode concatenate -tile 2x .temp_status.th.png"
 				self.execute(cmd, log, workdir=sumdir)
 				cmd="mv .temp_status.png status.png"
 				self.execute(cmd, log, workdir=sumdir)
@@ -717,9 +717,9 @@ class Pipeline:
 		if os.path.exists("%s/dspsr_status.png" % (sumdir)):
 			if os.path.exists("%s/status.png" % (sumdir)): # means that either FE maps or TA heatmap(s) were created
 				log.info("Appending dspsr status file to status.png ...")
-				cmd="montage -background none -mode concatenate -tile 2x status.png dspsr_status.png .temp_status.png"
+				cmd="montage status.png dspsr_status.png -background none -mode concatenate -tile 2x .temp_status.png"
 				self.execute(cmd, log, workdir=sumdir)
-				cmd="montage -background none -mode concatenate -tile 2x status.th.png dspsr_status.th.png .temp_status.th.png"
+				cmd="montage status.th.png dspsr_status.th.png -background none -mode concatenate -tile 2x .temp_status.th.png"
 				self.execute(cmd, log, workdir=sumdir)
 				cmd="mv .temp_status.png status.png"
 				self.execute(cmd, log, workdir=sumdir)
