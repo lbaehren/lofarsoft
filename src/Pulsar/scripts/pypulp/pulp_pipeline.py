@@ -476,7 +476,7 @@ class Pipeline:
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
 			proc.communicate()
 		except: pass
-		cmd="gzip %s" % (tarname)
+		cmd="gzip -f %s" % (tarname)
 		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
 		proc.communicate()
 
@@ -726,7 +726,7 @@ class Pipeline:
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
 			proc.communicate()
 		except: pass
-		cmd="gzip %s" % (tarname)
+		cmd="gzip -f %s" % (tarname)
 		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
 		proc.communicate()
 
