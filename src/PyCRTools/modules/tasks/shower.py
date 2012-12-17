@@ -54,14 +54,15 @@ class Shower(Task):
             doc="Plot type (e.g. png, jpeg, pdf)"),
         plotlist=dict(default=[],
             doc="List of output plots.", output=True),
+        
         ldf_enable=dict(default=False,
             doc="Draw Lateral Distribution Function, signal vs. distance from shower axis"),
         ldf_logplot=dict(default=True,
             doc="Draw LDF with log axis"),
         ldf_remove_outliers=dict(default=True,
             doc="Do not allow values > 1000000 or < 0.001 for signal strength"),
-        ldf_total_signal=dict(default=False, doc="draw only one signalstrength"),
-
+        ldf_total_signal=dict(default=False, 
+            doc="draw only one signalstrength"),
         ldf_scale=dict(default=True, doc="Scale LDF to region around core only"),
         ldf_color_x=dict(default='#B30424', doc="color signals x"),
         ldf_color_y=dict(default='#68C8F7', doc="color signals y"),
@@ -97,6 +98,13 @@ class Shower(Task):
         footprint_marker_lora=dict(default='p', doc="Marker for LORA stations in footprint"),
         footprint_lora_point_scaling=dict(default=200, doc="Scaling factor for point size in LORA shower"),
 
+        skyplot_of_directions_enable=dict(default=False,
+            doc="Plotting all directions of stations on sky"),
+        all_directions=dict(default=None,
+            doc="List of directions, [NStations x [az,el]]"),    
+        all_stations=dict(default=None,
+            doc="List of stations corresponding to all_directions"),
+            
         footprint_polarization_enable=dict(default=False,
             doc="Draw footprint with polarization arrows"),
 
@@ -104,6 +112,8 @@ class Shower(Task):
             doc="Making plots for different distance bins"),
         slicing=dict(default=None,
             doc="Give boundaries for azimuth bins in [a,b,c,d]"),
+            
+    
     )
 
     def __GetDistance(self, core, direction, positions):
@@ -509,6 +519,44 @@ class Shower(Task):
 
             else:
                 print "WARNING: Give at least positions and signals to plot a footprint"
+                
+                
+                
+        # --------------------- Skyplot of all directions ----------------------------#
+        
+        
+        if self.skyplot_of_directions_enable:
+            
+            from matplotlib import cm
+            
+            if self.all_directions is not None and self.all_stations is not None:
+            
+                az = 90 - self.all_directions[:,0]
+                zen = 90 - self.all_directions[:,1]
+            
+                direction_colors = np.arange(float(len(self.all_stations)))/(len(self.all_stations)-1)
+            
+                cr.plt.figure()
+                ax = cr.plt.subplot(111)
+                
+                for i in xrange(len(self.all_stations)):
+                    cr.plt.polar(np.radians(az[i]),zen[i],marker="s",markersize = 7,  linestyle ="None",color = cm.gist_rainbow(direction_colors[i]),label=self.all_stations[i])
+    
+                cr.plt.legend(bbox_to_anchor=(1., .0, 1., .0),loc=3,borderaxespad=0., shadow=False, numpoints=1)
+                
+                cr.plt.rgrids([10,30,60,80],labels=None, angle=202)
+                ax.set_frame_on(False)
+                ax.set_xticks([])
+                ax.set_yticks([])
+                
+                if self.save_plots:
+                    plotname = self.plot_prefix + "direction_on_sky.{0}".format(self.plot_type)
+                    cr.plt.savefig(plotname)
+                    self.plotlist.append(plotname)
+                else:
+                    cr.plt.show()    
+
+
 
         # --------------------- Polarization Footprint  ------------------------------ #
         if self.footprint_polarization_enable:
