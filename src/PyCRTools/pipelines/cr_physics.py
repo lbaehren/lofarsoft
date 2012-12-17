@@ -116,6 +116,9 @@ def process_station(station):
         station.status = "SKIPPED"
         station.statusmessage = e.message
     except Skipped as e:
+        logging.info("station processing aborted due to container skipping")
+        station.status = "ABORTED"
+        station.statusmessage = e.message
         raise
     except StationError as e:
         logging.exception(e.message)
@@ -154,6 +157,10 @@ def process_polarization(polarization, *args):
             polarization[p].status = "SKIPPED"
             polarization[p].statusmessage = e.message
     except Skipped as e:
+        logging.info("polarization processing aborted due to container skipping")
+        for p in args:
+            polarization[p].status = "ABORTED"
+            polarization[p].statusmessage = e.message
         raise
     except PolarizationError as e:
         logging.exception(e.message)
