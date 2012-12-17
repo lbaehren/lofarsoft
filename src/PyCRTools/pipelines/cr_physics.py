@@ -219,7 +219,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     try:
         pulse_direction = list(event["lora_direction"])
     except KeyError:
-        raise EventError("have no lora_direction")
+        raise EventSkipped("have no lora_direction")
     
     # Create FFTW plans
     fftplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
