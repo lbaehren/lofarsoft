@@ -454,7 +454,23 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             residual_delays = direction_fit_plane_wave.residual_delays.toNumpy()
             residual_delays = np.abs(residual_delays)
             
-            average_residual = residual_delays.sum()/residual_delays.shape[0]
+            average_residual = residual_delays.mean()
+
+            if direction_fit_plane_wave.fit_failed:
+                break
+    
+            if direction_fit_plane_wave.goodcount < nantennas / 2:
+                station.status = "BAD"
+                station.statusmessage = "goodcount {0} < nantennas / 2 [= {1}]".format(direction_fit_plane_wave.goodcount, nantennas / 2)
+                break
+    
+            if average_residual > options.maximum_allowed_residual_delay: 
+                print "direction fit residuals too large, average_residual = {0}".format(average_residual)
+                station.status = "BAD"
+                station.statusmessage = "average_residual = {0}".format(average_residual)
+                break
+
+            print "direction fit residuals ok, average_residual = {0}".format(average_residual)
 
             with process_polarization(station.polarization, 'xyz') as polarization:
 
@@ -497,23 +513,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
                 polarization['xyz']["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
     
-                if direction_fit_plane_wave.fit_failed:
-                    polarization['xyz'].status = "BAD"
-                    polarization['xyz'].statusmessage = "plane wave fit failed"
+                polarization['xyz'].status = "GOOD"
+                polarization['xyz'].statusmessage = ""
     
-                elif direction_fit_plane_wave.goodcount < nantennas / 2:
-                    polarization['xyz'].status = "BAD"
-                    polarization['xyz'].statusmessage = "goodcount {0} < nantennas / 2 [= {1}]".format(direction_fit_plane_wave.goodcount, nantennas / 2)
-    
-                elif average_residual > options.maximum_allowed_residual_delay: 
-                    polarization['xyz'].status = "BAD"
-                    polarization['xyz'].statusmessage = "average_residual = {0}".format(average_residual)
-
-                else:
-                    polarization['xyz'].status = "GOOD"
-                    polarization['xyz'].statusmessage = ""
-    
-                    cr_found = True
+                cr_found = True
 
     if cr_found:
     
