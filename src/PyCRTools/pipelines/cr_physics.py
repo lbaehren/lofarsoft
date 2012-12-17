@@ -327,7 +327,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 try:
                     cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
                 except Exception:
-                    raise StationError("do not have DIPOLE_CALIBRATION_DELAY value")
+                    raise StationSkipped("do not have DIPOLE_CALIBRATION_DELAY value")
     
                 weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
                 phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
