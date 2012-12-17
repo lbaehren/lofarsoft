@@ -59,6 +59,8 @@ class Shower(Task):
             doc="Draw Lateral Distribution Function, signal vs. distance from shower axis"),
         ldf_logplot=dict(default=True,
             doc="Draw LDF with log axis"),
+        ldf_integrated_signal=dict(default=False,
+            doc="Change labels to match integrated pulse power"),    
         ldf_remove_outliers=dict(default=True,
             doc="Do not allow values > 1000000 or < 0.001 for signal strength"),
         ldf_total_signal=dict(default=False, 
@@ -255,7 +257,10 @@ class Shower(Task):
                     cr.plt.errorbar(Dist, self.signals[:, 2], yerr=[sig_uncer[:, 2], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_z, marker=self.ldf_marker_z, linestyle="None", label="z")
 
                 cr.plt.xlabel("Distance to Shower Axis [m]")
-                cr.plt.ylabel("Signal [a.u.]")
+                if self.ldf_integrated_signal:
+                    cr.plt.ylabel("Integrated signal [a.u.]")
+                else:    
+                    cr.plt.ylabel("Peak signal [a.u.]")
 
                 if self.ldf_logplot:
                     cr.plt.yscale("log")
@@ -272,7 +277,10 @@ class Shower(Task):
                     cr.plt.scatter(Dist, self.signals[:, 2], c=self.ldf_color_z, marker=self.ldf_marker_z, label="z")
 
                 cr.plt.xlabel("Distance to Shower Axis [m]")
-                cr.plt.ylabel("Signal [a.u.]")
+                if self.ldf_integrated_signal:
+                    cr.plt.ylabel("Integrated signal [a.u.]")
+                else:    
+                    cr.plt.ylabel("Peak signal [a.u.]")
 
                 if self.ldf_logplot:
                     cr.plt.yscale("log")
@@ -282,7 +290,10 @@ class Shower(Task):
                 cr.plt.xlim(0, 500)
 
             if self.save_plots:
-                plotname = self.plot_prefix + "shower_ldf.{0}".format(self.plot_type)
+                if self.ldf_integrated_signal:
+                    plotname = self.plot_prefix + "shower_integrated_ldf.{0}".format(self.plot_type)
+                else:    
+                    plotname = self.plot_prefix + "shower_ldf.{0}".format(self.plot_type)
                 cr.plt.savefig(plotname)
                 self.plotlist.append(plotname)
             else:
