@@ -249,6 +249,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # Open file
             f = cr.open(station.datafile.settings.datapath + '/' + station.datafile.filename)
 
+            # Check if antenna_set is supported this pipeline
             if f["ANTENNA_SET"] not in ["LBA_INNER", "LBA_OUTER"]:
                 raise EventSkipped("unsupported antenna_set {0}".format(f["ANTENNA_SET"]))
     
