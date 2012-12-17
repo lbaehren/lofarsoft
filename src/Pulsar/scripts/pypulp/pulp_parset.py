@@ -148,9 +148,11 @@ class SAPBeam:
 		# find up to 3 brightest pulsars in the SAP
 		if not cmdline.opts.is_nofold:
 			if len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind") or \
-				(len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind3"):
+				(len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind3") or \
+				(len(cmdline.psrs) != 0 and cmdline.psrs[0] == "tabfind+"):
 				self.psrs = find_pulsars(self.rarad, self.decrad, cmdline, cmdline.opts.fwhm_IS/2.)
-				if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "sapfind" and len(self.psrs)>0: self.psrs = self.psrs[:1]
+				if len(cmdline.psrs) != 0 and (cmdline.psrs[0] == "sapfind" or cmdline.psrs[0] == "tabfind+") and len(self.psrs) > 0: 
+					self.psrs = self.psrs[:1]
 
 		# initializing SAP beams objects and making the list of SAP beams
 		for tid in np.arange(self.nrTiedArrayBeams):

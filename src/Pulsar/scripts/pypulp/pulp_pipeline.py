@@ -48,11 +48,6 @@ class Pipeline:
 		# prefix and suffix for summary archive name, in between them there will CS, IS, CV code
 		self.summary_archive_prefix="_summary"
 		self.summary_archive_suffix=".tar"
-		# extensions of the files to copy to a full archive (*.tgz)
-		self.full_archive_exts=["*.log", "*.txt", "*parset", "*.par", "*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse", "*.rv", "*.out", "*.h5"]
-		# prefix and suffix for full archive name, in between them there will CS, IS, CV code
-		self.full_archive_prefix="_pulp"
-		self.full_archive_suffix=".tgz"
 		self.number_failed_pipes = 0   # number of failed pipelines
 		self.number_failed_summaries = 0  # number of failed summaries
 
@@ -311,26 +306,31 @@ class Pipeline:
 		self.sum_popens=[]
 
 	# make feedback file
-	def make_feedback(self, obs, cep2, cmdline, log):
+	def make_feedback(self, obs, cep2, cmdline, log=None):
 		sumnode=cep2.get_current_node()
 		sumdir=self.summary_dirs[sumnode]
 
 		# moving log-files to corresponding directory
-		log.info("Moving log-files...")
+		if log != None: log.info("Moving log-files...")
 		for unit in [u for u in self.units if u.summary_node == sumnode]: 
 			if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
 				if not cmdline.opts.is_log_append:	
 					cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
 						(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
-					self.execute(cmd, log, workdir=sumdir)
+					if log != None: self.execute(cmd, log, workdir=sumdir)
+					else:
+						proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
+						proc.communicate()
 				else:
 					# appending log from sumdir to the one in corresponing beam directory
 					cmd="cat %s/%s_sap%03d_beam%04d.log >> %s/%s/SAP%d/%s/%s_sap%03d_beam%04d.log" % \
 						(sumdir, obs.id, unit.sapid, unit.tabid, sumdir, unit.beams_root_dir, unit.sapid, unit.procdir, obs.id, unit.sapid, unit.tabid)
-					self.execute(cmd, log, is_os=True)
+					if log != None: self.execute(cmd, log, is_os=True)
+					else: os.system(cmd)
 					# removing log from sumdir
-					cmd="rm -f %s_sap%03d_beam%04d.log" % (obs.id, unit.sapid, unit.tabid)
-					self.execute(cmd, log, workdir=sumdir)
+					cmd="rm -f %s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)
+					if log != None: self.execute(cmd, log, workdir=sumdir)
+					else: os.system(cmd)
 
                 # either "CS", "IS", "CV", ..
                 data_code=[u.code for u in self.units if u.summary_node == sumnode][0]
@@ -464,17 +464,24 @@ class Pipeline:
 		cmd="chmod -R g+w %s" % (sumdir)
 		os.system(cmd)
 
-		# adding log file to the archive and gzip it
-		cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
-		try: # --ignore-failed-read does not seem to help with tar failing for some beams
-                     # like file was changed during the tar, though tarball seem to be fine
-			self.execute(cmd, log, workdir=sumdir)
+		# delete file from the archive first
+		cmd="tar --delete -v --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
+		try:
+			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
+			proc.communicate()
+			# adding log file to the archive and gzip it
+			cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
+			# --ignore-failed-read does not seem to help with tar failing for some beams
+			# like file was changed during the tar, though tarball seem to be fine
+			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
+			proc.communicate()
 		except: pass
 		cmd="gzip %s" % (tarname)
-		self.execute(cmd, log, workdir=sumdir)
+		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
+		proc.communicate()
 
 		# updating the Feedback unit
-		self.make_feedback(obs, cep2, cmdline, log)
+		self.make_feedback(obs, cep2, cmdline)
 
 
 	# run necessary processes to organize summary info on summary nodes for CS and IS data
@@ -596,7 +603,8 @@ class Pipeline:
 		if data_code == "CS" and not cmdline.opts.is_nofold and (len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] != "tabfind")):
 			for sap in obs.saps:
 				if sap.nrRings > 0:
-					if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
+					if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "sapfind" and \
+										cmdline.psrs[0] != "sapfind3" and cmdline.psrs[0] != "tabfind+":
 						psrs = cmdline.psrs # getting list of pulsars from command line
 					else: # getting list of pulsars from SAP
 						psrs = sap.psrs
@@ -612,14 +620,16 @@ class Pipeline:
 						# combining TA heatmap log and linear plots
 						cmd="convert %s_SAP%d_%s_TA_heatmap_log.png %s_SAP%d_%s_TA_heatmap_linear.png -append ta_heatmap_sap%d_%s.png" % (obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, sap.sapid, psr)
 						self.execute(cmd, log, workdir=sumdir)
+
 					# combining TA heatmaps for different pulsars
 					heatmaps=glob.glob("%s/ta_heatmap_sap%d_*.png" % (sumdir, sap.sapid))
-					if len(heatmaps) > 1: cmd="convert %s +append ta_heatmap_sap%d.png" % (" ".join(heatmaps), sap.sapid)
-					else: cmd="mv %s ta_heatmap_sap%d.png" % (heatmaps[0], sap.sapid)
-					self.execute(cmd, log, workdir=sumdir)
-					# remove temporary png files
-					cmd="rm -f ta_heatmap_sap%d_*.png" % (sap.sapid)
-					self.execute(cmd, log, workdir=sumdir)
+					if len(heatmaps) > 0:
+						if len(heatmaps) > 1: cmd="convert %s +append ta_heatmap_sap%d.png" % (" ".join(heatmaps), sap.sapid)
+						else: cmd="mv %s ta_heatmap_sap%d.png" % (heatmaps[0], sap.sapid)
+						self.execute(cmd, log, workdir=sumdir)
+						# remove temporary png files
+						cmd="rm -f ta_heatmap_sap%d_*.png" % (sap.sapid)
+						self.execute(cmd, log, workdir=sumdir)
 			# combining TA heatmaps for different SAPs
 			heatmaps=glob.glob("%s/ta_heatmap_sap*.png" % (sumdir))
 			if len(heatmaps) > 0:
@@ -704,17 +714,24 @@ class Pipeline:
 		cmd="chmod -R g+w %s" % (sumdir)
 		os.system(cmd)
 
-		# adding log file to the archive and gzip it
-		cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
-		try: # --ignore-failed-read does not seem to help with tar failing for some beams
-                     # like file was changed during the tar, though tarball seem to be fine
-			self.execute(cmd, log, workdir=sumdir)
+		# delete file from the archive first
+		cmd="tar --delete -v --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
+		try:
+			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
+			proc.communicate()
+			# adding log file to the archive and gzip it
+			cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname, cep2.get_logfile().split("/")[-1])
+			# --ignore-failed-read does not seem to help with tar failing for some beams
+			# like file was changed during the tar, though tarball seem to be fine
+			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
+			proc.communicate()
 		except: pass
 		cmd="gzip %s" % (tarname)
-		self.execute(cmd, log, workdir=sumdir)
+		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=sumdir)
+		proc.communicate()
 
 		# updating the Feedback unit
-		self.make_feedback(obs, cep2, cmdline, log)
+		self.make_feedback(obs, cep2, cmdline)
 
 
 # base class for the single processing (a-ka beam)
@@ -744,14 +761,18 @@ class PipeUnit:
 		self.start_time = 0  # start time of the processing (in s)
 		self.end_time = 0    # end time (in s)
 		self.total_time = 0  # total time in s 
-		# extensions of the files to copy to archive (parfile and parset will be also included)
-		self.extensions=["*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse", "*.h5"]
+		# extensions of the files to copy to summary node
+		self.extensions=["*.log", "*.txt", "*.pdf", "*.ps", "*.bestprof", "*.inf", "*.rfirep", "*png"]
 		self.procdir = "BEAM%d" % (self.tabid)
+		# extensions for the full archive, e.g. LTA
+		self.full_archive_exts=["*.log", "*.txt", "*.pdf", "*.ps", "*.pfd", "*.bestprof", "*.polycos", "*.inf", "*.rfirep", "*png", "*.ar", "*.AR", "*pdmp*", "*_rfifind*", "*.dat", "*.singlepulse", "*.h5"]
 
 		# pulsars to fold for this unit
 		self.psrs = []
 		if not cmdline.opts.is_nofold:
 			self.psrs = self.get_pulsars_to_fold(obs, cep2, cmdline, log)
+			# to be sure that we have unique list of pulsars (especially relevant for tabfind+ option)
+			self.psrs = np.unique(self.psrs)
 
 	# function to set outdir and curdir directories
 	def set_outdir(self, obs, cep2, cmdline):
@@ -787,13 +808,23 @@ class PipeUnit:
 						break
 				if len(self.psrs)>0: self.psrs = self.psrs[:1]  # leave only one pulsar
 	
-			# if special word "tabfind" is given
-			if len(cmdline.psrs) != 0 and cmdline.psrs[0] == "tabfind":
+			# if special word "tabfind" or "tabfind+" is given
+			# if it is "tabfind+", then we take pulsar from the parset (if exist), then one pulsar from the SAP (if different from the parset)
+			# and then also search for another pulsar in the TAB
+			# In case of "tabfind" we only search for pulsars in the TAB
+			if len(cmdline.psrs) != 0 and (cmdline.psrs[0] == "tabfind" or cmdline.psrs[0] == "tabfind+"):
+				# in the special case of "tabfind+"...
+				if cmdline.psrs[0] == "tabfind+":
+					for sap in obs.saps:
+						if self.sapid == sap.sapid: 
+							if sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None):
+								self.psrs.append(sap.source)
+							if len(sap.psrs) > 0: self.psrs.append(sap.psrs[0])
 				log.info("Searching for best pulsar for folding in SAP=%d TAB=%d..." % (self.sapid, self.tabid))
-				self.psrs = find_pulsars(self.tab.rarad, self.tab.decrad, cmdline, cmdline.opts.fwhm_CS/2.)
-				if len(self.psrs) > 0: 
-					self.psrs = self.psrs[:1] # leave only one pulsar
-					log.info("%s" % (" ".join(self.psrs)))
+				tabpsrs = find_pulsars(self.tab.rarad, self.tab.decrad, cmdline, cmdline.opts.fwhm_CS/2.)
+				if len(tabpsrs) > 0: 
+					self.psrs.append(tabpsrs[0]) # use only one pulsar from those found in a TAB
+					log.info("%s" % (tabpsrs[0]))
 
 			# using pulsars from SAP
 			if len(cmdline.psrs) != 0 and (cmdline.psrs[0] == "sapfind" or cmdline.psrs[0] == "sapfind3"):
@@ -805,7 +836,7 @@ class PipeUnit:
 
 			# if --pulsar is used but no special word
 			if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "tabfind" and \
-					cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3":
+					cmdline.psrs[0] != "sapfind" and cmdline.psrs[0] != "sapfind3" and cmdline.psrs[0] != "tabfind+":
 				self.psrs[:] = cmdline.psrs # copying all items
 
 			# checking if pulsars are in ATNF catalog, or if not par-files do exist fo them, if not - exit
@@ -833,7 +864,7 @@ class PipeUnit:
 				if os.path.exists(cmdline.opts.parfile): 
 					self.log.info("Copying user-specified parfile '%s' to %s/%s.par" % \
 						(cmdline.opts.parfile, self.outdir, psr2))
-					cmd="cp -f %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
+					cmd="cp -n %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
 					self.execute(cmd)
 					continue
 				else: 
@@ -842,16 +873,19 @@ class PipeUnit:
 					sys.exit(1)
 			parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
 			if os.path.exists(parfile):
-				cmd="cp -f %s %s" % (parfile, self.outdir)
+				cmd="cp -n %s %s" % (parfile, self.outdir)
 				self.execute(cmd)
 				continue
 			parfile="%s/%s.par" % (cep2.parfile_dir, psr)
 			if os.path.exists(parfile):
-				cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
+				cmd="cp -n %s %s/%s.par" % (parfile, self.outdir, psr2)
 				self.execute(cmd)
 				continue
 			self.log.info("Parfile does not exist. Creating parfile base on pulsar ephemeris from ATNF catalog...")
-			cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr2, self.outdir, psr2)
+			# for -e option, we need to use pulsar name with leading B or J, otherwise it is possible (I cama across this!)
+			# that there are two pulsars with the same name, one with leading J, another with leading B,
+			# in this case psrcat returns records for both pulsars, and output parfile gets messed up
+			cmd="psrcat -db_file %s -e %s > %s/%s.par" % (cep2.psrcatdb, psr, self.outdir, psr2)
 			self.execute(cmd, is_os=True)
 
 		# Now we check the par-files if they have non-appropriate flags that can cause prepfold to crash
@@ -970,7 +1004,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 				(prg, time.asctime(time.gmtime()), job_total_time, job_total_time/3600.))
 			self.log.info("")
 		except Exception:
-			self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join([fu.pid for fu in popen_list if fu.poll() is not None])))
+			self.log.exception("Oops... %s has crashed!\npids = %s" % (prg, ",".join(["%d" % (fu.pid) for fu in popen_list if fu.poll() is not None])))
 			raise Exception
 
 	def power_of_two(self, value):
@@ -1043,7 +1077,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 		if not cmdline.opts.is_feedback:
 			# copying parset file to output directory
 			self.log.info("Copying original parset file to output directory...")
-			cmd="cp -f %s %s" % (obs.parset, self.outdir)
+			cmd="cp -n %s %s" % (obs.parset, self.outdir)
 			self.execute(cmd, workdir=self.outdir)
 			# Make a tarball of all the plots for this beam
 			self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
@@ -1076,23 +1110,29 @@ CLK line will be removed from the parfile!" % (parfile,))
 		else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
 		os.system(cmd)
 		cmd="rsync %s -axP %s %s:%s" % (verbose, cep2.get_logfile(), self.summary_node, output_dir)
-		self.execute(cmd, workdir=self.outdir)
+		proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
+		proc.communicate()
 
 		# changing the file permissions to be re-writable for group
 		cmd="chmod -R g+w %s" % (self.outdir)
 		os.system(cmd)
 
 		if not cmdline.opts.is_feedback:
-			# de-gzipping archive, adding log file to the archive and gzip it again
-			cmd="gzip -d %s" % (tarname)
-			self.execute(cmd, workdir=self.outdir)
-			cmd="tar -rv --ignore-failed-read -f %s %s" % (tarname.split(".gz")[0], cep2.get_logfile().split("/")[-1])
-			try: # --ignore-failed-read does not seem to help with tar failing for some beams
-	                     # like file was changed during the tar, though tarball seem to be fine
-				self.execute(cmd, workdir=self.outdir)
+			# create a new full archive tarball
+			tar_list=[]
+			for ext in self.full_archive_exts:
+				ext_list=rglob(self.curdir, ext, 3)
+				tar_list.extend(ext_list)
+			tar_list.extend(glob.glob("%s/*.par" % (self.outdir)))
+			tar_list.extend(glob.glob("%s/*.parset" % (self.outdir)))
+			tar_list.extend(glob.glob("%s/%s" % (self.outdir, cep2.get_logfile().split("/")[-1])))
+			cmd="tar -cvz --ignore-failed-read -f %s %s" % (tarname, " ".join([f.split(self.outdir+"/")[1] for f in tar_list]))
+			try:
+				# --ignore-failed-read does not seem to help with tar failing for some beams
+				# like file was changed during the tar, though tarball seem to be fine
+				proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
+				proc.communicate()
 			except: pass
-			cmd="gzip %s" % (tarname.split(".gz")[0])
-			self.execute(cmd, workdir=self.outdir)
 
 		# initializing the Feedback unit
 		fbindex=0
@@ -1718,7 +1758,7 @@ class CSUnit(PipeUnit):
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus092"
 		self.summary_node_dir_suffix = "_CSplots" # "_CSplots"
-		self.archive_suffix = "_plotsCS.tar.gz"
+		self.archive_suffix = "_pulpCS.tar.gz"
 		self.outdir_suffix = "_red" # "_red"
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
@@ -1752,7 +1792,7 @@ class ISUnit(PipeUnit):
 		self.sampling = obs.samplingIS
 		self.summary_node = "locus094"
 		self.summary_node_dir_suffix = "_redIS" # "_redIS"
-		self.archive_suffix = "_plotsIS.tar.gz"
+		self.archive_suffix = "_pulpIS.tar.gz"
 		self.outdir_suffix = "_redIS" # "_redIS"
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
@@ -1786,7 +1826,7 @@ class CVUnit(PipeUnit):
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus093"
 		self.summary_node_dir_suffix = "_CVplots"  # "_CVplots"
-		self.archive_suffix = "_plotsCV.tar.gz"
+		self.archive_suffix = "_pulpCV.tar.gz"
 		self.outdir_suffix = "_red"  # "_red"
 		# extensions of the files to copy to archive (parfile and parset will be also included)
 		self.extensions=["*.pdf", "*.ps", "*png", "*.ar", "*.AR", "*pdmp*", "*.rv", "*.out", "*.h5"]
@@ -2348,7 +2388,7 @@ class FE_CSUnit(PipeUnit):
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus092"
 		self.summary_node_dir_suffix = "_CSplots" # "_CSplots"
-		self.archive_suffix = "_plotsCS.tar.gz"
+		self.archive_suffix = "_pulpCS.tar.gz"
 		self.outdir_suffix = "_red" # "_red"
 		# re-assigning procdir from BEAMN to station name
 		if obs.FE and self.tab.stationList[0] != "": 
@@ -2384,7 +2424,7 @@ class FE_CVUnit(CVUnit):
 		self.sampling = obs.samplingCS
 		self.summary_node = "locus093"
 		self.summary_node_dir_suffix = "_CVplots" # "_CVplots"
-		self.archive_suffix = "_plotsCV.tar.gz"
+		self.archive_suffix = "_pulpCV.tar.gz"
 		self.outdir_suffix = "_red" # "_red"
 		# re-assigning procdir from BEAMN to station name
 		if obs.FE and self.tab.stationList[0] != "": 

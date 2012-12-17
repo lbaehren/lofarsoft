@@ -58,9 +58,11 @@ class CMDLine:
                            help="specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
         	self.cmd.add_option('-p', '-P', '--pulsar', dest='psr', metavar='PSRS|word',
                            help="specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
-                                 give one of the 4 special words: \"parset\" - to take pulsar name from the source field for each SAP \
+                                 give one of the 5 special words: \"parset\" - to take pulsar name from the source field for each SAP \
                                  separately from the parset file, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV \
-                                 of the particular SAP, or \"tabfind\" to find the brightest pulsar for each TAB individually. \
+                                 of the particular SAP, or \"tabfind\" to find the brightest pulsar for each TAB individually, or \
+                                 \"tabfind+\" to first get pulsar from the parset if pulsar name their is legitimate, then get the brightest \
+                                 one in the SAP (same as \"sapfind\"), and get another pulsar from the TAB (same as \"tabfind\"). \
                                  If no pulsars are given and no special words used, then pipeline will try to take source names from \
                                  parset file first, and then look for the best pulsars in SAP's FOV (same as \"sapfind\"). \
                                  Word 'NONE' as a pulsar name is ignored", default="", type='str')
@@ -299,7 +301,7 @@ class CMDLine:
 				msg="***\n*** Warning: Pulsar is not specified and PULP will use source names\n\
 *** from the parset file first if given, and then will look for the best\n\
 *** pulsar in the SAP's FOV for each SAP separately! You also can use\n\
-*** predefined words: \"parset\", \"sapfind\", \"sapfind3\", or \"tabfind\".\n\
+*** predefined words: \"parset\", \"sapfind\", \"sapfind3\", \"tabfind\", or \"tabfind+\".\n\
 *** See help for more details.\n***"
 				if log != None: log.warning(msg)
 				else: print msg
@@ -337,7 +339,7 @@ class CMDLine:
 
 			# checking if given psr(s) names are valid, and these pulsars are in the catalog
 			if len(self.psrs) != 0 and self.psrs[0] != "parset" and self.psrs[0] != "sapfind" and \
-				self.psrs[0] != "sapfind3" and self.psrs[0] != "tabfind":
+				self.psrs[0] != "sapfind3" and self.psrs[0] != "tabfind" and self.psrs[0] != "tabfind+":
 				if self.opts.parfile != "" and len(self.psrs) > 1:
 					msg="Parfile '%s' is given, but more than 1 pulsar are given to fold. Exiting..." % (self.opts.parfile)
 					if log != None: log.error(msg)
@@ -354,7 +356,7 @@ class CMDLine:
 							msg="Copying parfile '%s' to %s..." % (self.opts.parfile, cep2.get_logdir())
 							if log != None: log.info(msg)
 							else: print msg
-							cmd="cp -f %s %s" % (self.opts.parfile, cep2.get_logdir())
+							cmd="cp -n %s %s" % (self.opts.parfile, cep2.get_logdir())
 							os.system(cmd)
 							# we should also change the parfile name in self.options in order to pass correct file to processing nodes
 							newpar="%s/%s" % (cep2.get_logdir(), self.opts.parfile.split("/")[-1])
@@ -499,7 +501,8 @@ class CMDLine:
 			else:
 				if len(self.psrs) == 0: pulsar_status = "default:parset -> sapfind"
 				else: 
-					if self.psrs[0] == "parset" or self.psrs[0] == "sapfind" or self.psrs[0] == "sapfind3" or self.psrs[0] == "tabfind":
+					if self.psrs[0] == "parset" or self.psrs[0] == "sapfind" or self.psrs[0] == "sapfind3" \
+						or self.psrs[0] == "tabfind" or self.psrs[0] == "tabfind+":
 						pulsar_status = self.psrs[0]
 					else: pulsar_status = ", ".join(self.psrs)
 			log.info("PSR(s) = %s" % (pulsar_status))
@@ -514,6 +517,14 @@ class CMDLine:
 					for sap in obs.saps: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, ", ".join(sap.psrs)))
 				if len(self.psrs) != 0 and self.psrs[0] == "parset":
 					for sap in obs.saps: log.info("SAP=%d   PSR: %s" % (sap.sapid, sap.source))
+				if len(self.psrs) != 0 and self.psrs[0] == "tabfind+":
+					for sap in obs.saps:
+						if sap.source != "" and check_pulsars(sap.source, self, cep2, None): 
+							# check if there are pulsars in SAP and if the first one is not the same as in the parset
+							if len(sap.psrs) > 0 and sap.source != sap.psrs[0]:
+								log.info("SAP=%d   PSR(s): %s, %s" % (sap.sapid, sap.source, len(sap.psrs)>0 and sap.psrs[0] or ""))
+							else: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, sap.source))
+						else: log.info("SAP=%d   PSR(s): %s" % (sap.sapid, len(sap.psrs)>0 and sap.psrs[0] or ""))
 			if self.opts.parfile != "":
 				log.info("User-specified Parfile = %s" % (self.opts.parfile))
 			if self.opts.rawdir != "/data":
