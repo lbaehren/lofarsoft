@@ -115,6 +115,8 @@ def process_station(station):
         logging.info("station skipped because: {0}".format(e.message))
         event.status = "SKIPPED"
         event.statusmessage = e.message
+    except Skipped as e:
+        raise
     except StationError as e:
         logging.exception(e.message)
         station.status = "ERROR"
@@ -150,6 +152,8 @@ def process_polarization(polarization, *args):
         logging.info("polarization skipped because: {0}".format(e.message))
         event.status = "SKIPPED"
         event.statusmessage = e.message
+    except Skipped as e:
+        raise
     except PolarizationError as e:
         logging.exception(e.message)
         for p in args:
@@ -328,7 +332,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
                 except Exception:
                     raise StationSkipped("do not have DIPOLE_CALIBRATION_DELAY value")
-    
+
                 weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
                 phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
     
