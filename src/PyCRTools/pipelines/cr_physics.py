@@ -326,7 +326,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     
                 # Flag dirty channels (from RFI excission)
                 fft_data[..., flagged_channels] = 0 # Flag default channels
-                #fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
+                fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
     
                 # Apply calibration delays
                 try:
