@@ -310,7 +310,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 f["BLOCK"] = block_number_lora
     
                 # Find RFI and bad antennas
-                findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[])
+                try:
+                    findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[])
+                except ZeroDivisionError as e:
+                    raise StationError("findrfi reports NaN in file {0}".format(e.message))
+
                 polarization['0']['crp_plotfiles'].append(findrfi.plotlist[0])
                 polarization['1']['crp_plotfiles'].append(findrfi.plotlist[1])
     
