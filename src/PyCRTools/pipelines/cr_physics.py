@@ -457,18 +457,18 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             average_residual = residual_delays.mean()
 
             if direction_fit_plane_wave.fit_failed:
-                break
+                continue
     
             if direction_fit_plane_wave.goodcount < nantennas / 2:
                 station.status = "BAD"
                 station.statusmessage = "goodcount {0} < nantennas / 2 [= {1}]".format(direction_fit_plane_wave.goodcount, nantennas / 2)
-                break
+                continue
     
             if average_residual > options.maximum_allowed_residual_delay: 
                 print "direction fit residuals too large, average_residual = {0}".format(average_residual)
                 station.status = "BAD"
                 station.statusmessage = "average_residual = {0}".format(average_residual)
-                break
+                continue
 
             print "direction fit residuals ok, average_residual = {0}".format(average_residual)
 
