@@ -599,7 +599,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     
         ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, ldf_enable=True, footprint_enable=True, lora_positions=lora_positions, lora_signals=lora_signals, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
     
-        ldf_power = cr.trun("Shower", positions=all_station_antenna_positions, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_integrated_pulse_power, direction_uncertainties=direction_uncertainties, ldf_enable=True, ldf_integrated_signal=True, footprint_enable=False, lora_positions=lora_positions, lora_signals=lora_signals, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+        ldf_power = cr.trun("Shower", positions=all_station_antenna_positions, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_integrated_pulse_power, direction_uncertainties=direction_uncertainties, ldf_enable=True, ldf_integrated_signal=True, ldf_logplot=False, footprint_enable=False, lora_positions=lora_positions, lora_signals=lora_signals, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         event.status = "CR_FOUND"
         event.statusmessage = ""
