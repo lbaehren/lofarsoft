@@ -281,7 +281,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     
                 print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
             except Exception:
-                raise EventError("could not get expected block number from LORA data")
+                raise StationError("could not get expected block number from LORA data")
 
             print "have LORA data"
 
