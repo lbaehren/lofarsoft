@@ -467,7 +467,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 if len(pulse_envelope.antennas_with_significant_pulses) < 3:
                     if n == 0:
                         logging.info("less than 3 antennas with significant pulses in first iteration")
-                        StationError("less than 3 antennas with significant pulses"
+                        StationError("less than 3 antennas with significant pulses")
                     else:
                         logging.info("less than 3 antennas with significant pulses, using previous direction")
                         break
