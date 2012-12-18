@@ -106,6 +106,8 @@ class Shower(Task):
             doc="List of directions, [NStations x [az,el]]"),    
         all_stations=dict(default=None,
             doc="List of stations corresponding to all_directions"),
+        lora_direction=dict(default=None,
+            doc='direction as reconstructed by LORA in [az,el]')    
             
         footprint_polarization_enable=dict(default=False,
             doc="Draw footprint with polarization arrows"),
@@ -551,8 +553,12 @@ class Shower(Task):
                 ax = cr.plt.subplot(111)
                 
                 for i in xrange(len(self.all_stations)):
-                    cr.plt.polar(np.radians(az[i]),zen[i],marker="s",markersize = 7,  linestyle ="None",color = cm.gist_rainbow(direction_colors[i]),label=self.all_stations[i])
+                    cr.plt.polar(np.radians(az[i]),zen[i],marker="s",markersize=7, linestyle ="None",color=cm.gist_rainbow(direction_colors[i]),label=self.all_stations[i])
     
+                if self.lora_direction:
+                    cr.plt.polar(np.radians(self.lora_direction[0]),self.lora_direction[1], marker='o', markersize=5, linestyle="None", color='k', label='LORA')
+                    
+                    
                 cr.plt.legend(bbox_to_anchor=(1., .0, 1., .0),loc=3,borderaxespad=0., shadow=False, numpoints=1)
                 
                 cr.plt.rgrids([10,30,60,80],labels=None, angle=202)
