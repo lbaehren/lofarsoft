@@ -107,7 +107,7 @@ class Shower(Task):
         all_stations=dict(default=None,
             doc="List of stations corresponding to all_directions"),
         lora_direction=dict(default=None,
-            doc='direction as reconstructed by LORA in [az,el]')    
+            doc='direction as reconstructed by LORA in [az,el]'),    
             
         footprint_polarization_enable=dict(default=False,
             doc="Draw footprint with polarization arrows"),
