@@ -507,6 +507,21 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             
             average_residual = residual_delays.mean()
 
+            # Plot residual delays
+            plt.clf()
+            plt.plot(direction_fit_plane_wave.residual_delays.toNumpy(), "ro")
+            plt.xlabel("Antenna number")
+            plt.ylabel("Residual delay (s)")
+            plotfile = station_plot_prefix + "residual_delay.{0}".format(options.plot_type)
+            plt.savefig(plotfile)
+            station["crp_plotfiles"].append(plotfile)
+    
+            # Add parameters
+            station["crp_pulse_time"] = time_delays
+            station["crp_pulse_delay"] = pulse_envelope.delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
+            station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
+            station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
+
             if direction_fit_plane_wave.fit_failed:
                 continue
     
@@ -541,23 +556,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 time_delays = pulse_envelope_xyz.pulse_maximum_time.toNumpy().reshape((nantennas, 3))
                 time_delays += float(block_number_lora * options.blocksize + max(f["SAMPLE_NUMBER"])) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
     
-                # Plot residual delays
-                plt.clf()
-                plt.plot(direction_fit_plane_wave.residual_delays.toNumpy(), "ro")
-                plt.xlabel("Antenna number")
-                plt.ylabel("Residual delay (s)")
-                
-                plotfile = station_plot_prefix + "residual_delay.{0}".format(options.plot_type)
-                plt.savefig(plotfile)
-                station["crp_plotfiles"].append(plotfile)
-    
-                # Add parameters
-                station["crp_pulse_time"] = time_delays
-                station["crp_pulse_delay"] = pulse_envelope.delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
-    
-                station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
-    
-                station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
                 polarization['xyz']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_xyz.peak_amplitude).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_integrated_pulse_power"] = cr.hArray(pulse_envelope_xyz.integrated_pulse_power).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
