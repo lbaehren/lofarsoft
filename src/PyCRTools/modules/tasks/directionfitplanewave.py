@@ -117,7 +117,7 @@ class DirectionFitPlaneWave(tasks.Task):
             # if fit only remains with three antennas (or less) it should not be trusted as it always has a solution (fails)
             if self.goodcount < 3:
                 print "ERROR: too few good antennas for direction fit."
-                self.meandirection = cr.hArray(0, 0, 1)
+                self.meandirection = cr.hArray((0, 0, 1))
                 self.fit_failed = True
                 break
 
@@ -143,13 +143,17 @@ class DirectionFitPlaneWave(tasks.Task):
                 print "histogram filled", hist
                 print "edges", edges
                 # fix for first and last bin
+                print "maximum at", max_time
                 try:
                     upper = edges[max_time+1]
                 except:
                     upper = edges[len[edges]]
+                    print "upper exception"
                 try:
                     lower = edges[max_time-1]
+                    
                 except:
+                    print "lower exception"
                     lower = edges[0]
                     
                 print "selecting between lower ",lower, " and upper", upper 
