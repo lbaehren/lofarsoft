@@ -421,7 +421,7 @@ class Pipeline:
 		dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 		if len(dspsr_diags) > 0:
 			log.info("Creating DSPSR summary diagnostic plots...")
-			if len(dspsr_diags) > 1: cmd="montage %s -background none -mode concatenate -tile 10x dspsr_status.png" % (" ".join(dspsr_diags))
+			if len(dspsr_diags) > 1: cmd="montage %s -background none -mode concatenate -tile %dx dspsr_status.png" % (" ".join(dspsr_diags), int(math.sqrt(len(dspsr_diags))))
 			else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
 			self.execute(cmd, log, workdir=sumdir)
 
@@ -599,6 +599,11 @@ class Pipeline:
 							(node, rf, unit.tab.specificationType == "flyseye" and " [%s]" % (",".join(unit.tab.stationList)) or ""))
 			bpnf.close()
 
+		# removing old version of all status png files (if exist)
+		log.info("Removing previous status png files (if any) ...")
+		cmd="rm -f status.png status.th.png TAheatmap_status.png TAheatmap_status.th.png FE_status.png FE_status.th.png dspsr_status.png dspsr_status.th.png"
+		self.execute(cmd, log, workdir=sumdir)
+
 		# creating TA heatmaps 
 		# only when folding, and only if pulsars are set from the command line, or 'parset' or 'sapfind' or 'sapfind3' keywords are used (or
 		# nothing is given for --pulsar option
@@ -651,7 +656,7 @@ class Pipeline:
 			dspsr_diags=rglob(sumdir, "*_diag.png", 3)
 			if len(dspsr_diags) > 0:
 				log.info("Creating DSPSR summary diagnostic plots...")
-				if len(dspsr_diags) > 1: cmd="montage %s -background none -mode concatenate -tile 10x dspsr_status.png" % (" ".join(dspsr_diags))
+				if len(dspsr_diags) > 1: cmd="montage %s -background none -mode concatenate -tile %dx dspsr_status.png" % (" ".join(dspsr_diags), int(math.sqrt(len(dspsr_diags))))
 				else: cmd="mv %s dspsr_status.png" % (dspsr_diags[0])
 				self.execute(cmd, log, workdir=sumdir)
 				# making a thumbnail version of combined DSPSR plot
@@ -677,11 +682,6 @@ class Pipeline:
 				# making a thumbnail version of FE status map
 				cmd="convert -scale 200x140-0-0 FE_status.png FE_status.th.png"
 				self.execute(cmd, log, workdir=sumdir)
-
-		# removing old version of status.png if exists (could be left over from previous run)
-		if os.path.exists("%s/status.png" % (sumdir)):		
-			cmd="rm -f status.png status.th.png"
-			self.execute(cmd, log, workdir=sumdir)
 
 		# Combining different status maps into one 'status.png' to be shown in web-summary page 
 		# combining FE maps to general status.png
