@@ -137,10 +137,17 @@ class DirectionFitPlaneWave(tasks.Task):
             self.residual_delays = goodtimes - expectedDelays
             
             if self.fit_failed:
-                hist, edges = np.histogram(self.residual_delays,bins=(self.residual_delays.max()-self.residual_delays.min())*c/(positions.max()-positions.min()))
+                hist, edges = np.histogram(self.residual_delays,bins=int((self.residual_delays.max()-self.residual_delays.min())*c/(positions[:,0].max()-positions[:,0].min())))
                 max_time = np.argmax(hist)
-                upper = edges[maxt_time+1] # fix for first and last bin
-                lower = edges[maxt_time-1]
+                # fix for first and last bin
+                try:
+                    upper = edges[maxt_time+1] 
+                except:  
+                    upper = edges[len[edges]] 
+                try:     
+                    lower = edges[maxt_time-1]
+                except:
+                    lower = edges[0]    
                 goodSubset = np.where(self.residual_delays-lower<upper-lower)
             else:
                 # remove > k-sigma outliers and iterate
