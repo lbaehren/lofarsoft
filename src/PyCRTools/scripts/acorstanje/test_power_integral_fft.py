@@ -17,14 +17,16 @@ print 'Trace power = %f' % trace_power
 spec=np.fft.rfft(trace) # NB. For FFTW a factor 1/blocksize is needed for normalization of FFT.
 print 'dimensions', spec.shape
 power = (spec.real)**2+(spec.imag)**2 
-power /= blocksize**2
+power /= blocksize # take power per sample
 
 amplitude = np.sqrt(power)
 
 # options
 cleaned_power_power = 2*np.sum(power) - power[0] - power[-1] # subtle: first and last element counted once, not twice! From complex -> real fft symmetry
+cleaned_power_power /= blocksize
+
 #cleaned_power = np.sum(spec)
-cleaned_power_amplitude = 2*np.sum(amplitude)
+cleaned_power_amplitude = 2*np.sum(amplitude) / blocksize
 cleaned_power_rms = np.sqrt(cleaned_power_power)
 
 #print "test of commutation", cleaned_power, np.sqrt(cleaned_power_power), cleaned_power/ np.sqrt(cleaned_power_power)
