@@ -139,7 +139,9 @@ class DirectionFitPlaneWave(tasks.Task):
             print self.residual_delays
 
 #            if self.fit_failed:
+            print "bins", int((self.residual_delays.max()-self.residual_delays.min())*c/(positions[:,0].max()-positions[:,0].min()))
             hist, edges = np.histogram(self.residual_delays,bins=int((self.residual_delays.max()-self.residual_delays.min())*c/(positions[:,0].max()-positions[:,0].min())))
+            
             max_time = np.argmax(hist)
             print "histogram filled", hist
             print "edges", edges
