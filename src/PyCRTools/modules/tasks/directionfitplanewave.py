@@ -147,7 +147,7 @@ class DirectionFitPlaneWave(tasks.Task):
                 try:
                     upper = edges[max_time+2]
                 except:
-                    upper = edges[len[edges]]
+                    upper = edges[edges.shape[0]]
                     print "upper exception"
                 try:
                     lower = edges[max_time]
