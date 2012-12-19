@@ -135,10 +135,18 @@ class DirectionFitPlaneWave(tasks.Task):
             expectedDelays = srcfind.timeDelaysFromDirection(goodpositions, (az, el))
             expectedDelays -= expectedDelays[0]
             self.residual_delays = goodtimes - expectedDelays
-            # remove > k-sigma outliers and iterate
-            spread = np.std(self.residual_delays)
-            k = self.rmsfactor
-            goodSubset = np.where(abs(self.residual_delays - np.mean(self.residual_delays)) < k * spread)
+            
+            if self.fit_failed:
+                hist, edges = np.histogram(self.residual_delays,bins=(self.residual_delays.max()-self.residual_delays.min())*c/(positions.max()-positions.min()))
+                max_time = np.argmax(hist)
+                upper = edges[maxt_time+1] # fix for first and last bin
+                lower = edges[maxt_time-1]
+                goodSubset = np.where(self.residual_delays-lower<upper-lower)
+            else:
+                # remove > k-sigma outliers and iterate
+                spread = np.std(self.residual_delays)
+                k = self.rmsfactor
+                goodSubset = np.where(abs(self.residual_delays - np.mean(self.residual_delays)) < k * spread)
             # gives subset of 'indicesOfGoodAntennas' that is 'good' after this iteration
             if self.verbose:
                 print 'iteration # %d' % niter
