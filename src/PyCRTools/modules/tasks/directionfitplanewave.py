@@ -89,6 +89,7 @@ class DirectionFitPlaneWave(tasks.Task):
         self.farfield = True
         c = 299792458.0  # speed of light in m/s
         rad2deg = 180.0 / np.pi
+        
 
         positions = self.positions.toNumpy()
         times = self.timelags.toNumpy()
@@ -126,7 +127,7 @@ class DirectionFitPlaneWave(tasks.Task):
             (az, el) = srcfind.directionForHorizontalArray(goodpositions, goodtimes)
             if np.isnan(el) or np.isnan(az):
                 print 'WARNING: plane wave fit returns NaN. Setting elevation to 0.0'
-                el = 40.* deg2rad  # need to propagate the warning...!
+                el = np.deg2rad(40)  # need to propagate the warning...!
                 self.fit_failed = True
             else:
                 self.fit_failed = False
