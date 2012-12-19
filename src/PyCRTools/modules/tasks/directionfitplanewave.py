@@ -151,6 +151,8 @@ class DirectionFitPlaneWave(tasks.Task):
                     lower = edges[max_time-1]
                 except:
                     lower = edges[0]
+                    
+                print "selecting between lower ",lower, " and upper", upper 
                 goodSubset = np.where(self.residual_delays-lower<upper-lower)
             else:
                 # remove > k-sigma outliers and iterate
