@@ -18,7 +18,6 @@ TZRFRQ         345.62700000000000955
 TZRSITE        i
 TRES           8.345
 EPHVER         5
-CLK            TT(UTC(NIST))
 EPHEM          DE405
 NITS           1
 NTOA           47
