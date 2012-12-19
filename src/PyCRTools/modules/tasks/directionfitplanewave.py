@@ -117,7 +117,7 @@ class DirectionFitPlaneWave(tasks.Task):
             # if fit only remains with three antennas (or less) it should not be trusted as it always has a solution (fails)
             if self.goodcount < 3:
                 print "ERROR: too few good antennas for direction fit."
-                self.meandirection = (0, 0, 1)
+                self.meandirection = cr.hArray(0, 0, 1)
                 self.fit_failed = True
                 break
 
@@ -153,7 +153,7 @@ class DirectionFitPlaneWave(tasks.Task):
                     lower = edges[0]
                     
                 print "selecting between lower ",lower, " and upper", upper 
-                goodSubset = np.where(self.residual_delays-lower<upper-lower)
+                goodSubset = np.where((self.residual_delays > lower)&(self.residual_delays < upper))
             else:
                 # remove > k-sigma outliers and iterate
                 spread = np.std(self.residual_delays)
