@@ -138,36 +138,36 @@ class DirectionFitPlaneWave(tasks.Task):
             self.residual_delays = goodtimes - expectedDelays
             print self.residual_delays
 
-#            if self.fit_failed:
-            bins = int((self.residual_delays.max()-self.residual_delays.min())*c/(positions[:,0].max()-positions[:,0].min()))
-            if bins < 1:
-                bins = 1
-            hist, edges = np.histogram(self.residual_delays,bins=bins)
-            
-            max_time = np.argmax(hist)
-            print "histogram filled", hist
-            print "edges", edges
-            # fix for first and last bin
-            print "maximum at", max_time
-            try:
-                upper = edges[max_time+2]
-            except:
-                upper = edges[edges.shape[0]-1]
-                print "upper exception"
-            try:
-                lower = edges[max_time]
+            if self.fit_failed:
+                bins = int((self.residual_delays.max()-self.residual_delays.min())*c/(positions[:,0].max()-positions[:,0].min()))
+                if bins < 1:
+                    bins = 1
+                hist, edges = np.histogram(self.residual_delays,bins=bins)
                 
-            except:
-                print "lower exception"
-                lower = edges[0]
-                
-            print "selecting between lower ",lower, " and upper", upper 
-            goodSubset = np.where((self.residual_delays > lower)&(self.residual_delays < upper))
-#            else:
-#                # remove > k-sigma outliers and iterate
-#                spread = np.std(self.residual_delays)
-#                k = self.rmsfactor
-#                goodSubset = np.where(abs(self.residual_delays - np.mean(self.residual_delays)) < k * spread)
+                max_time = np.argmax(hist)
+                print "histogram filled", hist
+                print "edges", edges
+                # fix for first and last bin
+                print "maximum at", max_time
+                try:
+                    upper = edges[max_time+2]
+                except:
+                    upper = edges[edges.shape[0]-1]
+                    print "upper exception"
+                try:
+                    lower = edges[max_time]
+                    
+                except:
+                    print "lower exception"
+                    lower = edges[0]
+                    
+                print "selecting between lower ",lower, " and upper", upper 
+                goodSubset = np.where((self.residual_delays > lower)&(self.residual_delays < upper))
+            else:
+                # remove > k-sigma outliers and iterate
+                spread = np.std(self.residual_delays)
+                k = self.rmsfactor
+                goodSubset = np.where(abs(self.residual_delays - np.mean(self.residual_delays)) < k * spread)
             # gives subset of 'indicesOfGoodAntennas' that is 'good' after this iteration
             if self.verbose:
                 print 'iteration # %d' % niter
