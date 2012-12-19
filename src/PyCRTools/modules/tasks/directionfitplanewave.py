@@ -145,12 +145,12 @@ class DirectionFitPlaneWave(tasks.Task):
                 # fix for first and last bin
                 print "maximum at", max_time
                 try:
-                    upper = edges[max_time+1]
+                    upper = edges[max_time+2]
                 except:
                     upper = edges[len[edges]]
                     print "upper exception"
                 try:
-                    lower = edges[max_time-1]
+                    lower = edges[max_time]
                     
                 except:
                     print "lower exception"
