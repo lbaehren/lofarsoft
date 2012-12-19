@@ -126,7 +126,7 @@ class DirectionFitPlaneWave(tasks.Task):
             (az, el) = srcfind.directionForHorizontalArray(goodpositions, goodtimes)
             if np.isnan(el) or np.isnan(az):
                 print 'WARNING: plane wave fit returns NaN. Setting elevation to 0.0'
-                el = 0.0  # need to propagate the warning...!
+                el = 40.* deg2rad  # need to propagate the warning...!
                 self.fit_failed = True
             else:
                 self.fit_failed = False
