@@ -97,7 +97,7 @@ class DirectionFitPlaneWave(tasks.Task):
 #        import pdb; pdb.set_trace()
         if len(positions.shape) == 1:
             positions = positions.reshape(len(positions) / 3, 3)
-        
+
         if not self.reference_antenna:
             times -= times[0]
 
@@ -135,19 +135,19 @@ class DirectionFitPlaneWave(tasks.Task):
             expectedDelays = srcfind.timeDelaysFromDirection(goodpositions, (az, el))
             expectedDelays -= expectedDelays[0]
             self.residual_delays = goodtimes - expectedDelays
-            
+
             if self.fit_failed:
                 hist, edges = np.histogram(self.residual_delays,bins=int((self.residual_delays.max()-self.residual_delays.min())*c/(positions[:,0].max()-positions[:,0].min())))
                 max_time = np.argmax(hist)
                 # fix for first and last bin
                 try:
-                    upper = edges[maxt_time+1] 
-                except:  
-                    upper = edges[len[edges]] 
-                try:     
-                    lower = edges[maxt_time-1]
+                    upper = edges[max_time+1]
                 except:
-                    lower = edges[0]    
+                    upper = edges[len[edges]]
+                try:
+                    lower = edges[max_time-1]
+                except:
+                    lower = edges[0]
                 goodSubset = np.where(self.residual_delays-lower<upper-lower)
             else:
                 # remove > k-sigma outliers and iterate
