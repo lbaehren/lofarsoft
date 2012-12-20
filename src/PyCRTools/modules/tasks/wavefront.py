@@ -28,7 +28,6 @@ import pycrtools as cr
 from pycrtools import srcfind as sf
 from pycrtools import lora
 import os
-# from pycrtools.tasks.shortcuts import *
 import numpy as np
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
@@ -214,9 +213,6 @@ class Wavefront(Task):
         times = arrivaltime.toNumpy()
         positions = antennaPositions.toNumpy().ravel()
 
-        # HACK out outlying values
-        #arrivaltime[206] = 0.0
-
         # Apply calibration delays (per antenna)
         arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
         # Apply sub-sample inter-station clock offsets (LOFAR)
@@ -274,18 +270,8 @@ class Wavefront(Task):
         goodTimes = times[goodIndices]
         goodSignals = signals[goodIndices]
         goodResidues -= min(goodResidues)
-#        residu[np.where(abs(residu) > 100e-9)] = 0.0
-#        residu -= residu.mean()
-#        residu[np.where(abs(residu) > 15e-9)] = 0.0  # hack
-
-#        residu[np.argmax(residu)] = 0.0
-#        residu[np.argmin(residu)] = 0.0
-#        residu -= rangemin
-#        rangemax -= rangemin
         # now the good one: difference between measured arrival times and plane wave fit!
-#        import pdb; pdb.set_trace()
         fptask_delta = cr.trerun("Shower", "3", positions=goodPositions2D, signals=goodSignals, timelags=goodResidues, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
-#        plt.clim(0.0, rangemax)
         plt.title('Footprint of residual delays w.r.t. planewave fit')
 
         # Simplex fit point source...
@@ -313,15 +299,7 @@ class Wavefront(Task):
         self.pointsourceArrivalTimes = bestfitDelays
 
         residu = goodTimes - bestfitDelays
-        # residu[np.where(abs(residu) > 100e-9)] = 0.0 # hack
-        residu -= residu.mean()
-        # residu[np.where(abs(residu) > 15e-9)] = np.float('nan') # hack
-
-#        residu[np.argmax(residu)] = 0.0
-#        residu[np.argmin(residu)] = 0.0
-#        residu[np.argmax(residu)] = 0.0
-#        residu[np.argmin(residu)] = 0.0
-        # residu -= min(residu)
+        residu -= min(residu)
 
         # Difference between measured arrival times and point source fit. Check plot for fit errors!
 
