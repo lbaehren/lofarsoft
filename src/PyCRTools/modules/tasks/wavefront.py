@@ -43,13 +43,14 @@ def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0)
 
     return mse
 
-def flaggedIndicesForOutliers(inarray, k_sigma = 6):
+def flaggedIndicesForOutliers(inarray, k_sigma = 5):
     # Remove outliers beyond k-sigma (above and below)
     # Use robust estimators, i.e. median and percentile-based sigma.
     n = len(inarray)
     sortedArray = np.sort(inarray)
     median = np.median(sortedArray)
-    noise = 0.5 * (sortedArray[0.7*n] - sortedArray[0.3*n]) # ~ sigma estimator, robust against 30% bad data
+    # ~ sigma estimator assuming normal distribution, robust against 30% bad data
+    noise = (sortedArray[0.7*n] - sortedArray[0.3*n]) / 1.05
 
     goodIndices = np.where( abs(inarray - median) < k_sigma * noise )[0] # indices in original array!
     flaggedIndices = np.array( [i for i in range(n) if i not in goodIndices] ) # inversion
