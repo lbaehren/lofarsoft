@@ -1,7 +1,6 @@
 """
---- Modifying this test script to work as a Task (with sensible parameters and all). ---
+Wavefront Task: produces the shape of the incoming wavefront, using pulse arrival times at each antenna.
 
-Test script to gather processed timeseries data from results directory of a given event.
 Reprocess cross correlation using MultiTBBData datareader, which reads and bundles data from all
 datafiles for a given event.
 
