@@ -269,39 +269,21 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             tbb_time = f["TIME"][0]
             tbb_sample_number = max(f["SAMPLE_NUMBER"])
 
+			print "reading LORA data"
             try:
-                print "reading LORA data"
-
                 (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile=os.path.join(options.lora_directory, options.lora_logfile))
 
                 (block_number_lora, sample_number_lora) = lora.loraTimestampToBlocknumber(tbb_time_sec, tbb_time_nsec, tbb_time, tbb_sample_number, blocksize=options.blocksize)
-
-                pulse_search_window_start = sample_number_lora - int(options.broad_search_window_width) / 2
-                pulse_search_window_end = sample_number_lora + int(options.broad_search_window_width) / 2
-
-                print "look for pulse between sample {0:d} and {1:d} in block {2:d}".format(pulse_search_window_start, pulse_search_window_end, block_number_lora)
             except Exception:
                 raise StationError("could not get expected block number from LORA data")
-
             print "have LORA data"
 
-            # See if we need to shift the block a bit to fit the full pulse search window
-            start_sample = pulse_search_window_start - int(options.broad_search_window_width)
-            if start_sample < 0:
-                shift = -1 * abs(start_sample)
-                f.shiftTimeseriesData(shift)
-                pulse_search_window_start -= shift
-                pulse_search_window_end -= shift
-
-                print "shifting block by {0} samples".format(shift)
-
-            end_sample = pulse_search_window_end + int(options.broad_search_window_width)
-            if end_sample >= options.blocksize:
-                shift = end_sample - options.blocksize
-                f.shiftTimeseriesData(shift)
-                pulse_search_window_start -= shift
-                pulse_search_window_end -= shift
-                print "shifting block by {0} samples".format(abs(shift))
+            # Center readout block around LORA pulse location
+            print "shifting block by {0} samples to center lora pulse at sample {1}".format(shift, options.blocksize / 2)
+            shift = sample_number_lora - (options.blocksize / 2)
+            pulse_search_window_start = (options.blocksize / 2) - (options.broad_search_window_width / 2)
+            pulse_search_window_end = (options.blocksize / 2) + (options.broad_search_window_width / 2)
+            f.shiftTimeseriesData(shift)
 
             with process_polarization(station.polarization, '0', '1') as polarization:
 
