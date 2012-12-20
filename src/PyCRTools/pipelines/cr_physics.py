@@ -269,7 +269,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             tbb_time = f["TIME"][0]
             tbb_sample_number = max(f["SAMPLE_NUMBER"])
 
-			print "reading LORA data"
+            print "reading LORA data"
             try:
                 (tbb_time_sec, tbb_time_nsec) = lora.nsecFromSec(tbb_time, logfile=os.path.join(options.lora_directory, options.lora_logfile))
 
