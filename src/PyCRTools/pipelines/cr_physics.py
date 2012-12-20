@@ -443,6 +443,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 continue
     
             # Get pulse window
+            station['crp_bf_pulse_position'] = int(pulse_envelope_bf.meanpos)
             pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
             pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
     
