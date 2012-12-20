@@ -103,7 +103,7 @@ class Shower(Task):
         skyplot_of_directions_enable=dict(default=False,
             doc="Plotting all directions of stations on sky"),
         all_directions=dict(default=None,
-            doc="List of directions, [NStations x [az,el]]"),    
+            doc="List of directions, [NStations x [az,el]]"),
         all_stations=dict(default=None,
             doc="List of stations corresponding to all_directions"),
         lora_direction=dict(default=None,
@@ -556,7 +556,7 @@ class Shower(Task):
                     cr.plt.polar(np.radians(az[i]),zen[i],marker="s",markersize=7, linestyle ="None",color=cm.gist_rainbow(direction_colors[i]),label=self.all_stations[i])
     
                 if self.lora_direction:
-                    cr.plt.polar(np.radians(self.lora_direction[0]),self.lora_direction[1], marker='o', markersize=5, linestyle="None", color='k', label='LORA')
+                    cr.plt.polar(np.radians(90 - self.lora_direction[0]),90 -self.lora_direction[1], marker='o', markersize=5, linestyle="None", color='k', label='LORA')
                     
                     
                 cr.plt.legend(bbox_to_anchor=(1., .0, 1., .0),loc=3,borderaxespad=0., shadow=False, numpoints=1)
