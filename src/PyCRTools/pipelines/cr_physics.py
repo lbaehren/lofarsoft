@@ -279,10 +279,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             print "have LORA data"
 
             # Center readout block around LORA pulse location
-            print "shifting block by {0} samples to center lora pulse at sample {1}".format(shift, options.blocksize / 2)
             shift = sample_number_lora - (options.blocksize / 2)
             pulse_search_window_start = (options.blocksize / 2) - (options.broad_search_window_width / 2)
             pulse_search_window_end = (options.blocksize / 2) + (options.broad_search_window_width / 2)
+
+            print "shifting block by {0} samples to center lora pulse at sample {1}".format(shift, options.blocksize / 2)
             f.shiftTimeseriesData(shift)
 
             with process_polarization(station.polarization, '0', '1') as polarization:
