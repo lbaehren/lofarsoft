@@ -98,7 +98,8 @@ hostdir="Lofar"  # dir that contains plots, grid links, db file
 plotsdir="/home/%s/%s/plots" % (username, hostdir)
 griddir="/home/%s/%s/grid" % (username, hostdir)
 # where to copy profile plots (ag004)
-webserver="%s@10.87.15.4" % (username, )  # ag004 - former dop95
+#webserver="%s@10.87.15.4" % (username, )  # ag004 - former dop95
+webserver="%s@ag004" % (username, )  # ag004 - former dop95
 htmltitle="LOFAR pulsar observations "
 basehref="http://www.astron.nl"
 basehref_dir="lofarpwg"
@@ -394,7 +395,10 @@ class obsinfo:
                 sbparts=sblist.split(",")
                 for ss in sbparts:
                         sedges=ss.split("..")
-                        if len(sedges) == 1: subs.append(int(sedges[0]))
+                        if len(sedges) == 1: 
+				pieces=sedges[0].split("*")
+				if len(pieces) > 1: subs.append(int(pieces[1]))
+				else: subs.append(int(sedges[0]))
                         else: subs.extend(np.arange(int(sedges[0]), int(sedges[1])+1))
 #               subs=np.unique(subs)
                 subs.sort() # sorting with smallest being the first
