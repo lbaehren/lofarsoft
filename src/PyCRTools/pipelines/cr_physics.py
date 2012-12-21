@@ -284,6 +284,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             pulse_search_window_end = (options.blocksize / 2) + (options.broad_search_window_width / 2)
 
             print "shifting block by {0} samples to center lora pulse at sample {1}".format(shift, options.blocksize / 2)
+
+            # Set file parameters to match LORA block
+            f["BLOCKSIZE"] = options.blocksize
+            f["BLOCK"] = block_number_lora
             f.shiftTimeseriesData(shift)
 
             # Make plot of timeseries data in both polarizations of first selected antenna
@@ -297,10 +301,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             station["crp_plotfiles"].append(plotfile)
 
             with process_polarization(station.polarization, '0', '1') as polarization:
-
-                # Set file parameters to match LORA block
-                f["BLOCKSIZE"] = options.blocksize
-                f["BLOCK"] = block_number_lora
 
                 # Find RFI and bad antennas
                 try:
