@@ -63,6 +63,9 @@ class TBBData(IOInterface):
         # Selection dependent initialization
         self.__initSelection()
 
+        # Set default shift
+        self.__shift = 0
+
         # Mark file as opened
         self.closed = False
 
