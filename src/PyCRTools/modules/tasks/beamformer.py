@@ -408,7 +408,7 @@ class BeamFormer(tasks.Task):
                       doc="Cartesian coordinates of the current antenna relative to the phase center of the array.",
                       unit="m"),
 
-        stationpos = dict(default = lambda self: (md.getStationPositions(self.datafile['STATION_NAME'][0], self.datafile['ANTENNA_SET'], True, coordinatesystem='ITRF') if self.single_station else md.ITRFCS002),
+        stationpos = dict(default = lambda self: (md.getStationPositions(self.datafile['STATION_NAME'][0], self.antenna_set, True, coordinatesystem='ITRF') if self.single_station else md.ITRFCS002),
                       doc = "ITRF coordinates of the phace center (usually center of current station).",
                       unit = "m"),
 
@@ -483,8 +483,11 @@ class BeamFormer(tasks.Task):
         pointingsXYZ=dict(default=lambda self: cr.hArray(float, [self.nbeams, 3], fill=[item for sublist in [cr.convert(coords, "CARTESIAN") for coords in self.pointings] for item in sublist], name="Beam Direction XYZ"),
                              doc="Array of shape ``[nbeams,3]`` with *x*, *y*, *z* positions for each beam on the sky."),
 
-#------------------------------------------------------------------------
+        antenna_set = dict(default = lambda self: self.datafile['ANTENNA_SET'],
+                               doc="Antenna Set",
+                               unit=""),
 
+#------------------------------------------------------------------------
 # Now define all the work arrays used internally
         data=dict(workarray=True,
                     doc="Main input array of raw data.",
@@ -564,7 +567,6 @@ class BeamFormer(tasks.Task):
         single_station = dict(workarray = True,
                         default = True,
                         doc = "if True using the 'ANTENNA_POSITONS' (phase center at the center of the station), otherwise 'ANTENNA_POSITION'(phase center at the LOFAR center), info elsewere on their meanings.")
-
     )
 
     def run(self):

@@ -294,9 +294,7 @@ class BeamData(IOInterface):
         pos = cr.hArray(float, [self['NOF_BEAM_DATASETS'], 3])
 
         for i, file in enumerate(self.__files):
-#            pos[i] = file.par.hdr['BeamFormer']['stationpos']            
-            # Triking the system for now. haaaaahaaaaahaaaaaahaaaa!!!!!
-            pos[i] =  md.getStationPositions(self['STATION_NAME'][i],self['TBB_ANTENNA_SET'],True,coordinatesystem='ITRF')
+            pos[i] = file.par.hdr['BeamFormer']['stationpos']
 
         pos = md.convertITRFToLocal(pos)
 
