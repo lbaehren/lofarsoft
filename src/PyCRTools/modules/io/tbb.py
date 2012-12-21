@@ -556,9 +556,7 @@ class TBBData(IOInterface):
         else:
             self.__block = block
 
-#        print 'Reading from alignment offset %d, block-position %d, sample offset %d' % (self.__alignment_offset.max()[0], block*self.__blocksize, sample_offset)
-
-        cr.hReadTimeseriesData(data, self.__alignment_offset + block * self.__blocksize + sample_offset, self.__blocksize, self.__file)
+        cr.hReadTimeseriesData(data, self.__alignment_offset + block * self.__blocksize + self.__shift + sample_offset, self.__blocksize, self.__file)
 
     def shiftTimeseriesData(self, sample_offset=0):
         """Shifts timeseries data for selected antennas.
@@ -572,12 +570,10 @@ class TBBData(IOInterface):
         =============== =================================================
 
         """
-#        print 'shifting %d' % sample_offset
         if sample_offset > self.__keyworddict["MAXIMUM_READ_LENGTH"]:
             raise ValueError('Sample offset > MAXIMUM_READ_LENGTH !!')
 
-        self._TBBData__alignment_offset[...] += sample_offset
-#        print self.__alignment_offset
+        self.__shift = sample_offset
         self.__keyworddict["MAXIMUM_READ_LENGTH"] -= sample_offset
 
     def getFFTData(self, data, block=-1, hanning=True):
