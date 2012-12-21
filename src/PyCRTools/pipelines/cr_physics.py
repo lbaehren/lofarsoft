@@ -286,6 +286,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             print "shifting block by {0} samples to center lora pulse at sample {1}".format(shift, options.blocksize / 2)
             f.shiftTimeseriesData(shift)
 
+            # Make plot of timeseries data in both polarizations of first selected antenna
+            raw_data = f["TIMESERIES_DATA"].toNumpy()
+            plt.subplot(2,1,1)
+            plt.plot(raw_data[0])
+            plt.subplot(2,1,2)
+            plt.plot(raw_data[1])
+            plotfile = station_plot_prefix + "raw_data.{0}".format(options.plot_type)
+            plt.savefig(plotfile)
+            station["crp_plotfiles"].append(plotfile)
+
             with process_polarization(station.polarization, '0', '1') as polarization:
 
                 # Set file parameters to match LORA block
