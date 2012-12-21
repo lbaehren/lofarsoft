@@ -118,7 +118,8 @@ class Wavefront(Task):
 #            doc = "Timeseries data." ),
         #fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, 1, 1, 1, cr.fftw_flags.MEASURE),
         #    doc = "Forward plan for FFTW, by default use a plan that works over all antennas at once and is measured for speed because this is applied many times." ),
-        arrivalTimes = dict( default = None, doc = "Pulse arrival times per antenna, for antennas in self.f['SELECTED_DIPOLES']", output = True),
+        arrivalTimes = dict( default = None, doc = "Pulse arrival times per antenna; give as input parameter together with 'positions' if not using 'filefilter' or 'filelist'."),
+        positions = dict( default = None, doc = "Antenna positions array in [Nx3] format (2D)."),
         pointsourceArrivalTimes = dict( default = None, doc = "Arrival times from best-fit point source approximation", output = True),
         planewaveArrivalTimes = dict( default = None, doc = "Arrival times from best-fit plane-wave approximation.", output = True),
         fitPlaneWave = dict( default = None, doc = "Fit results (az, el, mse) for planar fit.", output = True ),
@@ -142,97 +143,99 @@ class Wavefront(Task):
         """Run the task.
         """
 
-        if not self.f and not self.filefilter and not self.filelist:
-            raise RuntimeError("Give a file object or a filefilter or a filelist")
-        if not self.f:
-            #filefilter = '/Users/acorstanje/triggering/CR/*.986Z*.h5'
-            if not self.filelist:
-                self.filelist = cr.listFiles(self.filefilter)
-            superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007", "CS021"]
-            if len(self.filelist) == 1:
-                print 'There is only 1 file'
-                self.filelist = self.filelist[0]
-            else:  # sort files on station ID
-                sortedlist = []
-                for station in superterpStations:
-                    thisStationsFile = [filename for filename in self.filelist if station in filename]
-                    if len(thisStationsFile) > 0:
-                        sortedlist.append(thisStationsFile[0])
-                self.filelist = sortedlist
-            print '[Wavefront] Processing files: '
-            print self.filelist
-            self.f = cr.open(self.filelist, blocksize=self.blocksize)
-            selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
-            self.f["SELECTED_DIPOLES"] = selected_dipoles
+        if self.positions is None and self.arrivalTimes is None:
 
-        self.blocksize = self.f["BLOCKSIZE"]
+            if not self.f and not self.filefilter and not self.filelist:
+                raise RuntimeError("Give a file object or a filefilter or a filelist")
+            if not self.f:
+                #filefilter = '/Users/acorstanje/triggering/CR/*.986Z*.h5'
+                if not self.filelist:
+                    self.filelist = cr.listFiles(self.filefilter)
+                superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007", "CS021"]
+                if len(self.filelist) == 1:
+                    print 'There is only 1 file'
+                    self.filelist = self.filelist[0]
+                else:  # sort files on station ID
+                    sortedlist = []
+                    for station in superterpStations:
+                        thisStationsFile = [filename for filename in self.filelist if station in filename]
+                        if len(thisStationsFile) > 0:
+                            sortedlist.append(thisStationsFile[0])
+                    self.filelist = sortedlist
+                print '[Wavefront] Processing files: '
+                print self.filelist
+                self.f = cr.open(self.filelist, blocksize=self.blocksize)
+                selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
+                self.f["SELECTED_DIPOLES"] = selected_dipoles
 
-        # Get the pulse location in the data from LORA timing: block and sample number
-        (block, pulse_samplenr) = pulseTimeFromLORA(self.loradir, self.f)
+            self.blocksize = self.f["BLOCKSIZE"]
 
-        # assume LORA-LOFAR delay and file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
+            # Get the pulse location in the data from LORA timing: block and sample number
+            (block, pulse_samplenr) = pulseTimeFromLORA(self.loradir, self.f)
 
-        antennaPositions = self.f["ANTENNA_POSITIONS"]
+            # assume LORA-LOFAR delay and file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
 
-        timeseries = self.f.empty("TIMESERIES_DATA")
-        # get timeseries data with pulse, then cut out a region around the pulse.
-        cutoutSize = 1024
-        self.f.getTimeseriesData(timeseries, block = block)
-        nofChannels = timeseries.shape()[0]
-        cutoutTimeseries = cr.hArray(float, dimensions=[nofChannels, cutoutSize])
-        start = pulse_samplenr - cutoutSize / 2
-        end = pulse_samplenr + cutoutSize / 2
-        cutoutTimeseries[...].copy(timeseries[..., start:end])
+            antennaPositions = self.f["ANTENNA_POSITIONS"]
 
-        # Get reference antenna, take the one with the highest maximum.
-        y = cutoutTimeseries.toNumpy()
-        refant = self.refant
-        if not self.refant:
-            refant = int(np.argmax(np.max(y, axis=1)))
-        print 'Taking channel %d as reference antenna' % refant
+            timeseries = self.f.empty("TIMESERIES_DATA")
+            # get timeseries data with pulse, then cut out a region around the pulse.
+            cutoutSize = 1024
+            self.f.getTimeseriesData(timeseries, block = block)
+            nofChannels = timeseries.shape()[0]
+            cutoutTimeseries = cr.hArray(float, dimensions=[nofChannels, cutoutSize])
+            start = pulse_samplenr - cutoutSize / 2
+            end = pulse_samplenr + cutoutSize / 2
+            cutoutTimeseries[...].copy(timeseries[..., start:end])
 
-        #import pdb; pdb.set_trace()
-        plt.plot(y[0])
-        plt.plot(y[140])
+            # Get reference antenna, take the one with the highest maximum.
+            y = cutoutTimeseries.toNumpy()
+            refant = self.refant
+            if not self.refant:
+                refant = int(np.argmax(np.max(y, axis=1)))
+            print 'Taking channel %d as reference antenna' % refant
 
-        sample_interval = 5.0e-9 # hardcoded...
-        # is the index of the ref antenna also in the full list of antids / antpos
+            #import pdb; pdb.set_trace()
+            plt.plot(y[0])
+            plt.plot(y[140])
 
-        # now cross correlate all channels in full_timeseries, get relative times
-        crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", cutoutTimeseries, oversamplefactor=64)
+            sample_interval = 5.0e-9 # hardcoded...
+            # is the index of the ref antenna also in the full list of antids / antpos
 
-        # And determine the relative offsets between them
-        maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot=True, plotend=5, sampleinterval=sample_interval / crosscorr.oversamplefactor, peak_width=11, splineorder=3, refant=refant)
+            # now cross correlate all channels in full_timeseries, get relative times
+            crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", cutoutTimeseries, oversamplefactor=64)
 
-        # plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
+            # And determine the relative offsets between them
+            maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot=True, plotend=5, sampleinterval=sample_interval / crosscorr.oversamplefactor, peak_width=11, splineorder=3, refant=refant)
 
-        cr.hArray(maxima_cc.lags).plot()
+            # plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
 
-        # Plot arrival times, do plane-wave fit, plot residuals wrt plane wave
-        arrivaltime = cr.hArray(maxima_cc.lags)
-        times = arrivaltime.toNumpy()
-        positions = antennaPositions.toNumpy().ravel()
+            cr.hArray(maxima_cc.lags).plot()
 
-        # Apply calibration delays (per antenna)
-        arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
-        # Apply sub-sample inter-station clock offsets (LOFAR)
-        subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"] # numpy array!
-        # Apply inter-station delays from RFIlines Task
-        # Assuming ordering CS002, 3, 4, 5, 7 for this event (sorted alphabetically)
-        if not type(self.interStationDelays) == type(None): # cannot do if self.interStationDelays, apparently...
-            subsampleOffsets -= self.interStationDelays
+            # Plot arrival times, do plane-wave fit, plot residuals wrt plane wave
+            arrivaltime = cr.hArray(maxima_cc.lags)
+            times = arrivaltime.toNumpy()
+            positions = antennaPositions.toNumpy().ravel()
 
-#        subsampleOffsets[1] -= 0.11e-9
-#        subsampleOffsets[2] -= -1.30e-9
-#        subsampleOffsets[3] -= -1.32e-9
-#        subsampleOffsets[4] -= 0.71e-9
+            # Apply calibration delays (per antenna)
+            arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
+            # Apply sub-sample inter-station clock offsets (LOFAR)
+            subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"] # numpy array!
+            # Apply inter-station delays from RFIlines Task
+            # Assuming ordering CS002, 3, 4, 5, 7 for this event (sorted alphabetically)
+            if not type(self.interStationDelays) == type(None): # cannot do if self.interStationDelays, apparently...
+                subsampleOffsets -= self.interStationDelays
 
-        stationList = self.f["STATION_LIST"]
-        print stationList
-        stationStartIndex = self.f["STATION_STARTINDEX"]
-        for i in range(len(subsampleOffsets)):
-            arrivaltime[stationStartIndex[i]:stationStartIndex[i + 1]] -= subsampleOffsets[i]
-            # Sign + or - ???
+    #        subsampleOffsets[1] -= 0.11e-9
+    #        subsampleOffsets[2] -= -1.30e-9
+    #        subsampleOffsets[3] -= -1.32e-9
+    #        subsampleOffsets[4] -= 0.71e-9
+
+            stationList = self.f["STATION_LIST"]
+            print stationList
+            stationStartIndex = self.f["STATION_STARTINDEX"]
+            for i in range(len(subsampleOffsets)):
+                arrivaltime[stationStartIndex[i]:stationStartIndex[i + 1]] -= subsampleOffsets[i]
+                # Sign + or - ???
 
         # plt.figure()
         # arrivaltime.plot()
