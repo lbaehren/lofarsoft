@@ -742,6 +742,7 @@ class MultiTBBData(IOInterface):
         self.__blocksize = blocksize
         self.__block = block
         self.__subsample_clockoffsets = None
+        self.__shift = 0
 
         self.__initSelection()
 
