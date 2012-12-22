@@ -998,16 +998,22 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.log.exception("Oops... job has crashed!\n%s\nStatus=%s" % (re.sub("\n", "\\\\n", cmd), status))
 			raise Exception
 
-	def start_and_go(self, cmd, workdir=None, shell=False):
+	def start_and_go(self, cmd, workdir=None, shell=False, immediate_status_check=False):
 	    	"""
         	Execute the command 'cmd' after logging the command
-		This function start the cmd and leaves the fucntion
+		This function start the cmd and leaves the function
 		returning the Popen object, it does not wait for process to finish
     		"""
 		status=1
 		try:
 			self.log.info(re.sub("\n", "\\\\n", cmd))
 			self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
+			if immediate_status_check:
+               			process = Popen(shlex.split(cmd), cwd=workdir, shell=shell)
+				time.sleep(5)  # waiting 5 secs to see if process crashes right away
+				if process.poll() != 0: raise Exception
+				else: process.kill()  # if process is still running, it means that cmd is good, so we kill it in order to
+							# restart it with proper stdout/stderr and add it to the list
                		process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
 			status=process.returncode
 			self.procs.append(process)
@@ -1330,7 +1336,18 @@ CLK line will be removed from the parfile!" % (parfile,))
 								# I suppose it happens because name of the file is TOO long for Tempo
 								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s %s.fits" % \
 									(psr, psr2, prepfold_nbins, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, cmdline.opts.prepfold_extra_opts, self.output_prefix)
-								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
+								try: # if prepfold fails right away (sometimes happens with error like this:
+									# Read 0 set(s) of polycos for PSR 1022+1001 at 56282.138888888891 (DM = 3.6186e-317)
+									# MJD 56282.139 out of range (    0.000 to     0.000)
+									# isets = 0
+									# I guess something to do with how Tempo treats parfile. When this happens, we try to rerun prepfold with the same
+									# command but without using -par option
+									prepfold_popen = self.start_and_go(cmd, workdir=self.curdir, immediate_status_check=True)
+								except Exception:
+									self.log.warning("***** Prepfold failed when using par-file. Will try the same command but without using -par option *****")
+									cmd="prepfold -noscales -nooffsets -noxwin -psr %s -n %d -nsub %d -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s %s.fits" % \
+										(psr, prepfold_nbins, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, cmdline.opts.prepfold_extra_opts, self.output_prefix)
+									prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 								prepfold_popens.append(prepfold_popen)
 								time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish 
                                                                               # with temporary files lile resid2.tmp otherwise it can interfere with next prepfold call
@@ -1342,7 +1359,13 @@ CLK line will be removed from the parfile!" % (parfile,))
 							# I suppose it happens because name of the file is TOO long for Tempo
 							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -o %s_%s%s %s %s.fits" % \
 								(psr, psr2, prepfold_nbins, prepfold_nsubs, psr, self.output_prefix, output_stem, cmdline.opts.prepfold_extra_opts, self.output_prefix)
-							prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
+							try: # same reasoning as above
+								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir, immediate_status_check=True)
+							except Exception:
+								self.log.warning("***** Prepfold failed when using par-file. Will try the same command but without using -par option *****")
+								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -n %d -nsub %d -fine -nopdsearch -o %s_%s%s %s %s.fits" % \
+									(psr, prepfold_nbins, prepfold_nsubs, psr, self.output_prefix, output_stem, cmdline.opts.prepfold_extra_opts, self.output_prefix)
+								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
 							prepfold_popens.append(prepfold_popen)
 							time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish 
                                                                       # with temporary files like resid2.tmp otherwise it can interfere with next prepfold call
@@ -1893,6 +1916,15 @@ class CVUnit(PipeUnit):
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
 
+	# refresh NFS mounting of locus node (loc) on hoover node
+	# by doing 'ls' command
+	def hoover_mounting(self, cep2, firstfile, loc):
+		uniqdir="/".join(firstfile.split("/")[0:-1]).split("/data/")[-1]
+		input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
+		process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+		process.communicate()
+		return input_dir
+
 	# main CV processing function
 	def run(self, obs, cep2, cmdline, log):
 		# if there are no pulsars to fold we set --nofold option to True
@@ -1937,10 +1969,7 @@ class CVUnit(PipeUnit):
 					for loc in self.tab.location:
 						if loc in self.tab.rawfiles:
 							# first "mounting" corresponding locus node
-							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
-							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-							process.communicate()
+							input_dir = self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 							# dspsr needs all polarizations S* files to be in the current directory together with h5 files,
 							# so we have to make soft links to input files
 							self.log.info("Making links to input files in the current directory...")
@@ -1995,6 +2024,10 @@ class CVUnit(PipeUnit):
 						dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
 						# loop on frequency splits
 						for ii in range(len(s0_files)):
+							# refreshing NFS mounting of locus nodes
+							for loc in self.tab.location: 
+								if loc in self.tab.rawfiles: 
+									self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
 							cmd="dspsr -b %d -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d -U minX%d %s %s" % \
 								(dspsr_nbins, cmdline.opts.tsubint, verbose, self.outdir, psr2, \
@@ -2172,10 +2205,7 @@ class CVUnit(PipeUnit):
 					for loc in self.tab.location:
 						if loc in self.tab.rawfiles:
 							# first "mounting" corresponding locus node
-							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
-							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-							process.communicate()
+							input_dir = self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 							# bf2puma2 assumes all polarizations S* files to be in the current directory, so we have to
 							# make soft links to input files
 							self.log.info("Making links to input files in the current directory...")
@@ -2229,6 +2259,10 @@ class CVUnit(PipeUnit):
 					self.log.info("Running bf2puma2 for all frequency splits...")
 					# loop on frequency splits
 					for ii in range(len(s0_files)):
+						# refreshing NFS mounting of locus nodes
+						for loc in self.tab.location: 
+							if loc in self.tab.rawfiles: 
+								self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 						cmd="bf2puma2 -f %s -h %s -p %s -hist_cutoff %f %s %s %s %s" % (s0_files[ii], cep2.puma2header, obs.parset, cmdline.opts.hist_cutoff, verbose, nblocks, is_all_for_scaling, is_write_ascii)
 						self.execute(cmd, workdir=self.curdir)
 
