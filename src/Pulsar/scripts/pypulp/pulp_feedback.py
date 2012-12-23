@@ -53,7 +53,7 @@ class FeedbackUnit:
 	def flush(self, fbfile, cep2, is_summary, is_log=False):
 		fb=open(fbfile, 'w')
 		# if it is PULP log-file, then just write 
-		if is_log: fb.write("%s = %s\n" % (cep2.feedback_log_prefix, self._data['location']))
+		if is_log: fb.write("%s = %s/%s\n" % (cep2.feedback_log_prefix, self._data['location'], self._data['filename']))
 		else:
 			for key, value in self._data.items():
 				if is_summary and (key == "SAP" or key == "TAB"): continue
