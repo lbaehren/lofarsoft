@@ -566,8 +566,10 @@ class Pipeline:
    	               	        	else:
 						log.warning("Warning: can't read chi-sq value from %s" % (bp))
 	                        	chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, data_code, cursapid, curprocdir, psr, chi_val))
-        	                	montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
-        	                	montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, bigfile)
+					if os.path.exists("%s/%s" % (sumdir, thumbfile)):
+        	                		montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, thumbfile)
+					if os.path.exists("%s/%s" % (sumdir, bigfile)):
+        	                		montage_cmd_pdf += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (data_code, cursapid, curprocdir, psr, chi_val, bigfile)
               	        chif.close()
 
 			# creating combined plots
@@ -1515,11 +1517,19 @@ CLK line will be removed from the parfile!" % (parfile,))
 				for psfile in prepfold_ps:
 					base=psfile.split("/")[-1].split(".ps")[0]
 					cmd="convert %s.ps %s.pdf" % (base, base)
-					self.execute(cmd, workdir=self.curdir)
+					# have separate try/except blocks for each convert command to allow to continue processing
+					# in case something is wrong with ps-file
+					try:
+						self.execute(cmd, workdir=self.curdir)
+					except: pass
 					cmd="convert -rotate 90 %s.ps %s.png" % (base, base)
-					self.execute(cmd, workdir=self.curdir)
+					try:
+						self.execute(cmd, workdir=self.curdir)
+					except : pass
 					cmd="convert -rotate 90 -crop 200x140-0 %s.ps %s.th.png" % (base, base)
-					self.execute(cmd, workdir=self.curdir)
+					try:
+						self.execute(cmd, workdir=self.curdir)
+					except: pass
 
 			# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
 			if not cmdline.opts.is_nofold and not cmdline.opts.is_feedback:

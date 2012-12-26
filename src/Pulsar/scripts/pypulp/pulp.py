@@ -72,10 +72,7 @@ if __name__ == "__main__":
 			# in this case summary locus node is given in --beams option
 			logfile += "_summary_%s.log" % (cmdline.opts.beam_str)
 	else:
-		if cmdline.opts.is_summary:
-			logfile += "_summary.log"
-		else:
-			logfile += "_pulp.log"
+		logfile += "_pulp.log"
 
 	# initializing the Logger
 	log = PulpLogger(logger_name)
