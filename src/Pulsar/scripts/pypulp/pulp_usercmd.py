@@ -74,6 +74,8 @@ class CMDLine:
                                  and only one pulsar name should be given for --par option to work", default="", type='str')
         	self.cmd.add_option('--nodecode', action="store_true", dest='is_nodecode',
                            help="optional parameter to skip decoding the data (2bf2fits/bf2puma2)", default=False)
+        	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
+                           help="optional parameter to skip rfifind and subdyn.py RFI checker and/or paz", default=False)
         	self.cmd.add_option('--nofold', action="store_true", dest='is_nofold',
                            help="optional parameter to turn off folding of data (prepfold is not run)", default=False)
         	self.cmd.add_option('--nopdmp', action="store_true", dest='is_nopdmp',
@@ -144,8 +146,6 @@ class CMDLine:
                                  (mostly for _internal_ use only)", default=False)
 		# adding CS/IS/FE extra options
 	        self.groupCS = opt.OptionGroup(self.cmd, "CS/IS/FE extra options")
-        	self.groupCS.add_option('--norfi', action="store_true", dest='is_norfi',
-                           help="optional parameter to skip rfifind and subdyn.py RFI checker", default=False)
         	self.groupCS.add_option('--skip-subdyn', action="store_true", dest='is_skip_subdyn',
                            help="optional parameter to skip subdyn.py only", default=False)
         	self.groupCS.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
@@ -557,7 +557,7 @@ class CMDLine:
 					if self.opts.nsplits != -1:
 						log.info("NUMBER OF SPLITS = %d" % (self.opts.nsplits))
 					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
-					log.info("RFI Checking = %s" % (self.opts.is_norfi and "no" or "yes"))
+					log.info("RFI Zapping = %s" % (self.opts.is_norfi and "no" or "yes"))
 					log.info("Subdyn.py = %s" % ((self.opts.is_skip_subdyn == False and self.opts.is_norfi == False) and "yes" or "no"))
 					log.info("Prepfold = %s" % (self.opts.is_skip_prepfold and "no" or "yes"))
 					if self.opts.prepfold_extra_opts != "" and not self.opts.is_skip_prepfold:

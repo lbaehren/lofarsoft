@@ -1392,19 +1392,31 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.waiting_list("dspsr", dspsr_popens)
 
 						# zapping channels...
-						self.log.info("Zapping channels using median smoothed difference algorithm...")
-						for psr in self.psrs:  # pulsar list is empty if --nofold is used
-							cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
+						if not cmdline.opts.is_norfi:
+							self.log.info("Zapping channels using median smoothed difference algorithm...")
+							for psr in self.psrs:  # pulsar list is empty if --nofold is used
+								cmd="paz -r -e paz.ar %s_%s.ar" % (psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
 
 						# scrunching in frequency
 						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
 						if self.nrChanPerSub > 1:
 							for psr in self.psrs:  # pulsar list is empty if --nofold is used
+								# first, running fscrunch on zapped archive
+								if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+									cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+									self.execute(cmd, workdir=self.curdir)
+									# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
+									cmd="rm -f %s_%s.paz.ar" % (psr, self.output_prefix)
+									self.execute(cmd, workdir=self.curdir)
+								# running fscrunching on non-zapped archive
 								cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
 								self.execute(cmd, workdir=self.curdir)
 						else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
 							for psr in self.psrs:  # pulsar list is empty if --nofold is used
+								if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+									cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+									self.execute(cmd, workdir=self.curdir)
 								cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 								self.execute(cmd, workdir=self.curdir)
 								cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
@@ -1420,14 +1432,17 @@ CLK line will be removed from the parfile!" % (parfile,))
 				# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
 				pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
 				for psr in self.psrs:  # pulsar list is empty if --nofold is used
+					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+						output_stem=".paz.fscr.AR"
+					else: output_stem=".fscr.AR"
 					# creating DSPSR diagnostic plots
-					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s%s" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
 					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
                 	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
@@ -1442,15 +1457,18 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.log.info("Running pdmp...")
 						pdmp_popens=[]  # list of pdmp Popen objects	
 						for psr in self.psrs:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+								output_stem=".paz.fscr.AR"
+							else: output_stem=".fscr.AR"
 							# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
 							# we still provide our own number of bins in --dspsr-extra-opts
 							try:
-								cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+								cmd="psredit -q -Q -c nbin %s/%s_%s%s" % (self.curdir, psr, self.output_prefix, output_stem)
 								binsline=os.popen(cmd).readlines()
 								if np.size(binsline) > 0:
 									best_nbins=int(binsline[0][:-1])
-									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
-										(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
+										(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix, output_stem)
 									pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
 									pdmp_popens.append(pdmp_popen)
 							except Exception: pass
@@ -1595,14 +1613,17 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.waiting_list("pdmp", pdmp_popens)
 						# when pdmp is finished do extra actions with files...
 						for psr in self.psrs:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+								output_stem=".paz.fscr.AR"
+							else: output_stem=".fscr.AR"
 							cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 							self.execute(cmd, is_os=True)
 							cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 							self.execute(cmd, is_os=True)
 							# reading new DM from the *.per file
 							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
-							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
+							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm[-1], psr, self.output_prefix, output_stem)
+							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm, psr, self.output_prefix, output_stem)
 							self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
@@ -1736,23 +1757,42 @@ CLK line will be removed from the parfile!" % (parfile,))
 							remove_list=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
 							cmd="rm -f %s" % (" ".join(remove_list))
 							self.execute(cmd, workdir=self.curdir)
+
 						# zapping rfi
-						self.log.info("Zapping channels using median smoothed difference algorithm...")
-						cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
+						if not cmdline.opts.is_norfi:
+							self.log.info("Zapping channels using median smoothed difference algorithm...")
+							cmd="paz -r -e paz.ar %s_%s.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+
 						# dedispersing
 						self.log.info("Dedispersing...")
-						cmd="pam -D -m %s_%s.ar" % (psr, self.output_prefix)
+						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+							cmd="pam -D -m %s_%s.paz.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
+						cmd="pam -D -e dd %s_%s.ar" % (psr, self.output_prefix)
 						self.execute(cmd, workdir=self.curdir)
+
 						# scrunching in frequency
 						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (nsubs_eff))
 						if self.nrChanPerSub > 1:
-							cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
+							# first, running fscrunch on zapped archive
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+								cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (nsubs_eff, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+								# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
+								cmd="rm -f %s_%s.paz.ar" % (psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+							# running fscrunching on non-zapped archive
+							cmd="pam --setnchn %d -e fscr.AR %s_%s.dd" % (nsubs_eff, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
-						else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
-							cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							# remove non-scrunched dedispersed archive (we will always have unzapped non-dedispersed non-scrunched version)
+							cmd="rm -f %s_%s.dd" % (psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
-							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+						else: # if number of chans == number of subs, we will just rename .paz.ar to .paz.fscr.AR and .dd to .fscr.AR
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+								cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+							cmd="mv -f %s_%s.dd %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
 					# removing links for input .raw files
@@ -1770,14 +1810,17 @@ CLK line will be removed from the parfile!" % (parfile,))
 				# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
 				pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
 				for psr in self.psrs:  # pulsar list is empty if --nofold is used
+					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+						output_stem=".paz.fscr.AR"
+					else: output_stem=".fscr.AR"
 					# creating DSPSR diagnostic plots
-					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s%s" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
 					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
                 	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
@@ -1792,15 +1835,18 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.log.info("Running pdmp...")
 						pdmp_popens=[]  # list of pdmp Popen objects	
 						for psr in self.psrs:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+								output_stem=".paz.fscr.AR"
+							else: output_stem=".fscr.AR"
 							# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
 							# we still provide our own number of bins in --dspsr-extra-opts
 							try:
-								cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+								cmd="psredit -q -Q -c nbin %s/%s_%s%s" % (self.curdir, psr, self.output_prefix, output_stem)
 								binsline=os.popen(cmd).readlines()
 								if np.size(binsline) > 0:
 									best_nbins=int(binsline[0][:-1])
-									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
-										(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
+										(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix, output_stem)
 									pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
 									pdmp_popens.append(pdmp_popen)
 							except Exception: pass
@@ -1812,14 +1858,17 @@ CLK line will be removed from the parfile!" % (parfile,))
 						self.waiting_list("pdmp", pdmp_popens)
 						# when pdmp is finished do extra actions with files...
 						for psr in self.psrs:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+								output_stem=".paz.fscr.AR"
+							else: output_stem=".fscr.AR"
 							cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 							self.execute(cmd, is_os=True)
 							cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 							self.execute(cmd, is_os=True)
 							# reading new DM from the *.per file
 							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
-							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
+							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm[-1], psr, self.output_prefix, output_stem)
+							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm, psr, self.output_prefix, output_stem)
 							self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
@@ -2055,9 +2104,12 @@ class CVUnit(PipeUnit):
 							cmd="paz -z \"%s\" -m %s_%s.ar" % \
 								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
-						self.log.info("Zapping channels using median smoothed difference algorithm...")
-						cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
+
+						# rfi zapping
+						if not cmdline.opts.is_norfi:
+							self.log.info("Zapping channels using median smoothed difference algorithm...")
+							cmd="paz -r -e paz.ar %s_%s.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
 
 						# removing ar-files from dspsr for every frequency split
 						if not cmdline.opts.is_debug:
@@ -2075,11 +2127,22 @@ class CVUnit(PipeUnit):
 					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (nsubs_eff))
 					if self.nrChanPerSub > 1:
 						for psr in self.psrs:
-							#cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+							# first, running fscrunch on zapped archive
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+								#cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+								cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (nsubs_eff, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+								# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
+								cmd="rm -f %s_%s.paz.ar" % (psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+							# running fscrunching on non-zapped archive
 							cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 					else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
 						for psr in self.psrs:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+								cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
 							cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
@@ -2095,21 +2158,24 @@ class CVUnit(PipeUnit):
 				pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
 				self.log.info("Creating diagnostic plots...")
 				for psr in self.psrs:
+					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+						output_stem=".paz.fscr.AR"
+					else: output_stem=".fscr.AR"
 					# creating DSPSR diagnostic plots
-					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s%s" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
 					if not cmdline.opts.is_skip_rmfit:
 						try:
 							# running rmfit for negative and positive RMs
-							cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 							self.execute(cmd, workdir=self.curdir)
-							cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 							self.execute(cmd, workdir=self.curdir)
 							cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
         	                                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
@@ -2137,15 +2203,18 @@ class CVUnit(PipeUnit):
 					self.log.info("Running pdmp...")
 					pdmp_popens=[]  # list of pdmp Popen objects	
 					for psr in self.psrs:
+						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+							output_stem=".paz.fscr.AR"
+						else: output_stem=".fscr.AR"
 						# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
 						# we still provide our own number of bins in --dspsr-extra-opts
 						try:
-							cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+							cmd="psredit -q -Q -c nbin %s/%s_%s%s" % (self.curdir, psr, self.output_prefix, output_stem)
 							binsline=os.popen(cmd).readlines()
 							if np.size(binsline) > 0:
 								best_nbins=int(binsline[0][:-1])
-								cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
-									(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+								cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
+									(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix, output_stem)
 								pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
 								pdmp_popens.append(pdmp_popen)
 						except Exception: pass
@@ -2156,14 +2225,17 @@ class CVUnit(PipeUnit):
 					self.waiting_list("pdmp", pdmp_popens)
 					# when pdmp is finished do extra actions with files...
 					for psr in self.psrs:
+						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+							output_stem=".paz.fscr.AR"
+						else: output_stem=".fscr.AR"
 						cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 						self.execute(cmd, is_os=True)
 						cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 						self.execute(cmd, is_os=True)
 						# reading new DM from the *.per file
 						newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-						if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
-						else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
+						if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm[-1], psr, self.output_prefix, output_stem)
+						else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm, psr, self.output_prefix, output_stem)
 						self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
@@ -2353,9 +2425,12 @@ class CVUnit(PipeUnit):
 							cmd="paz -z \"%s\" -m %s_%s.ar" % \
 								(" ".join([str(jj) for jj in range(0, total_chan, self.nrChanPerSub)]), psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
-						self.log.info("Zapping channels using median smoothed difference algorithm...")
-						cmd="paz -r -m %s_%s.ar" % (psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
+
+						# rfi zapping
+						if not cmdline.opts.is_norfi:
+							self.log.info("Zapping channels using median smoothed difference algorithm...")
+							cmd="paz -r -e paz.ar %s_%s.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
 
 						# removing files created by dspsr for each freq channel
 						if not cmdline.opts.is_debug:
@@ -2374,11 +2449,22 @@ class CVUnit(PipeUnit):
 					self.log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (nsubs_eff))
 					if self.nrChanPerSub > 1:
 						for psr in self.psrs:
-							#cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+							# first, running fscrunch on zapped archive
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+								#cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+								cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (nsubs_eff, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+								# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
+								cmd="rm -f %s_%s.paz.ar" % (psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+							# running fscrunching on non-zapped archive
 							cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 					else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
 						for psr in self.psrs:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+								cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
 							cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
@@ -2394,21 +2480,24 @@ class CVUnit(PipeUnit):
 				pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
 				self.log.info("Creating diagnostic plots...")
 				for psr in self.psrs:
+					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+						output_stem=".paz.fscr.AR"
+					else: output_stem=".fscr.AR"
 					# creating DSPSR diagnostic plots
-					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -SFTd -g %s_%s_SFTd.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s.fscr.AR" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix)
+					cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s%s" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+					cmd="pav -J -g %s_%s_J.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 					self.execute(cmd, workdir=self.curdir)
 					if not cmdline.opts.is_skip_rmfit:
 						try:
 							# running rmfit for negative and positive RMs
-							cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 							self.execute(cmd, workdir=self.curdir)
-							cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
+							cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
 							self.execute(cmd, workdir=self.curdir)
 							cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_SFTd.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
                         	                             -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
@@ -2436,15 +2525,18 @@ class CVUnit(PipeUnit):
 					self.log.info("Running pdmp...")
 					pdmp_popens=[]  # list of pdmp Popen objects	
 					for psr in self.psrs:
+						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+							output_stem=".paz.fscr.AR"
+						else: output_stem=".fscr.AR"
 						# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
 						# we still provide our own number of bins in --dspsr-extra-opts
 						try:
-							cmd="psredit -q -Q -c nbin %s/%s_%s.fscr.AR" % (self.curdir, psr, self.output_prefix)
+							cmd="psredit -q -Q -c nbin %s/%s_%s%s" % (self.curdir, psr, self.output_prefix, output_stem)
 							binsline=os.popen(cmd).readlines()
 							if np.size(binsline) > 0:
 								best_nbins=int(binsline[0][:-1])
-								cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s.fscr.AR" % \
-									(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix)
+								cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
+									(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix, output_stem)
 								pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
 								pdmp_popens.append(pdmp_popen)
 						except Exception: pass
@@ -2455,14 +2547,17 @@ class CVUnit(PipeUnit):
 					self.waiting_list("pdmp", pdmp_popens)
 					# when pdmp is finished do extra actions with files...
 					for psr in self.psrs:
+						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
+							output_stem=".paz.fscr.AR"
+						else: output_stem=".fscr.AR"
 						cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 						self.execute(cmd, is_os=True)
 						cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
 						self.execute(cmd, is_os=True)
 						# reading new DM from the *.per file
 						newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-						if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm[-1], psr, self.output_prefix)
-						else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s.fscr.AR" % (newdm, psr, self.output_prefix)
+						if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm[-1], psr, self.output_prefix, output_stem)
+						else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm, psr, self.output_prefix, output_stem)
 						self.execute(cmd, workdir=self.curdir)
 
 			# finishing off the processing...
