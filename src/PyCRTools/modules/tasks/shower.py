@@ -341,9 +341,9 @@ class Shower(Task):
             # Shower
             if self.footprint_shower_enable and self.direction is not None and self.core is not None:
 
-                    dcos = cr.cos(cr.radians(self.direction[0]))
-                    dsin = cr.sin(cr.radians(self.direction[0]))
-                    elev = self.direction[1]
+                    dcos = cr.cos(cr.radians(self.direction[0]))*2
+                    dsin = cr.sin(cr.radians(self.direction[0]))*2
+                    elev = 90 - self.direction[1]
 
             if self.positions is not None and self.signals is not None:
               if self.signals.shape[0] > 0 and self.timelags.shape[0] > 0:
@@ -414,7 +414,7 @@ class Shower(Task):
                 # Plotting the shower
                 if self.footprint_shower_enable:
                     cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
-                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=600, color=self.footprint_shower_color, linewidth=4)
+                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
 
                 if self.save_plots:
                     plotname = self.plot_prefix + "shower_footprint_polX.{0}".format(self.plot_type)
@@ -467,7 +467,7 @@ class Shower(Task):
                     # Plotting the shower
                     if self.footprint_shower_enable:
                         cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
-                        cr.plt.scatter(self.core[0], self.core[1], marker='x', s=600, color=self.footprint_shower_color, linewidth=4)
+                        cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
 
                     if self.save_plots:
                         plotname = self.plot_prefix + "shower_footprint_polY.{0}".format(self.plot_type)
@@ -519,7 +519,7 @@ class Shower(Task):
                     # Plotting the shower
                     if self.footprint_shower_enable:
                         cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
-                        cr.plt.scatter(self.core[0], self.core[1], marker='x', s=600, color=self.footprint_shower_color, linewidth=4)
+                        cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
 
                     if self.save_plots:
                         plotname = self.plot_prefix + "shower_footprint_polZ.{0}".format(self.plot_type)
@@ -593,7 +593,7 @@ class Shower(Task):
                     dcos = cr.cos(cr.radians(self.direction[0]))
                     dsin = cr.sin(cr.radians(self.direction[0]))
                     cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
-                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=600, color=self.footprint_shower_color, linewidth=4)
+                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
 
             else:
                 print "Give positions and polarization angles to draw footprint in polarization"
