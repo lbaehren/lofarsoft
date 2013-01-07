@@ -288,8 +288,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # Set file parameters to match LORA block
             f["BLOCKSIZE"] = options.blocksize
             f["BLOCK"] = block_number_lora
-            f.shiftTimeseriesData(shift)
-
+            try:
+                f.shiftTimeseriesData(shift)
+            except ValueError as e:
+                raise StationError("{0}, signal is at edge of file".format(e.message))
+                
             # Make plot of timeseries data in both polarizations of first selected antenna
             raw_data = f["TIMESERIES_DATA"].toNumpy()
             plt.subplot(2,1,1)
