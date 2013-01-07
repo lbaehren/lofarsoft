@@ -115,7 +115,7 @@ class FindPulseDelay(Task):
         maxpos=dict(default = lambda self: cr.hArray(int, self.trace.shape()[0]),
             doc = "position of pulse maximum.",
             output = True),
-        delay=dict(default = lambda self: cr.hArray(int, self.trace.shape()[0]),
+        delay=dict(default = lambda self: cr.hArray(float, self.trace.shape()[0]),
             doc = "pulse delays in seconds.",
             output = True),
     )
