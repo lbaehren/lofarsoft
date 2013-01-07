@@ -61,7 +61,7 @@ class CrossCorrelateAntennas(Task):
         crosscorr_data=dict(default=lambda self: cr.hArray(float, (self.fft_data.shape()[0], (self.fft_data.shape()[1] - 1) * 2 * max(self.oversamplefactor, 1))),
                 doc="Output array of dimensions ``[N data sets, data length * oversamplefactor]`` containing the cross correlation.",
                 output=True),
-        blocksize=dict(default=lambda self: self.timeseries_data.shape()[1],
+        blocksize=dict(default=lambda self: (self.fft_data.shape()[1] - 1) * 2,
             doc="Length of the data for each antenna"),
         fftplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),
             doc="Memory and plan for FFT",
