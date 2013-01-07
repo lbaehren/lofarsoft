@@ -131,7 +131,7 @@ class FindPulseDelay(Task):
         self.maxpos[...] = temp[...].maxpos()
 
         # Convert to time delay
-        self.delay[:] = self.maxpos[:]
+        self.delay[...].copy(self.maxpos[...])
         self.delay /= self.sampling_frequency
 
         # Shift delay to be relative to reference antenna
