@@ -453,6 +453,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
             pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
 
+            timeseries_data_cut = cr.hArray(self.nantennas, options.narrow_search_window_width)
+
             print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
 
             # Start direction fitting loopim
@@ -468,7 +470,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 timeseries_data /= options.blocksize
 
                 # Calculate delays using cross correlations
-                cca = cr.trun("CrossCorrelateAntennas", fft_data=fft_data, refant=0, oversamplefactor=10)
+                timeseries_data_cut[...].copy(self.timeseries_data[..., pulse_start:pulse_end])
+
+                cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data_cut, refant=0, oversamplefactor=10)
 
                 fpd = cr.trun("FindPulseDelay", trace=cca.crosscorr_data, refant=0, sampling_frequency = 10 * 200.e6)
                 print fpd.delay
