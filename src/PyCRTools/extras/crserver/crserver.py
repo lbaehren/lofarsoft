@@ -305,6 +305,7 @@ def event_handler(eventID):
     v = c.fetchone()
 
     if v is not None:
+        print v, unpickle_parameter(v)
         figure = SubElement(figures, "figure")
         SubElement(figure, "path").text = "/LORA"+str(unpickle_parameter(v)).split("results")[1]
 
