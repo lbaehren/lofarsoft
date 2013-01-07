@@ -98,3 +98,42 @@ class CrossCorrelateAntennas(Task):
         else:
             cr.hFFTWExecutePlan(self.crosscorr_data[...], self.fft_data[...], self.invfftplan)
 
+class FindPulseDelay(Task):
+    """Calculate pulse delay by finding maxima in a trace.
+
+    This may require some additional manipulation to the data to give a meaningfull result,
+    for instance the trace may be the cross correlation signal.
+    """
+
+    parameters = dict(
+        trace=dict(default=None,
+            doc="array containing a trace as a function of time for each antenna"
+        refant=dict(default=None,
+            doc="reference antenna"),
+        sampling_frequency=dict(default=200.e6,
+            doc="sampling frequency in Hz."),
+        maxpos=dict(default = lambda self: cr.hArray(int, self.trace.shape()[1]),
+            doc = "position of pulse maximum.",
+            output = True),
+        delay=dict(default = lambda self: cr.hArray(int, self.trace.shape()[1]),
+            doc = "pulse delays in seconds.",
+            output = True),
+    )
+
+    def run(self):
+
+        # Take absolute value
+        temp = trace.copy()
+        temp.abs()
+
+        # Calculate position
+        self.maxpos[...] = temp[...].maxpos()
+
+        # Convert to time delay
+        self.delay[:] = self.maxpos[:]
+        self.delay /= self.sampling_frequency
+
+        # Shift delay to be relative to reference antenna
+        if self.refant:
+            self.delay -= self.delay[self.refant]
+
