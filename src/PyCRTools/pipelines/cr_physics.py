@@ -467,8 +467,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
                 timeseries_data /= options.blocksize
 
-				# Calculate delays using cross correlations
-				cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data, refant=0, oversamplefactor=10)
+                # Calculate delays using cross correlations
+                cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data, refant=0, oversamplefactor=10)
+                print cca.crosscorr_data
 
                 # Calculate delays using Hilbert transform
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
@@ -480,9 +481,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                         raise StationError("less than 3 antennas with significant pulses")
                     else:
                         logging.info("less than 3 antennas with significant pulses, using previous direction")
-                        station.status = "BAD"
-                        station["crp_pulse_direction"] = pulse_direction
-                        station.statusmessage = "less than 3 antennas in last iteration"
                         break
 
                 # Fit pulse direction
@@ -499,8 +497,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Check for convergence of iterative direction fitting loop
                 if n > 0:
                     angular_diff = np.rad2deg(tools.spaceAngle(np.deg2rad((90 - last_direction[1])), np.deg2rad((90 - last_direction[0])), np.deg2rad((90 - pulse_direction[1])), np.deg2rad((90 - pulse_direction[0]))))
+
                     if angular_diff < options.maximum_angular_diff:
                         direction_fit_converged = True
+
                 last_direction = pulse_direction
 
                 n += 1
