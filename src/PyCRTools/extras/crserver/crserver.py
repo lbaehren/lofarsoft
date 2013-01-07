@@ -286,7 +286,7 @@ def event_handler(eventID):
             SubElement(parameter, "value").text = str(e[1])
 
     # Fetch event level figures
-    sql = "SELECT plotfiles, crp_plotfiles, lora_ldf, FROM eventparameters WHERE eventID={0}".format(eventID)
+    sql = "SELECT plotfiles, crp_plotfiles, lora_ldf FROM eventparameters WHERE eventID={0}".format(eventID)
     c.execute(sql)
 
     v = c.fetchone()
