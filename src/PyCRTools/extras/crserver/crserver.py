@@ -286,7 +286,7 @@ def event_handler(eventID):
             SubElement(parameter, "value").text = str(e[1])
 
     # Fetch event level figures
-    sql = "SELECT plotfiles, crp_plotfiles FROM eventparameters WHERE eventID={0}".format(eventID)
+    sql = "SELECT plotfiles, crp_plotfiles, lora_ldf, FROM eventparameters WHERE eventID={0}".format(eventID)
     c.execute(sql)
 
     v = c.fetchone()
@@ -296,9 +296,13 @@ def event_handler(eventID):
 
         for e in zip(keys, values):
 
-            for p in e[1]:
-                figure = SubElement(figures, "figure")
-                SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
+            if isinstance(e[1], str):
+                    figure = SubElement(figures, "figure")
+                    SubElement(figure, "path").text = "/results"+str(e[1]).split("results")[1]
+            else:
+                for p in e[1]:
+                    figure = SubElement(figures, "figure")
+                    SubElement(figure, "path").text = "/results"+str(p).split("results")[1]
 
     # Open string file descriptor for output
     f = StringIO()
@@ -465,7 +469,7 @@ def polarization_handler(eventID, station_name, polarization_direction):
     if options.host:
         # PostgreSQL
         c.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='polarizationparameters'")
-        
+
         keys = [str(e[0]) for e in c.fetchall()[1:]]
     else:
         # Sqlite
