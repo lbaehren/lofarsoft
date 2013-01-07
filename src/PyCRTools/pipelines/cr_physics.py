@@ -468,7 +468,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 timeseries_data /= options.blocksize
 
                 # Calculate delays using cross correlations
-                cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data, refant=0, oversamplefactor=10)
+                cca = cr.trun("CrossCorrelateAntennas", fft_data=fft_data, refant=0, oversamplefactor=10)
                 print cca.crosscorr_data
 
                 # Calculate delays using Hilbert transform
