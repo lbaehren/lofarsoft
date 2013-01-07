@@ -453,7 +453,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
             pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
 
-            timeseries_data_cut = cr.hArray(nantennas, options.narrow_search_window_width)
+            timeseries_data_cut = cr.hArray(float, dimentions=[nantennas, options.narrow_search_window_width])
 
             print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
 
