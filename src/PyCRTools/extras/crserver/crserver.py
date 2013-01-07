@@ -307,7 +307,7 @@ def event_handler(eventID):
     if v is not None and len(v) > 0:
         print "bla", unpickle_parameter(v[0])
         figure = SubElement(figures, "figure")
-        SubElement(figure, "path").text = "/LORA"+str(unpickle_parameter(v[0])).split("results")[1]
+        SubElement(figure, "path").text = "/LORA"+unpickle_parameter(v[0]).split("LORA")[1]
 
     # Open string file descriptor for output
     f = StringIO()
