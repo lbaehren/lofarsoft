@@ -107,7 +107,7 @@ class FindPulseDelay(Task):
 
     parameters = dict(
         trace=dict(default=None,
-            doc="array containing a trace as a function of time for each antenna"
+            doc="array containing a trace as a function of time for each antenna"),
         refant=dict(default=None,
             doc="reference antenna"),
         sampling_frequency=dict(default=200.e6,
