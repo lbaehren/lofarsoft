@@ -329,8 +329,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     if dipole_names[2 * i] in findrfi.good_antennas and dipole_names[2 * i + 1] in findrfi.good_antennas:
                         selected_dipoles.extend([dipole_names[2 * i], dipole_names[2 * i + 1]])
 
-                f["SELECTED_DIPOLES"] = selected_dipoles
-
+                try:
+                    f["SELECTED_DIPOLES"] = selected_dipoles
+                except ValueError as e:
+                    raise StationError("Data problem, cannot read selected dipoles: {0}".format(e.message))
+                
                 station["crp_selected_dipoles"] = selected_dipoles
 
                 # Read FFT data
