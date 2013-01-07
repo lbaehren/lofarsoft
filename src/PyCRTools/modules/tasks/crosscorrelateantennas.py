@@ -126,6 +126,8 @@ class FindPulseDelay(Task):
         temp = self.trace.new()
         temp[...].copy(self.trace[...])
         temp.abs()
+        print temp[0]
+        print temp[1]
 
         # Calculate position
         self.maxpos[...] = temp[...].maxpos()
