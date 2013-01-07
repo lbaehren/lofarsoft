@@ -135,6 +135,7 @@ class FindPulseDelay(Task):
         self.delay /= self.sampling_frequency
 
         # Shift delay to be relative to reference antenna
-        if self.refant:
+        if self.refant is not None:
+            print "using reference antenna", self.refant
             self.delay -= self.delay[self.refant]
 
