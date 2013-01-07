@@ -477,6 +477,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                         raise StationError("less than 3 antennas with significant pulses")
                     else:
                         logging.info("less than 3 antennas with significant pulses, using previous direction")
+                        station.status = "BAD"
                         station["crp_pulse_direction"] = pulse_direction
                         station.statusmessage = "less than 3 antennas in last iteration"
                         break
