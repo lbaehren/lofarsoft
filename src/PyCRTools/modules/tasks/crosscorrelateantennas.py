@@ -123,7 +123,7 @@ class FindPulseDelay(Task):
     def run(self):
 
         # Take absolute value
-        temp = trace.copy()
+        temp = self.trace.copy()
         temp.abs()
 
         # Calculate position
