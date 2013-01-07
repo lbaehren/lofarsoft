@@ -440,6 +440,7 @@ task_modules = ["averagespectrum",
 "directionfitplanewave",
 "stokesparameters",
 "shower",
+"crosscorrelateantennas",
 ]
 
 import os
