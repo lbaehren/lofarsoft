@@ -477,6 +477,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                         raise StationError("less than 3 antennas with significant pulses")
                     else:
                         logging.info("less than 3 antennas with significant pulses, using previous direction")
+                        station["crp_pulse_direction"] = pulse_direction
+                        station.statusmessage = "less than 3 antennas in last iteration"
                         break
 
                 # Fit pulse direction
@@ -493,10 +495,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Check for convergence of iterative direction fitting loop
                 if n > 0:
                     angular_diff = np.rad2deg(tools.spaceAngle(np.deg2rad((90 - last_direction[1])), np.deg2rad((90 - last_direction[0])), np.deg2rad((90 - pulse_direction[1])), np.deg2rad((90 - pulse_direction[0]))))
-
                     if angular_diff < options.maximum_angular_diff:
                         direction_fit_converged = True
-
                 last_direction = pulse_direction
 
                 n += 1
