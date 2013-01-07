@@ -299,7 +299,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             except RuntimeError as e:
                 raise StationError("Cannot get the raw data, hdf5 problem detected: {0}".format(e.message))
             
-            if raw_data.shape()[0] < 2:
+            if raw_data.shape[0] < 2:
                 raise StationError("File of station contains less than 2 antennas.")
                     
             plt.subplot(2,1,1)
