@@ -304,10 +304,9 @@ def event_handler(eventID):
     c.execute(sql)
     v = c.fetchone()
 
-    if v is not None:
-        print v, unpickle_parameter(v)
+    if v is not None and len(v) > 0:
         figure = SubElement(figures, "figure")
-        SubElement(figure, "path").text = "/LORA"+str(unpickle_parameter(v)).split("results")[1]
+        SubElement(figure, "path").text = "/LORA"+str(unpickle_parameter(v[0])).split("results")[1]
 
     # Open string file descriptor for output
     f = StringIO()
