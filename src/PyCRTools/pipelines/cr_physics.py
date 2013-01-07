@@ -294,7 +294,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 raise StationError("{0}, signal is at edge of file".format(e.message))
                 
             # Make plot of timeseries data in both polarizations of first selected antenna
-            raw_data = f["TIMESERIES_DATA"].toNumpy()
+            try:
+                raw_data = f["TIMESERIES_DATA"].toNumpy()
+            except RuntimeError as e:
+                raise StationError("Cannot get the raw data, hdf5 problem detected: {0}".format(e.message))
+                    
             plt.subplot(2,1,1)
             plt.plot(raw_data[0])
             plt.subplot(2,1,2)
