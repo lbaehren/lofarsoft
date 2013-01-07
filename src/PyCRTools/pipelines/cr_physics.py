@@ -469,7 +469,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Calculate delays using cross correlations
                 cca = cr.trun("CrossCorrelateAntennas", fft_data=fft_data, refant=0, oversamplefactor=10)
-                print cca.crosscorr_data
+
+                fpd = cr.trun("FindPulseDelay", trace=cca.crosscorr_data, refant=0, sampling_frequency = 10 * 200.e6)
+                print fpd.delay
 
                 # Calculate delays using Hilbert transform
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
