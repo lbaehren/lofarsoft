@@ -305,7 +305,10 @@ def event_handler(eventID):
     v = c.fetchone()
 
     if v is not None and len(v) > 0:
-        print v
+        print v[0]
+        print unpickle_parameter(v[0])
+        print unpickle_parameter(v[0]).split("LORA")
+        print unpickle_parameter(v[0]).split("LORA")[1]
 #
 #        print "bla"
 #        print unpickle_parameter(v[0])
@@ -313,8 +316,6 @@ def event_handler(eventID):
 #        print unpickle_parameter(v[0]).split("LORA")[1]
 #        print "bla"
 #
-#        figure = SubElement(figures, "figure")
-#        SubElement(figure, "path").text = "/LORA"+unpickle_parameter(v[0]).split("LORA")[1]
 
     # Open string file descriptor for output
     f = StringIO()
