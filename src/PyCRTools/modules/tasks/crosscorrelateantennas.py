@@ -112,10 +112,10 @@ class FindPulseDelay(Task):
             doc="reference antenna"),
         sampling_frequency=dict(default=200.e6,
             doc="sampling frequency in Hz."),
-        maxpos=dict(default = lambda self: cr.hArray(int, self.trace.shape()[1]),
+        maxpos=dict(default = lambda self: cr.hArray(int, self.trace.shape()[0]),
             doc = "position of pulse maximum.",
             output = True),
-        delay=dict(default = lambda self: cr.hArray(int, self.trace.shape()[1]),
+        delay=dict(default = lambda self: cr.hArray(int, self.trace.shape()[0]),
             doc = "pulse delays in seconds.",
             output = True),
     )
