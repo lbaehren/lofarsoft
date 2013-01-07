@@ -292,16 +292,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 f.shiftTimeseriesData(shift)
             except ValueError as e:
                 raise StationError("{0}, signal is at edge of file".format(e.message))
-                
+
             # Make plot of timeseries data in both polarizations of first selected antenna
             try:
                 raw_data = f["TIMESERIES_DATA"].toNumpy()
             except RuntimeError as e:
                 raise StationError("Cannot get the raw data, hdf5 problem detected: {0}".format(e.message))
-            
+
             if raw_data.shape[0] < 2:
                 raise StationError("File of station contains less than 2 antennas.")
-                    
+
             plt.subplot(2,1,1)
             plt.plot(raw_data[0])
             plt.subplot(2,1,2)
@@ -333,7 +333,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     f["SELECTED_DIPOLES"] = selected_dipoles
                 except ValueError as e:
                     raise StationError("Data problem, cannot read selected dipoles: {0}".format(e.message))
-                
+
                 station["crp_selected_dipoles"] = selected_dipoles
 
                 # Read FFT data
@@ -455,7 +455,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
 
-            # Start direction fitting loop
+            # Start direction fitting loopim
             n = 0
             direction_fit_converged = False
             while True:
@@ -467,7 +467,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
                 timeseries_data /= options.blocksize
 
-                # Calculate delays
+				# Calculate delays using cross correlations
+				cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data, refant=0, oversamplefactor=10)
+
+                # Calculate delays using Hilbert transform
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
 
                 # Use current direction if not enough significant pulses are found for direction fitting
