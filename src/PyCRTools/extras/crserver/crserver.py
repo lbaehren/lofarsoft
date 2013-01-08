@@ -8,6 +8,7 @@ import cPickle as pickle
 import sqlite3
 import SocketServer
 import SimpleHTTPServer
+import matplotlib.pyplot as plt
 
 try:
     import psycopg2
@@ -184,40 +185,27 @@ def statistics_handler():
     # Create cursor
     c = conn.cursor()
 
-    # Generate empty XML
-    elements = Element("elements")
-
     # Get total number of events
     c.execute("""SELECT COUNT(status) FROM events""")
     nof_events = c.fetchone()[0]
 
     # Get status count
     c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
-    status_count = c.fetchall()
 
-    # Convert to percentage
-    status_count_percent = [(e[0], float(e[1]) / nof_events) for e in status_count]
+    status = []
+    status_count = []
+    status_count_percent = []
+    for e in c.fetchall()
+        status.append(e[0])
+        status_count.append(e[1])
+        status_count_percent.append(float(e[1]) / nof_events)
 
-    # Generate table
-    info = SubElement(elements, "info")
-    table = SubElement(info, "table")
-    for e in status_count:
-        row = SubElement(table, "row")
-        SubElement(row, "key").text = e[0]
-        SubElement(row, "value").text = str(e[1])
-    row = SubElement(table, "row")
-    SubElement(row, "key").text = "total"
-    SubElement(row, "value").text = str(nof_events)
+    fig = plt.figure()
 
-    # Open string file descriptor for output
+    plt.pie(status_count_percent, labels = status)
+
     f = StringIO()
-
-    # Write header information
-    f.write('<?xml version="1.0" ?>')
-#    f.write('<?xml-stylesheet type="text/xsl" href="/layout/statistics.xsl"?>')
-
-    # Write XML DOM to string file descriptor
-    ElementTree(elements).write(f)
+    fig.savefig(f, format='svg')
 
     return f.getvalue()
 
