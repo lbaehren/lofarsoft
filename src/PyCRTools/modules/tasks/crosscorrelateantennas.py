@@ -137,9 +137,10 @@ class FindPulseDelay(Task):
         self.delay /= self.sampling_frequency
         print self.delay
 
-        for i in range(temp.shape()[0]):
+        bla = temp.toNumpy()
+        for i in range(bla.shape[0]):
             plt.clf()
-            plt.plot(temp[i])
+            plt.plot(bla[i])
             plt.savefig("{0}.png".format(i))
 
         # Shift delay to be relative to reference antenna
