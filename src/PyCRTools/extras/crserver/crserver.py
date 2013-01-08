@@ -184,20 +184,30 @@ def statistics_handler():
     # Create cursor
     c = conn.cursor()
 
-    # Fetch all event IDs
-    c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
-
     # Generate empty XML
     elements = Element("elements")
 
+    # Get total number of events
+    c.execute("""SELECT COUNT(status) FROM events""")
+    nof_events = c.fetchone()[0]
+
+    # Get status count
+    c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
+    status_count = e.fetchall()
+
+    # Convert to percentage
+    status_count_percent = [(e[0], float(e[1]) / nof_events) for e in status_count]
+
+    # Generate table
     info = SubElement(elements, "info")
-
     table = SubElement(info, "table")
-
-    for e in c.fetchall():
+    for e in status_count:
         row = SubElement(table, "row")
         SubElement(row, "key").text = e[0]
         SubElement(row, "value").text = str(e[1])
+    row = SubElement(table, "row")
+    SubElement(row, "key").text = "total"
+    SubElement(row, "value").text = str(nof_events)
 
     # Open string file descriptor for output
     f = StringIO()
