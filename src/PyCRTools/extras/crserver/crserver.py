@@ -192,17 +192,15 @@ def statistics_handler():
     # Get status count
     c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
 
-    status = []
-    status_count = []
-    status_count_percent = []
-    for e in c.fetchall()
-        status.append(e[0])
-        status_count.append(e[1])
-        status_count_percent.append(float(e[1]) / nof_events)
+    fraction = []
+    labels = []
+    for e in c.fetchall():
+        fraction.append(float(e[1]) / nof_events)
+        label.append("{0} {1} {2}".format(e[0], e[1], float(e[1]) / nof_events)
 
     fig = plt.figure()
 
-    plt.pie(status_count_percent, labels = status)
+    plt.pie(fraction, labels = labels)
 
     f = StringIO()
     fig.savefig(f, format='svg')
