@@ -123,24 +123,17 @@ class FindPulseDelay(Task):
     def run(self):
 
         # Take absolute value
-        temp = self.trace.new()
-        temp[...].copy(self.trace[...])
-        temp.abs()
+        temp = trace.toNumpy().abs()
 
         # Calculate position
-        self.maxpos[...] = temp[...].maxpos()
+        self.maxpos = cr.hArray(np.argmax(temp, axis=0))
 
         # Convert to time delay
-        self.delay[...].copy(self.maxpos[...])
-        print self.maxpos
-        print self.delay
-        self.delay /= self.sampling_frequency
-        print self.delay
+        self.delay = cr.hArray(np.argmax / self.sampling_frequency)
 
-        bla = temp.toNumpy()
-        for i in range(bla.shape[0]):
+        for i in range(temp.shape[0]):
             plt.clf()
-            plt.plot(bla[i])
+            plt.plot(temp[i])
             plt.savefig("{0}.png".format(i))
 
         # Shift delay to be relative to reference antenna
