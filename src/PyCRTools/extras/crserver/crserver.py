@@ -196,7 +196,7 @@ def statistics_handler():
     labels = []
     for e in c.fetchall():
         fraction.append(float(e[1]) / nof_events)
-        label.append("{0} {1} {2}".format(e[0], e[1], float(e[1]) / nof_events))
+        labels.append("{0} {1} {2}".format(e[0], e[1], float(e[1]) / nof_events))
 
     fig = plt.figure()
 
