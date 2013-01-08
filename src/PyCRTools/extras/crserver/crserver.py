@@ -8,6 +8,9 @@ import cPickle as pickle
 import sqlite3
 import SocketServer
 import SimpleHTTPServer
+import matplotlib
+
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 try:
