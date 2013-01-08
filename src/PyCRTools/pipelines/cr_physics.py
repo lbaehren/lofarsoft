@@ -477,7 +477,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
 
                 # Calculate the cross correlations of all the signals with respect to the reference antenna
-                print self.refant
+                print pulse_envelope.refant
                 cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data_cut, refant=pulse_envelope.refant, oversamplefactor=10)
 
                 # Find the delays defined as the position of the maxima of the cross correlations
