@@ -206,7 +206,7 @@ parser.add_option("--user", default=None, help="PostgreSQL user.")
 parser.add_option("--password", default=None, help="PostgreSQL password.")
 parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg, pdf.")
-parser.add_option("--use-cc-delay", default=False, action=store_true, help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
+parser.add_option("--use-cc-delay", default=False, action="store_true", help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
 
 (options, args) = parser.parse_args()
 
