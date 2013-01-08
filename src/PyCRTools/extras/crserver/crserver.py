@@ -185,12 +185,19 @@ def statistics_handler():
     c = conn.cursor()
 
     # Fetch all event IDs
-    c.execute("""SELECT status FROM events""")
+    c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
 
     # Generate empty XML
     elements = Element("elements")
 
-    SubElement(elements, "test").text = "bla"
+    info = SubElement(elements, "info")
+
+    table = SubElement(info, "table")
+
+    for e in c.fetch_all():
+        row = SubElement(table, "row")
+        SubElement(row, "key").text = e[0]
+        SubElement(row, "value").text = e[1]
 
     # Open string file descriptor for output
     f = StringIO()
