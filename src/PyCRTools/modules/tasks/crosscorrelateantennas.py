@@ -145,11 +145,11 @@ class FindPulseDelay(Task):
             for i in range(temp.shape[0]):
                 plt.clf()
 
-                y = temp
-                x = 1.e6 * np.arange(y.shape[1]) / self.sampling_frequency
+                y = temp[i]
+                x = 1.e6 * np.arange(y.shape[0]) / self.sampling_frequency
 
                 plt.plot(x, y)
-                plt.annotate("pulse maximum", xy=(1.e6 * self.maxpos[i] / self.sampling_frequency, np.max(temp[i])), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
+                plt.annotate("pulse maximum", xy=(1.e6 * self.maxpos[i] / self.sampling_frequency, np.max(y)), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
                 p = self.plot_prefix + "find_pulse_delay-{0:d}.{1}".format(i, self.plot_type)
 
