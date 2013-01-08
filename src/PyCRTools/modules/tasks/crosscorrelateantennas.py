@@ -123,7 +123,7 @@ class FindPulseDelay(Task):
     def run(self):
 
         # Take absolute value
-        temp = self.trace.toNumpy().abs()
+        temp = np.abs(self.trace.toNumpy())
 
         # Calculate position
         self.maxpos = cr.hArray(np.argmax(temp, axis=0))
