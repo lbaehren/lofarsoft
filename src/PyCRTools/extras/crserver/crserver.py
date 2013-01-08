@@ -167,6 +167,43 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
 
     return header
 
+def statistics_handler():
+    """Handle statistics overview page.
+    """
+
+    # Connect to database
+    if have_psycopg2 and options.host:
+        # Open PostgreSQL database
+        print "Opening connection to PostgreSQL database"
+        conn = psycopg2.connect(host=options.host, user=options.user, password=options.password, dbname=options.dbname)
+    else:
+        # Open SQLite database
+        print "Opening Sqlite database"
+        conn = sqlite3.connect(options.database, timeout=60.0)
+
+    # Create cursor
+    c = conn.cursor()
+
+    # Fetch all event IDs
+    c.execute("""SELECT status FROM events""")
+
+    # Generate empty XML
+    elements = Element("elements")
+
+    SubElement(elements, "test").text = "bla"
+
+    # Open string file descriptor for output
+    f = StringIO()
+
+    # Write header information
+    f.write('<?xml version="1.0" ?>')
+    f.write('<?xml-stylesheet type="text/xsl" href="/layout/events.xsl"?>')
+
+    # Write XML DOM to string file descriptor
+    ElementTree(elements).write(f)
+
+    return f.getvalue()
+
 def events_handler():
     """Handle summary of events.
     """
@@ -544,7 +581,16 @@ class CustomHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         try:
 
-            if self.path == '/events':
+            if self.path == '/statistics':
+
+                s = statistics_handler()
+
+                self.send_response(200)
+                self.send_header('Content-type','text/xml')
+                self.end_headers()
+                self.wfile.write(s)
+
+            elif self.path == '/events':
 
                 s = events_handler()
 
