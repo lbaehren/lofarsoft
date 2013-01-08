@@ -129,7 +129,7 @@ class FindPulseDelay(Task):
         self.maxpos = cr.hArray(np.argmax(temp, axis=0))
 
         # Convert to time delay
-        self.delay = cr.hArray(np.argmax / self.sampling_frequency)
+        self.delay = cr.hArray(self.maxpos.toNumpy() / self.sampling_frequency)
 
         for i in range(temp.shape[0]):
             plt.clf()
