@@ -194,7 +194,7 @@ def statistics_handler():
 
     table = SubElement(info, "table")
 
-    for e in c.fetch_all():
+    for e in c.fetchall():
         row = SubElement(table, "row")
         SubElement(row, "key").text = e[0]
         SubElement(row, "value").text = e[1]
