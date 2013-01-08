@@ -193,7 +193,7 @@ def statistics_handler():
 
     # Get status count
     c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
-    status_count = e.fetchall()
+    status_count = c.fetchall()
 
     # Convert to percentage
     status_count_percent = [(e[0], float(e[1]) / nof_events) for e in status_count]
