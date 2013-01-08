@@ -118,6 +118,14 @@ class FindPulseDelay(Task):
         delay=dict(default = lambda self: cr.hArray(float, self.trace.shape()[0]),
             doc = "pulse delays in seconds.",
             output = True),
+        save_plots=dict(default = False,
+            doc = "Store plots"),
+        plot_prefix=dict(default = "",
+            doc = "Prefix for plots"),
+        plot_type=dict(default = "png",
+            doc = "Plot type (e.g. png, jpeg, pdf)"),
+        plotlist=dict(default = [],
+            doc = "List of plots"),
     )
 
     def run(self):
@@ -131,10 +139,27 @@ class FindPulseDelay(Task):
         # Convert to time delay
         self.delay = cr.hArray(self.maxpos.toNumpy() / self.sampling_frequency)
 
-        for i in range(temp.shape[0]):
-            plt.clf()
-            plt.plot(temp[i])
-            plt.savefig("{0}.png".format(i))
+        if self.save_plots:
+
+            # Plot found maxima
+            for i in range(temp.shape[0]):
+                plt.clf()
+
+                y = temp
+                x = 1.e6 * np.arange(y.shape[1]) / self.sampling_frequency
+
+                plt.plot(x, y)
+                plt.annotate("pulse maximum", xy=(1.e6 * self.maxpos[i] / self.sampling_frequency, np.max(temp[i])), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
+
+                p = self.plot_prefix + "find_pulse_delay-{0:d}.{1}".format(i, self.plot_type)
+
+                plt.xlabel(r"Time ($\mu s$)")
+                plt.ylabel("Signal (ADU)")
+                plt.legend()
+                plt.title("Pulse delay for antenna {0:d}".format(i))
+                plt.savefig(p)
+
+                self.plotlist.append(p)
 
         # Shift delay to be relative to reference antenna
         if self.refant is not None:
