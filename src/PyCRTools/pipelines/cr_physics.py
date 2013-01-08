@@ -206,6 +206,7 @@ parser.add_option("--user", default=None, help="PostgreSQL user.")
 parser.add_option("--password", default=None, help="PostgreSQL password.")
 parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg, pdf.")
+parser.add_option("--use-cc-delay", default=False, action=store_true, help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
 
 (options, args) = parser.parse_args()
 
@@ -472,12 +473,19 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Calculate delays using cross correlations
                 timeseries_data_cut[...].copy(timeseries_data[..., pulse_start:pulse_end])
 
-                cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data_cut, refant=0, oversamplefactor=10)
-
-                fpd = cr.trun("FindPulseDelay", trace=cca.crosscorr_data, refant=0, sampling_frequency = 10 * 200.e6)
-
                 # Calculate delays using Hilbert transform
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=10, npolarizations=2)
+
+                # Calculate the cross correlations of all the signals with respect to the reference antenna
+                cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data_cut, refant=pulse_envelope.refant, oversamplefactor=10)
+
+                # Find the delays defined as the position of the maxima of the cross correlations
+                fpd = cr.trun("FindPulseDelay", trace=cca.crosscorr_data, refant=pulse_envelope.refant, sampling_frequency = 10 * 200.e6)
+
+                if options.use_cc_delay:
+                    delays = fpd.delays
+                else:
+                    delays = pulse_envelope.delays
 
                 # Use current direction if not enough significant pulses are found for direction fitting
                 if len(pulse_envelope.antennas_with_significant_pulses) < 3:
@@ -491,7 +499,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                         break
 
                 # Fit pulse direction
-                direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=pulse_envelope.delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
+                direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
 
                 pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
@@ -539,7 +547,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             station["crp_plotfiles"].append(plotfile)
 
             # Add parameters
-            station["crp_pulse_delay"] = pulse_envelope.delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
+            station["crp_pulse_delay"] = delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
             station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
             station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
 

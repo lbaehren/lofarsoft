@@ -115,7 +115,7 @@ class FindPulseDelay(Task):
         maxpos=dict(default = lambda self: cr.hArray(int, self.trace.shape()[0]),
             doc = "position of pulse maximum.",
             output = True),
-        delay=dict(default = lambda self: cr.hArray(float, self.trace.shape()[0]),
+        delays=dict(default = lambda self: cr.hArray(float, self.trace.shape()[0]),
             doc = "pulse delays in seconds.",
             output = True),
         save_plots=dict(default = False,
@@ -136,8 +136,8 @@ class FindPulseDelay(Task):
         # Calculate position
         self.maxpos = cr.hArray(np.argmax(temp, axis=1))
 
-        # Convert to time delay
-        self.delay = cr.hArray(self.maxpos.toNumpy() / self.sampling_frequency)
+        # Convert to time delays
+        self.delays = cr.hArray(self.maxpos.toNumpy() / self.sampling_frequency)
 
         if self.save_plots:
 
@@ -151,18 +151,18 @@ class FindPulseDelay(Task):
                 plt.plot(x, y)
                 plt.annotate("pulse maximum", xy=(1.e6 * self.maxpos[i] / self.sampling_frequency, np.max(y)), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
-                p = self.plot_prefix + "find_pulse_delay-{0:d}.{1}".format(i, self.plot_type)
+                p = self.plot_prefix + "find_pulse_delays-{0:d}.{1}".format(i, self.plot_type)
 
                 plt.xlabel(r"Time ($\mu s$)")
                 plt.ylabel("Signal (ADU)")
                 plt.legend()
-                plt.title("Pulse delay for antenna {0:d}".format(i))
+                plt.title("Pulse delays for antenna {0:d}".format(i))
                 plt.savefig(p)
 
                 self.plotlist.append(p)
 
-        # Shift delay to be relative to reference antenna
+        # Shift delays to be relative to reference antenna
         if self.refant is not None:
             print "using reference antenna", self.refant
-            self.delay -= self.delay[self.refant]
+            self.delays -= self.delays[self.refant]
 
