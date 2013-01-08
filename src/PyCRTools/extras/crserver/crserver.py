@@ -197,7 +197,7 @@ def statistics_handler():
     for e in c.fetchall():
         row = SubElement(table, "row")
         SubElement(row, "key").text = e[0]
-        SubElement(row, "value").text = e[1]
+        SubElement(row, "value").text = str(e[1])
 
     # Open string file descriptor for output
     f = StringIO()
