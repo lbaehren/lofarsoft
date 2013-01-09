@@ -235,6 +235,8 @@ def statistics_handler():
     # Write XML DOM to string file descriptor
     ElementTree(elements).write(f)
 
+    return f.getvalue()
+
 def events_handler():
     """Handle summary of events.
     """
