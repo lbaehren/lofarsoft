@@ -228,6 +228,43 @@ def statistics_handler():
         graph = SubElement(info, "graph")
         SubElement(graph, "path").text = figname
 
+    # alt_status
+    if True: # only for indent clarity, perhaps later turned into a function
+
+        info = SubElement(elements, "info")
+        SubElement(info, "caption").text = "Event status (alternative)"
+        data = SubElement(info, "data")
+
+        # Get total number of events
+        c.execute("""SELECT COUNT(alt_status) FROM events""")
+        nof_events = c.fetchone()[0]
+
+        # Get status count
+        c.execute("""SELECT alt_status, COUNT(*) FROM events GROUP BY alt_status""")
+
+        fraction = []
+        labels = []
+        for e in c.fetchall():
+            fraction.append(float(e[1]) / nof_events)
+            labels.append("{0} {1}={2:.1f}%".format(e[0], e[1], 100 * float(e[1]) / nof_events))
+
+            record = SubElement(data, "record")
+            SubElement(record, "key").text = e[0]
+            SubElement(record, "value").text = str(e[1])
+
+        total = SubElement(data, "total").text = str(nof_events)
+
+        fig = plt.figure()
+        fig.add_subplot(111, aspect='equal')
+
+        plt.pie(fraction, labels=labels, shadow=True)
+
+        figname = "statistics/event_status_pie.png"
+        fig.savefig(figname)
+
+        graph = SubElement(info, "graph")
+        SubElement(graph, "path").text = figname
+
     # Open string file descriptor for output
     f = StringIO()
 

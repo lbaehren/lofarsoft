@@ -203,3 +203,8 @@ div.info img
     vertical-align: top;
 }
 
+tr.total
+{
+    font-weight: bold;
+}
+

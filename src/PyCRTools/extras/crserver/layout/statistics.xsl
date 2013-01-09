@@ -24,8 +24,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
             </tr>
             </xsl:for-each>
             <xsl:if test="data/total">
-            <tr>
-                <td class="total">Total</td>
+            <tr class="total">
+                <td>Total</td>
                 <td><xsl:value-of select="data/total"/></td>
             </tr>
             </xsl:if>
