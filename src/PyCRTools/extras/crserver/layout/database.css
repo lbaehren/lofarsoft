@@ -193,10 +193,12 @@ div.info figure
     display: inline-block;
     vertical-align: top;
     text-align: center;
+    margin: 0px;
 }
 
 div.info img
 {
     width: 400px;
+    margin:2px;
 }
 
