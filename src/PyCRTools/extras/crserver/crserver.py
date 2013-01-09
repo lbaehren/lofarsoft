@@ -188,32 +188,52 @@ def statistics_handler():
     # Create cursor
     c = conn.cursor()
 
-    # Get total number of events
-    c.execute("""SELECT COUNT(status) FROM events""")
-    nof_events = c.fetchone()[0]
+    # Generate empty XML
+    elements = Element("elements")
 
-    # Get status count
-    c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
+    # status
+    if True: # only for indent clarity, perhaps later turned into a function
 
-    fraction = []
-    labels = []
-    for e in c.fetchall():
-        fraction.append(float(e[1]) / nof_events)
-        labels.append("{0} {1}={2:.1f}%".format(e[0], e[1], 100 * float(e[1]) / nof_events))
+        info = SubElement(elements, "info")
+        data = SubElement(info, "data")
 
-    fig = plt.figure()
-    fig.add_subplot(111, aspect='equal')
+        # Get total number of events
+        c.execute("""SELECT COUNT(status) FROM events""")
+        nof_events = c.fetchone()[0]
 
-    plt.pie(fraction, labels=labels, shadow=True)
-    plt.title("Event status")
+        # Get status count
+        c.execute("""SELECT status, COUNT(*) FROM events GROUP BY status""")
 
-#    f = StringIO()
-#    fig.savefig(f, format='svg')
-    fig.savefig("bla.png")
+        fraction = []
+        labels = []
+        for e in c.fetchall():
+            fraction.append(float(e[1]) / nof_events)
+            labels.append("{0} {1}={2:.1f}%".format(e[0], e[1], 100 * float(e[1]) / nof_events))
 
-    s="""<html><head></head><body><img src="bla.png"></body></html>"""
+            record = SubElement(data, "record")
+            SubElement(record, "key").text = e[0]
+            SubElement(record, "value").text = labels[-1]
 
-    return s#f.getvalue()
+        fig = plt.figure()
+        fig.add_subplot(111, aspect='equal')
+
+        plt.pie(fraction, labels=labels, shadow=True)
+        plt.title("Event status")
+
+        figname = "statistics/event_status_pie.png"
+        fig.savefig(figname)
+
+        graph = SubElement(info, "graph").text = figname
+
+    # Open string file descriptor for output
+    f = StringIO()
+
+    # Write header information
+    f.write('<?xml version="1.0" ?>')
+    f.write('<?xml-stylesheet type="text/xsl" href="/layout/events.xsl"?>')
+
+    # Write XML DOM to string file descriptor
+    ElementTree(elements).write(f)
 
 def events_handler():
     """Handle summary of events.
@@ -597,7 +617,7 @@ class CustomHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
                 s = statistics_handler()
 
                 self.send_response(200)
-                self.send_header('Content-type','text/html')
+                self.send_header('Content-type','text/xml')
                 self.end_headers()
                 self.wfile.write(s)
 
