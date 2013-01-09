@@ -230,7 +230,7 @@ def statistics_handler():
 
     # Write header information
     f.write('<?xml version="1.0" ?>')
-    f.write('<?xml-stylesheet type="text/xsl" href="/layout/events.xsl"?>')
+#    f.write('<?xml-stylesheet type="text/xsl" href="/layout/events.xsl"?>')
 
     # Write XML DOM to string file descriptor
     ElementTree(elements).write(f)
