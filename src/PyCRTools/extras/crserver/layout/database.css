@@ -83,7 +83,7 @@ nav ul li
 }
 
 nav li ul
-{ 
+{
     display: none;
 }
 
@@ -175,5 +175,24 @@ div.desc
     font-weight:normal;
     width:120px;
     margin:2px;
+}
+
+div.info
+{
+    display: block;
+}
+
+div.info table
+{
+    display: block;
+    float: left;
+    position: relative;
+}
+
+div.info figure
+{
+    display: block;
+    float: right;
+    position: relative;
 }
 
