@@ -212,7 +212,9 @@ def statistics_handler():
 
             record = SubElement(data, "record")
             SubElement(record, "key").text = e[0]
-            SubElement(record, "value").text = labels[-1]
+            SubElement(record, "value").text = str(e[1])
+
+        total = SubElement(data, "total").text = str(nof_events)
 
         fig = plt.figure()
         fig.add_subplot(111, aspect='equal')
