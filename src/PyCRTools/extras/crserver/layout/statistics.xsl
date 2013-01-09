@@ -14,6 +14,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <h1>LOFAR Cosmic Ray Statistics</h1>
   <xsl:for-each select="/elements/info">
     <div class="info">
+        <h2><xsl:value-of select="caption"/></h2>
         <xsl:if test="data">
             <table class="parameters">
             <xsl:for-each select="data/record">
@@ -33,7 +34,6 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <xsl:if test="graph">
             <figure>
             <img><xsl:attribute name="src"><xsl:value-of select="graph/path"/></xsl:attribute><xsl:attribute name="alt"><xsl:value-of select="graph/path"/></xsl:attribute></img>
-            <figcaption><xsl:value-of select="graph/caption"/></figcaption>
             </figure>
         </xsl:if>
     </div>

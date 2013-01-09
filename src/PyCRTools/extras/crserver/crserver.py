@@ -195,6 +195,7 @@ def statistics_handler():
     if True: # only for indent clarity, perhaps later turned into a function
 
         info = SubElement(elements, "info")
+        SubElement(data, "caption").text = "Event status"
         data = SubElement(info, "data")
 
         # Get total number of events
@@ -226,7 +227,6 @@ def statistics_handler():
 
         graph = SubElement(info, "graph")
         SubElement(graph, "path").text = figname
-        SubElement(graph, "caption").text = "Event status"
 
     # Open string file descriptor for output
     f = StringIO()
