@@ -14,6 +14,22 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <h1>LOFAR Cosmic Ray Statistics</h1>
   <xsl:for-each select="/elements/info">
     <div class="info">
+        <xsl:if test="data">
+            <table class="parameters">
+            <xsl:for-each select="data/record">
+            <tr>
+                <td><xsl:value-of select="key"/></td>
+                <td><xsl:value-of select="value"/></td>
+            </tr>
+            </xsl:for-each>
+            <xsl:if test="data/total">
+            <tr>
+                <td class="total">Total</td>
+                <td><xsl:value-of select="data/total"/></td>
+            </tr>
+            </xsl:if>
+            </table>
+        </xsl:if>
         <xsl:if test="graph">
             <img><xsl:attribute name="src"><xsl:value-of select="graph/path"/></xsl:attribute><xsl:attribute name="alt"><xsl:value-of select="graph/path"/></xsl:attribute></img>
         </xsl:if>
