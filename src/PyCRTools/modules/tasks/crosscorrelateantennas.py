@@ -155,7 +155,6 @@ class FindPulseDelay(Task):
 
                 plt.xlabel(r"Time ($\mu s$)")
                 plt.ylabel("Signal (ADU)")
-                plt.legend()
                 plt.title("Pulse delays for antenna {0:d}".format(i))
                 plt.savefig(p)
 
