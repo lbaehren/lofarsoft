@@ -220,13 +220,13 @@ def statistics_handler():
         fig.add_subplot(111, aspect='equal')
 
         plt.pie(fraction, labels=labels, shadow=True)
-        plt.title("Event status")
 
         figname = "statistics/event_status_pie.png"
         fig.savefig(figname)
 
         graph = SubElement(info, "graph")
         SubElement(graph, "path").text = figname
+        SubElement(graph, "caption").text = "Event status"
 
     # Open string file descriptor for output
     f = StringIO()

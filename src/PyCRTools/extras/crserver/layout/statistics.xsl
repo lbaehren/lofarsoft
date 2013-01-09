@@ -31,7 +31,10 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
             </table>
         </xsl:if>
         <xsl:if test="graph">
+            <figure>
             <img><xsl:attribute name="src"><xsl:value-of select="graph/path"/></xsl:attribute><xsl:attribute name="alt"><xsl:value-of select="graph/path"/></xsl:attribute></img>
+            <figcaption><xsl:value-of select="graph/caption"/></figcaption>
+            </figure>
         </xsl:if>
     </div>
   </xsl:for-each>
