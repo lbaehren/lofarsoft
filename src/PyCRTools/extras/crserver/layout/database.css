@@ -185,12 +185,12 @@ div.info
 div.info table
 {
     display: inline-block;
-    vertical-align: center;
 }
 
 div.info figure
 {
     display: inline-block;
+    vertical-align: center;
 }
 
 div.info img
