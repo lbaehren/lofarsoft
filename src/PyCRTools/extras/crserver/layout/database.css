@@ -184,15 +184,18 @@ div.info
 
 div.info table
 {
-    display: block;
+    display: inline;
     float: left;
-    position: relative;
 }
 
 div.info figure
 {
-    display: block;
-    float: right;
-    position: relative;
+    display: inline;
+    float: left;
+}
+
+div.info img
+{
+    width=250px;
 }
 
