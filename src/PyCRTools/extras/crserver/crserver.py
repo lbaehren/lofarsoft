@@ -225,7 +225,8 @@ def statistics_handler():
         figname = "statistics/event_status_pie.png"
         fig.savefig(figname)
 
-        graph = SubElement(info, "graph").text = figname
+        graph = SubElement(info, "graph")
+        SubElement(graph, "path").text = figname
 
     # Open string file descriptor for output
     f = StringIO()

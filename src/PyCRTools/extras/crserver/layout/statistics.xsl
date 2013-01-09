@@ -12,7 +12,13 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   </head>
   <body>
   <h1>LOFAR Cosmic Ray Statistics</h1>
-  <xsl:value-of select="test"/>
+  <xsl:for-each select="/elements/info">
+    <div class="info">
+        <xsl:if test="graph">
+            <img><xsl:attribute name="src"><xsl:value-of select="path"/></xsl:attribute><xsl:attribute name="alt"><xsl:value-of select="path"/></xsl:attribute></img>
+        </xsl:if>
+    </div>
+  </xsl:for-each>
   </body>
   </html>
 </xsl:template>
