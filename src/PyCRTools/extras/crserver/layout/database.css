@@ -200,5 +200,6 @@ div.info img
 {
     width: 400px;
     margin:2px;
+    vertical-align: top;
 }
 
