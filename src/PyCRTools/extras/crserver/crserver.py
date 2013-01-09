@@ -205,11 +205,15 @@ def statistics_handler():
     fig.add_subplot(111, aspect='equal')
 
     plt.pie(fraction, labels=labels, shadow=True)
+    plt.title("Event status")
 
-    f = StringIO()
-    fig.savefig(f, format='svg')
+#    f = StringIO()
+#    fig.savefig(f, format='svg')
+    fig.savefig("bla.png")
 
-    return f.getvalue()
+    s="""<html><head></head><body><img src="bla.png"></body></html>"""
+
+    return s#f.getvalue()
 
 def events_handler():
     """Handle summary of events.
