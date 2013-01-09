@@ -195,7 +195,7 @@ def statistics_handler():
     if True: # only for indent clarity, perhaps later turned into a function
 
         info = SubElement(elements, "info")
-        SubElement(data, "caption").text = "Event status"
+        SubElement(info, "caption").text = "Event status"
         data = SubElement(info, "data")
 
         # Get total number of events
