@@ -190,7 +190,7 @@ div.info table
 div.info figure
 {
     display: inline-block;
-    vertical-align: center;
+    text-align: center;
 }
 
 div.info img
