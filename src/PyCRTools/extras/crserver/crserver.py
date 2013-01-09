@@ -259,7 +259,7 @@ def statistics_handler():
 
         plt.pie(fraction, labels=labels, shadow=True)
 
-        figname = "statistics/event_status_pie.png"
+        figname = "statistics/event_alt_status_pie.png"
         fig.savefig(figname)
 
         graph = SubElement(info, "graph")
