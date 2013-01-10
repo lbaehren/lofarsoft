@@ -1177,7 +1177,7 @@ def process_datafile(full_filename, datafile_info=None, dump_html=False):
         print "---> Cross correlate pulses, get time lags, and determine direction of pulse."
 
         #Now cross correlate all pulses with each other
-        crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",timeseries_data_cut_to_pulse,pardict=par,oversamplefactor=10)
+        crosscorr=trerun('CrossCorrelateAntennas',"crosscorr",timeseries_data=timeseries_data_cut_to_pulse,pardict=par,oversamplefactor=10)
 
         #And determine the relative offsets between them
         maxima_cc=trerun('FitMaxima',"Lags",crosscorr.crosscorr_data,pardict=par,doplot=Pause.doplot,plotend=5,sampleinterval=sample_interval/crosscorr.oversamplefactor,peak_width=11,splineorder=3,refant=pulses_refant)
