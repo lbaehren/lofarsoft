@@ -117,10 +117,12 @@ class CRDatabasePopulator(object):
         print "Timestamp = ",timestamp
         eventIDs = self.dbManager.getEventIDs(timestamp=timestamp)
         if eventIDs:
-            print "case 1"
             self.ID['event'] = eventIDs[0]
+
+            # Set event status to new when adding new datafile.
+            sql = "UPDATE events SET STATUS='{1}' WHERE eventID={0}".format(self.ID['event'],"NEW")
+            self.sqlList.append(sql)
         else:
-            print "case 2"
             self.ID['event'] = self.createEventID(timestamp=timestamp)
 
             # Write event info to list of SQL statements
