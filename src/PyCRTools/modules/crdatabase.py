@@ -131,7 +131,7 @@ class CRDatabase(object):
             sql_list.append("CREATE TABLE datafileparameters (datafileID INTEGER PRIMARY KEY);")
 
             # Stations table
-            sql_list.append("CREATE TABLE stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
+            sql_list.append("CREATE TABLE stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT, statuscategory TEXT);")
 
             # Station parameters table
             sql_list.append("CREATE TABLE stationparameters (stationID INTEGER PRIMARY KEY, crp_pulse_direction TEXT, plotfiles TEXT, crp_plotfiles TEXT, crp_selected_dipoles TEXT, crp_antennas_cleaned_power TEXT, crp_antennas_cleaned_sum_amplitudes TEXT, crp_galactic_noise TEXT, crp_pulse_time TEXT, crp_pulse_delay TEXT, crp_pulse_delay_fit_residual TEXT, crp_dirty_channels TEXT, local_antenna_positions TEXT, crp_bf_pulse_position TEXT);")
@@ -2175,6 +2175,20 @@ class Station(object):
         """Set station statusmessage
         """
         self._db.execute("UPDATE stations SET statusmessage='{1}' WHERE stationID={0}".format(self._id, str(msg.lower())))
+
+    @property
+    def statuscategory(self):
+        """Get station statuscategory
+        """
+        records = self._db.selectone("SELECT statuscategory FROM stations WHERE stationID={0}".format(int(self._id)))
+
+        return records[0]
+
+    @statuscategory.setter
+    def statuscategory(self, msg):
+        """Set station statuscategory
+        """
+        self._db.execute("UPDATE stations SET statuscategory='{1}' WHERE stationID={0}".format(self._id, str(msg.lower())))
 
     @property
     def alt_status(self):

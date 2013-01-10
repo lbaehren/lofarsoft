@@ -27,7 +27,10 @@ from contextlib import contextmanager
 # Error handling
 class PipelineError(Exception):
     """Base class for pipeline exceptions."""
-    pass
+
+    def __init__(self, message, category="OTHER"):
+        self.message = message
+        self.category = category
 
 class EventError(PipelineError):
     """Raised when an unhandlable error occurs at event level."""
@@ -107,6 +110,7 @@ def process_station(station):
 
     station.status = "PROCESSING"
     station.statusmessage = ""
+    station.statuscategory = ""
     station["crp_plotfiles"] = []
 
     try:
@@ -119,6 +123,7 @@ def process_station(station):
         logging.info("station processing aborted due to container skipping")
         station.status = "ABORTED"
         station.statusmessage = e.message
+        station.statuscategory = e.category
         raise
     except StationError as e:
         logging.exception(e.message)
@@ -446,6 +451,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             else:
                 station.status = "BAD"
                 station.statusmessage = "no significant pulse found in beamformed signal for either polarization"
+                station.statuscategory = "no_bf_pulse"
 
                 continue
 
@@ -510,6 +516,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 if direction_fit_plane_wave.fit_failed:
                     station.status = "BAD"
                     station.statusmessage = "direction fit failed"
+                    station.statuscategory = "fit_failed"
                     break
 
                 # Check for convergence of iterative direction fitting loop
@@ -560,12 +567,14 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             if direction_fit_plane_wave.goodcount < nantennas / 2:
                 station.status = "BAD"
                 station.statusmessage = "goodcount {0} < nantennas / 2 [= {1}]".format(direction_fit_plane_wave.goodcount, nantennas / 2)
+                station.statuscategory = "good_count_ant"
                 continue
 
             if average_residual > options.maximum_allowed_residual_delay:
                 print "direction fit residuals too large, average_residual = {0}".format(average_residual)
                 station.status = "BAD"
                 station.statusmessage = "average_residual = {0}".format(average_residual)
+                station.statuscategory = "average_residual"
                 continue
 
             print "direction fit residuals ok, average_residual = {0}".format(average_residual)
