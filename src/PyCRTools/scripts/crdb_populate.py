@@ -114,19 +114,21 @@ class CRDatabasePopulator(object):
 
         # Find corresponding eventID and check if this is lower than self.eventID
         timestamp = dx.timestamp
+        antennaset = str(dx.antennaset)
+
         print "Timestamp = ",timestamp
         eventIDs = self.dbManager.getEventIDs(timestamp=timestamp)
         if eventIDs:
             self.ID['event'] = eventIDs[0]
 
             # Set event status to new when adding new datafile.
-            sql = "UPDATE events SET STATUS='{1}' WHERE eventID={0}".format(self.ID['event'],"NEW")
+            sql = "UPDATE events SET status='{1}' WHERE eventID={0}".format(self.ID['event'],"NEW")
             self.sqlList.append(sql)
         else:
             self.ID['event'] = self.createEventID(timestamp=timestamp)
 
             # Write event info to list of SQL statements
-            sql = "INSERT INTO events (eventID, timestamp, status, alt_status) VALUES ({0}, {1}, '{2}','{3}');".format(self.ID['event'], timestamp, 'NEW', 'NEW')
+            sql = "INSERT INTO events (eventID, timestamp, antennaset, status, alt_status) VALUES ({0}, {1}, '{2}','{3}','{4}');".format(self.ID['event'], timestamp, antennaset, 'NEW', 'NEW')
             self.sqlList.append(sql)
 
             # Add LORA data to event parameters
@@ -203,7 +205,6 @@ class CRDatabasePopulator(object):
                 # Write Station-Polarization table SQL
                 sql = "INSERT INTO station_polarization (stationID, polarizationID) VALUES ({0}, {1});".format(self.ID['station'], self.ID['polarization'])
                 self.sqlList.append(sql)
-
 
         if options.verbose:
             self.summary()
