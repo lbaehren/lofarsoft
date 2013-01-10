@@ -165,6 +165,7 @@ class CRDatabase(object):
     def __updateDatabase(self):
         pass
 
+
     def addParameterName(self, grouptype, parametername):
         """Add a parameter with name *parametername* to the table
         *grouptype*.
@@ -667,7 +668,8 @@ class CRDatabase(object):
 
         return sql_list
 
-    def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, status=None, order=""):
+
+    def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, direction=None, status=None, order=""):
         """Return a list of polarizationIDs that satisfy the values of the
         provided arguments of this method.
 
@@ -680,6 +682,7 @@ class CRDatabase(object):
         *datafileID*       id of the datafile.
         *stationID*        id of the station.
         *antennaset*       type of antennaset.
+        *direction*        direction of the polarization.
         *status*           status of the polarization.
         *order*            database fields that are used to sort the returned records.
         =================  ==============================================================
@@ -713,6 +716,8 @@ class CRDatabase(object):
             # Construct selection
             if antennaset:
                 sql_selection_list.append("p.antennaset='{0}'".format(str(antennaset.upper())))
+            if direction:
+                sql_selection_list.append("p.direction='{0}'".format(str(direction)))
             if status:
                 sql_selection_list.append("p.status='{0}'".format(str(status.upper())))
 
