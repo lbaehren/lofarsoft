@@ -216,7 +216,7 @@ class CRDatabase(object):
         else:
             raise ValueError("DATABASE IS LOCKED: Unable to add a parametername {0} to the database".format(columnname))
 
-    def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, order="e.timestamp"):
+    def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, antennaset=None, order="e.timestamp"):
         """Return a list of eventIDs satifying the values of this
         functions arguments.
 
@@ -230,6 +230,7 @@ class CRDatabase(object):
         *timestamp_end*    timestamp of the event is smaller than this value.
         *status*           status of the event.
         *datafile_name*    name of a datafile associated to an event.
+        *antennaset*       type of the antennaset.
         *order*            database fields that are used to sort the returned records.
         =================  ==============================================================
 
@@ -267,6 +268,8 @@ class CRDatabase(object):
             if datafile_name:
                 sql_table = sql_table_d
                 sql_selection_list.append("d.filename='{0}'".format(str(datafile_name)))
+            if antennaset:
+                sql_selection_list.append("e.antennaset='{0}'".format(str(antennaset.upper()))
 
             sql_selection = ""
             if sql_selection_list:
