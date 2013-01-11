@@ -269,7 +269,7 @@ class CRDatabase(object):
                 sql_table = sql_table_d
                 sql_selection_list.append("d.filename='{0}'".format(str(datafile_name)))
             if antennaset:
-                sql_selection_list.append("e.antennaset='{0}'".format(str(antennaset.upper()))
+                sql_selection_list.append("e.antennaset='{0}'".format(str(antennaset).upper()))
 
             sql_selection = ""
             if sql_selection_list:
