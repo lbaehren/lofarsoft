@@ -1071,6 +1071,7 @@ class Settings(object):
 
 
 class BaseParameter(object):
+    """Base parameter functionality for the cr database."""
 
     def __init__(self, parent):
         """"""
@@ -1724,6 +1725,7 @@ class Event(object):
 
 
 class EventParameter(BaseParameter):
+    """Container class for event parameters."""
 
     # Class variables
     key_list = []
@@ -2093,6 +2095,7 @@ class Datafile(object):
 
 
 class DatafileParameter(BaseParameter):
+    """Container class for datafile parameters."""
 
     # Class variables
     key_list = []
@@ -2538,6 +2541,7 @@ class Station(object):
 
 
 class StationParameter(BaseParameter):
+    """Container class for station parameters."""
 
     # Class variables
     key_list = []
@@ -2921,6 +2925,7 @@ class Polarization(object):
 
 
 class PolarizationParameter(BaseParameter):
+    """Container class for polarization parameters."""
 
     # Class variables
     key_list = []
