@@ -369,7 +369,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Get expected galactic noise strength
                 galactic_noise = cr.trun("GalacticNoise", timestamp=tbb_time)
 
-                # Correct to expected level (power is amplitude in this case)
+                # Correct to expected level
                 antennas_cleaned_sum_amplitudes = cr.hArray([findrfi.antennas_cleaned_sum_amplitudes[i] for i in f["SELECTED_DIPOLES_INDEX"]])
                 antennas_cleaned_power = cr.hArray([findrfi.antennas_cleaned_power[i] for i in f["SELECTED_DIPOLES_INDEX"]])
 
@@ -377,9 +377,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 station["crp_antennas_cleaned_power"] = antennas_cleaned_power
                 station["crp_galactic_noise"] = galactic_noise.galactic_noise
 
-                cr.hInverse(antennas_cleaned_power)
-                cr.hMul(antennas_cleaned_power, galactic_noise.galactic_noise)
-                cr.hMul(fft_data[...], antennas_cleaned_power[...])
+                cr.hInverse(antennas_cleaned_sum_amplitudes)
+                cr.hMul(antennas_cleaned_sum_amplitudes, galactic_noise.galactic_noise)
+                cr.hMul(fft_data[...], antennas_cleaned_sum_amplitudes[...])
 
                 # Get timeseries data
                 timeseries_data = f.empty("TIMESERIES_DATA")
