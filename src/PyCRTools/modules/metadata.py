@@ -405,9 +405,9 @@ def getCableDelays(station, antennaset, return_as_hArray=False):
 
 def antennaset2rcumode(antennaset,filter):
     rcumode=dict()
-    rcumode[('LBA_INNER','LBA_10_90')]=1 
-    rcumode[('LBA_OUTER','LBA_10_90')]=2 
-    rcumode[('LBA_INNER','LBA_30_90')]=3 
+    rcumode[('LBA_INNER','LBA_10_90')]=1
+    rcumode[('LBA_OUTER','LBA_10_90')]=2
+    rcumode[('LBA_INNER','LBA_30_90')]=3
     rcumode[('LBA_OUTER','LBA_30_90')]=4
     rcumode[('HBA','HBA_110_190')]=5
     rcumode[('HBA','HBA_170_230')]=6
@@ -869,7 +869,7 @@ def getRelativeAntennaPositions(station, antennaset, return_as_hArray=False):
     """
 
     # Known antennasets
-    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE0', 'LBA_SPARSE1', 'HBA_0', 'HBA_1', 'HBA']
+    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE0', 'LBA_SPARSE1', 'HBA_0', 'HBA_1', 'HBA','HBA0','HBA1']
 
     # Check if requested antennaset is known
     assert antennaset in names
@@ -985,7 +985,7 @@ def getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=False):
     """
 
     # Known antennasets
-    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE_EVEN', 'LBA_SPARSE_ODD', 'HBA_0', 'HBA_1', 'HBA']
+    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE_EVEN', 'LBA_SPARSE_ODD', 'HBA0', 'HBA1', 'HBA']
 
     # Check if requested antennaset is known
     assert antennaset in names
