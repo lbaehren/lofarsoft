@@ -985,7 +985,7 @@ def getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=False):
     """
 
     # Known antennasets
-    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE_EVEN', 'LBA_SPARSE_ODD', 'HBA0', 'HBA1', 'HBA']
+    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE_EVEN', 'LBA_SPARSE_ODD', 'HBA0', 'HBA1', 'HBA','HBA_DUAL']
 
     # Check if requested antennaset is known
     assert antennaset in names
@@ -1095,6 +1095,52 @@ def getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=False):
 
     return antpos
 
+
+def getRelativeAntennaPositionsNew(station, antennaset, return_as_hArray=True):
+    """Returns the antenna positions of all the antennas in the station
+    relative to the center of the station for the specified antennaset.
+    station can be the name or id of the station. Default returns as hArray, option to return as numpy
+    array.
+
+    Required arguments:
+
+    ================== ==============================================
+    Parameter          Description
+    ================== ==============================================
+    *station*          Name or id of the station. e.g. "CS302" or 142
+    *antennaset*       Antennaset used for this station. Options:
+
+                       * LBA_INNER
+                       * LBA_OUTER
+                       * LBA_X
+                       * LBA_Y
+                       * LBA_SPARSE0
+                       * LBA_SPARSE1
+                       * HBA_0
+                       * HBA_1
+                       * HBA
+
+    ================== ==============================================
+
+    Optional arguments:
+
+    ================== ==============================================
+    Parameter          Description
+    ================== ==============================================
+    *return_as_hArray* Return as hArray.
+    ================== ==============================================
+
+    """
+
+    itrfpos = getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=True)
+    refpos = getStationPositions(station, antennaset, return_as_hArray=True,coordinatesystem='ITRF')
+    reflonlat = None
+    returnpos = convertITRFToLocal(itrfpos, refpos=refpos, reflonlat=refpos)
+
+    if not return_as_hArray:
+        returnpos = returnpos.toNumpy()
+
+    return returnpos
 
 def getAntennaPositions(station, antennaset, return_as_hArray=False):
     """Returns the antenna positions of all the antennas in the station
@@ -1335,6 +1381,16 @@ def getStationPositions(station, antennaset, return_as_hArray=False, coordinates
         stationpos = np.asarray(stationpos)
 
     return stationpos
+
+
+def getRotationMatrix(station,antennaset):
+    '''Returns the rotation matrix of a given station.
+
+        NOTE: We may not need to implement this, since the rotation matrix is the same for all dutch stations.
+        Altough it will be useful for the use of international stations.
+    '''
+
+    raise NotImplementedError
 
 
 def convertITRFToLocal(itrfpos, refpos=ITRFCS002, reflonlat=lonlatCS002):

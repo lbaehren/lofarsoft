@@ -643,7 +643,7 @@ class BeamFormer(tasks.Task):
                     self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  # Need to calculate this each time after having a new antenna selection.
                 print "# Start antenna =", antenna, "(ID=", str(antennaID) + "):"
                 if self.single_station:
-                    self.antpos = self.datafile["ANTENNA_POSITIONS"]
+                    self.antpos = md.getRelativeAntennaPositionsNew(self.datafile['STATION_NAME'][0],self.antenna_set)
                 else:
                     self.antpos = md.convertITRFToLocal(self.datafile['ITRFANTENNA_POSITIONS'])
                 self.antpos -= self.phase_center_array
