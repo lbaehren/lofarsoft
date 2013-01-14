@@ -342,29 +342,23 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 station["crp_selected_dipoles"] = selected_dipoles
 
-                # Read FFT data
+                # Read FFT data (with Hanning window)
                 fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, False)
+                f.getFFTData(fft_data, block_number_lora, True)
+
+                # Get corresponding frequencies
                 frequencies = cr.hArray(f["FREQUENCY_DATA"])
+
+                # Normalize spectrum
+                fft_data /= f["BLOCKSIZE"]
+
+                # Reject DC component
+                spectrum[..., 0] = 0.0
 
                 # Flag dirty channels (from RFI excission)
                 fft_data[..., flagged_channels] = 0 # Flag default channels
                 fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
                 station["crp_dirty_channels"] = findrfi.dirty_channels
-
-                # Apply calibration delays
-                try:
-                    cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
-                except Exception:
-                    raise StationSkipped("do not have DIPOLE_CALIBRATION_DELAY value")
-
-                weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
-                phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
-
-                cr.hDelayToPhase(phases, frequencies, cabledelays)
-                cr.hPhaseToComplex(weights, phases)
-
-                fft_data.mul(weights)
 
                 # Get expected galactic noise strength per Hz
                 galactic_noise = cr.trun("GalacticNoise", timestamp=tbb_time)
@@ -388,6 +382,22 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # multiply spectrum by correction factor per antenna
                 cr.hMul(fft_data[...], antennas_cleaned_sum_power[...])
+
+                print "power", np.sum(np.square(np.abs(fft_data.toNumpy())) / options.blocksize, axis=0)
+
+                # Apply calibration delays
+                try:
+                    cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
+                except Exception:
+                    raise StationSkipped("do not have DIPOLE_CALIBRATION_DELAY value")
+
+                weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
+                phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
+
+                cr.hDelayToPhase(phases, frequencies, cabledelays)
+                cr.hPhaseToComplex(weights, phases)
+
+                fft_data.mul(weights)
 
                 # Get timeseries data
                 timeseries_data = f.empty("TIMESERIES_DATA")
