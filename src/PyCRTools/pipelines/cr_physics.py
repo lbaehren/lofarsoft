@@ -355,6 +355,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Reject DC component
                 fft_data[..., 0] = 0.0
 
+                # Also reject 1st harmonic (gives a lot of spurious power with Hanning window)
+                fft_data[..., 1] = 0.0
+
                 # Flag dirty channels (from RFI excission)
 #                fft_data[..., flagged_channels] = 0 # Flag default channels
                 fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
