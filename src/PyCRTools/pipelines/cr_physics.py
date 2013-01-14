@@ -386,7 +386,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # multiply spectrum by correction factor per antenna
                 cr.hMul(fft_data[...], antennas_cleaned_power[...])
 
-                print "power", np.sum(np.square(np.abs(fft_data.toNumpy())), axis=0)
+                print "power", np.sum(np.square(np.abs(fft_data.toNumpy())), axis=1)
 
                 # Apply calibration delays
                 try:
