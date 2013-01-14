@@ -353,7 +353,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 fft_data /= f["BLOCKSIZE"]
 
                 # Reject DC component
-                spectrum[..., 0] = 0.0
+                fft_data[..., 0] = 0.0
 
                 # Flag dirty channels (from RFI excission)
 #                fft_data[..., flagged_channels] = 0 # Flag default channels
