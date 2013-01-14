@@ -376,7 +376,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # galactic_noise_power is per Hz
                 # now calculate per channel (bandwidth = f / blocksize) correction factor
-                galactic_noise_correction_factor = 1.0 #(f["SAMPLE_FREQUENCY"] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
+                galactic_noise_correction_factor = (f["SAMPLE_FREQUENCY"] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
 
                 # convert antennas_cleaned_sum_power to correction factor per antenna
                 cr.hInverse(antennas_cleaned_power)
@@ -385,8 +385,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # multiply spectrum by correction factor per antenna
                 cr.hMul(fft_data[...], antennas_cleaned_power[...])
-
-                print "power", 2 * np.sum(np.square(np.abs(fft_data.toNumpy())), axis=1)
 
                 # Apply calibration delays
                 try:
