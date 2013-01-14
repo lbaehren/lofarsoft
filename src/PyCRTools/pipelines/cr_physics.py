@@ -376,12 +376,12 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 galactic_noise_correction_factor = 1.0 #(f["SAMPLE_FREQUENCY"] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
 
                 # convert antennas_cleaned_sum_power to correction factor per antenna
-                cr.hInverse(antennas_cleaned_sum_power)
-                cr.hMul(antennas_cleaned_sum_power, galactic_noise.galactic_noise_correction_factor)
-                cr.hSqrt(antennas_cleaned_sum_power)
+                cr.hInverse(antennas_cleaned_power)
+                cr.hMul(antennas_cleaned_power, galactic_noise.galactic_noise_correction_factor)
+                cr.hSqrt(antennas_cleaned_power)
 
                 # multiply spectrum by correction factor per antenna
-                cr.hMul(fft_data[...], antennas_cleaned_sum_power[...])
+                cr.hMul(fft_data[...], antennas_cleaned_power[...])
 
                 print "power", np.sum(np.square(np.abs(fft_data.toNumpy())), axis=0)
 
