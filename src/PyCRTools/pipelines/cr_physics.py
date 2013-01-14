@@ -366,7 +366,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 fft_data.mul(weights)
 
-                # Get expected galactic noise strength
+                # Get expected galactic noise strength per Hz
                 galactic_noise = cr.trun("GalacticNoise", timestamp=tbb_time)
 
                 # Correct to expected level
@@ -375,11 +375,19 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 station["crp_antennas_cleaned_sum_amplitudes"] = antennas_cleaned_sum_amplitudes
                 station["crp_antennas_cleaned_power"] = antennas_cleaned_power
-                station["crp_galactic_noise"] = galactic_noise.galactic_noise
+                station["crp_galactic_noise"] = galactic_noise.galactic_noise_power
 
-                cr.hInverse(antennas_cleaned_sum_amplitudes)
-                cr.hMul(antennas_cleaned_sum_amplitudes, galactic_noise.galactic_noise)
-                cr.hMul(fft_data[...], antennas_cleaned_sum_amplitudes[...])
+                # galactic_noise_power is per Hz
+                # now calculate per channel (bandwidth = f / blocksize) correction factor
+                galactic_noise_correction_factor = (f["SAMPLE_FREQUENCY"] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
+
+                # convert antennas_cleaned_sum_power to correction factor per antenna
+                cr.hInverse(antennas_cleaned_sum_power)
+                cr.hMul(antennas_cleaned_sum_power, galactic_noise.galactic_noise_correction_factor)
+                cr.hSqrt(antennas_cleaned_sum_power)
+
+                # multiply spectrum by correction factor per antenna
+                cr.hMul(fft_data[...], antennas_cleaned_sum_power[...])
 
                 # Get timeseries data
                 timeseries_data = f.empty("TIMESERIES_DATA")
