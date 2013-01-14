@@ -380,7 +380,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # convert antennas_cleaned_sum_power to correction factor per antenna
                 cr.hInverse(antennas_cleaned_power)
-                cr.hMul(antennas_cleaned_power, galactic_noise.galactic_noise_correction_factor)
+                cr.hMul(antennas_cleaned_power, galactic_noise_correction_factor)
                 cr.hSqrt(antennas_cleaned_power)
 
                 # multiply spectrum by correction factor per antenna
