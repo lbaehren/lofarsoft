@@ -356,7 +356,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 spectrum[..., 0] = 0.0
 
                 # Flag dirty channels (from RFI excission)
-                fft_data[..., flagged_channels] = 0 # Flag default channels
+#                fft_data[..., flagged_channels] = 0 # Flag default channels
                 fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
                 station["crp_dirty_channels"] = findrfi.dirty_channels
 
