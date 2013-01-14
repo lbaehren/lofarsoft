@@ -1108,17 +1108,7 @@ def getRelativeAntennaPositionsNew(station, antennaset, return_as_hArray=True):
     Parameter          Description
     ================== ==============================================
     *station*          Name or id of the station. e.g. "CS302" or 142
-    *antennaset*       Antennaset used for this station. Options:
-
-                       * LBA_INNER
-                       * LBA_OUTER
-                       * LBA_X
-                       * LBA_Y
-                       * LBA_SPARSE0
-                       * LBA_SPARSE1
-                       * HBA_0
-                       * HBA_1
-                       * HBA
+    *antennaset*       Antennaset used for this station.
 
     ================== ==============================================
 
@@ -1135,7 +1125,7 @@ def getRelativeAntennaPositionsNew(station, antennaset, return_as_hArray=True):
     itrfpos = getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=True)
     refpos = getStationPositions(station, antennaset, return_as_hArray=True,coordinatesystem='ITRF')
     reflonlat = None
-    returnpos = convertITRFToLocal(itrfpos, refpos=refpos, reflonlat=refpos)
+    returnpos = convertITRFToLocal(itrfpos, refpos=refpos, reflonlat=reflonlat)
 
     if not return_as_hArray:
         returnpos = returnpos.toNumpy()
