@@ -373,7 +373,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # galactic_noise_power is per Hz
                 # now calculate per channel (bandwidth = f / blocksize) correction factor
-                galactic_noise_correction_factor = (f["SAMPLE_FREQUENCY"] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
+                galactic_noise_correction_factor = 1.0 #(f["SAMPLE_FREQUENCY"] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
 
                 # convert antennas_cleaned_sum_power to correction factor per antenna
                 cr.hInverse(antennas_cleaned_sum_power)
