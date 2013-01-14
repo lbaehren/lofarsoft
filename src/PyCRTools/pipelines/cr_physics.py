@@ -362,6 +362,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Get expected galactic noise strength per Hz
                 galactic_noise = cr.trun("GalacticNoise", timestamp=tbb_time)
+                station["crp_galactic_noise"] = galactic_noise.galactic_noise_power
 
                 # Get integrated power / amplitude spectrum for each antenna
                 antennas_cleaned_sum_amplitudes = cr.hArray([findrfi.antennas_cleaned_sum_amplitudes[i] for i in f["SELECTED_DIPOLES_INDEX"]])
@@ -369,7 +370,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 station["crp_antennas_cleaned_sum_amplitudes"] = antennas_cleaned_sum_amplitudes
                 station["crp_antennas_cleaned_power"] = antennas_cleaned_power
-                station["crp_galactic_noise"] = galactic_noise.galactic_noise_power
 
                 # galactic_noise_power is per Hz
                 # now calculate per channel (bandwidth = f / blocksize) correction factor
