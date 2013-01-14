@@ -342,9 +342,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 station["crp_selected_dipoles"] = selected_dipoles
 
-                # Read FFT data (with Hanning window)
+                # Read FFT data (without Hanning window)
                 fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, True)
+                f.getFFTData(fft_data, block_number_lora, False)
 
                 # Get corresponding frequencies
                 frequencies = cr.hArray(f["FREQUENCY_DATA"])
