@@ -161,7 +161,7 @@ class FindRFI(Task):
             magspectrum.abs()
             if i == 0 and self.refant < 0:  # in first block, determine reference antenna (which channel has median power)
                 magspectrum.square()
-                channel_power = 2 * cr.hArray(magspectrum[...].sum())
+                channel_power = cr.hArray(magspectrum[...].sum())
                 refant = np.argsort(channel_power.toNumpy())[self.nantennas / 2]
                 refant = int(refant)  # numpy.int64 causes problems...
                 print 'Taking channel %d as reference antenna' % refant
@@ -254,12 +254,11 @@ class FindRFI(Task):
         self.amplitude_spectrum.copy(self.cleaned_spectrum)
         self.amplitude_spectrum.sqrt()
 
-        self.antennas_cleaned_sum_amplitudes =  2 * cr.hArray(self.amplitude_spectrum[...].sum())
+        self.antennas_cleaned_sum_amplitudes = cr.hArray(self.amplitude_spectrum[...].sum())
         # Sum up power for avg spectrum
-        # Factor 2 because of real-FFT.
-        self.antennas_cleaned_power = 2 * cr.hArray(self.cleaned_spectrum[...].sum())
-#        dirty_power = 2 * cr.hArray(avgspectrum[...].sum() ) - cleaned_power
-#        total_power = 2 * cr.hArray(avgspectrum[...].sum() )
+        self.antennas_cleaned_power = cr.hArray(self.cleaned_spectrum[...].sum())
+#        dirty_power = cr.hArray(avgspectrum[...].sum() ) - cleaned_power
+#        total_power = cr.hArray(avgspectrum[...].sum() )
 
         # Get bad antennas from outliers in power
         # Instead of the non-robust k-sigma method, take the range to be from 1/2 to 2 times median power.
