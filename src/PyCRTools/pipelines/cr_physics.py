@@ -497,11 +497,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             while True:
 
                 # Unfold antenna pattern
-                if not hba:
+                if hba:
+                    # Get timeseries data
+                    cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
+
+                else:
                     antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
 
-                # Get timeseries data
-                cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
+                    # Get timeseries data
+                    cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
+
                 timeseries_data /= options.blocksize
 
                 # Calculate delays using cross correlations
