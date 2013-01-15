@@ -81,6 +81,7 @@ class BeamData(IOInterface):
 
         self.__keyworddict['FILENAMES'] = self.__filename
         self.__keyworddict['STATION_NAME'] = lambda: [self.__files[i].par.hdr['STATION_NAME'][0] for i in range(self.__nofBeamDataSets)]
+        self.__keyworddict['ANTENNA_SET'] = lambda: [self.__files[i].par.hdr['Beamformer']['antenna_set'] for i in range(self.__nofBeamDataSets)]
         # self.__keyworddict['BEAM_STATIONPOS'] =??
         self.__keyworddict['MAXIMUM_READ_LENGTH'] = self['NCHUNKS'] * self['BEAM_BLOCKLEN'] * self['BEAM_NBLOCKS']
         self.__keyworddict['BLOCKSIZE'] = self['BEAM_BLOCKLEN']
@@ -294,9 +295,10 @@ class BeamData(IOInterface):
         pos = cr.hArray(float, [self['NOF_BEAM_DATASETS'], 3])
 
         for i, file in enumerate(self.__files):
-            pos[i] = file.par.hdr['BeamFormer']['stationpos']
+#            pos[i] = file.par.hdr['BeamFormer']['stationpos']
+            pos[i] = getStationPositions(self['STATION_NAME'][i], self['ANTENNA_SET'][i], return_as_hArray=True,coordinatesystem='ITRF')
 
-        pos = md.convertITRFToLocal(pos)
+        pos = md.convertITRFToLocal(pos,reflonlat=None)
 
         return pos
 
