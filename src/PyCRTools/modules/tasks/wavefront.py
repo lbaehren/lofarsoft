@@ -101,25 +101,26 @@ class Wavefront(Task):
     """
 
     parameters = dict(
-        filefilter = dict(default=None, doc="File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "),
-        filelist = dict(default=None, doc="List of filenames in one event. "),
-        f = dict( default = None,
-            doc = "File object. Blocksize, polarisation + antenna selection etc. are taken from the given file object, and should have been set before calling this Task." ),
-        loradir = dict( default = None, doc = "Directory with LORA trigger data. Required for obtaining pulse location in the data. "),
-        interStationDelays = dict( default=None, doc="Inter-station delays as a correction on current LOFAR clock offsets. To be obtained e.g. from the CalibrateFM Task. Assumed to be in alphabetic order in the station name e.g. CS002, CS003, ... If not given, zero correction will be assumed." ),
-        blocksize = dict ( default = 65536, doc = "Blocksize." ),
-        nantennas = dict( default = lambda self : self.f["NOF_SELECTED_DATASETS"],
-            doc = "Number of selected antennas." ),
-#        nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
-        pulse_block = dict( default = 0, doc = "Block nr. where the pulse is" ),
-        refant = dict(default = None, doc = "Optional parameter to set reference antenna number."),
-        pol = dict(default = 0, doc = "Polarization. Only used if no file object is given."),
-#        timeseries_data = dict( default = lambda self : cr.hArray(float, dimensions=(self.nantennas, self.blocksize)),
-#            doc = "Timeseries data." ),
-        #fftwplan = dict( default = lambda self : cr.FFTWPlanManyDftR2c(self.blocksize, self.nantennas, 1, 1, 1, 1, cr.fftw_flags.MEASURE),
-        #    doc = "Forward plan for FFTW, by default use a plan that works over all antennas at once and is measured for speed because this is applied many times." ),
-        arrivalTimes = dict( default = None, doc = "Pulse arrival times per antenna; give as input parameter together with 'positions' if not using 'filefilter' or 'filelist'."),
+#        filefilter = dict(default=None, doc="File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "),
+#        filelist = dict(default=None, doc="List of filenames in one event. "),
+#        f = dict( default = None,
+#            doc = "File object. Blocksize, polarisation + antenna selection etc. are taken from the given file object, and should have been set before calling this Task." ),
+#        loradir = dict( default = None, doc = "Directory with LORA trigger data. Required for obtaining pulse location in the data. "),
+
+        arrivaltimes = dict( default = None, doc = "Pulse arrival times per antenna; give as input parameter together with 'positions' if not using 'filefilter' or 'filelist'."),
         positions = dict( default = None, doc = "Antenna positions array in [Nx3] format (2D)."),
+
+        interStationDelays = dict( default=None, doc="Inter-station delays as a correction on current LOFAR clock offsets. To be obtained e.g. from the CalibrateFM Task. Assumed to be in alphabetic order in the station name e.g. CS002, CS003, ... If not given, zero correction will be assumed." ),
+        stationList = dict( default=None, doc="List of station names present in the positions and arrivaltimes arrays. Only needed if interStationDelays also supplied."),
+        stationStartIndex = dict( default=None, doc="List of start indices of a given station. Array should end with an entry n where n = nof antennas. Only needed if interStationDelays given."),
+#        blocksize = dict ( default = 65536, doc = "Blocksize." ),
+#        nantennas = dict( default = lambda self : self.f["NOF_SELECTED_DATASETS"],
+#            doc = "Number of selected antennas." ),
+#        nofblocks = dict( default = -1, doc = "Number of data blocks to process. Set to -1 for entire file." ),
+#        pulse_block = dict( default = 0, doc = "Block nr. where the pulse is" ),
+#        refant = dict(default = None, doc = "Optional parameter to set reference antenna number."),
+        pol = dict(default = 0, doc = "Polarization. Only (to be) used for reference / plotting purposes."),
+        ## OUTPUT PARAMS ##
         pointsourceArrivalTimes = dict( default = None, doc = "Arrival times from best-fit point source approximation", output = True),
         planewaveArrivalTimes = dict( default = None, doc = "Arrival times from best-fit plane-wave approximation.", output = True),
         fitPlaneWave = dict( default = None, doc = "Fit results (az, el, mse) for planar fit.", output = True ),
@@ -134,8 +135,8 @@ class Wavefront(Task):
             doc = "Prefix for plots" ),
         plotlist = dict( default = [],
             doc = "List of plots" ),
-        plot_antennas = dict( default = lambda self : range(self.nantennas),
-            doc = "Antennas to create plots for." ),
+        plot_type = dict(default="png",
+            doc="Plot type (e.g. png, jpeg, pdf)"),
         verbose = dict( default = True, doc = "Verbose output."),
     )
 
@@ -143,106 +144,44 @@ class Wavefront(Task):
         """Run the task.
         """
 
-        if self.positions is None and self.arrivalTimes is None:
+        if self.positions is None or self.arrivaltimes is None:
+            raise ValueError("Need to supply 'positions' and 'arrivaltimes' parameters!")
 
-            if not self.f and not self.filefilter and not self.filelist:
-                raise RuntimeError("Give a file object or a filefilter or a filelist")
-            if not self.f:
-                #filefilter = '/Users/acorstanje/triggering/CR/*.986Z*.h5'
-                if not self.filelist:
-                    self.filelist = cr.listFiles(self.filefilter)
-                superterpStations = ["CS002", "CS003", "CS004", "CS005", "CS006", "CS007", "CS021"]
-                if len(self.filelist) == 1:
-                    print 'There is only 1 file'
-                    self.filelist = self.filelist[0]
-                else:  # sort files on station ID
-                    sortedlist = []
-                    for station in superterpStations:
-                        thisStationsFile = [filename for filename in self.filelist if station in filename]
-                        if len(thisStationsFile) > 0:
-                            sortedlist.append(thisStationsFile[0])
-                    self.filelist = sortedlist
-                print '[Wavefront] Processing files: '
-                print self.filelist
-                self.f = cr.open(self.filelist, blocksize=self.blocksize)
-                selected_dipoles = [x for x in self.f["DIPOLE_NAMES"] if int(x) % 2 == self.pol]
-                self.f["SELECTED_DIPOLES"] = selected_dipoles
+        if not hasattr(self.arrivaltimes, 'toNumpy'):
+            print 'Warning: arrivaltimes expected as hArray. Converting it now.'
+            self.arrivaltimes = cr.hArray(self.arrivaltimes)
 
-            self.blocksize = self.f["BLOCKSIZE"]
-
-            # Get the pulse location in the data from LORA timing: block and sample number
-            (block, pulse_samplenr) = pulseTimeFromLORA(self.loradir, self.f)
-
-            # assume LORA-LOFAR delay and file shifts are of the order ~ 200 samples << blocksize for cut-out timeseries
-
-            antennaPositions = self.f["ANTENNA_POSITIONS"]
-
-            timeseries = self.f.empty("TIMESERIES_DATA")
-            # get timeseries data with pulse, then cut out a region around the pulse.
-            cutoutSize = 1024
-            self.f.getTimeseriesData(timeseries, block = block)
-            nofChannels = timeseries.shape()[0]
-            cutoutTimeseries = cr.hArray(float, dimensions=[nofChannels, cutoutSize])
-            start = pulse_samplenr - cutoutSize / 2
-            end = pulse_samplenr + cutoutSize / 2
-            cutoutTimeseries[...].copy(timeseries[..., start:end])
-
-            # Get reference antenna, take the one with the highest maximum.
-            y = cutoutTimeseries.toNumpy()
-            refant = self.refant
-            if not self.refant:
-                refant = int(np.argmax(np.max(y, axis=1)))
-            print 'Taking channel %d as reference antenna' % refant
-
-            #import pdb; pdb.set_trace()
-            plt.plot(y[0])
-            plt.plot(y[140])
-
-            sample_interval = 5.0e-9 # hardcoded...
-            # is the index of the ref antenna also in the full list of antids / antpos
-
-            # now cross correlate all channels in full_timeseries, get relative times
-            crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", cutoutTimeseries, oversamplefactor=64)
-
-            # And determine the relative offsets between them
-            maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot=True, plotend=5, sampleinterval=sample_interval / crosscorr.oversamplefactor, peak_width=11, splineorder=3, refant=refant)
-
-            # plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
-
-            cr.hArray(maxima_cc.lags).plot()
-
-            # Plot arrival times, do plane-wave fit, plot residuals wrt plane wave
-            arrivaltime = cr.hArray(maxima_cc.lags)
-            times = arrivaltime.toNumpy()
-            positions = antennaPositions.toNumpy().ravel()
+        # Applying of inter-station delays goes here... if we decide to do that in here.
 
             # Apply calibration delays (per antenna)
-            arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
+#            arrivaltime -= cr.hArray(self.f["DIPOLE_CALIBRATION_DELAY"])
             # Apply sub-sample inter-station clock offsets (LOFAR)
-            subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"] # numpy array!
+#            subsampleOffsets = self.f["SUBSAMPLE_CLOCK_OFFSET"] # numpy array!
             # Apply inter-station delays from RFIlines Task
             # Assuming ordering CS002, 3, 4, 5, 7 for this event (sorted alphabetically)
-            if not type(self.interStationDelays) == type(None): # cannot do if self.interStationDelays, apparently...
-                subsampleOffsets -= self.interStationDelays
+#            if not type(self.interStationDelays) == type(None): # cannot do if self.interStationDelays, apparently...
+#                subsampleOffsets -= self.interStationDelays
 
     #        subsampleOffsets[1] -= 0.11e-9
     #        subsampleOffsets[2] -= -1.30e-9
     #        subsampleOffsets[3] -= -1.32e-9
     #        subsampleOffsets[4] -= 0.71e-9
 
-            stationList = self.f["STATION_LIST"]
-            print stationList
-            stationStartIndex = self.f["STATION_STARTINDEX"]
-            for i in range(len(subsampleOffsets)):
-                arrivaltime[stationStartIndex[i]:stationStartIndex[i + 1]] -= subsampleOffsets[i]
+#            stationList = self.f["STATION_LIST"]
+#            print stationList
+#            stationStartIndex = self.f["STATION_STARTINDEX"]
+#            for i in range(len(subsampleOffsets)):
+#                arrivaltime[stationStartIndex[i]:stationStartIndex[i + 1]] -= subsampleOffsets[i]
                 # Sign + or - ???
+#            self.positions = antennaPositions
+#            self.arrivaltimes = arrivaltime
 
         # plt.figure()
         # arrivaltime.plot()
         # plt.title('Arrival times, matched with offsets per station (check!)')
-        times = arrivaltime.toNumpy()
-        positions = antennaPositions.toNumpy().ravel()
-        positions2D = antennaPositions.toNumpy()
+        times = self.arrivaltimes.toNumpy()
+        positions2D = self.positions.toNumpy()
+        positions = positions2D.ravel()
         # now make footprint plot of all arrival times
 
         signals = np.copy(times)
@@ -253,7 +192,7 @@ class Wavefront(Task):
         # Do plane-wave direction fit on full arrivaltimes
         # Fit pulse direction
         print 'Do plane wave fit on full arrival times (cross correlations here)...'
-        direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antennaPositions, timelags=arrivaltime, verbose=True)
+        direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=self.positions, timelags=self.arrivaltimes, verbose=True)
 
         direction_fit_plane_wave.residual_delays.plot()
         plt.title('Residual delays after plane wave fit')
@@ -273,9 +212,15 @@ class Wavefront(Task):
         goodTimes = times[goodIndices]
         goodSignals = signals[goodIndices]
         goodResidues -= min(goodResidues)
+
         # now the good one: difference between measured arrival times and plane wave fit!
         fptask_delta = cr.trerun("Shower", "3", positions=goodPositions2D, signals=goodSignals, timelags=goodResidues, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
         plt.title('Footprint of residual delays w.r.t. planewave fit')
+
+        if self.save_plots:
+            p = self.plot_prefix + "wavefront_vs_planewave.{0}".format(self.plot_type)
+            plt.savefig(p)
+            self.plotlist.append(p)
 
         # Simplex fit point source...
         (az, el) = direction_fit_plane_wave.meandirection_azel  # check
@@ -309,6 +254,12 @@ class Wavefront(Task):
         fptask_delta_pointsource = cr.trerun("Shower", "4", positions=goodPositions2D, signals=goodSignals, timelags=residu, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
 
         plt.title('Footprint of residual delays w.r.t. point source fit')
+
+        if self.save_plots:
+            p = self.plot_prefix + "wavefront_vs_pointsource.{0}".format(self.plot_type)
+            plt.savefig(p)
+            self.plotlist.append(p)
+
 
         """
         see test script testCrosscorr_MultiTBB.py for commented-out stuff
