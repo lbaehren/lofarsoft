@@ -77,16 +77,17 @@ def event_header(cursor, eventID, station=None, polarization=None, datafile=None
     header = Element("header")
 
     # Get event header
-    sql = "SELECT timestamp, status, alt_status, statusmessage, alt_statusmessage FROM events WHERE eventID={0}".format(eventID)
+    sql = "SELECT timestamp, antennaset, status, alt_status, statusmessage, alt_statusmessage FROM events WHERE eventID={0}".format(eventID)
     cursor.execute(sql)
 
     e = cursor.fetchone()
     SubElement(header, "id").text = str(eventID)
     SubElement(header, "timestamp").text = str(datetime.utcfromtimestamp(e[0]))
-    SubElement(header, "status").text = str(e[1])
-    SubElement(header, "alt_status").text = str(e[2])
-    SubElement(header, "statusmessage").text = str(e[3])
-    SubElement(header, "alt_statusmessage").text = str(e[4])
+    SubElement(header, "antennaset").text = str(e[1])
+    SubElement(header, "status").text = str(e[2])
+    SubElement(header, "alt_status").text = str(e[3])
+    SubElement(header, "statusmessage").text = str(e[4])
+    SubElement(header, "alt_statusmessage").text = str(e[5])
 
     if station:
         s = SubElement(header, "station")
@@ -295,7 +296,7 @@ def events_handler():
     c = conn.cursor()
 
     # Fetch all event IDs
-    c.execute("""SELECT e.eventID, e.timestamp, e.status, e.alt_status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere FROM
+    c.execute("""SELECT e.eventID, e.timestamp, e.antennaset, e.status, e.alt_status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere FROM
     events AS e LEFT JOIN eventparameters AS ep ON (e.eventID=ep.eventID)""")
 
     # Generate empty XML
@@ -307,17 +308,18 @@ def events_handler():
 
         SubElement(event, "id").text = str(e[0])
         SubElement(event, "timestamp").text = str(datetime.utcfromtimestamp(e[1]))
-        SubElement(event, "status").text = str(e[2])
-        SubElement(event, "alt_status").text = str(e[3])
+        SubElement(event, "antennaset").text = str(e[2])
+        SubElement(event, "status").text = str(e[3])
+        SubElement(event, "alt_status").text = str(e[4])
 
         lora = SubElement(event, "lora")
 
-        energy = unpickle_parameter(e[4])
-        core_x = unpickle_parameter(e[5])
-        core_y = unpickle_parameter(e[6])
-        azimuth = unpickle_parameter(e[7])
-        elevation = unpickle_parameter(e[8])
-        moliere = unpickle_parameter(e[9])
+        energy = unpickle_parameter(e[5])
+        core_x = unpickle_parameter(e[6])
+        core_y = unpickle_parameter(e[7])
+        azimuth = unpickle_parameter(e[8])
+        elevation = unpickle_parameter(e[9])
+        moliere = unpickle_parameter(e[10])
 
         if good_lora_reconstruction(core_x, core_y, moliere, elevation):
             lora.attrib['good_reconstruction'] = "true"

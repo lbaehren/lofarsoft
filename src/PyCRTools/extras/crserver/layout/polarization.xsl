@@ -65,6 +65,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       </td>
     </tr>
     <tr>
+      <th>Antennaset</th>
+      <td colspan="2">
+        <xsl:value-of select="/elements/header/antennaset"/>
+      </td>
+    </tr>
+    <tr>
       <th>Event status</th>
       <td>
         <xsl:value-of select="/elements/header/status"/>

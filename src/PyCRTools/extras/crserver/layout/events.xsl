@@ -29,6 +29,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <tr>
         <th>Id</th>
         <th>Timestamp</th>
+        <th>Antennaset</th>
         <th>Event status</th>
         <th>Event alt_status</th>
         <th>Energy (eV)</th>
@@ -46,11 +47,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
            <tr class="error">
              <td>
                <a><xsl:attribute name="href">
-               events/<xsl:value-of select="id"/></xsl:attribute> 
-               <xsl:value-of select="id"/> 
+               events/<xsl:value-of select="id"/></xsl:attribute>
+               <xsl:value-of select="id"/>
                </a>
              </td>
              <td><xsl:value-of select="timestamp"/></td>
+             <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
@@ -65,11 +67,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
            <tr class="skipped">
              <td>
                <a><xsl:attribute name="href">
-               events/<xsl:value-of select="id"/></xsl:attribute> 
-               <xsl:value-of select="id"/> 
+               events/<xsl:value-of select="id"/></xsl:attribute>
+               <xsl:value-of select="id"/>
                </a>
              </td>
              <td><xsl:value-of select="timestamp"/></td>
+             <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
@@ -84,11 +87,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
            <tr class="good">
              <td>
                <a><xsl:attribute name="href">
-               events/<xsl:value-of select="id"/></xsl:attribute> 
-               <xsl:value-of select="id"/> 
+               events/<xsl:value-of select="id"/></xsl:attribute>
+               <xsl:value-of select="id"/>
                </a>
              </td>
              <td><xsl:value-of select="timestamp"/></td>
+             <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
@@ -103,11 +107,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
            <tr>
              <td>
                <a><xsl:attribute name="href">
-               events/<xsl:value-of select="id"/></xsl:attribute> 
-               <xsl:value-of select="id"/> 
+               events/<xsl:value-of select="id"/></xsl:attribute>
+               <xsl:value-of select="id"/>
                </a>
              </td>
              <td><xsl:value-of select="timestamp"/></td>
+             <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
@@ -127,6 +132,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <tr>
       <th>Id</th>
       <th>Timestamp</th>
+      <th>Antennaset</th>
       <th>Event status</th>
       <th>Event alt_status</th>
       <th>Energy (eV)</th>
@@ -140,11 +146,12 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <tr>
         <td>
           <a><xsl:attribute name="href">
-          events/<xsl:value-of select="id"/></xsl:attribute> 
-          <xsl:value-of select="id"/> 
+          events/<xsl:value-of select="id"/></xsl:attribute>
+          <xsl:value-of select="id"/>
           </a>
         </td>
         <td><xsl:value-of select="timestamp"/></td>
+        <td><xsl:value-of select="antennaset"/></td>
         <td><xsl:value-of select="status"/></td>
         <td><xsl:value-of select="alt_status"/></td>
         <td><xsl:value-of select="lora/energy"/></td>
