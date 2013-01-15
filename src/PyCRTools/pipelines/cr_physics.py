@@ -268,7 +268,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             f = cr.open(station.datafile.settings.datapath + '/' + station.datafile.filename)
 
             # Check if antenna_set is supported this pipeline
-            if f["ANTENNA_SET"] not in ["LBA_INNER", "LBA_OUTER"]:
+            if f["ANTENNA_SET"] in ["LBA_INNER", "LBA_OUTER"]:
+                hba = False
+            elif f["ANTENNA_SET"] in ["HBA_ZERO", "HBA_ONE", "HBA_DUAL", "HBA_JOINED"]:
+                hba = True
+            else:
                 raise EventSkipped("unsupported antenna_set {0}".format(f["ANTENNA_SET"]))
 
             # Read LORA information
@@ -376,11 +380,15 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # galactic_noise_power is per Hz
                 # now calculate per channel (bandwidth = f / blocksize) correction factor
-                galactic_noise_correction_factor = (f["SAMPLE_FREQUENCY"][0] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
+                if hba:
+                    galactic_noise_correction_factor = 1.0
+                else:
+                    galactic_noise_correction_factor = 1.0
+#                    galactic_noise_correction_factor = (f["SAMPLE_FREQUENCY"][0] * galactic_noise.galactic_noise_power) / f["BLOCKSIZE"]
 
                 # convert antennas_cleaned_sum_power to correction factor per antenna
                 cr.hInverse(antennas_cleaned_power)
-#                cr.hMul(antennas_cleaned_power, galactic_noise_correction_factor)
+                cr.hMul(antennas_cleaned_power, galactic_noise_correction_factor)
                 cr.hSqrt(antennas_cleaned_power)
 
                 # multiply spectrum by correction factor per antenna
@@ -489,7 +497,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             while True:
 
                 # Unfold antenna pattern
-                antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
+                if not hba:
+                    antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
 
                 # Get timeseries data
                 cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
@@ -558,6 +567,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     print "maximum number of iterations reached"
                     station["crp_pulse_direction"] = pulse_direction
                     station.statusmessage = "maximum number of iterations reached"
+                    break
+
+                if hba:
+                    station["crp_pulse_direction"] = pulse_direction
                     break
 
             # Check if result of planewave fit is reasonable
