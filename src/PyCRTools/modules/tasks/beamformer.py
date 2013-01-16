@@ -645,7 +645,7 @@ class BeamFormer(tasks.Task):
                 if self.single_station:
                     self.antpos = md.getRelativeAntennaPositionsNew(self.datafile['STATION_NAME'][0],self.antenna_set)
                 else:
-                    self.antpos = md.convertITRFToLocal(self.datafile['ITRFANTENNA_POSITIONS'])
+                    self.antpos = md.convertITRFToLocal(self.datafile['ITRFANTENNA_POSITIONS'],reflonlat=None)
                 self.antpos -= self.phase_center_array
                 # print "Relative antenna position =",self.antpos
 
