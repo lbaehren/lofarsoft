@@ -505,8 +505,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     # Get timeseries data
                     cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
 
-                timeseries_data /= options.blocksize
-
                 # Calculate delays using cross correlations
                 timeseries_data_cut[...].copy(timeseries_data[..., pulse_start:pulse_end])
 
