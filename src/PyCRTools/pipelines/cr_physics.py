@@ -433,8 +433,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 cr.hFFTWExecutePlan(beamformed_timeseries[0], mb0.beamformed_fft, invfftplan)
                 cr.hFFTWExecutePlan(beamformed_timeseries[1], mb1.beamformed_fft, invfftplan)
 
-                beamformed_timeseries /= options.blocksize
-
                 print "starting pulse envelope"
 
                 # Look for significant pulse in beamformed signal
