@@ -89,6 +89,8 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
         dim2 = 1
     elif keyword is "RelativeAntennaPositions":
         functionname = getRelativeAntennaPositions
+    elif keyword is "RelativeAntennaPositionsNew":
+        functionname = getRelativeAntennaPositionsNew
     elif keyword is "AbsoluteAntennaPositions":
         functionname = getAbsoluteAntennaPositions
     elif keyword is "AntennaPositions":

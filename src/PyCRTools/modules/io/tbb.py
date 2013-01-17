@@ -635,6 +635,20 @@ class TBBData(IOInterface):
 
         return md.get("RelativeAntennaPositions", self.__selectedDipoles, self.antenna_set, True)
 
+    def getRelativeAntennaPositionsNew(self):
+        """Returns relative antenna positions for selected antennas, or all
+        antennas if no selection was applied.
+
+        Output:
+        a two dimensional array containing the Cartesian position of
+        each antenna in meters in local coordinates from a predefined
+        center.
+        So that if `a` is the returned array `a[i]` is an array of
+        length 3 with positions (x,y,z) of antenna i.
+        """
+
+        return md.get("RelativeAntennaPositionsNew", self.__selectedDipoles, self.antenna_set, True)
+
     def getITRFAntennaPositions(self):
         """Returns antenna positions for selected antennas, or all
         antennas if no selection was applied.
