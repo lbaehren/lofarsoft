@@ -17,7 +17,7 @@ def strdate2jd(strdate):
     '''
     import re
 #   from pytmf import *
-    
+
     date_all = [int(a) for a in re.findall(r'\w+',strdate)]
     date = [date_all[0],date_all[1], float(date_all[2])+date_all[3]/24.+date_all[4]/(24*60.)+date_all[5]/(24.*60*60)]
     utc = date2jd(date[0],date[1],date[2])
@@ -34,68 +34,68 @@ if pulsar:
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
 #        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
-#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5')
 #        filefilter = '/data/FRATS/data/L43784_D20120125T211154.867Z_CS003_R000_tbb.h5'
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5')
 #        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS004_R000_tbb.h5'
 #        f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5')
-#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'  
+#        filefilter = '/data/FRATS/data/L43784_D20120125T211154.866Z_CS005_R000_tbb.h5'
         f1=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5')
-        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5'  
+        filefilter = '/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5'
         output_dir= '/Users/eenriquez/RESEARCH/Pulsars/Results/'
         f2=cr.open('/data/FRATS/data/L43784_D20120125T211154.887Z_CS007_R000_tbb.h5')
 
-    else:    
+    else:
         f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
         filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5'
 #        f1=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5')
-#        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'  
+#        filefilter = '~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.871Z_CS006_R000_tbb.h5'
         output_dir= '~/RESEARCH/Pulsars/Results/'
         f2=cr.open('~/RESEARCH/Pulsars/Data/L43784_D20120125T211154.887Z_CS002_R000_tbb.h5')
 
 #PSR B0329+54 -- Pulsar    0.71452 sec
 #Wikipidea Values
     #alpha = hms2rad(3, 32, 59.368); # Right assention
-    #delta = dms2rad(54, 34, 43.57); # Declination        
+    #delta = dms2rad(54, 34, 43.57); # Declination
 #Simbad values
-    alpha = hms2rad(03,32,59.37 ); # Right assention 
-    delta = dms2rad(54,34,44.9); # Declination    
-    
-    phi = deg2rad(52.915122495)  #(LOFAR Superterp) 
-    L = deg2rad(6.869837540) 
-    
+    alpha = hms2rad(03,32,59.37 ); # Right assention
+    delta = dms2rad(54,34,44.9); # Declination
+
+    phi = deg2rad(52.915122495)  #(LOFAR Superterp)
+    L = deg2rad(6.869837540)
+
     utc = strdate2jd(f1['TIME_HR'][0])
-    
+
     # Make input and output arrays for conversion
     equatorial = cr.hArray([alpha, delta])
     horizontal = equatorial.new()
-    
+
     # Convert all coordinates in the input array
     # assumes difference between UTC and UT is 0 (hence ut1_utc=0.)
     cr.hEquatorial2Horizontal(horizontal, equatorial, utc, 0., L, phi)
     #horizontal2 = radec2azel(alpha,delta,utc,0.,L,phi)
-    
+
     if horizontal[0] < 0:  horizontal[0] += 2.*math.pi  #Need to check the definitions used for positive azimut angles.
-    
+
     azel = [horizontal[0],horizontal[1]]
-    
+    pdb.set_trace()
     NyquistZone = 2
     pointings=[{'az': azel[0], 'el': azel[1]}]
     maxchunklen = 2**20
     blocklen = 2**14
     dohanning =True
-    
+
 else:
     f1=cr.open('~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5')
-    filefilter = '~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5'   
+    filefilter = '~/RESEARCH/VHECR/Data/L28348_D20110612T231913.199Z_CS002_R000_tbb.h5'
 #    f1=cr.open('~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5')
-#    filefilter = '~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5'   
+#    filefilter = '~/RESEARCH/VHECR/Data/L35018_D20111120T014205.590Z_CS004_R000_tbb.h5'
     output_dir= '~/RESEARCH/VHECR/Results/'
 
 #    azel_CR =[-46.9,45.4]
     azel_CR =[231.9,63.1]
-    
+
     azel = [a*cr.deg for a in azel_CR]
     NyquistZone = 1
     pointings=[{'el': azel[1]+0*cr.deg, 'az': azel[0]}]#,{'el': azel[1]-5*cr.deg, 'az': azel[0]},{'el': azel[1], 'az': azel[0]-5*cr.deg}]
@@ -113,11 +113,11 @@ qualitycheck = False
 plotspec = True
 doplot = False
 filenames = [filefilter]
-nantennas_start = 1
+nantennas_start = 0
 nantennas_stride = 2
 maxnantennas = f1['NOF_DIPOLE_DATASETS']
 detail_name = '.pol1.multi_station'
-single_station = False
+single_station = True
 
 #------------------------------
 #Additional calibration values.
@@ -147,7 +147,7 @@ if pulsar:
     sample_offset = int((t0-t1)/f1['SAMPLE_INTERVAL'][0])
 
 #----------------------------------
-bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,single_station=single_station)
+bm = cr.trun("BeamFormer",filefilter=filefilter,filenames = filenames,antenna_set='HBA1',output_dir=output_dir,pointings=pointings,FarField=FarField,NyquistZone=NyquistZone,cal_delays=cal_delays,randomize_peaks=randomize_peaks,qualitycheck=qualitycheck,plotspec=plotspec,doplot=doplot,nantennas_start = nantennas_start, nantennas_stride = nantennas_stride,maxnantennas = maxnantennas,maxchunklen=maxchunklen,blocklen=blocklen,dohanning=dohanning,detail_name=detail_name,single_station=single_station,test_beam_per_antenna=True)
 
 #antenna_positions=antenna_positions ,,phase_center=phase_center,,sample_offset=sample_offset,,maxnchunks=maxnchunks)
 #-------------------------------------------------------------------------------------
