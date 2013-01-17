@@ -13,19 +13,41 @@ import datetime
 class GalacticNoise(Task):
     """Task to calculate Galactic noise level.
 
-    Evaluates the polynomial fit to the Galactic response as a function of Local Apparant Siderial Time.
+    Evaluates a partial Fourier series fit to the Galactic response as a function of Local Apparant Siderial Time.
     """
 
     parameters = dict(
-        galactic_noise_power=dict(default=0, doc="Galactic noise power per Hz", output=True),
+        galactic_noise_power=dict(default=(0, 0), doc="Galactic noise power per Hz", output=True),
         timestamp=dict(default=None, doc="Observation time"),
         longitude=dict(default=pytmf.deg2rad(6.869837540), doc="Observer longitude in radians"),
-        coefficients=dict(default=[7.56798970e-03, -2.29406950e-01, 2.94867516e+00, -2.04868891e+01, 8.13909736e+01, -1.82426264e+02, 2.22528946e+02, -1.44469831e+02, 1.91345039e+01, 7.72182912e+02], doc="Coefficients for polynomial describing galaxy response"),
+        coefficients=dict(default=(np.array(np.array([2.10174906e-04, 8.35381607e-06, -6.49743724e-06, 8.93979789e-07, 3.25335297e-06], np.array([2.21666835e-04, 6.60195679e-06, -5.24392154e-06, -1.02265106e-06, 3.31638392e-06])),
+            doc="Tuple with coefficients for partial Fourier series describing galaxy response in Hz for polarization 0 and 1 respectively"),
     )
 
     def run(self):
         """Run.
         """
+
+        def fourier_series(x, p):
+            """Evaluates a partial Fourier series
+
+            ...math::
+
+                F(x) \approx \frac{a_{0}}{2} + \sum_{n=1}^{\mathrm{order}} a_{n} \sin(nx) + b_{n} \cos(nx)
+
+            """
+
+            r = p[0] / 2
+
+            order = (len(p) - 1) / 2
+
+            for i in range(order):
+
+                n = i + 1
+
+                r += p[2*i + 1] * np.sin(n * x) + p[2*i + 2] * np.cos(n * x)
+
+            return r
 
         # Convert timestamp to datetime object
         t = datetime.datetime.utcfromtimestamp(self.timestamp)
@@ -40,7 +62,6 @@ class GalacticNoise(Task):
         # Calculate Local Apparant Sidereal Time
         self.last = pytmf.rad2circle(pytmf.last(ut, tt, self.longitude))
 
-        # Evaluate polynomial for calculated LST
-        p = np.poly1d(self.coefficients)
-        self.galactic_noise_power = p(self.last)
+        # Evaluate Fourier series for calculated LST
+        self.galactic_noise_power = (fourier_series(self.last, self.coefficients[0]), fourier_series(self.last, self.coefficients[1]))
 
