@@ -478,6 +478,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # Start direction fitting loopim
             n = 0
             direction_fit_converged = False
+            direction_fit_successful = True
             while True:
 
                 # Unfold antenna pattern
@@ -529,9 +530,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Check if fitting was succesful
                 if direction_fit_plane_wave.fit_failed:
-                    station.status = "BAD"
-                    station.statusmessage = "direction fit failed"
-                    station.statuscategory = "fit_failed"
                     break
 
                 # Check for convergence of iterative direction fitting loop
@@ -581,22 +579,31 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
 
             if direction_fit_plane_wave.fit_failed:
-                continue
+                station.status = "BAD"
+                station.statusmessage = "direction fit failed"
+                station.statuscategory = "fit_failed"
+                pulse_direction = list(event["lora_direction"])
+                direction_fit_successful = False
+
 
             if direction_fit_plane_wave.goodcount < nantennas / 2:
                 station.status = "BAD"
                 station.statusmessage = "goodcount {0} < nantennas / 2 [= {1}]".format(direction_fit_plane_wave.goodcount, nantennas / 2)
                 station.statuscategory = "good_count_ant"
-                continue
+                pulse_direction = list(event["lora_direction"])
+                direction_fit_successful = False
+
 
             if average_residual > options.maximum_allowed_residual_delay:
                 print "direction fit residuals too large, average_residual = {0}".format(average_residual)
                 station.status = "BAD"
                 station.statusmessage = "average_residual = {0}".format(average_residual)
                 station.statuscategory = "average_residual"
-                continue
-
-            print "direction fit residuals ok, average_residual = {0}".format(average_residual)
+                pulse_direction = list(event["lora_direction"])
+                direction_fit_successful = False
+                
+            else:
+                print "direction fit residuals ok, average_residual = {0}".format(average_residual)
 
             with process_polarization(station.polarization, 'xyz') as polarization:
 
@@ -623,11 +630,17 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
                 polarization['xyz']["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
+                
+                # Exclude failed fits and average residuals and set polarization status
+                if  direction_fit_successful == False:
+                    polarization['xyz'].status = "BAD"
+                    polarization['xyz'].statusmessage = "direction fit not successful"
+                
+                else:
+                    polarization['xyz'].status = "GOOD"
+                    polarization['xyz'].statusmessage = ""
 
-                polarization['xyz'].status = "GOOD"
-                polarization['xyz'].statusmessage = ""
-
-                cr_found = True
+                    cr_found = True
 
     if cr_found:
 
