@@ -322,7 +322,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Find RFI and bad antennas
                 try:
-                    findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[])
+                    if hba:
+                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(110, 190), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=False)
+                    else:
+                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(30, 80), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=False)
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
@@ -373,7 +376,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 station["crp_antennas_cleaned_power"] = antennas_cleaned_power
 
                 # Normalize recieved power to that expected for a Galaxy dominated reference antenna
-                galactic_noise = cr.trun("GalacticNoise", fft_data=fft_data, sample_frequency=f["SAMPLE_FREQUENCY"], timestamp=tbb_time, antenna_set=f["ANTENNA_SET"])
+                galactic_noise = cr.trun("GalacticNoise", fft_data=fft_data, channel_width=f["SAMPLE_FREQUENCY"][0] / f["BLOCKSIZE"], timestamp=tbb_time, antenna_set=f["ANTENNA_SET"], original_power=antennas_cleaned_power)
 
                 station["crp_galactic_noise"] = galactic_noise.galactic_noise_power
 

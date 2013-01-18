@@ -106,6 +106,8 @@ class FindRFI(Task):
         plot_antennas = dict(default=lambda self: range(self.nantennas),
             doc="Antennas to create plots for."),
         verbose = dict(default=True, doc="Verbose output."),
+        apply_hanning_window = dict(default=True,
+            doc="Apply Hanning window to data before FFT."),
     )
 
     def run(self):
@@ -142,7 +144,7 @@ class FindRFI(Task):
 #            x = f["TIMESERIES_DATA"]
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
-            self.f.getFFTData(self.fft_data, block=i, hanning=True)
+            self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window)
             # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
             # difference!

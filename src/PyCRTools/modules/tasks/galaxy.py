@@ -5,6 +5,7 @@ Galaxy documentation
 """
 
 from pycrtools.tasks import Task
+import pycrtools as cr
 import numpy as np
 import pytmf
 import datetime
@@ -18,14 +19,15 @@ class GalacticNoise(Task):
 
     parameters = dict(
         fft_data=dict(default=None, doc="FFT data to correct."),
-        antenna_set=dict(default="LBA_OUTER", doc="Antenna set"),
+        original_power=dict(default=None, doc="Original power to normalize by (typically rfi cleaned average integrated power spectrum per antenna)."),
+        antenna_set=dict(default="", doc="Antenna set"),
         channel_width=dict(default=1., doc="Width of a single frequency channel in Hz"),
         galactic_noise_power=dict(default=(0, 0), doc="Galactic noise power per Hz", output=True),
         timestamp=dict(default=None, doc="Observation time"),
         longitude=dict(default=pytmf.deg2rad(6.869837540), doc="Observer longitude in radians"),
         coefficients_lba=dict(default=(np.array([2.10174906e-04, 8.35381607e-06, -6.49743724e-06, 8.93979789e-07, 3.25335297e-06]), np.array([2.21666835e-04, 6.60195679e-06, -5.24392154e-06, -1.02265106e-06, 3.31638392e-06])),
             doc="Tuple with coefficients for partial Fourier series describing galaxy response in Hz for polarization 0 and 1 respectively"),
-        coefficients_hba=dict(default=(np.array([1.0]), np.array([1.0])),
+        coefficients_hba=dict(default=lambda self : (np.array([2.0 / self.channel_width]), np.array([2.0 / self.channel_width])),
             doc="Tuple with coefficients for partial Fourier series describing galaxy response in Hz for polarization 0 and 1 respectively"),
     )
 
@@ -77,6 +79,8 @@ class GalacticNoise(Task):
 
         if self.fft_data is not None:
 
+            print "correcting power per channel to", self.galactic_noise_power[0] * self.channel_width, self.galactic_noise_power[1] * self.channel_width
+
             # Calculate correction factor
             self.correction_factor = self.original_power.new()
             self.correction_factor.copy(self.original_power)
@@ -89,5 +93,5 @@ class GalacticNoise(Task):
             cr.hSqrt(self.correction_factor)
 
             # Correct FFT data
-            cr.hMul(fft_data[...], self.original_power)
+            cr.hMul(self.fft_data[...], self.correction_factor[...])
 
