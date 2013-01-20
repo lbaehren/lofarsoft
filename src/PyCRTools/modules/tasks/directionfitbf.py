@@ -59,7 +59,7 @@ class DirectionFitBF(Task):
             cr.hBeamformBlock(self.beamformed_fft, self.fft_data, self.frequencies, self.antpos, self.direction_cartesian)
 
             # Go to timeseries
-            cr.hFFTWExecutePlan(self.beamformed_timeseries, self.beamformed_fft, ifftwplan)
+            cr.hFFTWExecutePlan(self.beamformed_timeseries, self.beamformed_fft, self.ifftwplan)
 
             return -1 * cr.hMax(self.beamformed_timeseries).val()
 
