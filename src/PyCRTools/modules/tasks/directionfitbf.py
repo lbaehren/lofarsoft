@@ -53,7 +53,7 @@ class DirectionFitBF(Task):
             print "calling beamformer"
 
             # Calculate Cartesian coordinates for direction
-            self.direction_cartesian = cr.hArray(pytmf.spherical2cartesian(1.0, 2 * np.pi - pytmf.deg2rad(self.direction[1]), 2 * np.pi - pytmf.deg2rad(self.direction[0])))
+            self.direction_cartesian = cr.hArray(pytmf.spherical2cartesian(1.0, 2 * np.pi - pytmf.deg2rad(direction[1]), 2 * np.pi - pytmf.deg2rad(direction[0])))
 
             # Do beamforming
             cr.hBeamformBlock(self.beamformed_fft, self.fft_data, self.frequencies, self.antpos, self.direction_cartesian)
