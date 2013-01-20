@@ -10,7 +10,7 @@ import pytmf
 import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
-from scipy.optimize import minimize
+from scipy.optimize import fmin
 
 class DirectionFitBF(Task):
     """Find direction by maximizing the beamformed signal using a simplex fit.
@@ -61,5 +61,9 @@ class DirectionFitBF(Task):
 
             return -1 * cr.hMax(self.beamformed_timeseries).val()
 
-        self.fit_direction = minimize(negative_bf_signal, np.asrray(self.direction), method='nelder-mead', options={'maxiter' : self.maxiter, 'disp': True})
+        minimize_result = fmin(negative_bf_signal, np.asrray(self.direction), maxiter=self.maxiter)
+
+        print minimize_result
+
+        self.fit_direction = minimize_result[0]
 
