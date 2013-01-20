@@ -528,9 +528,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
 
                 if hba:
-                    direction_fit_bf = cr.trun("DirectionFitBF", fft_data=fft_data, start_direction=pulse_direction, ifftwplan=invfftplan)
+                    direction_fit_bf = cr.trun("DirectionFitBF", fft_data=fft_data, start_direction=pulse_direction, frequencies=frequencies, antpos=antenna_positions, ifftwplan=invfftplan)
                 else:
-                    direction_fit_bf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, start_direction=pulse_direction, ifftwplan=invfftplan)
+                    direction_fit_bf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, start_direction=pulse_direction, frequencies=frequencies, antpos=antenna_positions, ifftwplan=invfftplan)
 
                 print "bf", direction_fit_bf.fit_direction
 
