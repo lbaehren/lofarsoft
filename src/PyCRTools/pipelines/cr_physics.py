@@ -532,7 +532,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 else:
                     direction_fit_bf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, start_direction=pulse_direction)
 
-                print "bf", direction_fit_bf.direction
+                print "bf", direction_fit_bf.fit_direction
 
                 print "plane wave", direction_fit_plane_wave.meandirection_azel_deg
 

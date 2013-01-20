@@ -50,6 +50,8 @@ class DirectionFitBF(Task):
 
         def negative_bf_signal(direction):
 
+            print "calling beamformer"
+
             # Calculate Cartesian coordinates for direction
             self.direction_cartesian = cr.hArray(pytmf.spherical2cartesian(1.0, 2 * np.pi - pytmf.deg2rad(self.direction[1]), 2 * np.pi - pytmf.deg2rad(self.direction[0])))
 
