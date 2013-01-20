@@ -441,6 +441,7 @@ task_modules = ["averagespectrum",
 "stokesparameters",
 "shower",
 "crosscorrelateantennas",
+"directionfitbf",
 ]
 
 import os
