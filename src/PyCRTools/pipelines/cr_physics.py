@@ -527,7 +527,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
 
 
-                direction_fit_bf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, start_direction=pulse_direction)
+                if hba:
+                    direction_fit_bf = cr.trun("DirectionFitBF", fft_data=fft_data, start_direction=pulse_direction)
+                else:
+                    direction_fit_bf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, start_direction=pulse_direction)
 
                 print "bf", direction_fit_bf.direction
 
