@@ -526,6 +526,13 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 else:
                     direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
 
+
+                direction_fit_bf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, start_direction=pulse_direction)
+
+                print "bf", direction_fit_bf.direction
+
+                print "plane wave", direction_fit_plane_wave.meandirection_azel_deg
+
                 pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
                 # Check if fitting was succesful
@@ -601,7 +608,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 station.statuscategory = "average_residual"
                 pulse_direction = list(event["lora_direction"])
                 direction_fit_successful = False
-                
+
             else:
                 print "direction fit residuals ok, average_residual = {0}".format(average_residual)
 
@@ -630,12 +637,12 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
                 polarization['xyz']["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
-                
+
                 # Exclude failed fits and average residuals and set polarization status
                 if  direction_fit_successful == False:
                     polarization['xyz'].status = "BAD"
                     polarization['xyz'].statusmessage = "direction fit not successful"
-                
+
                 else:
                     polarization['xyz'].status = "GOOD"
                     polarization['xyz'].statusmessage = ""
