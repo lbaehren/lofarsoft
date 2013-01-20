@@ -61,7 +61,7 @@ class DirectionFitBF(Task):
 
             return -1 * cr.hMax(self.beamformed_timeseries).val()
 
-        minimize_result = fmin(negative_bf_signal, np.asrray(self.direction), maxiter=self.maxiter)
+        minimize_result = fmin(negative_bf_signal, np.asarray(self.direction), maxiter=self.maxiter)
 
         print minimize_result
 
