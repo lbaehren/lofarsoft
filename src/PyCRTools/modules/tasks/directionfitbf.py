@@ -61,5 +61,5 @@ class DirectionFitBF(Task):
 
             return -1 * cr.hMax(self.beamformed_timeseries).val()
 
-        self.fit_direction = minimize(negative_bf_signal, np.asrray(self.direction), method='nelder-mead', options={'maxiter', : self.maxiter, 'disp': True})
+        self.fit_direction = minimize(negative_bf_signal, np.asrray(self.direction), method='nelder-mead', options={'maxiter' : self.maxiter, 'disp': True})
 
