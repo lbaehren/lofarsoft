@@ -10,7 +10,7 @@ import pytmf
 import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
-from scipy.optimize import fmin
+from scipy.optimize import fmin_powell
 
 class DirectionFitBF(Task):
     """Find direction by maximizing the beamformed signal using a simplex fit.
@@ -27,6 +27,8 @@ class DirectionFitBF(Task):
             doc="Pointing as (az, el) tuple in degrees in the LOFAR convention."),
         maxiter=dict(default=100,
             doc="Maximum number of iterations in simplex fit."),
+        xtol=dict(default=1.0,
+            doc="Convergence is assumed when direction varies less than this value in each direction between iterations."),
         nantennas = dict(default=lambda self: self.fft_data.shape()[0],
             doc="Number of antennas."),
         nfreq = dict(default=lambda self: self.fft_data.shape()[1],
@@ -50,12 +52,11 @@ class DirectionFitBF(Task):
 
         def negative_bf_signal(direction):
 
-            print "calling beamformer"
-
             # Calculate Cartesian coordinates for direction
             self.direction_cartesian = cr.hArray(pytmf.spherical2cartesian(1.0, 2 * np.pi - pytmf.deg2rad(direction[1]), 2 * np.pi - pytmf.deg2rad(direction[0])))
 
             # Do beamforming
+            self.beamformed_fft.fill(0.)
             cr.hBeamformBlock(self.beamformed_fft, self.fft_data, self.frequencies, self.antpos, self.direction_cartesian)
 
             # Go to timeseries
@@ -66,9 +67,5 @@ class DirectionFitBF(Task):
 
             return -1 * cr.hMax(self.beamformed_timeseries).val()
 
-        minimize_result = fmin(negative_bf_signal, np.asarray(self.start_direction), maxiter=self.maxiter)
-
-        print minimize_result
-
-        self.fit_direction = minimize_result[0]
+        self.fit_direction = fmin_powell(negative_bf_signal, np.asarray(self.start_direction), maxiter=self.maxiter, xtol=1.0)
 
