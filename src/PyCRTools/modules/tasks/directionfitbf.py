@@ -61,6 +61,9 @@ class DirectionFitBF(Task):
             # Go to timeseries
             cr.hFFTWExecutePlan(self.beamformed_timeseries, self.beamformed_fft, self.ifftwplan)
 
+            # Get absolute value squared
+            cr.hSquare(self.beamformed_timeseries)
+
             return -1 * cr.hMax(self.beamformed_timeseries).val()
 
         minimize_result = fmin(negative_bf_signal, np.asarray(self.start_direction), maxiter=self.maxiter)
