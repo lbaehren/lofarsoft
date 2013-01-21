@@ -212,6 +212,7 @@ parser.add_option("--password", default=None, help="PostgreSQL password.")
 parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg, pdf.")
 parser.add_option("--use-cc-delay", default=False, action="store_true", help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
+parser.add_option("--use-hanning-window", default=False, action="store_true", help="Apply Hanning window before FFT.")
 
 (options, args) = parser.parse_args()
 
@@ -323,9 +324,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Find RFI and bad antennas
                 try:
                     if hba:
-                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(110, 190), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=False)
+                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(110, 190), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window)
                     else:
-                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(30, 80), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=False)
+                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(30, 80), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window)
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
@@ -349,7 +350,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Read FFT data (without Hanning window)
                 fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, False)
+                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window)
 
                 # Get corresponding frequencies
                 frequencies = cr.hArray(f["FREQUENCY_DATA"])
