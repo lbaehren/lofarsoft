@@ -31,7 +31,7 @@ class DirectionFitBF(Task):
             doc="Number of antennas."),
         nfreq = dict(default=lambda self: self.fft_data.shape()[1],
             doc="Number of frequencies."),
-        blocksize = dict(default=lambda self: self.fft_data.shape()[1] - 1 * 2,
+        blocksize = dict(default=lambda self: 2 * (self.nfreq - 1),
             doc="Number of samples in a block."),
         beamformed_fft = dict(default=lambda self: cr.hArray(complex, dimensions=(self.nfreq, )),
             doc = "Resulting beamformed FFT signal."),
