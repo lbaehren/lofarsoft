@@ -577,6 +577,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             station["crp_pulse_delay"] = delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
             station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
             station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
+			station["clock_offset"] = f["CLOCK_OFFSET"][0]
 
             if direction_fit_plane_wave.fit_failed:
                 station.status = "BAD"
@@ -657,7 +658,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             if station.status == "GOOD":
                 try:
                     all_station_direction.append(station["crp_pulse_direction"])
-                    all_station_pulse_delays.append(station["crp_pulse_delay"])
+                    all_station_pulse_delays.append(station["crp_pulse_delay"] - station["clock_offset"])
                     all_station_antenna_positions.append(station["local_antenna_positions"])
                     all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"])
