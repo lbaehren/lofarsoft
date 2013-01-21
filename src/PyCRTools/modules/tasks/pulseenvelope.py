@@ -126,7 +126,7 @@ class PulseEnvelope(Task):
         cr.hMaxSNR(self.snr[...], self.mean[...], self.rms[...], self.peak_amplitude[...], self.maxpos[...], self.envelope[...], (self.pulse_start - self.window_start) * int(self.resample_factor), (self.pulse_end - self.window_start) * int(self.resample_factor))
 
         if self.npolarizations > 1:
-            
+
             # Figure out which polarization has the strongest pulse signal on average
             self.strongest_polarization = int(np.argmax(self.snr.toNumpy().reshape((self.nantennas / self.npolarizations, self.npolarizations)).mean(axis=0)))
 

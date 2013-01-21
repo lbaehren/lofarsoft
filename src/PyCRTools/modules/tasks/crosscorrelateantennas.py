@@ -63,11 +63,11 @@ class CrossCorrelateAntennas(Task):
                 output=True),
         blocksize=dict(default=lambda self: (self.fft_data.shape()[1] - 1) * 2,
             doc="Length of the data for each antenna"),
-        fftplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),
+        fftwplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),
             doc="Memory and plan for FFT",
             output=False,
             workarray=True),
-        invfftplan=dict(default=lambda self: cr.FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),
+        ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDftC2r(self.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE),
             doc="Memory and plan for inverse FFT",
             output=False,
             workarray=True)
@@ -75,11 +75,11 @@ class CrossCorrelateAntennas(Task):
 
     def run(self):
         if self.timeseries_data:
-            cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data[...], self.fftplan)
+            cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data[...], self.fftwplan)
         if not self.reference_data:
             self.fft_reference_data.copy(self.fft_data[self.refant])
         else:
-            cr.hFFTWExecutePlan(self.fft_reference_data[...], self.reference_data[...], self.fftplan)
+            cr.hFFTWExecutePlan(self.fft_reference_data[...], self.reference_data[...], self.fftwplan)
 
         self.fft_data[...].crosscorrelatecomplex(self.fft_reference_data, True)
 
@@ -88,7 +88,7 @@ class CrossCorrelateAntennas(Task):
         if self.oversamplefactor > 1:
             self.shift = 1.0 / self.oversamplefactor
             for i in range(self.oversamplefactor):
-                cr.hFFTWExecutePlan(self.crosscorr_data_orig[...], self.fft_data[...], self.invfftplan)
+                cr.hFFTWExecutePlan(self.crosscorr_data_orig[...], self.fft_data[...], self.ifftwplan)
 
                 # distribute with gaps in between and shift by a fraction
                 self.crosscorr_data[...].redistribute(self.crosscorr_data_orig[...], i, self.oversamplefactor)
@@ -96,7 +96,7 @@ class CrossCorrelateAntennas(Task):
                 # apply a sub-sample shift to the FFT data
                 self.fft_data[...].shiftfft(self.fft_data[...], self.shift)
         else:
-            cr.hFFTWExecutePlan(self.crosscorr_data[...], self.fft_data[...], self.invfftplan)
+            cr.hFFTWExecutePlan(self.crosscorr_data[...], self.fft_data[...], self.ifftwplan)
 
 class FindPulseDelay(Task):
     """Calculate pulse delay by finding maxima in a trace.

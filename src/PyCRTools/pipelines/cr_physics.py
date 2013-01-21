@@ -240,8 +240,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         raise EventSkipped("have no lora_direction")
 
     # Create FFTW plans
-    fftplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
-    invfftplan = cr.FFTWPlanManyDftC2r(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+    fftwplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
+    ifftwplan = cr.FFTWPlanManyDftC2r(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
     # Loop over all stations in event
     stations = []
@@ -418,8 +418,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 print "calculating inverse FFT"
 
-                cr.hFFTWExecutePlan(beamformed_timeseries[0], mb0.beamformed_fft, invfftplan)
-                cr.hFFTWExecutePlan(beamformed_timeseries[1], mb1.beamformed_fft, invfftplan)
+                cr.hFFTWExecutePlan(beamformed_timeseries[0], mb0.beamformed_fft, ifftwplan)
+                cr.hFFTWExecutePlan(beamformed_timeseries[1], mb1.beamformed_fft, ifftwplan)
 
                 print "starting pulse envelope"
 
@@ -484,13 +484,13 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Unfold antenna pattern
                 if hba:
                     # Get timeseries data
-                    cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], invfftplan)
+                    cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
 
                 else:
                     antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
 
                     # Get timeseries data
-                    cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], invfftplan)
+                    cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], ifftwplan)
 
                 # Calculate delays using cross correlations
                 timeseries_data_cut[...].copy(timeseries_data[..., pulse_start:pulse_end])
@@ -499,7 +499,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2)
 
                 # Calculate the cross correlations of all the signals with respect to the reference antenna
-                cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data_cut, refant=pulse_envelope.refant, oversamplefactor=16)
+                cca = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data_cut, refant=pulse_envelope.refant, oversamplefactor=16, fftwplan=fftwplan, ifftwplan=ifftwplan)
 
                 # Find the delays defined as the position of the maxima of the cross correlations
                 fpd = cr.trun("FindPulseDelay", trace=cca.crosscorr_data, refant=pulse_envelope.refant, sampling_frequency = 16 * 200.e6)
