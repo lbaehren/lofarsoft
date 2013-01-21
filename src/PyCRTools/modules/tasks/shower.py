@@ -240,8 +240,10 @@ class Shower(Task):
             if self.ldf_total_signal:
                 if self.signals.ndim > 1:
                     self.total_signals = self.signals[:,0]**2 + self.signals[:,1]**2 + self.signals[:,2]**2
+                    self.total_uncertainties = self.signals_uncertainties[:,0]**2 + self.signals_uncertainties[:,1]**2 + self.signals_uncertainties[:,2]**2
                 else:
                     self.total_signals = self.signals    
+                    self.total_uncertainties = self.signals_uncertainties
 
             if self.core_uncertainties is not None and self.direction_uncertainties is not None and self.signals_uncertainties is not None:
 
@@ -259,7 +261,7 @@ class Shower(Task):
                 
                 cr.plt.figure()
                 if self.ldf_total_signal:
-                    cr.plt.errorbar(Dist, self.total_signals, yerr=[sig_uncer, self.signals_uncertainties], xerr=Dist_uncert, c='k', marker=self.ldf_marker_x, linestyle="None", label="total")
+                    cr.plt.errorbar(Dist, self.total_signals, yerr=self.total_uncertainties, xerr=Dist_uncert, c='k', marker=self.ldf_marker_x, linestyle="None", label="total")
                 else:
                     cr.plt.errorbar(Dist, self.signals[:, 0], yerr=[sig_uncer[:, 0], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_x, marker=self.ldf_marker_x, linestyle="None", label="x")
                     cr.plt.errorbar(Dist, self.signals[:, 1], yerr=[sig_uncer[:, 1], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_y, marker=self.ldf_marker_y, linestyle="None", label="y")
