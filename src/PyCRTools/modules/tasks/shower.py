@@ -206,7 +206,6 @@ class Shower(Task):
         err = err + 2 * difft * diffp * covangles
         err = err + 2 * diffc1 * diffc2 * covcore
 
-
         err.sqrt()
 
         return err
@@ -237,6 +236,12 @@ class Shower(Task):
                                self.signals[i, 2] = 10
                            if self.signals[i, 2] < 0.001:
                                self.signals[i, 2] = 1
+            
+            if self.ldf_total_signal:
+                if self.signals.ndim > 1:
+                    self.total_signals = self.signals[:,0]**2 + self.signals[:,1]**2 + self.signals[:,2]**2
+                else:
+                    self.total_signals = self.signals    
 
             if self.core_uncertainties is not None and self.direction_uncertainties is not None and self.signals_uncertainties is not None:
 
@@ -249,13 +254,13 @@ class Shower(Task):
                     sig_uncer = self.signals - sig_lower
                 else:
                     sig_lower = np.copy(self.signals_uncertainties)
-
+                
+                
+                
                 cr.plt.figure()
                 if self.ldf_total_signal:
-                    cr.plt.errorbar(Dist, self.signals, yerr=[sig_uncer, self.signals_uncertainties], xerr=Dist_uncert, c=self.ldf_color_x, marker=self.ldf_marker_x, linestyle="None", label="total")
-
+                    cr.plt.errorbar(Dist, self.total_signals, yerr=[sig_uncer, self.signals_uncertainties], xerr=Dist_uncert, c='k', marker=self.ldf_marker_x, linestyle="None", label="total")
                 else:
-
                     cr.plt.errorbar(Dist, self.signals[:, 0], yerr=[sig_uncer[:, 0], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_x, marker=self.ldf_marker_x, linestyle="None", label="x")
                     cr.plt.errorbar(Dist, self.signals[:, 1], yerr=[sig_uncer[:, 1], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_y, marker=self.ldf_marker_y, linestyle="None", label="y")
                     cr.plt.errorbar(Dist, self.signals[:, 2], yerr=[sig_uncer[:, 2], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_z, marker=self.ldf_marker_z, linestyle="None", label="z")
@@ -274,7 +279,7 @@ class Shower(Task):
                 print "Not all uncertainties given, do not plot uncertainties"
                 cr.plt.figure()
                 if self.ldf_total_signal:
-                    cr.plt.scatter(Dist, self.signals, c=self.ldf_color_x, marker=self.ldf_marker_x, label="total")
+                    cr.plt.scatter(Dist, self.total_signals, c=self.ldf_color_x, marker=self.ldf_marker_x, label="total")
                 else:
                     cr.plt.scatter(Dist, self.signals[:, 0], c=self.ldf_color_x, marker=self.ldf_marker_x, label="x")
                     cr.plt.scatter(Dist, self.signals[:, 1], c=self.ldf_color_y, marker=self.ldf_marker_y, label="y")
@@ -315,6 +320,10 @@ class Shower(Task):
             if self.save_plots:
                 if self.ldf_integrated_signal:
                     plotname = self.plot_prefix + "shower_integrated_ldf.{0}".format(self.plot_type)
+                elif self.ldf_total_signal:
+                    plotname = self.plot_prefix + "shower_total_ldf.{0}".format(self.plot_type)  
+                elif self.ldf_time_color: 
+                    plotname = self.plot_prefix + "shower_color_ldf.{0}".format(self.plot_type)  
                 else:
                     plotname = self.plot_prefix + "shower_ldf.{0}".format(self.plot_type)
                 cr.plt.savefig(plotname)
@@ -565,7 +574,6 @@ class Shower(Task):
 
 
         # --------------------- Skyplot of all directions ----------------------------#
-
 
         if self.skyplot_of_directions_enable:
 
