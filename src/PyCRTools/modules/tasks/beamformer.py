@@ -351,7 +351,7 @@ class BeamFormer(tasks.Task):
         peak_rmsfactor=dict(default=5,
                               doc="At how many sigmas above the mean will a peak be randomized."),
 
-        nantennas_start=dict(default=0,
+        nantennas_start=dict(default=lambda self: (self.antenna_list[0]  if self.antenna_list else 0),
                                doc="Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."),
 
         nantennas_stride=dict(default=1,
@@ -487,6 +487,10 @@ class BeamFormer(tasks.Task):
                                doc="Antenna Set",
                                unit=""),
 
+        antenna_list=dict(default={},
+                        doc="List of antenna indices used as input from each filename.",
+                        output=True),
+
 #------------------------------------------------------------------------
 # Now define all the work arrays used internally
         data=dict(workarray=True,
@@ -537,11 +541,6 @@ class BeamFormer(tasks.Task):
         nantennas=dict(workarray=True,
                         default=lambda self: len(self.antennas),
                          doc="The actual number of antennas available for calculation in the file (``< maxnantennas``)."),
-
-        antenna_list=dict(workarray=True,
-                            default={},
-                            doc="List of antenna indices used as input from each filename.",
-                            output=True),
 
         antennas=dict(workarray=True,
                         default=lambda self: cr.hArray(range(min(self.datafile["NOF_DIPOLE_DATASETS"], self.maxnantennas))),
@@ -626,7 +625,8 @@ class BeamFormer(tasks.Task):
             print "# Start File", str(self.file_start_number) + ":", fname
             self.ws.update(workarrays=False)  # Since the file_start_number was changed, make an update to get the correct file
             self.datafile["BLOCKSIZE"] = self.blocklen  # Setting initial block size
-            self.antenna_list[fname] = range(self.nantennas_start, self.nantennas, self.nantennas_stride)
+            if not self.antenna_list:
+                self.antenna_list[fname] = range(self.nantennas_start, self.nantennas, self.nantennas_stride)
             if self.test_beam_per_antenna:
                 test_beam = cr.hArray(Type=complex, dimensions=[len(self.antenna_list[fname]), self.speclen], name="test_BEAM")
                 test_tbeam = cr.hArray(float, dimensions=[len(self.antenna_list[fname]), self.blocklen], name="test_TIMESERIES_DATA")
