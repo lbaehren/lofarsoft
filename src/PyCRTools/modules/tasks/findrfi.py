@@ -152,13 +152,6 @@ class FindRFI(Task):
             spectrum = self.fft_data / self.f["BLOCKSIZE"]  # normalize back to ADC units
             spectrum[..., 0] = 0.0  # reject DC component
             spectrum[..., 1] = 0.0  # reject 1st harmonic. NB! May be wrong for getting power estimates !!!
-            # test hack
-#            print spectrum.shape()
-#            if i == 0:
-#                spectrum.fill(0.0)
-            # for j in range(spectrum.shape()[1]):
-            #    spectrum[20, j] = 0.0
-            # end test hack
             magspectrum.copy(spectrum)
             magspectrum.abs()
             if i == 0 and self.refant < 0:  # in first block, determine reference antenna (which channel has median power)
