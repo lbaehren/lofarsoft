@@ -627,7 +627,6 @@ class BeamFormer(tasks.Task):
             self.datafile["BLOCKSIZE"] = self.blocklen  # Setting initial block size
             if not self.antenna_list:
                 self.antenna_list[fname] = range(self.nantennas_start, self.nantennas, self.nantennas_stride)
-            pdb.set_trace()
             if self.test_beam_per_antenna:
                 test_beam = cr.hArray(Type=complex, dimensions=[len(self.antenna_list[fname]), self.speclen], name="test_BEAM")
                 test_tbeam = cr.hArray(float, dimensions=[len(self.antenna_list[fname]), self.blocklen], name="test_TIMESERIES_DATA")
