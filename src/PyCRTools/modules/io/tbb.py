@@ -158,8 +158,8 @@ class TBBData(IOInterface):
         """
 
         # Align data
-        if hasattr(self, "_TBBData__alignment_offset"):
-            print 'WARNING: user-applied alignments offsets are reset to default!'
+#        if hasattr(self, "_TBBData__alignment_offset"):
+#            print 'WARNING: user-applied alignments offsets are reset to default!'
         self.__alignment_offset = cr.hArray(self.__file.alignment_offset(self.__refAntenna))
 
         # has to be re-done also after antenna selection to match array length...
@@ -687,7 +687,7 @@ class TBBData(IOInterface):
         """Return clock offset.
         """
 
-        return [md.getClockCorrection(s) for s in self["STATION_NAME"]]
+        return [md.getClockCorrection(s, antennaset=self["ANTENNA_SET"]) for s in self["STATION_NAME"]]
 
     def empty(self, key):
         """Return empty array for keyword data.
