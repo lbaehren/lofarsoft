@@ -1384,7 +1384,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 						for psr in self.psrs: # pulsar list is empty if --nofold is used
 							psr2=re.sub(r'[BJ]', '', psr)
 							dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
-							cmd="dspsr -b %d -E %s/%s.par %s %s -fft-bench -O %s_%s -K -A -L 60 -t %d %s %s.fits" % \
+							cmd="dspsr -b %d -E %s/%s.par %s %s -fft-bench -O %s_%s -A -L 60 -t %d %s %s.fits" % \
 								(dspsr_nbins, self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, self.output_prefix)
 							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 							dspsr_popens.append(dspsr_popen)
@@ -1392,12 +1392,21 @@ CLK line will be removed from the parfile!" % (parfile,))
 						# waiting for dspsr to finish
 						self.waiting_list("dspsr", dspsr_popens)
 
-						# zapping channels...
+						# zapping rfi
 						if not cmdline.opts.is_norfi:
 							self.log.info("Zapping channels using median smoothed difference algorithm...")
 							for psr in self.psrs:  # pulsar list is empty if --nofold is used
 								cmd="paz -r -e paz.ar %s_%s.ar" % (psr, self.output_prefix)
 								self.execute(cmd, workdir=self.curdir)
+
+						# dedispersing
+						self.log.info("Dedispersing...")
+						for psr in self.psrs:  # pulsar list is empty if --nofold is used
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
+								cmd="pam -D -m %s_%s.paz.ar" % (psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+							cmd="pam -D -e dd %s_%s.ar" % (psr, self.output_prefix)
+							self.execute(cmd, workdir=self.curdir)
 
 						# scrunching in frequency
 						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
@@ -1411,16 +1420,17 @@ CLK line will be removed from the parfile!" % (parfile,))
 									cmd="rm -f %s_%s.paz.ar" % (psr, self.output_prefix)
 									self.execute(cmd, workdir=self.curdir)
 								# running fscrunching on non-zapped archive
-								cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
+								cmd="pam --setnchn %d -e fscr.AR %s_%s.dd" % (self.tab.nrSubbands, psr, self.output_prefix)
 								self.execute(cmd, workdir=self.curdir)
-						else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
+								# remove non-scrunched dedispersed archive (we will always have unzapped non-dedispersed non-scrunched version)
+								cmd="rm -f %s_%s.dd" % (psr, self.output_prefix)
+								self.execute(cmd, workdir=self.curdir)
+						else: # if number of chans == number of subs, we will just rename .paz.ar to .paz.fscr.AR and .dd to .fscr.AR
 							for psr in self.psrs:  # pulsar list is empty if --nofold is used
 								if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
 									cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 									self.execute(cmd, workdir=self.curdir)
-								cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-								cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, self.output_prefix, psr, self.output_prefix)
+								cmd="mv -f %s_%s.dd %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 								self.execute(cmd, workdir=self.curdir)
 
 			# running extra Psrchive programs, pam, pav,pdmp, etc... 
