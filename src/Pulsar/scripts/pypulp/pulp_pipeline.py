@@ -1012,8 +1012,9 @@ CLK line will be removed from the parfile!" % (parfile,))
 			self.log.info("Start at UTC %s" % (time.asctime(time.gmtime())))
 			if immediate_status_check:
                			process = Popen(shlex.split(cmd), cwd=workdir, shell=shell)
-				time.sleep(5)  # waiting 5 secs to see if process crashes right away
-				if process.poll() != 0: raise Exception
+				time.sleep(10)  # waiting 10 secs to see if process crashes right away
+				if process.poll() is not None and process.poll() != 0:
+					raise Exception
 				else: process.kill()  # if process is still running, it means that cmd is good, so we kill it in order to
 							# restart it with proper stdout/stderr and add it to the list
                		process = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=workdir, shell=shell)
