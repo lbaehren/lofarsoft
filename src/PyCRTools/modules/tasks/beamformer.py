@@ -351,7 +351,7 @@ class BeamFormer(tasks.Task):
         peak_rmsfactor=dict(default=5,
                               doc="At how many sigmas above the mean will a peak be randomized."),
 
-        nantennas_start=dict(default=lambda self: (self.antenna_list[0]  if self.antenna_list else 0),
+        nantennas_start=dict(default=lambda self: (self.antenna_list[0]  if isinstance(self.antenna_list, list) else 0),
                                doc="Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."),
 
         nantennas_stride=dict(default=1,
@@ -627,10 +627,13 @@ class BeamFormer(tasks.Task):
             self.datafile["BLOCKSIZE"] = self.blocklen  # Setting initial block size
             if not self.antenna_list:
                 self.antenna_list[fname] = range(self.nantennas_start, self.nantennas, self.nantennas_stride)
+            pdb.set_trace()
             if self.test_beam_per_antenna:
                 test_beam = cr.hArray(Type=complex, dimensions=[len(self.antenna_list[fname]), self.speclen], name="test_BEAM")
                 test_tbeam = cr.hArray(float, dimensions=[len(self.antenna_list[fname]), self.blocklen], name="test_TIMESERIES_DATA")
                 count = 0
+            if isinstance(self.antenna_list, list):
+                self.antenna_list = {fname:self.antenna_list}
             for iantenna in self.antenna_list[fname]:
                 antenna = self.antennas[iantenna]
                 rms = 0
