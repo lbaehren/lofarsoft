@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.7.6.1">
+  <compounddef id="_stock___write___dynspec___data___part_8h" kind="file">
+    <compoundname>Stock_Write_Dynspec_Data_Part.h</compoundname>
+    <includes local="no">string</includes>
+    <includes local="no">iostream</includes>
+    <includes local="no">vector</includes>
+    <includes local="no">dal/lofar/BF_File.h</includes>
+    <includedby refid="_reader___dynspec___part_8h" local="yes">/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Reader_Dynspec_Part.h</includedby>
+    <includedby refid="_dynspec_part_8cpp" local="yes">/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/DynspecPart.cpp</includedby>
+    <includedby refid="_reader___dynspec___part_8cpp" local="yes">/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Reader_Dynspec_Part.cpp</includedby>
+    <includedby refid="_stock___write___dynspec___data___part_8cpp" local="yes">/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Stock_Write_Dynspec_Data_Part.cpp</includedby>
+    <incdepgraph>
+      <node id="116">
+        <label>string</label>
+      </node>
+      <node id="115">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Stock_Write_Dynspec_Data_Part.h</label>
+        <link refid="Stock_Write_Dynspec_Data_Part.h"/>
+        <childnode refid="116" relation="include">
+        </childnode>
+        <childnode refid="117" relation="include">
+        </childnode>
+        <childnode refid="118" relation="include">
+        </childnode>
+        <childnode refid="119" relation="include">
+        </childnode>
+      </node>
+      <node id="118">
+        <label>vector</label>
+      </node>
+      <node id="119">
+        <label>dal/lofar/BF_File.h</label>
+      </node>
+      <node id="117">
+        <label>iostream</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="123">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Reader_Dynspec_Part.cpp</label>
+        <link refid="_reader___dynspec___part_8cpp"/>
+      </node>
+      <node id="122">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/DynspecPart.cpp</label>
+        <link refid="_dynspec_part_8cpp"/>
+      </node>
+      <node id="120">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Stock_Write_Dynspec_Data_Part.h</label>
+        <link refid="Stock_Write_Dynspec_Data_Part.h"/>
+        <childnode refid="121" relation="include">
+        </childnode>
+        <childnode refid="122" relation="include">
+        </childnode>
+        <childnode refid="123" relation="include">
+        </childnode>
+        <childnode refid="124" relation="include">
+        </childnode>
+      </node>
+      <node id="121">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Reader_Dynspec_Part.h</label>
+        <link refid="_reader___dynspec___part_8h_source"/>
+        <childnode refid="122" relation="include">
+        </childnode>
+        <childnode refid="123" relation="include">
+        </childnode>
+      </node>
+      <node id="124">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Stock_Write_Dynspec_Data_Part.cpp</label>
+        <link refid="_stock___write___dynspec___data___part_8cpp"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_stock___write___dynspec___data___part" prot="public">Stock_Write_Dynspec_Data_Part</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>DEF_STOCK_WRITE_DYNSPEC_DATA_PART</highlight></codeline>
+<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DEF_STOCK_WRITE_DYNSPEC_DATA_PART</highlight></codeline>
+<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include&lt;string&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include&lt;iostream&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include&lt;vector&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;dal/lofar/BF_File.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="keyword">using<sp/>namespace<sp/></highlight><highlight class="normal">dal;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="23" refid="class_stock___write___dynspec___data___part" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_stock___write___dynspec___data___part" kindref="compound" tooltip="Class object for stocking data parameters, processing the (select or rebin) and write data Matrix in ...">Stock_Write_Dynspec_Data_Part</ref></highlight></codeline>
+<codeline lineno="24"><highlight class="normal">{<sp/><sp/></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Public<sp/>Methods</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="class_stock___write___dynspec___data___part" kindref="compound" tooltip="Class object for stocking data parameters, processing the (select or rebin) and write data Matrix in ...">Stock_Write_Dynspec_Data_Part</ref>();</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/>~<ref refid="class_stock___write___dynspec___data___part" kindref="compound" tooltip="Class object for stocking data parameters, processing the (select or rebin) and write data Matrix in ...">Stock_Write_Dynspec_Data_Part</ref>();</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>stockDynspecData(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>Ntime,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>Nspectral,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>NtimeReal,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>NspectralReal);</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>writeDynspecData(Group<sp/>&amp;dynspec_grp,std::string<sp/>pathDir,std::string<sp/>obsName,std::string<sp/>pathFile,std::string<sp/>outputFile,File<sp/>&amp;root_grp,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>l,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>q,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>obsNofStockes,std::vector&lt;std::string&gt;<sp/>stokesComponent,</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>memoryRAM,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>SAPindex,</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>timeMinSelect,</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>timeMaxSelect,</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>timeRebin,</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>frequencyMin,</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>frequencyMax,</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>frequencyRebin);</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Private<sp/>Attributes</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>m_Ntime;</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>m_Nspectral;</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>m_NtimeReal;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>m_NspectralReal;</highlight></codeline>
+<codeline lineno="47"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Rebin/Stock_Write_Dynspec_Data_Part.h"/>
+  </compounddef>
+</doxygen>

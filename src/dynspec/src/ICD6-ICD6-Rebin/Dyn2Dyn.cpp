@@ -10,6 +10,49 @@ systeme Ubuntu 12.04 x86 LTS
 DAL v2.5 (library for hdf5 file)
 
 */
+
+
+/// Projet       LOFAR
+/// \file        Dyn2Dyn.cpp 
+/// \date        10/01/2013
+/// \author      Nicolas VILCHEZ
+/// \version     1.0
+/// \copyright   LPC2E/CNRS Station de radio-astronomie de Nançay
+///  \see DAL Library 2.5 (library for hdf5 file)
+///  \brief 	 Main program for converting ICD3 files to ICD6 (dynamic spectrum) files with (or not) a time-frequency selection and/or rebinning
+///  \details  
+/// <br />Algorithm overview:
+/// <br />This code (pipeline) uses several classes. Each classes has a particular role for processing dynamic spectrum data (ICD6). 
+///	 The role of this code is to convert a dynamic spectrum file in another lighter dynamic spectrum file. In fact, after a first processing, we obtain 
+///	 a first dynamic spectrum, but this dynamic spectrum is to massive to be visualized or the user needs only a smaller part of this spectrum. It is 
+/// 	 useless and unoptimized to reprocess all the ICD3 data ! Because ICD3 data must be very massive (more than 100 To) and time reprocessing could be very long (more than several day) !
+/// 	 So we introduce this tool to avoid reprocessing ! 
+///
+///  <br />Main code etablishes principal parameters of the observation (number of SAP, Beam and Stokes parameters. Thanks to robustess 
+///   	 nomenclature of ICD3 format, with these parameter we are able to know which file we have to process for a given SAP, Beam and Stokes parameter)
+///   	 After existency tests and principal parameters determination, the main code will loop of the SAPs that it has to process:
+///   	 
+///   	 First the code wil stock Root group metadata. Root Metadata are red by a function named readRoot and contained in the class Reader_Root_Dyn2Dyn_Part.h, the
+///   	  Root group is generated and Root's matadata are stocked, then written by a function named writeRootMetadata and contained in the class Stock_Write_Root_Dyn2Dyn_Metadata_Part.h
+///   	 
+///   	 Secondly, the main code will loop on Beam, and generate dynamic spectrum group and its metadata. The dynamic spectrum's metadata are red by a function named
+///   	 readDynspec and contained in the class Reader_Dyn2Dyn_Part.h, after, metadata are stocked, then written by a function named writeDynspecMetadata contained in
+///   	 Stock_Write_Dyn2Dyn_Metadata_Part.h
+///   	 
+///   	 Finaly, data are processed. Because LOFAR data are very voluminous, we have to develop a strategy for:
+/// <br /> - To avoid swaping
+/// <br /> - To have enough memory for loading data
+/// <br /> - etc ...
+///   	 We decide to use a frozen quantity of RAM for a processing. This quantity is chosen by the user and corresponds to a number of time bins that we can process
+///   	 for this RAM.
+///   	 So, the code will loop of the number of Time series we need to process all the selected data. Rebinning is done inside these blocks. 
+///   	 To conclude, data processing is done time blocks by time blocks, and data generation is done by the function  writeDynspecData which is included in the class 
+///   	 Stock_Write_Dyn2Dyn_Data_Part.h
+/// 	 Only selected data (time-frequency selection) are processed and/or rebinned !!
+
+
+
+
 #include <iostream>
 #include <string>
 #include <time.h>
@@ -33,6 +76,58 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+  
+  
+/// <br /> USAGE: Dyn2Dyn  Dynspec_File  Observation-Number(ex:Lxxxxx) Output-hdf5-File TimeMin TimeMax TimeRebin(s/pixel) FrequencyMin FrequencyMax FrequencyRebin(MHz/pixel) RebinAll(yes or no) [Facultative: Dataset-RAM-allocation (in Go; default value: 1Go) NumberOfSAP(if No, number of SAP to rebin/ if yes put 0 as default Value)]
+
+/// \param argc Number of arguments
+/// \param argv Table of arguments(see above c.f Usage)
+
+/// <br />\see Variables:
+/// <br />Dynspec_File: Observation File (ICD6 file) 
+/// <br />obsName: Observation ID
+/// <br />outputFile: Output file for One SAP contains all dynamic spectrum associated to this SAP
+/// <br />timeMinSelect: Minimum Time selection
+/// <br />timeMaxSelect: Maximum Time selection
+/// <br />timeRebin: Time rebinning
+/// <br />frequencyMin: Minimum Frequency selection
+/// <br />frequencyMax: Maximum Frequency selection
+/// <br />frequencyRebin: Frequency rebinning in a subbands => equal to 1 or a multiply of 2^n
+/// <br />rebinAllDynspec: yes or no => convert one or all SAP (Sub array pointing i.e line of sight for an observation i.e observed source)
+/// <br />SAPNumber Number: of SAP to process 
+/// <br />memoryRAM: RAM Memory allocation for processing
+/// <br />
+/// <br />Test Existing files allow to determinine main observation parameter:
+/// <br />obsNofSAP: Number of SAP contained in the observation directory
+/// <br />obsNofBeam: Number of BEAM (i.e signals from a station or a correlated sum) in the observation directory
+/// <br />obsNofStockes: Number of Stokes paramters contained in the observation directory
+/// <br />stokesComponent: Vector of Stokes parameter
+/// <br />
+/// <br />We have 2 kinds of observation: using or not Pxxx nomenclature 
+/// <br />rebinAllDynspec: Flag which allow to process only one selected SAP or All
+/// <br />methodFlag: Flag which allow to know if Pxxxnomenclatureis used
+
+/// <br />\see 2 modes (depends with nomenclature):
+/// <br />
+/// <br /> FIRST MODE:
+/// <br />Loop on SAPs
+/// <br />Root group generation => generation of the output file (*.h5) and its metadata	
+/// <br />Loop on BEAMs
+/// <br />generation of a dynamic spectrum in the Root group and its metadata
+/// <br />Data processing for this dynamic spectrum
+/// <br />
+/// <br /> SECOND MODE:
+/// <br />(if Pxxx nomenclature is used:) Loop on SAPs
+/// <br />(if Pxxx nomenclature is used:) Loop on BEAMs	
+/// <br />(if Pxxx nomenclature is used) Loop on differents Parts of the dynamic spectrum
+/// <br />(if Pxxx nomenclature is used) generation of a dynamic spectrum in the Root group and its metadata, One dynamic spectrum for each Part
+/// <br />(if Pxxx nomenclature is used) Data processing for this dynamic spectrum	  
+  
+/// <br />\return ICD6files  
+  
+  
+  
+  
   // Time CPU computation  
   clock_t start, end;
   double cpu_time_used;  

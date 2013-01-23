@@ -1,0 +1,189 @@
+.TH "Stock_Write_Root_Metadata_Part" 3 "Thu Jan 10 2013" "LOFAR-ICD3 Convertor with selection and/or rebinning" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Stock_Write_Root_Metadata_Part \- 
+.PP
+Class object for stock and write metadatas for the ICD6's Root Group\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <Stock_Write_Root_Metadata_Part\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBstockRootMetadata\fP (std::string attr_1, std::string attr_2, std::string attr_3, std::string attr_4, std::string attr_5, std::string attr_7, std::string attr_8, std::string attr_9, std::string attr_10, std::string attr_11, std::string attr_12, std::string attr_13, double attr_14, std::string attr_16, double attr_17, int attr_19, std::vector< std::string > attr_20, double attr_21, double attr_22, double attr_23, std::string attr_24, int attr_25, double attr_26, std::string attr_27, std::string attr_28, std::string attr_29, std::string attr_30, std::string attr_31, std::string attr_32, std::string attr_33, std::string attr_34, std::string attr_35, std::string attr_36, bool attr_37, int attr_38, int attr_39, std::string attr_40, std::string attr_41, std::string attr_42, double attr_45, double attr_46, double attr_47, std::vector< std::string > attr_48, std::vector< std::string > attr_49, int attr_52, double attr_53, std::string attr_54, double attr_55, std::string attr_56, double attr_57, std::string attr_58, int attr_59, double attr_60, std::string attr_61, double attr_62, std::string attr_63, double attr_64, std::vector< std::string > attr_65, std::vector< double > attr_66, std::vector< double > attr_67, std::vector< double > attr_68)"
+.br
+.ti -1c
+.RI "void \fBwriteRootMetadata\fP (std::string outputFile, File &root_grp)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Class object for stock and write metadatas for the ICD6's Root Group\&. 
+
+
+.br
+ Usage: 
+.br
+ This class need as parameter all metadata for the ICD6( or dynamic spectrum)'s Root Group\&. The function stockRootMetadata stocks Root metadata in private attributes, and the function writeRootMetadata write them in the Root Group of the hdf5 file in output 
+.SH "Member Function Documentation"
+.PP 
+.SS "void \fBStock_Write_Root_Metadata_Part::stockRootMetadata\fP (std::stringattr_1, std::stringattr_2, std::stringattr_3, std::stringattr_4, std::stringattr_5, std::stringattr_7, std::stringattr_8, std::stringattr_9, std::stringattr_10, std::stringattr_11, std::stringattr_12, std::stringattr_13, doubleattr_14, std::stringattr_16, doubleattr_17, intattr_19, std::vector< std::string >attr_20, doubleattr_21, doubleattr_22, doubleattr_23, std::stringattr_24, intattr_25, doubleattr_26, std::stringattr_27, std::stringattr_28, std::stringattr_29, std::stringattr_30, std::stringattr_31, std::stringattr_32, std::stringattr_33, std::stringattr_34, std::stringattr_35, std::stringattr_36, boolattr_37, intattr_38, intattr_39, std::stringattr_40, std::stringattr_41, std::stringattr_42, doubleattr_45, doubleattr_46, doubleattr_47, std::vector< std::string >attr_48, std::vector< std::string >attr_49, intattr_52, doubleattr_53, std::stringattr_54, doubleattr_55, std::stringattr_56, doubleattr_57, std::stringattr_58, intattr_59, doubleattr_60, std::stringattr_61, doubleattr_62, std::stringattr_63, doubleattr_64, std::vector< std::string >attr_65, std::vector< double >attr_66, std::vector< double >attr_67, std::vector< double >attr_68)"
+.br
+ Usage: 
+.br
+ void \fBStock_Write_Root_Metadata_Part::stockRootMetadata\fP(string attr_1,string attr_2,string attr_3,string attr_4,string attr_5,string attr_7,string attr_8,string attr_9,string attr_10, string attr_11,string attr_12,string attr_13,double attr_14,string attr_16,double attr_17,int attr_19, vector<string> attr_20,double attr_21,double attr_22,double attr_23,string attr_24,int attr_25,double attr_26,string attr_27, string attr_28,string attr_29,string attr_30,string attr_31,string attr_32,string attr_33,string attr_34,string attr_35,string attr_36, bool attr_37,int attr_38,int attr_39,string attr_40,string attr_41,string attr_42,double attr_45,double attr_46,double attr_47, vector<string> attr_48,vector<string> attr_49,int attr_52,double attr_53,string attr_54,double attr_55,string attr_56,double attr_57,string attr_58, int attr_59,double attr_60,string attr_61,double attr_62,string attr_63,double attr_64,vector<string> attr_65,vector<double> attr_66, vector<double> attr_67,vector<double> attr_68)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIattr_1\fP GROUPETYPE 
+.br
+\fIattr_2\fP FILENAME 
+.br
+\fIattr_3\fP FILEDATE 
+.br
+\fIattr_4\fP FILETYPE 
+.br
+\fIattr_5\fP TELESCOPE 
+.br
+\fIattr_7\fP PROJECT_ID 
+.br
+\fIattr_8\fP PROJECT_TITLE 
+.br
+\fIattr_9\fP PROJECT_PI 
+.br
+\fIattr_10\fP PROJECT_CO_I 
+.br
+\fIattr_11\fP PROJECT_CONTACT 
+.br
+\fIattr_12\fP OBSERVATION_ID 
+.br
+\fIattr_13\fP OBSERVATION_START_UTC 
+.br
+\fIattr_14\fP OBSERVATION_START_MJD 
+.br
+\fIattr_16\fP OBSERVATION_END_UTC 
+.br
+\fIattr_17\fP OBSERVATION_END_MJD 
+.br
+\fIattr_19\fP OBSERVATION_NOF_STATIONS 
+.br
+\fIattr_20\fP OBSERVATION_STATIONS_LIST 
+.br
+\fIattr_21\fP OBSERVATION_FREQUENCY_MAX 
+.br
+\fIattr_22\fP OBSERVATION_FREQUENCY_MIN 
+.br
+\fIattr_23\fP OBSERVATION_FREQUENCY_CENTER 
+.br
+\fIattr_24\fP OBSERVATION_FREQUENCY_UNIT 
+.br
+\fIattr_25\fP OBSERVATION_NOF_BITS_PER_SAMPLE 
+.br
+\fIattr_26\fP CLOCK_FREQUENCY 
+.br
+\fIattr_27\fP CLOCK_FREQUENCY_UNIT 
+.br
+\fIattr_28\fP ANTENNA_SET 
+.br
+\fIattr_29\fP FILTER_SELECTION 
+.br
+\fIattr_30\fP TARGET 
+.br
+\fIattr_31\fP SYSTEM_VERSION 
+.br
+\fIattr_32\fP PIPELINE_NAME 
+.br
+\fIattr_33\fP PIPELINE_VERSION 
+.br
+\fIattr_34\fP DOC_NAME 
+.br
+\fIattr_35\fP DOC_VERSION 
+.br
+\fIattr_36\fP NOTES 
+.br
+\fIattr_37\fP DYNSPEC_GROUP 
+.br
+\fIattr_38\fP NOF_DYNSPEC 
+.br
+\fIattr_39\fP NOF_TILED_DYNSPEC 
+.br
+\fIattr_40\fP CREATE_OFFLINE_ONLINE 
+.br
+\fIattr_41\fP BF_FORMAT 
+.br
+\fIattr_42\fP BF_VERSION 
+.br
+\fIattr_45\fP PRIMARY_POINTING_DIAMETER 
+.br
+\fIattr_46\fP POINT_RA 
+.br
+\fIattr_47\fP POINT_DEC 
+.br
+\fIattr_48\fP POINT_ALTITUDE 
+.br
+\fIattr_49\fP POINT_AZIMUTH 
+.br
+\fIattr_52\fP NOF_SAMPLES 
+.br
+\fIattr_53\fP SAMPLING_RATE 
+.br
+\fIattr_54\fP SAMPLING_RATE_UNIT 
+.br
+\fIattr_55\fP SAMPLING_TIME 
+.br
+\fIattr_56\fP SAMPLING_TIME_UNIT 
+.br
+\fIattr_57\fP TOTAL_INTEGRATION_TIME 
+.br
+\fIattr_58\fP TOTAL_INTEGRATION_TIME_UNIT 
+.br
+\fIattr_59\fP CHANNELS_PER_SUBANDS 
+.br
+\fIattr_60\fP SUBBAND_WIDTH 
+.br
+\fIattr_61\fP SUBBAND_WIDTH_UNIT 
+.br
+\fIattr_62\fP CHANNEL_WIDTH 
+.br
+\fIattr_63\fP CHANNEL_WIDTH_UNIT 
+.br
+\fIattr_64\fP TOTAL_BAND_WIDTH 
+.br
+\fIattr_65\fP WHEATER_STATIONS_LIST 
+.br
+\fIattr_66\fP WHEATER_TEMPERATURE 
+.br
+\fIattr_67\fP WHEATER_HUMIDITY 
+.br
+\fIattr_68\fP SYSTEM_TEMPERATURE
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+nothing 
+.RE
+.PP
+
+.SS "void \fBStock_Write_Root_Metadata_Part::writeRootMetadata\fP (std::stringoutputFile, File &root_grp)"
+.br
+ Usage: 
+.br
+ void Stock_Write_Root_Metadata_Part::writeRootMetadata(string outputFile,File &root_grp)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIoutputFile\fP this is the output file (dynamic spectrum file) 
+.br
+\fI&root_grp\fP \fBStock_Write_Root_Metadata_Part\fP Object for catching stocked private attributes 
+.RE
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for LOFAR-ICD3 Convertor with selection and/or rebinning from the source code\&.

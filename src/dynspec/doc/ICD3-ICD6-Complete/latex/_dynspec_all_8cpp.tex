@@ -1,0 +1,160 @@
+\section{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Complete/\-Dynspec\-All.cpp \-File \-Reference}
+\label{_dynspec_all_8cpp}\index{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Complete/\-Dynspec\-All.\-cpp@{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Complete/\-Dynspec\-All.\-cpp}}
+
+
+\-Main program for converting \-I\-C\-D3 files to \-I\-C\-D6 (dynamic spectrum) files without any time-\/frequency selection and rebinning (\-Complete convertion)  
+
+
+{\ttfamily \#include $<$iostream$>$}\*
+{\ttfamily \#include $<$string$>$}\*
+{\ttfamily \#include $<$fstream$>$}\*
+{\ttfamily \#include $<$time.\-h$>$}\*
+{\ttfamily \#include $<$unistd.\-h$>$}\*
+{\ttfamily \#include \char`\"{}\-Reader\-\_\-\-Root.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Reader\-\_\-\-Dynspec.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Metadata.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data.\-h\char`\"{}}\*
+{\ttfamily \#include $<$dal/lofar/\-B\-F\-\_\-\-File.\-h$>$}\*
+\-Include dependency graph for \-Dynspec\-All.\-cpp\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{_dynspec_all_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bf is\-\_\-readable\-Ter} (const std\-::string \&file)
+\item 
+int {\bf main} (int argc, char $\ast$argv[$\,$])
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Main program for converting \-I\-C\-D3 files to \-I\-C\-D6 (dynamic spectrum) files without any time-\/frequency selection and rebinning (\-Complete convertion) \-Projet \-L\-O\-F\-A\-R
+
+\begin{DoxyDate}{\-Date}
+17/12/2012 
+\end{DoxyDate}
+\begin{DoxyAuthor}{\-Author}
+\-Nicolas \-V\-I\-L\-C\-H\-E\-Z 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{\-Version}
+1.\-0 
+\end{DoxyVersion}
+\begin{DoxyCopyright}{\-Copyright}
+\-L\-P\-C2\-E/\-C\-N\-R\-S \-Station de radio-\/astronomie de \-Nançay 
+\end{DoxyCopyright}
+\begin{DoxySeeAlso}{\-See also}
+\-D\-A\-L \-Library 2.\-5 (library for hdf5 file)
+\end{DoxySeeAlso}
+\par
+\-Algorithm overview\-: \-This code (pipeline) uses several classes. \-Each classes has a particular role for processing \-I\-C\-D3 data to dynamic spectrum data (\-I\-C\-D6) \-The main code etablishes principal parameters of the observation (number of \-S\-A\-P, \-Beam and \-Stokes parameters. \-Thanks to robustess nomenclature of \-I\-C\-D3 format, with these parameters, we are able to know which file we have to process for a given \-S\-A\-P, \-Beam and \-Stokes parameter) \-After existency tests and principal parameters determination, the main code will loop of the \-S\-A\-Ps that it has to process\-:
+
+\-First, the code wil stock \-Root group metadata. \-Root \-Metadata are red by a function named read\-Root and contained in the class \doxyref{\-Reader\-\_\-\-Root.\-h}{p.}{_reader___root_8h}, the \-Root group is generated and \-Root's metadata are stocked, then written by a function named write\-Root\-Metadata and contained in the class \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata.\-h}{p.}{_stock___write___root___metadata_8h}
+
+\-Secondly, the main code will loop on \-Beam, and generate dynamic spectrum group and its metadata. \-The dynamic spectrum's metadata are red by a function named read\-Dynspec and contained in the class \doxyref{\-Reader\-\_\-\-Dynspec.\-h}{p.}{_reader___dynspec_8h}, after, metadata are stoked, then written by a function named write\-Dynspec\-Metadata contained in \-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Metadata\-\_\-\-Part.\-h
+
+\-Finaly, data are processed. \-Because \-L\-O\-F\-A\-R data are very voluminous, we have to develop a strategy for\-: \par
+ -\/ avoid swaping \par
+ -\/ have enough memory for loading data \par
+ etc ... \-We decide to use a frozen quantity of \-R\-A\-M for a processing. \-This quantity is chosen by the user and corresponds to a number of time bins that we can process for this \-R\-A\-M. \-So, the code will loop of the number of \-Time series we need to process all data. no rebinning is done inside these blocks (see \-I\-C\-D3-\/\-I\-C\-D6-\/\-Rebin module). \-To conclude, data processing is done time blocks by time blocks, and data generation is done by the function write\-Dynspec\-Data which is included in the class \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data.\-h}{p.}{_stock___write___dynspec___data_8h} \-All data contained in \-I\-C\-D3 observation are processed 
+
+\subsection{\-Function \-Documentation}
+\index{\-Dynspec\-All.\-cpp@{\-Dynspec\-All.\-cpp}!is\-\_\-readable\-Ter@{is\-\_\-readable\-Ter}}
+\index{is\-\_\-readable\-Ter@{is\-\_\-readable\-Ter}!DynspecAll.cpp@{\-Dynspec\-All.\-cpp}}
+\subsubsection[{is\-\_\-readable\-Ter}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf is\-\_\-readable\-Ter} (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{file}
+\end{DoxyParamCaption}
+)}\label{_dynspec_all_8cpp_a5403ee0052605540e098ac825f236c90}
+
+\begin{DoxyParams}{\-Parameters}
+{\em file} & \par
+\-Check if file is readable, so if file exists ! \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+boolean value 
+\end{DoxyReturn}
+
+
+\-Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=234pt]{_dynspec_all_8cpp_a5403ee0052605540e098ac825f236c90_icgraph}
+\end{center}
+\end{figure}
+
+
+\index{\-Dynspec\-All.\-cpp@{\-Dynspec\-All.\-cpp}!main@{main}}
+\index{main@{main}!DynspecAll.cpp@{\-Dynspec\-All.\-cpp}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf main} (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$}]{argv[$\,$]}
+\end{DoxyParamCaption}
+)}\label{_dynspec_all_8cpp_a0ddf1224851353fc92bfbff6f499fa97}
+\par
+\-Usage\-: \-Dynspec \-Observation-\/\-Path-\/\-D\-I\-R \-Observation-\/\-Number(ex\-:\-Lxxxxx) \-Output-\/hdf5-\/\-D\-I\-R [\-Facultative\-:\-Dataset-\/\-R\-A\-M-\/allocation (in \-Go; default value\-: 1\-Go)]
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em argc} & \-Number of arguments \\
+\hline
+{\em argv} & \-Table of arguments(see above c.\-f \-Usage)\\
+\hline
+\end{DoxyParams}
+\par
+\begin{DoxySeeAlso}{\-See also}
+\-Variables\-: \par
+path\-Dir \-Observation (\-I\-C\-D3) directory \par
+obs\-Name \-Observation \-I\-D \par
+\-S\-A\-P\-Number \-Number of \-S\-A\-P to process \par
+memory\-R\-A\-M \-R\-A\-M \-Memory allocation for processing \par
+\-Test \-Existing files allow to determinine \doxyref{main}{p.}{_dynspec_all_8cpp_a0ddf1224851353fc92bfbff6f499fa97} observation parameter\-: \par
+obs\-Nof\-S\-A\-P \-Number of \-S\-A\-P contained in the observation directory \par
+obs\-Nof\-Beam \-Number of \-B\-E\-A\-M (i.\-e signals from a station or a correlated sum) in the observation directory \par
+obs\-Nof\-Stockes \-Number of \-Stokes paramters contained in the observation directory \par
+stokes\-Component \-Vector of \-Stokes parameter \par
+\-We have 2 kinds of observation\-: using or not \-Pxxx nomenclature \par
+rebin\-All\-Dynspec \-Flag which allow to process only one selected \-S\-A\-P or \-All \par
+method\-Flag \-Flag which allow to know if \-Pxxxnomenclatureis used \par
+output\-File \-Output file for \-One \-S\-A\-P contains all dynamic spectrum
+\end{DoxySeeAlso}
+\par
+\begin{DoxySeeAlso}{\-See also}
+2 modes (depends with nomenclature)\-: \par
+ \par
+ \-F\-I\-R\-S\-T \-M\-O\-D\-E\-: \par
+\-Loop on \-S\-A\-Ps \par
+\-Root group generation =$>$ generation of the output file ($\ast$.h5) and its metadata \par
+\-Loop on \-B\-E\-A\-Ms \par
+generation of a dynamic spectrum in the \-Root group and its metadata \par
+\-Data processing for this dynamic spectrum \par
+ \par
+ \-S\-E\-C\-O\-N\-D \-M\-O\-D\-E\-: \par
+(if \-Pxxx nomenclature is used\-:) \-Loop on \-S\-A\-Ps \par
+(if \-Pxxx nomenclature is used\-:) \-Loop on \-B\-E\-A\-Ms \par
+(if \-Pxxx nomenclature is used) \-Loop on differents \-Parts of the dynamic spectrum \par
+(if \-Pxxx nomenclature is used) generation of a dynamic spectrum in the \-Root group and its metadata, \-One dynamic spectrum for each \-Part \par
+(if \-Pxxx nomenclature is used) \-Data processing for this dynamic spectrum
+\end{DoxySeeAlso}
+\par
+\begin{DoxyReturn}{\-Returns}
+\-I\-C\-D6files 
+\end{DoxyReturn}
+
+
+\-Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{_dynspec_all_8cpp_a0ddf1224851353fc92bfbff6f499fa97_cgraph}
+\end{center}
+\end{figure}
+
+

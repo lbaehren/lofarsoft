@@ -7,6 +7,17 @@
 
 #include <dal/lofar/BF_File.h>
 
+
+/// \class Stock_Write_Dynspec_Data_Part
+///  \brief Class object for stocking data parameters, processing the (select or rebin) and write data Matrix in the ICD6's Dynspec Groups 
+///  \details  
+/// <br /> Usage: 
+/// <br /> This class need as parameter all metadata of the dynamic spectrum Goup for process the data. 
+/// Data have 3 dimensions (at the opposite to ICD3 data which have 2). The additionnal dimension is Stokes. 
+/// The function stockDynspecData stocks  paramerter (for rebinning the data) in private attributes, and the function writeDynspecData
+/// process the data themselves. 
+
+
 using namespace dal;
 
 class Stock_Write_Dynspec_Data_Part

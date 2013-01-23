@@ -1,0 +1,118 @@
+\section{\-Reader\-\_\-\-Root \-Class \-Reference}
+\label{class_reader___root}\index{\-Reader\-\_\-\-Root@{\-Reader\-\_\-\-Root}}
+
+
+\-Class object for read \-I\-C\-D3 files and put in variables metadatas for the \-I\-C\-D6's \-Root \-Group.  
+
+
+
+
+{\ttfamily \#include $<$\-Reader\-\_\-\-Root.\-h$>$}
+
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\bf \-Reader\-\_\-\-Root} ()
+\item 
+{\bf $\sim$\-Reader\-\_\-\-Root} ()
+\item 
+void {\bf read\-Root} (std\-::string path\-File, std\-::string obs\-Name, {\bf \-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata} $\ast$root\-Metadata, int obs\-Nof\-Source, int obs\-Nof\-Beam, int obs\-Nof\-Frequency\-Band, int obs\-Nof\-Tiled\-Dynspec, std\-::string \-S\-A\-Pname, int \-S\-A\-Pindex)
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Class object for read \-I\-C\-D3 files and put in variables metadatas for the \-I\-C\-D6's \-Root \-Group. 
+
+\par
+ \-Usage\-: \par
+ \-This class need as parameter a \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata}{p.}{class_stock___write___root___metadata} object. \-The read\-Root function will read root metadatas and stock them in the \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata}{p.}{class_stock___write___root___metadata} object as private attributes. \-These attributes will be written in the next step by stock\-Root\-Metadata function which is in the class \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata.\-h}{p.}{_stock___write___root___metadata_8h} 
+
+\subsection{\-Constructor \& \-Destructor \-Documentation}
+\index{\-Reader\-\_\-\-Root@{\-Reader\-\_\-\-Root}!\-Reader\-\_\-\-Root@{\-Reader\-\_\-\-Root}}
+\index{\-Reader\-\_\-\-Root@{\-Reader\-\_\-\-Root}!Reader_Root@{\-Reader\-\_\-\-Root}}
+\subsubsection[{\-Reader\-\_\-\-Root}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Reader\-\_\-\-Root\-::\-Reader\-\_\-\-Root} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_reader___root_a1cb5e85ba5c6a9380001e4aa084c2cde}
+\index{\-Reader\-\_\-\-Root@{\-Reader\-\_\-\-Root}!$\sim$\-Reader\-\_\-\-Root@{$\sim$\-Reader\-\_\-\-Root}}
+\index{$\sim$\-Reader\-\_\-\-Root@{$\sim$\-Reader\-\_\-\-Root}!Reader_Root@{\-Reader\-\_\-\-Root}}
+\subsubsection[{$\sim$\-Reader\-\_\-\-Root}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \-Reader\-\_\-\-Root\-::$\sim$\-Reader\-\_\-\-Root} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_reader___root_a0adebb07fe89aaacd0cfb5e75192979b}
+
+
+\subsection{\-Member \-Function \-Documentation}
+\index{\-Reader\-\_\-\-Root@{\-Reader\-\_\-\-Root}!read\-Root@{read\-Root}}
+\index{read\-Root@{read\-Root}!Reader_Root@{\-Reader\-\_\-\-Root}}
+\subsubsection[{read\-Root}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Reader\-\_\-\-Root\-::read\-Root} (
+\begin{DoxyParamCaption}
+\item[{std\-::string}]{path\-File, }
+\item[{std\-::string}]{obs\-Name, }
+\item[{{\bf \-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata} $\ast$}]{root\-Metadata, }
+\item[{int}]{obs\-Nof\-Source, }
+\item[{int}]{obs\-Nof\-Beam, }
+\item[{int}]{obs\-Nof\-Frequency\-Band, }
+\item[{int}]{obs\-Nof\-Tiled\-Dynspec, }
+\item[{std\-::string}]{\-S\-A\-Pname, }
+\item[{int}]{\-S\-A\-Pindex}
+\end{DoxyParamCaption}
+)}\label{class_reader___root_a6a022809888fdc2b66fccc63ebac2dd9}
+\par
+ \-Usage\-: \par
+ void \-Reader\-\_\-\-Root\-::read\-Root(string path\-File,string obs\-Name,\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata $\ast$root\-Metadata,int obs\-Nof\-Source,int obs\-Nof\-Beam,int obs\-Nof\-Frequency\-Band,int obs\-Nof\-Tiled\-Dynspec, string S\-A\-Pname, int S\-A\-Pindex)
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em path\-File\-I\-C\-D3} & file to read \\
+\hline
+{\em obs\-Name} & observation \-I\-D \\
+\hline
+{\em $\ast$root\-Metadata} & \-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Metadata\-\_\-\-Part class object \\
+\hline
+{\em obs\-Nof\-Source} & number of sources \\
+\hline
+{\em obs\-Nof\-Beam} & number of beam \\
+\hline
+{\em obs\-Nof\-Frequency\-Bandnumber} & of frequency band \\
+\hline
+{\em obs\-Nof\-Tiled\-Dynspecnumber} & of tiled dynspec \\
+\hline
+{\em \-S\-A\-Pname} & name of \-Sub\-Array\-Pointing \\
+\hline
+{\em \-S\-A\-Pindex} & index of \-Sub\-Array\-Pointing\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+nothing 
+\end{DoxyReturn}
+
+
+\-Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_reader___root_a6a022809888fdc2b66fccc63ebac2dd9_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+\-Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=274pt]{class_reader___root_a6a022809888fdc2b66fccc63ebac2dd9_icgraph}
+\end{center}
+\end{figure}
+
+
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Complete/{\bf \-Reader\-\_\-\-Root.\-h}\item 
+/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Complete/{\bf \-Reader\-\_\-\-Root.\-cpp}\end{DoxyCompactItemize}

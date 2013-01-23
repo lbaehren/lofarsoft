@@ -1,9 +1,19 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 
 #include "Stock_Write_Dynspec_Data.h"
 
 #include <dal/lofar/BF_File.h>
+
+/// \file Stock_Write_Dynspec_Data.cpp
+///  \brief File C++ (associated to Stock_Write_Dynspec_Data_Part.h) for stock process parameters (for rebinning the data)  and write data Matrix for the ICD6's Dynspec Groups 
+///  \details  
+/// <br /> Overview:
+/// <br /> Functions stockDynspecData and writeDynspecData are described (programmed) here. 
+/// The first one (stockDynspecData) will take as parameter processing parameters and stok them as private attributes. 
+/// The second function (writeDynspecData) will write them in the hdf5 output file (in the corresponding dynspec).
+/// Data processing is coded here !!
 
 using namespace dal;
 using namespace std;
@@ -14,13 +24,57 @@ using namespace std;
   
   void Stock_Write_Dynspec_Data::stockDynspecData(int Ntime,int Nspectral)
   {
+    
+  /// <br /> Usage:
+  /// <br />     void Stock_Write_Dynspec_Data::stockDynspecData(int Ntime,int Nspectral)
+  /// \param   Ntime   time binning
+  /// \param   Nspectral  spectral (frequency)  binning (number of channels per subbands)
+    
     m_Ntime = Ntime;
     m_Nspectral = Nspectral;
   }
 
 
+  
+   bool is_readable( const std::string & file ) 
+  { 
+    /// \param file
+    /// <br />Check if file is readable, so if file exists !
+    /// \return boolean value 
+
+    std::ifstream fichier( file.c_str() ); 
+    return !fichier.fail(); 
+  } 
+    
+  
+  
   void Stock_Write_Dynspec_Data::writeDynspecData(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM, int SAPindex)  
   {
+      
+    
+  /// <br /> Usage:
+  /// <br />   void Stock_Write_Dynspec_Data::writeDynspecData(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM, int SAPindex)  
+
+  /// \param  &dynspec_grp Group Object(Dynamic spectrum object)
+  /// \param  pathDir ICD3 path directory
+  /// \param  obsName Observation ID
+  /// \param  pathFile ICD3 path for loading file
+  /// \param  outputFile output file 
+  /// \param  &root_grp File Object (Root Group object)
+  /// \param  i Subarray pointing loop index
+  /// \param  j Beams loop index
+  /// \param  k loop index
+  /// \param  l loop index
+  /// \param  q Pxx nomenclature loop index
+  /// \param  obsNofStockes number of Stokes components
+  /// \param  stokesComponent vector which contains all Stokes components
+  /// \param  memoryRAM RAM memory consuption by processing
+  /// \param  SAPindex Subarray pointings to process
+
+      cout << "begin BEAM N° :" <<  j << endl;
+
+      // Go for Writting, but before test if files exists !!	    
+    
       string index_i1,index_j1,index_k1,index_q1;
       std::ostringstream oss_i;oss_i << i;string index_i(oss_i.str());
       if (i<10){index_i1="_SAP00"+index_i;}
@@ -43,8 +97,41 @@ using namespace std;
       if (k>=10 && k<100){index_k1="0"+index_k;}
       if (k>=100 && k<1000){index_k1=index_k;}
       
-      pathFile	= pathFile+index_i1+index_j1+"_S0"+index_q1+"_bf.h5"; 
+  
+      string pathFile0(pathFile);  
+      pathFile		= pathFile0+index_i1+index_j1+"_S0"+index_q1+"_bf.h5"; 
+      string pathRaw 	= pathFile0+index_i1+index_j1+"_S0"+index_q1+"_bf.raw";       
     
+      // Condition for generating the Dynamic Spectrum Stockes I must
+      
+      unsigned long int noEmptyStokes(0);
+      
+      if ( is_readable(pathRaw) and is_readable(pathFile)) 
+	  {noEmptyStokes =0;}
+      else
+	  {pathRaw = pathFile0+index_i1+index_j1+"_S1"+index_q1+"_bf.raw";
+	   pathFile= pathFile0+index_i1+index_j1+"_S1"+index_q1+"_bf.h5";
+	   if ( is_readable(pathRaw) and is_readable(pathFile))
+		{noEmptyStokes =1;}	   
+	   else
+		{pathRaw = pathFile0+index_i1+index_j1+"_S2"+index_q1+"_bf.raw";
+		 pathFile= pathFile0+index_i1+index_j1+"_S2"+index_q1+"_bf.h5";
+		 if ( is_readable(pathRaw) and is_readable(pathFile))
+		     {noEmptyStokes =2;}
+		 else
+		     {pathRaw = pathFile0+index_i1+index_j1+"_S3"+index_q1+"_bf.raw";
+		      pathFile= pathFile0+index_i1+index_j1+"_S3"+index_q1+"_bf.h5";
+		      if ( is_readable(pathRaw)  and is_readable(pathFile))
+			  {noEmptyStokes =3;}
+		      else
+			  {noEmptyStokes =4;}
+		      }
+		}
+	  }
+	
+
+      if (noEmptyStokes < 4)	// Test for checking Empty Dynspec !!
+	{	    
       
       ////////////////////////////////////////////////////////////////
       // Redefine ObsStokes for particluar Cases
@@ -243,4 +330,41 @@ using namespace std;
       
       cout << "SubArrayPointings N° "<< SAPindex <<" and Dynspec N° " << index_k << " is done" << endl; 
       cout << endl;
+  	} // end of empty stokes
+	else
+	  {
+	    
+	    Group process_histo_grp(dynspec_grp, "PROCESS_HISTORY");
+	    Attribute<string> missedData(process_histo_grp, "MISSED DATA");
+	    missedData.value = "All Stokes Parameter Data are missing in ICD3 Observation";	    
+	    
+	    
+	    
+	    Dataset<float> data_grp(dynspec_grp, "DATA");
+	    vector<ssize_t> dimensions(3);
+	    dimensions[0] = m_Ntime;
+	    dimensions[1] = m_Nspectral;
+	    dimensions[2] = 1;      
+	    data_grp.create( dimensions );
+
+
+	    string GROUPE_TYPE_DATA("Data");
+	    string WCSINFO("/Coordinates");
+	    unsigned long int DATASET_NOF_AXIS(3);
+	    vector<unsigned long int> DATASET_SHAPE(1);DATASET_SHAPE[0];
+		      
+	    Attribute<string> attr_143(data_grp, "GROUPE_TYPE");
+	    Attribute<string> attr_144 (data_grp, "WCSINFO: DATA SET IS EMPTY (BEFORE PROCESSING)");
+	    Attribute<unsigned long int> attr_145(data_grp, "DATASET_NOF_AXIS");
+	    Attribute< vector<unsigned long int> > attr_146(data_grp, "DATASET_SHAPE");
+		
+	    attr_143.value = GROUPE_TYPE_DATA;
+	    attr_144.value = WCSINFO;
+	    attr_145.value = DATASET_NOF_AXIS;
+	    attr_146.create().set(DATASET_SHAPE);  
+	    
+	    cout << "SubArrayPointings N° "<< SAPindex <<" and Dynspec N° " << index_k << " is done and empty => data missed" << endl;	  
+	  }
+	  
+	    
   }

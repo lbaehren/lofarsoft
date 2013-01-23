@@ -1,0 +1,100 @@
+\section{\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part \-Class \-Reference}
+\label{class_reader___root___dyn2_dyn___part}\index{\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part@{\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part}}
+
+
+\-Class object for read \-I\-C\-D3 files and put in variables metadatas for the \-I\-C\-D6's \-Root \-Group.  
+
+
+
+
+{\ttfamily \#include $<$\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part.\-h$>$}
+
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bf read\-Root} (std\-::string path\-File, std\-::string obs\-Name, {\bf \-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part} $\ast$root\-Metadata, int obs\-Nof\-Beam, float time\-Min\-Select, float time\-Max\-Select, float time\-Rebin, float frequency\-Min, float frequency\-Max, float frequency\-Rebin)
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Class object for read \-I\-C\-D3 files and put in variables metadatas for the \-I\-C\-D6's \-Root \-Group. 
+
+\par
+ \-Usage\-: \par
+ \-This class need as parameter a \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part}{p.}{class_stock___write___root___dyn2_dyn___metadata___part} object. \-The read\-Root function will read root metadatas and stock them in the \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part}{p.}{class_stock___write___root___dyn2_dyn___metadata___part} object as private attributes. \-These attributes will be written in the next step by stock\-Root\-Metadata function which is in the class \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part.\-h}{p.}{_stock___write___root___dyn2_dyn___metadata___part_8h_source} 
+
+\subsection{\-Member \-Function \-Documentation}
+\index{\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part@{\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part}!read\-Root@{read\-Root}}
+\index{read\-Root@{read\-Root}!Reader_Root_Dyn2Dyn_Part@{\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part}}
+\subsubsection[{read\-Root}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part\-::read\-Root} (
+\begin{DoxyParamCaption}
+\item[{std\-::string}]{path\-File, }
+\item[{std\-::string}]{obs\-Name, }
+\item[{{\bf \-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part} $\ast$}]{root\-Metadata, }
+\item[{int}]{obs\-Nof\-Beam, }
+\item[{float}]{time\-Min\-Select, }
+\item[{float}]{time\-Max\-Select, }
+\item[{float}]{time\-Rebin, }
+\item[{float}]{frequency\-Min, }
+\item[{float}]{frequency\-Max, }
+\item[{float}]{frequency\-Rebin}
+\end{DoxyParamCaption}
+)}\label{class_reader___root___dyn2_dyn___part_a276db07fb7f17ca55f8da966c930333d}
+\par
+ \-Usage\-: \par
+ void \-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part\-::read\-Root(string path\-File,string obs\-Name,\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part $\ast$root\-Metadata,int obs\-Nof\-Beam,float time\-Min\-Select,float time\-Max\-Select,float time\-Rebin,float frequency\-Min,float frequency\-Max,float frequency\-Rebin)
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em path\-File} & file (dynamic spectrum) to read \\
+\hline
+{\em obs\-Name} & observation \-I\-D \\
+\hline
+{\em $\ast$root\-Metadata} & \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part}{p.}{class_stock___write___root___dyn2_dyn___metadata___part} class object \\
+\hline
+{\em obs\-Nof\-Beam} & number of beam \\
+\hline
+{\em time\-Min\-Select} & minimum time selection \\
+\hline
+{\em time\-Max\-Select} & maximum time selection \\
+\hline
+{\em time\-Rebin} & time rebinning \\
+\hline
+{\em frequency\-Min} & minimum frequency selection \\
+\hline
+{\em frequency\-Max} & maximum frequency selection \\
+\hline
+{\em frequency\-Rebin} & frequency rebinning\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+nothing 
+\end{DoxyReturn}
+
+
+\-Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_reader___root___dyn2_dyn___part_a276db07fb7f17ca55f8da966c930333d_cgraph}
+\end{center}
+\end{figure}
+
+
+
+
+\-Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=344pt]{class_reader___root___dyn2_dyn___part_a276db07fb7f17ca55f8da966c930333d_icgraph}
+\end{center}
+\end{figure}
+
+
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D6-\/\-I\-C\-D6-\/\-Rebin/\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part.\-h\item 
+/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D6-\/\-I\-C\-D6-\/\-Rebin/{\bf \-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part.\-cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.7.6.1">
+  <compounddef id="dir_5f9fac001b7c950476b64686cd56e361" kind="dir">
+    <compoundname>/home/vilchez/Bureau/dynspec/src/</compoundname>
+    <innerdir refid="dir_085f605145f083efd2b80533e3827d76">/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/</innerdir>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/home/vilchez/Bureau/dynspec/src/"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,748 @@
+.TH "Stock_Write_Dynspec_Metadata" 3 "Thu Jan 10 2013" "LOFAR-ICD3 Convertor without any  selection and rebinning" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Stock_Write_Dynspec_Metadata \- 
+.PP
+Class object for stock and write metadatas for the ICD6's Dynspec Groups (loop on Beams \&.\&.\&.)  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <Stock_Write_Dynspec_Metadata\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBStock_Write_Dynspec_Metadata\fP ()"
+.br
+.ti -1c
+.RI "\fB~Stock_Write_Dynspec_Metadata\fP ()"
+.br
+.ti -1c
+.RI "void \fBstockDynspecMetadata\fP (std::string attr_69, std::string attr_70, std::string attr_71, std::string attr_72, std::string attr_73, double attr_76, double attr_77, std::string attr_78, std::string attr_79, std::string attr_80, double attr_81, double attr_82, double attr_83, double attr_84, double attr_85, double attr_86, double attr_87, double attr_88, double attr_89, std::string attr_90, double attr_91, std::vector< std::string > attr_92, std::string attr_93, double attr_94, std::string attr_95, bool attr_96, std::vector< std::string > attr_97, bool attr_98, std::string attr_99, std::string attr_100, std::vector< double > attr_101, std::vector< std::string > attr_102, std::string attr_103, double attr_104, std::string attr_105, std::string attr_106, double attr_107, double attr_108, std::vector< std::string > attr_109, std::string attr_110, std::string attr_111, std::vector< std::string > attr_112, int attr_113, std::vector< std::string > attr_114, std::vector< std::string > attr_115, std::vector< double > attr_116, std::vector< double > attr_117, std::vector< double > attr_118, std::vector< double > attr_119, std::string attr_123, std::string attr_124, std::vector< std::string > attr_125, int attr_126, std::vector< std::string > attr_127, std::vector< std::string > attr_128, std::vector< double > attr_129, std::vector< double > attr_130, std::vector< double > attr_131, std::vector< double > attr_132, std::vector< double > attr_133, std::vector< double > attr_135, std::string attr_137, std::string attr_138, std::vector< std::string > attr_139, int attr_140, std::vector< std::string > attr_141, std::vector< std::string > attr_142, int Ntime, int Nspectral, std::string attr_147, std::string attr_148, int attr_149, std::string attr_150, std::string attr_151, int attr_152, std::vector< std::string > attr_153, std::vector< std::string > attr_154, std::vector< std::string > attr_155, std::vector< std::string > attr_156, std::vector< std::string > attr_157, std::vector< std::string > attr_158, std::string attr_159, bool attr_160, bool attr_161, bool attr_162, bool attr_163)"
+.br
+.ti -1c
+.RI "void \fBwriteDynspecMetadata\fP (Group &dynspec_grp, std::string pathDir, std::string obsName, std::string pathFile, std::string outputFile, File &root_grp, int i, int j, int k, int l, int q, int obsNofStockes, std::vector< std::string > stokesComponent, float memoryRAM)"
+.br
+.in -1c
+.SS "Private Attributes"
+
+.in +1c
+.ti -1c
+.RI "std::string \fBm_attr_69\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_70\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_71\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_72\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_73\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_76\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_77\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_78\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_79\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_80\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_81\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_82\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_83\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_84\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_85\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_86\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_87\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_88\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_89\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_90\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_91\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_92\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_92\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_93\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_94\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_95\fP"
+.br
+.ti -1c
+.RI "bool \fBm_attr_96\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_97\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_97\fP"
+.br
+.ti -1c
+.RI "bool \fBm_attr_98\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_99\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_100\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_101\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_101\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_102\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_102\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_103\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_104\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_105\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_106\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_107\fP"
+.br
+.ti -1c
+.RI "double \fBm_attr_108\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_109\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_109\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_110\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_111\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_112\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_112\fP"
+.br
+.ti -1c
+.RI "int \fBm_attr_113\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_114\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_114\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_115\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_115\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_116\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_116\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_117\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_117\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_118\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_118\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_119\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_119\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_123\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_124\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_125\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_125\fP"
+.br
+.ti -1c
+.RI "int \fBm_attr_126\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_127\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_127\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_128\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_128\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_129\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_129\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_130\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_130\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_131\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_131\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_132\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_132\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_133\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_133\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_135\fP"
+.br
+.ti -1c
+.RI "std::vector< double > \fBm_attr_135\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_137\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_138\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_139\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_139\fP"
+.br
+.ti -1c
+.RI "int \fBm_attr_140\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_141\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_141\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_142\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_142\fP"
+.br
+.ti -1c
+.RI "int \fBm_Ntime\fP"
+.br
+.ti -1c
+.RI "int \fBm_Nspectral\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_147\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_148\fP"
+.br
+.ti -1c
+.RI "int \fBm_attr_149\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_150\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_151\fP"
+.br
+.ti -1c
+.RI "int \fBm_attr_152\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_153\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_153\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_154\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_154\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_155\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_155\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_156\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_156\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_157\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_157\fP"
+.br
+.ti -1c
+.RI "int \fBm_size_attr_158\fP"
+.br
+.ti -1c
+.RI "std::vector< std::string > \fBm_attr_158\fP"
+.br
+.ti -1c
+.RI "std::string \fBm_attr_159\fP"
+.br
+.ti -1c
+.RI "bool \fBm_attr_160\fP"
+.br
+.ti -1c
+.RI "bool \fBm_attr_161\fP"
+.br
+.ti -1c
+.RI "bool \fBm_attr_162\fP"
+.br
+.ti -1c
+.RI "bool \fBm_attr_163\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Class object for stock and write metadatas for the ICD6's Dynspec Groups (loop on Beams \&.\&.\&.) 
+
+
+.br
+ Usage: 
+.br
+ This class need as parameter all metadata for the ICD6 (or dynamic spectrum)'s Dynspec Groups\&. The function stockDynspecMetadata stocks dynspec metadata in private attributes, and the function writeDynspecMetadata write them in the corresponding dynamic spectrum Group of the hdf5 file in output 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "\fBStock_Write_Dynspec_Metadata::Stock_Write_Dynspec_Metadata\fP ()"
+.SS "\fBStock_Write_Dynspec_Metadata::~Stock_Write_Dynspec_Metadata\fP ()"
+.SH "Member Function Documentation"
+.PP 
+.SS "void \fBStock_Write_Dynspec_Metadata::stockDynspecMetadata\fP (std::stringattr_69, std::stringattr_70, std::stringattr_71, std::stringattr_72, std::stringattr_73, doubleattr_76, doubleattr_77, std::stringattr_78, std::stringattr_79, std::stringattr_80, doubleattr_81, doubleattr_82, doubleattr_83, doubleattr_84, doubleattr_85, doubleattr_86, doubleattr_87, doubleattr_88, doubleattr_89, std::stringattr_90, doubleattr_91, std::vector< std::string >attr_92, std::stringattr_93, doubleattr_94, std::stringattr_95, boolattr_96, std::vector< std::string >attr_97, boolattr_98, std::stringattr_99, std::stringattr_100, std::vector< double >attr_101, std::vector< std::string >attr_102, std::stringattr_103, doubleattr_104, std::stringattr_105, std::stringattr_106, doubleattr_107, doubleattr_108, std::vector< std::string >attr_109, std::stringattr_110, std::stringattr_111, std::vector< std::string >attr_112, intattr_113, std::vector< std::string >attr_114, std::vector< std::string >attr_115, std::vector< double >attr_116, std::vector< double >attr_117, std::vector< double >attr_118, std::vector< double >attr_119, std::stringattr_123, std::stringattr_124, std::vector< std::string >attr_125, intattr_126, std::vector< std::string >attr_127, std::vector< std::string >attr_128, std::vector< double >attr_129, std::vector< double >attr_130, std::vector< double >attr_131, std::vector< double >attr_132, std::vector< double >attr_133, std::vector< double >attr_135, std::stringattr_137, std::stringattr_138, std::vector< std::string >attr_139, intattr_140, std::vector< std::string >attr_141, std::vector< std::string >attr_142, intNtime, intNspectral, std::stringattr_147, std::stringattr_148, intattr_149, std::stringattr_150, std::stringattr_151, intattr_152, std::vector< std::string >attr_153, std::vector< std::string >attr_154, std::vector< std::string >attr_155, std::vector< std::string >attr_156, std::vector< std::string >attr_157, std::vector< std::string >attr_158, std::stringattr_159, boolattr_160, boolattr_161, boolattr_162, boolattr_163)"
+.br
+ Usage: 
+.br
+ void \fBStock_Write_Dynspec_Metadata::stockDynspecMetadata\fP(string attr_69,string attr_70,string attr_71,string attr_72,string attr_73,double attr_76,double attr_77,string attr_78,string attr_79, string attr_80,double attr_81,double attr_82,double attr_83,double attr_84,double attr_85,double attr_86,double attr_87,double attr_88,double attr_89, string attr_90,double attr_91,vector<string> attr_92,string attr_93,double attr_94,string attr_95,bool attr_96,vector<string> attr_97,bool attr_98,string attr_99, string attr_100,vector<double> attr_101,vector<string> attr_102,string attr_103,double attr_104,string attr_105,string attr_106,double attr_107,double attr_108,vector<string> attr_109, string attr_110,string attr_111,vector<string> attr_112,int attr_113,vector<string> attr_114,vector<string> attr_115,vector<double> attr_116,vector<double> attr_117,vector<double> attr_118, vector<double> attr_119,string attr_123,string attr_124,vector<string> attr_125,int attr_126,vector<string> attr_127, vector<string> attr_128,vector<double> attr_129,vector<double> attr_130,vector<double> attr_131,vector<double> attr_132,vector<double> attr_133,vector<double> attr_135, string attr_137,string attr_138,vector<string> attr_139,int attr_140,vector<string> attr_141,vector<string> attr_142,int Ntime,int Nspectral,string attr_147,string attr_148,int attr_149,string attr_150, string attr_151,int attr_152,vector<string> attr_153,vector<string> attr_154,vector<string> attr_155,vector<string> attr_156,vector<string> attr_157,vector<string> attr_158,string attr_159,bool attr_160,bool attr_161,bool attr_162,bool attr_163, string attr_164,string attr_165,string attr_166,string attr_167,string attr_168)
+.PP
+\fBParameters:\fP
+.RS 4
+\fIattr_69\fP GROUPE_TYPE_DYN 
+.br
+\fIattr_70\fP DYNSPEC_START_MJD 
+.br
+\fIattr_71\fP DYNSPEC_STOP_MJD 
+.br
+\fIattr_72\fP DYNSPEC_START_UTC 
+.br
+\fIattr_73\fP DYNSPEC_STOP_UTC 
+.br
+\fIattr_76\fP DYNSPEC_BANDWIDTH 
+.br
+\fIattr_77\fP BEAM_DIAMETER 
+.br
+\fIattr_78\fP TRACKING 
+.br
+\fIattr_79\fP TARGET_DYN 
+.br
+\fIattr_80\fP ONOFF 
+.br
+\fIattr_81\fP POINT_RA 
+.br
+\fIattr_82\fP POINT_DEC 
+.br
+\fIattr_83\fP POSITION_OFFSET_RA 
+.br
+\fIattr_84\fP POSITION_OFFSET_DEC 
+.br
+\fIattr_85\fP BEAM_DIAMETER_RA 
+.br
+\fIattr_86\fP BEAM_DIAMETER_DEC 
+.br
+\fIattr_87\fP BEAM_FREQUENCY_MAX 
+.br
+\fIattr_88\fP BEAM_FREQUENCY_MIN 
+.br
+\fIattr_89\fP BEAM_FREQUENCY_CENTER 
+.br
+\fIattr_90\fP BEAM_FREQUENCY_UNIT 
+.br
+\fIattr_91\fP BEAM_NOF_STATIONS 
+.br
+\fIattr_92\fP BEAM_STATIONS_LIST 
+.br
+\fIattr_93\fP DEDISPERSION 
+.br
+\fIattr_94\fP DISPERSION_MEASURE 
+.br
+\fIattr_95\fP DISPERSION_MEASURE_UNIT 
+.br
+\fIattr_96\fP BARYCENTER 
+.br
+\fIattr_97\fP STOCKES_COMPONENT 
+.br
+\fIattr_98\fP COMPLEX_VOLTAGE 
+.br
+\fIattr_99\fP SIGNAL_SUM 
+.br
+\fIattr_100\fP GROUPE_TYPE_COORD 
+.br
+\fIattr_101\fP REF_LOCATION_VALUE 
+.br
+\fIattr_102\fP REF_LOCATION_UNIT 
+.br
+\fIattr_103\fP REF_LOCATION_FRAME 
+.br
+\fIattr_104\fP REF_TIME_VALUE 
+.br
+\fIattr_105\fP REF_TIME_UNIT 
+.br
+\fIattr_106\fP REF_TIME_FRAME 
+.br
+\fIattr_107\fP NOF_COORDINATES 
+.br
+\fIattr_108\fP NOF_AXIS 
+.br
+\fIattr_109\fP COORDINATE_TYPES 
+.br
+\fIattr_110\fP GROUPE_TYPE_TIME 
+.br
+\fIattr_111\fP COORDINATE_TYPE_TIME 
+.br
+\fIattr_112\fP STORAGE_TYPE_TIME 
+.br
+\fIattr_113\fP NOF_AXES_TIME 
+.br
+\fIattr_114\fP AXIS_NAMES_TIME 
+.br
+\fIattr_115\fP AXIS_UNIT_TIME 
+.br
+\fIattr_116\fP REFERENCE_VALUE_TIME 
+.br
+\fIattr_117\fP REFERENCE_PIXEL_TIME 
+.br
+\fIattr_118\fP INCREMENT_TIME 
+.br
+\fIattr_119\fP PC_TIME 
+.br
+\fIattr_123\fP GROUPE_TYPE_SPECTRAL 
+.br
+\fIattr_124\fP COORDINATE_TYPE_SPECTRAL 
+.br
+\fIattr_125\fP STORAGE_TYPE_SPECTRAL 
+.br
+\fIattr_126\fP NOF_AXES_SPECTRAL 
+.br
+\fIattr_127\fP AXIS_NAMES_SPECTRAL 
+.br
+\fIattr_128\fP AXIS_UNIT_SPECTRAL 
+.br
+\fIattr_129\fP REFERENCE_VALUE_SPECTRAL 
+.br
+\fIattr_130\fP REFERENCE_PIXEL_SPECTRAL 
+.br
+\fIattr_131\fP INCREMENT_SPECTRAL 
+.br
+\fIattr_132\fP PC_SPECTRAL 
+.br
+\fIattr_133\fP AXIS_VALUE_WORLD_SPECTRAL 
+.br
+\fIattr_135\fP AXIS_VALUE_PIXEL_SPECTRAL 
+.br
+\fIattr_137\fP GROUPE_TYPE_POL 
+.br
+\fIattr_138\fP COORDINATE_TYPE_POL 
+.br
+\fIattr_139\fP STORAGE_TYPE_POL 
+.br
+\fIattr_140\fP NOF_AXES_POL 
+.br
+\fIattr_141\fP AXIS_NAMES_POL 
+.br
+\fIattr_142\fP AXIS_UNIT_POL 
+.br
+\fINtime\fP Ntime 
+.br
+\fINspectral\fP Nspectral 
+.br
+\fIattr_147\fP GROUPE_TYPE_EVENT 
+.br
+\fIattr_148\fP DATASET_EVENT 
+.br
+\fIattr_149\fP N_AXIS_EVENT 
+.br
+\fIattr_150\fP N_AXIS_1_EVENT 
+.br
+\fIattr_151\fP N_AXIS_2_EVENT 
+.br
+\fIattr_152\fP N_EVENT 
+.br
+\fIattr_153\fP FIELD_1 
+.br
+\fIattr_154\fP FIELD_2 
+.br
+\fIattr_155\fP FIELD_3 
+.br
+\fIattr_156\fP FIELD_4 
+.br
+\fIattr_157\fP FIELD_5 
+.br
+\fIattr_158\fP FIELD_6 
+.br
+\fIattr_159\fP GROUPE_TYPE_PROCESS 
+.br
+\fIattr_160\fP OBSERVATION_PARSET 
+.br
+\fIattr_161\fP OBSERVATION_LOG 
+.br
+\fIattr_162\fP DYNSPEC_PARSET 
+.br
+\fIattr_163\fP DYNSPEC_LOG 
+.br
+\fIattr_164\fP PREPROCCESSINGINFO1 
+.br
+\fIattr_165\fP PREPROCCESSINGINFO2 
+.br
+\fIattr_166\fP PREPROCCESSINGINFO3 
+.br
+\fIattr_167\fP PREPROCCESSINGINFO4 
+.br
+\fIattr_168\fP PREPROCCESSINGINFO5 
+.RE
+.PP
+
+.SS "void \fBStock_Write_Dynspec_Metadata::writeDynspecMetadata\fP (Group &dynspec_grp, std::stringpathDir, std::stringobsName, std::stringpathFile, std::stringoutputFile, File &root_grp, inti, intj, intk, intl, intq, intobsNofStockes, std::vector< std::string >stokesComponent, floatmemoryRAM)"
+.br
+ Usage: 
+.br
+ void Stock_Write_Dynspec_Metadata::writeDynspecMetadata(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM)
+.PP
+\fBParameters:\fP
+.RS 4
+\fI&dynspec_grp\fP Group Object (Dynspec Group generated for write metadata) 
+.br
+\fIpathDir\fP Path for ICD3 observation directory 
+.br
+\fIobsName\fP Obsevartion ID 
+.br
+\fIpathFile\fP Complete Path for ICD3 observation 
+.br
+\fIoutputFile\fP Output file (Dynamic spectrum file) 
+.br
+\fI&root_grp\fP File Object(Root Group for link Dynspec Group with the Root group in the same output file) 
+.br
+\fIi\fP loop index (on SAP) 
+.br
+\fIj\fP loop index (on BEAM) 
+.br
+\fIk\fP iterator 
+.br
+\fIl\fP iterator 
+.br
+\fIq\fP loop index (on Pxxx if nomenclature Pxxx is used) 
+.br
+\fIobsNofStockes\fP number of Stokes 
+.br
+\fIstokesComponent\fP vector of Stokes 
+.br
+\fImemoryRAM\fP RAM memory consumption (choose by user) 
+.RE
+.PP
+
+.SH "Member Data Documentation"
+.PP 
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_100\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_101\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_102\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_103\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_104\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_105\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_106\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_107\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_108\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_109\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_110\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_111\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_112\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_attr_113\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_114\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_115\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_116\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_117\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_118\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_119\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_123\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_124\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_125\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_attr_126\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_127\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_128\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_129\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_130\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_131\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_132\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_133\fP\fC [private]\fP"
+.SS "std::vector<double> \fBStock_Write_Dynspec_Metadata::m_attr_135\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_137\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_138\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_139\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_attr_140\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_141\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_142\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_147\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_148\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_attr_149\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_150\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_151\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_attr_152\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_153\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_154\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_155\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_156\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_157\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_158\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_159\fP\fC [private]\fP"
+.SS "bool \fBStock_Write_Dynspec_Metadata::m_attr_160\fP\fC [private]\fP"
+.SS "bool \fBStock_Write_Dynspec_Metadata::m_attr_161\fP\fC [private]\fP"
+.SS "bool \fBStock_Write_Dynspec_Metadata::m_attr_162\fP\fC [private]\fP"
+.SS "bool \fBStock_Write_Dynspec_Metadata::m_attr_163\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_69\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_70\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_71\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_72\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_73\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_76\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_77\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_78\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_79\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_80\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_81\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_82\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_83\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_84\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_85\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_86\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_87\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_88\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_89\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_90\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_91\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_92\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_93\fP\fC [private]\fP"
+.SS "double \fBStock_Write_Dynspec_Metadata::m_attr_94\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_95\fP\fC [private]\fP"
+.SS "bool \fBStock_Write_Dynspec_Metadata::m_attr_96\fP\fC [private]\fP"
+.SS "std::vector<std::string> \fBStock_Write_Dynspec_Metadata::m_attr_97\fP\fC [private]\fP"
+.SS "bool \fBStock_Write_Dynspec_Metadata::m_attr_98\fP\fC [private]\fP"
+.SS "std::string \fBStock_Write_Dynspec_Metadata::m_attr_99\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_Nspectral\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_Ntime\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_101\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_102\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_109\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_112\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_114\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_115\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_116\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_117\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_118\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_119\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_125\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_127\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_128\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_129\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_130\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_131\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_132\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_133\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_135\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_139\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_141\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_142\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_153\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_154\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_155\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_156\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_157\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_158\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_92\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Metadata::m_size_attr_97\fP\fC [private]\fP"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for LOFAR-ICD3 Convertor without any selection and rebinning from the source code\&.

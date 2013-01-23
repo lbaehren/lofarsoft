@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.7.6.1">
+  <compounddef id="_reader___dynspec_8h" kind="file">
+    <compoundname>Reader_Dynspec.h</compoundname>
+    <includes local="no">string</includes>
+    <includes local="no">iostream</includes>
+    <includes local="no">dal/lofar/BF_File.h</includes>
+    <includes refid="_stock___write___dynspec___metadata_8h" local="yes">Stock_Write_Dynspec_Metadata.h</includes>
+    <includes refid="_stock___write___dynspec___data_8h" local="yes">Stock_Write_Dynspec_Data.h</includes>
+    <includedby refid="_dynspec_all_8cpp" local="yes">/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/DynspecAll.cpp</includedby>
+    <includedby refid="_reader___dynspec_8cpp" local="yes">/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Reader_Dynspec.cpp</includedby>
+    <incdepgraph>
+      <node id="132">
+        <label>Stock_Write_Dynspec_Metadata.h</label>
+        <link refid="_stock___write___dynspec___metadata_8h"/>
+        <childnode refid="129" relation="include">
+        </childnode>
+        <childnode refid="130" relation="include">
+        </childnode>
+        <childnode refid="133" relation="include">
+        </childnode>
+        <childnode refid="131" relation="include">
+        </childnode>
+      </node>
+      <node id="129">
+        <label>string</label>
+      </node>
+      <node id="133">
+        <label>vector</label>
+      </node>
+      <node id="131">
+        <label>dal/lofar/BF_File.h</label>
+      </node>
+      <node id="130">
+        <label>iostream</label>
+      </node>
+      <node id="128">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Reader_Dynspec.h</label>
+        <link refid="Reader_Dynspec.h"/>
+        <childnode refid="129" relation="include">
+        </childnode>
+        <childnode refid="130" relation="include">
+        </childnode>
+        <childnode refid="131" relation="include">
+        </childnode>
+        <childnode refid="132" relation="include">
+        </childnode>
+        <childnode refid="134" relation="include">
+        </childnode>
+      </node>
+      <node id="134">
+        <label>Stock_Write_Dynspec_Data.h</label>
+        <link refid="_stock___write___dynspec___data_8h"/>
+        <childnode refid="129" relation="include">
+        </childnode>
+        <childnode refid="130" relation="include">
+        </childnode>
+        <childnode refid="133" relation="include">
+        </childnode>
+        <childnode refid="131" relation="include">
+        </childnode>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="136">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/DynspecAll.cpp</label>
+        <link refid="_dynspec_all_8cpp"/>
+      </node>
+      <node id="137">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Reader_Dynspec.cpp</label>
+        <link refid="_reader___dynspec_8cpp"/>
+      </node>
+      <node id="135">
+        <label>/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Reader_Dynspec.h</label>
+        <link refid="Reader_Dynspec.h"/>
+        <childnode refid="136" relation="include">
+        </childnode>
+        <childnode refid="137" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="class_reader___dynspec" prot="public">Reader_Dynspec</innerclass>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#ifndef<sp/>DEF_READER_DYNSPEC</highlight></codeline>
+<codeline lineno="2"><highlight class="preprocessor"></highlight><highlight class="preprocessor">#define<sp/>DEF_READER_DYNSPEC</highlight></codeline>
+<codeline lineno="3"><highlight class="preprocessor"></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include&lt;string&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include&lt;iostream&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;dal/lofar/BF_File.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_stock___write___dynspec___metadata_8h" kindref="compound">Stock_Write_Dynspec_Metadata.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;<ref refid="_stock___write___dynspec___data_8h" kindref="compound">Stock_Write_Dynspec_Data.h</ref>&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26" refid="class_reader___dynspec" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">class<sp/></highlight><highlight class="normal"><ref refid="class_reader___dynspec" kindref="compound" tooltip="Class object for read ICD3 files and put in variables metadatas for the ICD6&amp;#39;s Dynspec Group...">Reader_Dynspec</ref></highlight></codeline>
+<codeline lineno="27"><highlight class="normal">{<sp/><sp/></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Public<sp/>Methods</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">public</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><ref refid="class_reader___dynspec_1ad8435bcbf814ad1aefcedc316a233b1a" kindref="member">Reader_Dynspec</ref>();<sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>constructor<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><ref refid="class_reader___dynspec_1a091944d9333e9bcfde574e5db2ff167e" kindref="member">~Reader_Dynspec</ref>();<sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>destructor</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="class_reader___dynspec_1ad700712653c8c6b4e5b7f3782dc0954e" kindref="member">readDynspec</ref>(std::string<sp/>pathFile,<ref refid="class_stock___write___dynspec___metadata" kindref="compound" tooltip="Class object for stock and write metadatas for the ICD6&amp;#39;s Dynspec Groups (loop on Beams ...">Stock_Write_Dynspec_Metadata</ref><sp/>*dynspecMetadata,<ref refid="class_stock___write___dynspec___data" kindref="compound" tooltip="Class object for stocking data parameters and write datas for the ICD6&amp;#39;s Dynspec Group.">Stock_Write_Dynspec_Data</ref><sp/>*dynspecData,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>q,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>obsNofSAP,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>obsNofSource,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>obsNofFrequencyBand,</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>obsNofStockes,std::vector&lt;std::string&gt;<sp/>stokesComponent,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>SAPindex);</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/></highlight><highlight class="comment">//<sp/>Private<sp/>Attributes</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/></highlight><highlight class="keyword">private</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="39"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Reader_Dynspec.h"/>
+  </compounddef>
+</doxygen>

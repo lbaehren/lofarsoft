@@ -1,0 +1,1730 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.7.6.1">
+  <compounddef id="class_stock___write___root___dyn2_dyn___metadata___part" kind="class" prot="public">
+    <compoundname>Stock_Write_Root_Dyn2Dyn_Metadata_Part</compoundname>
+    <includes refid="_stock___write___root___dyn2_dyn___metadata___part_8h" local="no">Stock_Write_Root_Dyn2Dyn_Metadata_Part.h</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1abd6f75da0f00609adf9bc46e0092f36d" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_1</definition>
+        <argsstring></argsstring>
+        <name>m_attr_1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="45" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a151f0a719e6708dcc7ce318b47cd86a3" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_2</definition>
+        <argsstring></argsstring>
+        <name>m_attr_2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="46" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a5e602a7a33ece7beffa8cf6b3dc2e8d2" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_3</definition>
+        <argsstring></argsstring>
+        <name>m_attr_3</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="47" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1acc106a9713e60da904e556e5cfb459a9" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_4</definition>
+        <argsstring></argsstring>
+        <name>m_attr_4</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="48" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aa9e1d3aa5d0454c19b59cbf847005231" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_5</definition>
+        <argsstring></argsstring>
+        <name>m_attr_5</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="49" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ac101a33f46c53d34cc706ec3902a3899" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_7</definition>
+        <argsstring></argsstring>
+        <name>m_attr_7</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="50" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a87eb449d0e5d53bc3137e44fb9f4273e" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_8</definition>
+        <argsstring></argsstring>
+        <name>m_attr_8</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="51" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aa8331b4a0f8946fed93f5d24b790e5aa" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_9</definition>
+        <argsstring></argsstring>
+        <name>m_attr_9</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="52" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a16af070debd02f1d149ec4d806218fd4" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_10</definition>
+        <argsstring></argsstring>
+        <name>m_attr_10</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="53" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a6794fbf54b95e1d295a4a0876bac3a20" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_11</definition>
+        <argsstring></argsstring>
+        <name>m_attr_11</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="54" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a7891c4b122e6df0e8552d98d3fd1d5b5" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_12</definition>
+        <argsstring></argsstring>
+        <name>m_attr_12</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="55" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a889d1e0646ca1e06cd9088bb67211fef" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_13</definition>
+        <argsstring></argsstring>
+        <name>m_attr_13</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="56" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="56" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a28253dca29b608a8555c5e8788306135" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_14</definition>
+        <argsstring></argsstring>
+        <name>m_attr_14</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="57" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1abedab87241905eacd8ca08609b6352af" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_16</definition>
+        <argsstring></argsstring>
+        <name>m_attr_16</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="58" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aab1b26f3bbb061613dce2ecd0be9d002" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_17</definition>
+        <argsstring></argsstring>
+        <name>m_attr_17</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="59" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a034b576a4949203dd253c0f4200a167b" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_19</definition>
+        <argsstring></argsstring>
+        <name>m_attr_19</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="60" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a6ae9df53bf32865ae0a3810399f5432f" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_size_attr_20</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_20</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="62" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="62" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a1c14ea6caa605c0ddeb284549e1cd554" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_20</definition>
+        <argsstring></argsstring>
+        <name>m_attr_20</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="63" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a7d21a8644bd2f597af355b3578b1befc" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_21</definition>
+        <argsstring></argsstring>
+        <name>m_attr_21</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="65" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a6c49d73575f0ef3d6c66ef86f5eaac14" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_22</definition>
+        <argsstring></argsstring>
+        <name>m_attr_22</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="66" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a814971322b51fc50595055fc81ee7713" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_23</definition>
+        <argsstring></argsstring>
+        <name>m_attr_23</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="67" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ac8af892d2ac587d469c2449171611137" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_24</definition>
+        <argsstring></argsstring>
+        <name>m_attr_24</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="69" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a1324dfaf8359c4595f2a94dc88cb11e0" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_25</definition>
+        <argsstring></argsstring>
+        <name>m_attr_25</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="70" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aaa99d002740ffba7b0cc9a22996fac2a" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_26</definition>
+        <argsstring></argsstring>
+        <name>m_attr_26</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="71" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1abd90e93047f22d39eab2367852e5c81c" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_27</definition>
+        <argsstring></argsstring>
+        <name>m_attr_27</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="72" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a2319df108716afcbfec30412b55c84a3" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_28</definition>
+        <argsstring></argsstring>
+        <name>m_attr_28</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="73" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="73" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a750184b9f2052584748be5e07429503f" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_29</definition>
+        <argsstring></argsstring>
+        <name>m_attr_29</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="74" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="74" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ab3a53b88377ee46b1e0eb9c9670bd822" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_30</definition>
+        <argsstring></argsstring>
+        <name>m_attr_30</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="75" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="75" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a89c084d39ab827eb045b581f49555aae" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_31</definition>
+        <argsstring></argsstring>
+        <name>m_attr_31</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="76" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="76" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ab60b043d0cc67df6136a6e004267b2da" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_32</definition>
+        <argsstring></argsstring>
+        <name>m_attr_32</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="77" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a79e6d8799f0bbee0b9193bed67ad9deb" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_33</definition>
+        <argsstring></argsstring>
+        <name>m_attr_33</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="78" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a1695a36bb05d3a7614dffc8001012d25" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_34</definition>
+        <argsstring></argsstring>
+        <name>m_attr_34</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="79" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a5a0f01d00ac13ca744193c9e823dad27" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_35</definition>
+        <argsstring></argsstring>
+        <name>m_attr_35</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="80" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a23fc6b5ccc08bb86e848eb35f82adbdd" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_36</definition>
+        <argsstring></argsstring>
+        <name>m_attr_36</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="81" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="81" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a6d5a79b3583b660fc30f67ba143dc808" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_37</definition>
+        <argsstring></argsstring>
+        <name>m_attr_37</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="82" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="82" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aa076db2c0401fd75f370dd84570dda2b" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_38</definition>
+        <argsstring></argsstring>
+        <name>m_attr_38</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="83" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="83" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1af2995a77254c388a13eab621417d4b33" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_39</definition>
+        <argsstring></argsstring>
+        <name>m_attr_39</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="84" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="84" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ab4a93e5ac1d77e1a36cc9c78ce2d20ba" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_40</definition>
+        <argsstring></argsstring>
+        <name>m_attr_40</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="85" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="85" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a48dbb312da9b1fd0b51ea0b4ea407bed" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_41</definition>
+        <argsstring></argsstring>
+        <name>m_attr_41</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="86" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a6ff6f8ee40b8bf6938a320e67470695a" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_42</definition>
+        <argsstring></argsstring>
+        <name>m_attr_42</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="87" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a3eebb50ed71466f7d03adde05d35d0a8" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_45</definition>
+        <argsstring></argsstring>
+        <name>m_attr_45</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="89" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="89" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a6f356b8a79ae2cab852f4d3220579e05" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_46</definition>
+        <argsstring></argsstring>
+        <name>m_attr_46</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="90" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a70716586e0efce527dbc388448db09b5" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_47</definition>
+        <argsstring></argsstring>
+        <name>m_attr_47</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="91" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ae6eef0c6cb829ede256708bc9b0034fe" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_size_attr_48</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_48</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="93" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="93" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a5bb98c0abc60c2ca644eafbbc034701a" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_48</definition>
+        <argsstring></argsstring>
+        <name>m_attr_48</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="94" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="94" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aac43d2cc77269864b66ecba20297d01a" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_size_attr_49</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_49</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="96" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="96" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a1cc142676d78fb18e37ab5a2acab9470" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_49</definition>
+        <argsstring></argsstring>
+        <name>m_attr_49</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="97" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="97" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a74a8061ebc90c0d9dba6c071b0e13d79" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_52</definition>
+        <argsstring></argsstring>
+        <name>m_attr_52</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="99" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="99" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a365aef8f798889a9d1f5193683fe9433" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_53</definition>
+        <argsstring></argsstring>
+        <name>m_attr_53</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="100" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aa3fe289c5c3e01ec1c728f1ccc1f9e23" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_54</definition>
+        <argsstring></argsstring>
+        <name>m_attr_54</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="101" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1abde5af63b76382f3a3302f50c7a03929" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_55</definition>
+        <argsstring></argsstring>
+        <name>m_attr_55</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="102" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1aeb7873c009462af54ff91f6582e1bd26" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_56</definition>
+        <argsstring></argsstring>
+        <name>m_attr_56</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="103" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ae123dd84101cffcfb76a01557b329509" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_57</definition>
+        <argsstring></argsstring>
+        <name>m_attr_57</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="104" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a74c135bbe3a9b5b78d92585bbea8337a" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_58</definition>
+        <argsstring></argsstring>
+        <name>m_attr_58</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="105" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a757eba3dc4c6dd439668bf079d8a9e1d" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_59</definition>
+        <argsstring></argsstring>
+        <name>m_attr_59</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="106" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a60c5a611ddfb5ff345a8672b4f6a179c" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_60</definition>
+        <argsstring></argsstring>
+        <name>m_attr_60</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="107" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a4c4b54243011846fbdac983e214f6329" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_61</definition>
+        <argsstring></argsstring>
+        <name>m_attr_61</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="108" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a04a4dfd6b1d87861f68745d0cb90bc9d" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_62</definition>
+        <argsstring></argsstring>
+        <name>m_attr_62</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="109" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="109" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1abb23bcececf498485cabccce5d8dbe8b" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_63</definition>
+        <argsstring></argsstring>
+        <name>m_attr_63</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="110" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="110" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a10ccecffa0640fddb0270a9424fa9848" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_64</definition>
+        <argsstring></argsstring>
+        <name>m_attr_64</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="111" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a5e5d04fc7f5f21c7364dd0ba8ff40461" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_size_attr_65</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_65</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="113" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="113" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a8d3942aee15d05baf7ad8792c888b943" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_65</definition>
+        <argsstring></argsstring>
+        <name>m_attr_65</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="114" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="114" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1ae58c3a07ead5e1fd62b4017ffb4c1e3d" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_size_attr_66</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_66</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="116" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="116" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1afc04b1cee2360685de70da007fe8918e" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_66</definition>
+        <argsstring></argsstring>
+        <name>m_attr_66</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="117" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="117" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a80d314e8971c97a86017f7248ef05cb2" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_size_attr_67</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_67</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="119" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="119" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a3f2e4999bfeec9574c1d84e5e1c107d9" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_67</definition>
+        <argsstring></argsstring>
+        <name>m_attr_67</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="120" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="120" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a33d6ec0dd1d55e57f7e65a38bfa47f32" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_size_attr_68</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_68</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="122" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="122" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___dyn2_dyn___metadata___part_1a025a74393d76e5efd7a708b328d99175" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Stock_Write_Root_Dyn2Dyn_Metadata_Part::m_attr_68</definition>
+        <argsstring></argsstring>
+        <name>m_attr_68</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="123" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="123" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_stock___write___root___dyn2_dyn___metadata___part_1a028c93b5ef807b7287057c47cc14db52" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Stock_Write_Root_Dyn2Dyn_Metadata_Part::Stock_Write_Root_Dyn2Dyn_Metadata_Part</definition>
+        <argsstring>()</argsstring>
+        <name>Stock_Write_Root_Dyn2Dyn_Metadata_Part</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="26" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.cpp" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___root___dyn2_dyn___metadata___part_1a742ecea46401b11d8b17a4e1b664decf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Stock_Write_Root_Dyn2Dyn_Metadata_Part::~Stock_Write_Root_Dyn2Dyn_Metadata_Part</definition>
+        <argsstring>()</argsstring>
+        <name>~Stock_Write_Root_Dyn2Dyn_Metadata_Part</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="27" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.cpp" bodystart="24" bodyend="24"/>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___root___dyn2_dyn___metadata___part_1ad88a553a3edc04d40b04439b719292fb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Stock_Write_Root_Dyn2Dyn_Metadata_Part::stockRootMetadata</definition>
+        <argsstring>(std::string attr_1, std::string attr_2, std::string attr_3, std::string attr_4, std::string attr_5, std::string attr_7, std::string attr_8, std::string attr_9, std::string attr_10, std::string attr_11, std::string attr_12, std::string attr_13, double attr_14, std::string attr_16, double attr_17, int attr_19, std::vector&lt; std::string &gt; attr_20, double attr_21, double attr_22, double attr_23, std::string attr_24, int attr_25, double attr_26, std::string attr_27, std::string attr_28, std::string attr_29, std::string attr_30, std::string attr_31, std::string attr_32, std::string attr_33, std::string attr_34, std::string attr_35, std::string attr_36, bool attr_37, int attr_38, int attr_39, std::string attr_40, std::string attr_41, std::string attr_42, double attr_45, double attr_46, double attr_47, std::vector&lt; std::string &gt; attr_48, std::vector&lt; std::string &gt; attr_49, int attr_52, double attr_53, std::string attr_54, double attr_55, std::string attr_56, double attr_57, std::string attr_58, int attr_59, double attr_60, std::string attr_61, double attr_62, std::string attr_63, double attr_64, std::vector&lt; std::string &gt; attr_65, std::vector&lt; double &gt; attr_66, std::vector&lt; double &gt; attr_67, std::vector&lt; double &gt; attr_68)</argsstring>
+        <name>stockRootMetadata</name>
+        <param>
+          <type>std::string</type>
+          <declname>attr_1</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_2</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_3</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_4</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_5</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_7</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_8</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_9</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_10</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_11</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_12</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_13</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_14</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_16</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_17</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_19</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_20</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_21</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_22</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_23</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_24</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_25</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_26</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_27</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_28</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_29</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_30</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_31</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_32</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_33</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_34</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_35</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_36</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>attr_37</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_38</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_39</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_40</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_41</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_42</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_45</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_46</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_47</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_48</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_49</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_52</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_53</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_54</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_55</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_56</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_57</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_58</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_59</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_60</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_61</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_62</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_63</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_64</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_65</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>attr_66</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>attr_67</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>attr_68</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ void <ref refid="class_stock___write___root___dyn2_dyn___metadata___part_1ad88a553a3edc04d40b04439b719292fb" kindref="member">Stock_Write_Root_Dyn2Dyn_Metadata_Part::stockRootMetadata</ref>(string attr_1,string attr_2,string attr_3,string attr_4,string attr_5,string attr_7,string attr_8,string attr_9,string attr_10, string attr_11,string attr_12,string attr_13,double attr_14,string attr_16,double attr_17,int attr_19, vector&lt;string&gt; attr_20,double attr_21,double attr_22,double attr_23,string attr_24,int attr_25,double attr_26,string attr_27, string attr_28,string attr_29,string attr_30,string attr_31,string attr_32,string attr_33,string attr_34,string attr_35,string attr_36, bool attr_37,int attr_38,int attr_39,string attr_40,string attr_41,string attr_42,double attr_45,double attr_46,double attr_47, vector&lt;string&gt; attr_48,vector&lt;string&gt; attr_49,int attr_52,double attr_53,string attr_54,double attr_55,string attr_56,double attr_57,string attr_58, int attr_59,double attr_60,string attr_61,double attr_62,string attr_63,double attr_64,vector&lt;string&gt; attr_65,vector&lt;double&gt; attr_66, vector&lt;double&gt; attr_67,vector&lt;double&gt; attr_68)</para><para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>attr_1</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>GROUPETYPE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILENAME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_3</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILEDATE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_4</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILETYPE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_5</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TELESCOPE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_7</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_ID </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_8</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_TITLE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_9</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_PI </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_10</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_CO_I </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_11</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_CONTACT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_12</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_ID </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_13</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_START_UTC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_14</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_START_MJD </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_16</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_END_UTC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_17</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_END_MJD </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_19</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_NOF_STATIONS </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_20</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_STATIONS_LIST </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_21</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_MAX </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_22</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_MIN </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_23</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_CENTER </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_24</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_25</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_NOF_BITS_PER_SAMPLE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_26</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CLOCK_FREQUENCY </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_27</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CLOCK_FREQUENCY_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_28</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ANTENNA_SET </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_29</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILTER_SELECTION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_30</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TARGET </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_31</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SYSTEM_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_32</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PIPELINE_NAME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_33</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PIPELINE_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_34</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>DOC_NAME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_35</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>DOC_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_36</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOTES </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_37</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>DYNSPEC_GROUP </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_38</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOF_DYNSPEC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_39</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOF_TILED_DYNSPEC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_40</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CREATE_OFFLINE_ONLINE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_41</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>BF_FORMAT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_42</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>BF_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_45</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PRIMARY_POINTING_DIAMETER </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_46</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_RA </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_47</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_DEC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_48</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_ALTITUDE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_49</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_AZIMUTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_52</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOF_SAMPLES </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_53</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_RATE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_54</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_RATE_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_55</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_TIME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_56</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_TIME_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_57</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TOTAL_INTEGRATION_TIME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_58</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TOTAL_INTEGRATION_TIME_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_59</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CHANNELS_PER_SUBANDS </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_60</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SUBBAND_WIDTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_61</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SUBBAND_WIDTH_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_62</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CHANNEL_WIDTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_63</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CHANNEL_WIDTH_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_64</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TOTAL_BAND_WIDTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_65</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>WHEATER_STATIONS_LIST </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_66</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>WHEATER_TEMPERATURE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_67</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>WHEATER_HUMIDITY </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_68</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SYSTEM_TEMPERATURE</para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>nothing </para></simplesect>
+</para>        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="37" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.cpp" bodystart="27" bodyend="208"/>
+        <referencedby refid="class_reader___root___dyn2_dyn___part_1a276db07fb7f17ca55f8da966c930333d" compoundref="_reader___root___dyn2_dyn___part_8cpp" startline="30" endline="292">Reader_Root_Dyn2Dyn_Part::readRoot</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___root___dyn2_dyn___metadata___part_1a3488d8d8c61f423bb0b97aa23d63bc40" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Stock_Write_Root_Dyn2Dyn_Metadata_Part::writeRootMetadata</definition>
+        <argsstring>(std::string outputFile, File &amp;root_grp)</argsstring>
+        <name>writeRootMetadata</name>
+        <param>
+          <type>std::string</type>
+          <declname>outputFile</declname>
+        </param>
+        <param>
+          <type>File &amp;</type>
+          <declname>root_grp</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ void Stock_Write_Root_Dyn2Dyn_Metadata_Part::writeRootMetadata(string outputFile,File &amp;root_grp)</para><para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>outputFile</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>this is the output file (dynamic spectrum file) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>&amp;root_grp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Stock_Write_Root_Metadata_Part Object for catching stocked private attributes </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="40" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.cpp" bodystart="212" bodyend="353"/>
+        <referencedby refid="_dyn2_dyn_8cpp_1a0ddf1224851353fc92bfbff6f499fa97" compoundref="_dyn2_dyn_8cpp" startline="77" endline="275">main</referencedby>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Class object for stock and write metadatas for the ICD6&apos;s Root Group. </para>    </briefdescription>
+    <detaileddescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ This class need as parameter all metadata for the ICD6( or dynamic spectrum)&apos;s Root Group. The function stockRootMetadata stocks Root metadata in private attributes, and the function writeRootMetadata write them in the Root Group of the hdf5 file in output </para>    </detaileddescription>
+    <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" line="22" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Root_Dyn2Dyn_Metadata_Part.h" bodystart="21" bodyend="125"/>
+    <listofallmembers>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1abd6f75da0f00609adf9bc46e0092f36d" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_1</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a16af070debd02f1d149ec4d806218fd4" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_10</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a6794fbf54b95e1d295a4a0876bac3a20" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_11</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a7891c4b122e6df0e8552d98d3fd1d5b5" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_12</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a889d1e0646ca1e06cd9088bb67211fef" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_13</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a28253dca29b608a8555c5e8788306135" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_14</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1abedab87241905eacd8ca08609b6352af" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_16</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aab1b26f3bbb061613dce2ecd0be9d002" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_17</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a034b576a4949203dd253c0f4200a167b" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_19</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a151f0a719e6708dcc7ce318b47cd86a3" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_2</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a1c14ea6caa605c0ddeb284549e1cd554" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_20</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a7d21a8644bd2f597af355b3578b1befc" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_21</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a6c49d73575f0ef3d6c66ef86f5eaac14" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_22</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a814971322b51fc50595055fc81ee7713" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_23</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ac8af892d2ac587d469c2449171611137" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_24</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a1324dfaf8359c4595f2a94dc88cb11e0" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_25</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aaa99d002740ffba7b0cc9a22996fac2a" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_26</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1abd90e93047f22d39eab2367852e5c81c" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_27</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a2319df108716afcbfec30412b55c84a3" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_28</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a750184b9f2052584748be5e07429503f" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_29</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a5e602a7a33ece7beffa8cf6b3dc2e8d2" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_3</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ab3a53b88377ee46b1e0eb9c9670bd822" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_30</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a89c084d39ab827eb045b581f49555aae" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_31</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ab60b043d0cc67df6136a6e004267b2da" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_32</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a79e6d8799f0bbee0b9193bed67ad9deb" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_33</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a1695a36bb05d3a7614dffc8001012d25" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_34</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a5a0f01d00ac13ca744193c9e823dad27" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_35</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a23fc6b5ccc08bb86e848eb35f82adbdd" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_36</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a6d5a79b3583b660fc30f67ba143dc808" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_37</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aa076db2c0401fd75f370dd84570dda2b" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_38</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1af2995a77254c388a13eab621417d4b33" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_39</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1acc106a9713e60da904e556e5cfb459a9" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_4</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ab4a93e5ac1d77e1a36cc9c78ce2d20ba" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_40</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a48dbb312da9b1fd0b51ea0b4ea407bed" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_41</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a6ff6f8ee40b8bf6938a320e67470695a" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_42</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a3eebb50ed71466f7d03adde05d35d0a8" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_45</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a6f356b8a79ae2cab852f4d3220579e05" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_46</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a70716586e0efce527dbc388448db09b5" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_47</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a5bb98c0abc60c2ca644eafbbc034701a" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_48</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a1cc142676d78fb18e37ab5a2acab9470" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_49</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aa9e1d3aa5d0454c19b59cbf847005231" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_5</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a74a8061ebc90c0d9dba6c071b0e13d79" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_52</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a365aef8f798889a9d1f5193683fe9433" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_53</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aa3fe289c5c3e01ec1c728f1ccc1f9e23" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_54</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1abde5af63b76382f3a3302f50c7a03929" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_55</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aeb7873c009462af54ff91f6582e1bd26" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_56</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ae123dd84101cffcfb76a01557b329509" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_57</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a74c135bbe3a9b5b78d92585bbea8337a" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_58</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a757eba3dc4c6dd439668bf079d8a9e1d" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_59</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a60c5a611ddfb5ff345a8672b4f6a179c" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_60</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a4c4b54243011846fbdac983e214f6329" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_61</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a04a4dfd6b1d87861f68745d0cb90bc9d" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_62</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1abb23bcececf498485cabccce5d8dbe8b" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_63</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a10ccecffa0640fddb0270a9424fa9848" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_64</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a8d3942aee15d05baf7ad8792c888b943" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_65</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1afc04b1cee2360685de70da007fe8918e" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_66</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a3f2e4999bfeec9574c1d84e5e1c107d9" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_67</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a025a74393d76e5efd7a708b328d99175" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_68</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ac101a33f46c53d34cc706ec3902a3899" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_7</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a87eb449d0e5d53bc3137e44fb9f4273e" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_8</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aa8331b4a0f8946fed93f5d24b790e5aa" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_attr_9</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a6ae9df53bf32865ae0a3810399f5432f" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_size_attr_20</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ae6eef0c6cb829ede256708bc9b0034fe" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_size_attr_48</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1aac43d2cc77269864b66ecba20297d01a" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_size_attr_49</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a5e5d04fc7f5f21c7364dd0ba8ff40461" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_size_attr_65</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ae58c3a07ead5e1fd62b4017ffb4c1e3d" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_size_attr_66</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a80d314e8971c97a86017f7248ef05cb2" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_size_attr_67</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a33d6ec0dd1d55e57f7e65a38bfa47f32" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>m_size_attr_68</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a028c93b5ef807b7287057c47cc14db52" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>Stock_Write_Root_Dyn2Dyn_Metadata_Part</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1ad88a553a3edc04d40b04439b719292fb" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>stockRootMetadata</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a3488d8d8c61f423bb0b97aa23d63bc40" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>writeRootMetadata</name></member>
+      <member refid="class_stock___write___root___dyn2_dyn___metadata___part_1a742ecea46401b11d8b17a4e1b664decf" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Dyn2Dyn_Metadata_Part</scope><name>~Stock_Write_Root_Dyn2Dyn_Metadata_Part</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

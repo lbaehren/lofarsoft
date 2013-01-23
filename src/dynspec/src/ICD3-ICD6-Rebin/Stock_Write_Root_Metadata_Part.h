@@ -7,6 +7,16 @@
 
 #include <dal/lofar/BF_File.h>
 
+
+/// \class Stock_Write_Root_Metadata_Part
+///  \brief Class object for stock and write metadatas for the ICD6's Root Group
+///  \details  
+/// <br /> Usage: 
+/// <br /> This class need as parameter all metadata for the ICD6( or dynamic spectrum)'s Root Group. 
+/// The function stockRootMetadata stocks Root metadata in private attributes, and the function writeRootMetadata
+/// write them in the Root Group of the hdf5 file in output
+
+
 using namespace dal;
 
 class Stock_Write_Root_Metadata_Part

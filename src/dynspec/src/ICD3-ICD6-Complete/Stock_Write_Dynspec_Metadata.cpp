@@ -5,6 +5,15 @@
 
 #include <dal/lofar/BF_File.h>
 
+/// \file Stock_Write_Dynspec_Metadata.cpp
+///  \brief File C++ (associated to Stock_Write_Dynspec_Metadata.h) for stock and write metadatas for the ICD6's Dynspec Groups 
+///  \details  
+/// <br /> Overview:
+/// <br /> Functions stockDynspecMetadata and writeDynspecMetadata are described (programmed) here. 
+/// The first one (stockDynspecMetadata) will take as parameter all Dynspec Group's metadata and stock them in the 
+/// private attributes of the class object. The second function (writeDynspecMetadata) will write them in the hdf5 output
+/// file (in the corresponding dynspec). 
+
 using namespace dal;
 
 using namespace std;
@@ -26,6 +35,112 @@ using namespace std;
     
 
  {
+
+/// <br /> Usage:
+/// <br />    void Stock_Write_Dynspec_Metadata::stockDynspecMetadata(string attr_69,string attr_70,string attr_71,string attr_72,string attr_73,double attr_76,double attr_77,string attr_78,string attr_79,
+/// string attr_80,double attr_81,double attr_82,double attr_83,double attr_84,double attr_85,double attr_86,double attr_87,double attr_88,double attr_89,
+/// string attr_90,double attr_91,vector<string> attr_92,string attr_93,double attr_94,string attr_95,bool attr_96,vector<string> attr_97,bool attr_98,string attr_99,
+/// string attr_100,vector<double> attr_101,vector<string> attr_102,string attr_103,double attr_104,string attr_105,string attr_106,double attr_107,double attr_108,vector<string> attr_109,
+/// string attr_110,string attr_111,vector<string> attr_112,int attr_113,vector<string> attr_114,vector<string> attr_115,vector<double> attr_116,vector<double> attr_117,vector<double> attr_118,
+/// vector<double> attr_119,string attr_123,string attr_124,vector<string> attr_125,int attr_126,vector<string> attr_127,
+/// vector<string> attr_128,vector<double> attr_129,vector<double> attr_130,vector<double> attr_131,vector<double> attr_132,vector<double> attr_133,vector<double> attr_135,
+/// string attr_137,string attr_138,vector<string> attr_139,int attr_140,vector<string> attr_141,vector<string> attr_142,int Ntime,int Nspectral,string attr_147,string attr_148,int attr_149,string attr_150,
+/// string attr_151,int attr_152,vector<string> attr_153,vector<string> attr_154,vector<string> attr_155,vector<string> attr_156,vector<string> attr_157,vector<string> attr_158,string attr_159,bool attr_160,bool attr_161,bool attr_162,bool attr_163,
+/// string attr_164,string attr_165,string attr_166,string attr_167,string attr_168)  
+      
+/// \param attr_69 GROUPE_TYPE_DYN
+/// \param attr_70 DYNSPEC_START_MJD
+/// \param attr_71 DYNSPEC_STOP_MJD
+/// \param attr_72 DYNSPEC_START_UTC
+/// \param attr_73 DYNSPEC_STOP_UTC
+/// \param attr_76 DYNSPEC_BANDWIDTH
+/// \param attr_77 BEAM_DIAMETER
+/// \param attr_78 TRACKING
+/// \param attr_79 TARGET_DYN
+/// \param attr_80 ONOFF
+/// \param attr_81 POINT_RA
+/// \param attr_82 POINT_DEC
+/// \param attr_83 POSITION_OFFSET_RA
+/// \param attr_84 POSITION_OFFSET_DEC
+/// \param attr_85 BEAM_DIAMETER_RA
+/// \param attr_86 BEAM_DIAMETER_DEC
+/// \param attr_87 BEAM_FREQUENCY_MAX
+/// \param attr_88 BEAM_FREQUENCY_MIN
+/// \param attr_89 BEAM_FREQUENCY_CENTER
+/// \param attr_90 BEAM_FREQUENCY_UNIT
+/// \param attr_91 BEAM_NOF_STATIONS
+/// \param attr_92 BEAM_STATIONS_LIST
+/// \param attr_93 DEDISPERSION
+/// \param attr_94 DISPERSION_MEASURE
+/// \param attr_95 DISPERSION_MEASURE_UNIT
+/// \param attr_96 BARYCENTER
+/// \param attr_97 STOCKES_COMPONENT
+/// \param attr_98 COMPLEX_VOLTAGE
+/// \param attr_99 SIGNAL_SUM
+/// \param attr_100 GROUPE_TYPE_COORD 
+/// \param attr_101 REF_LOCATION_VALUE
+/// \param attr_102 REF_LOCATION_UNIT
+/// \param attr_103 REF_LOCATION_FRAME
+/// \param attr_104 REF_TIME_VALUE
+/// \param attr_105 REF_TIME_UNIT
+/// \param attr_106 REF_TIME_FRAME
+/// \param attr_107 NOF_COORDINATES
+/// \param attr_108 NOF_AXIS
+/// \param attr_109 COORDINATE_TYPES
+/// \param attr_110 GROUPE_TYPE_TIME
+/// \param attr_111 COORDINATE_TYPE_TIME
+/// \param attr_112 STORAGE_TYPE_TIME
+/// \param attr_113 NOF_AXES_TIME
+/// \param attr_114 AXIS_NAMES_TIME
+/// \param attr_115 AXIS_UNIT_TIME
+/// \param attr_116 REFERENCE_VALUE_TIME
+/// \param attr_117 REFERENCE_PIXEL_TIME
+/// \param attr_118 INCREMENT_TIME
+/// \param attr_119 PC_TIME
+/// \param attr_123 GROUPE_TYPE_SPECTRAL
+/// \param attr_124 COORDINATE_TYPE_SPECTRAL
+/// \param attr_125 STORAGE_TYPE_SPECTRAL
+/// \param attr_126 NOF_AXES_SPECTRAL
+/// \param attr_127 AXIS_NAMES_SPECTRAL
+/// \param attr_128 AXIS_UNIT_SPECTRAL
+/// \param attr_129 REFERENCE_VALUE_SPECTRAL
+/// \param attr_130 REFERENCE_PIXEL_SPECTRAL
+/// \param attr_131 INCREMENT_SPECTRAL
+/// \param attr_132 PC_SPECTRAL
+/// \param attr_133 AXIS_VALUE_WORLD_SPECTRAL
+/// \param attr_135 AXIS_VALUE_PIXEL_SPECTRAL
+/// \param attr_137 GROUPE_TYPE_POL
+/// \param attr_138 COORDINATE_TYPE_POL
+/// \param attr_139 STORAGE_TYPE_POL
+/// \param attr_140 NOF_AXES_POL
+/// \param attr_141 AXIS_NAMES_POL
+/// \param attr_142 AXIS_UNIT_POL
+/// \param Ntime Ntime
+/// \param Nspectral Nspectral
+/// \param attr_147 GROUPE_TYPE_EVENT
+/// \param attr_148 DATASET_EVENT
+/// \param attr_149 N_AXIS_EVENT
+/// \param attr_150 N_AXIS_1_EVENT
+/// \param attr_151 N_AXIS_2_EVENT
+/// \param attr_152 N_EVENT
+/// \param attr_153 FIELD_1
+/// \param attr_154 FIELD_2
+/// \param attr_155 FIELD_3
+/// \param attr_156 FIELD_4
+/// \param attr_157 FIELD_5
+/// \param attr_158 FIELD_6
+/// \param attr_159 GROUPE_TYPE_PROCESS
+/// \param attr_160 OBSERVATION_PARSET
+/// \param attr_161 OBSERVATION_LOG
+/// \param attr_162 DYNSPEC_PARSET
+/// \param attr_163 DYNSPEC_LOG
+/// \param attr_164 PREPROCCESSINGINFO1
+/// \param attr_165 PREPROCCESSINGINFO2
+/// \param attr_166 PREPROCCESSINGINFO3
+/// \param attr_167 PREPROCCESSINGINFO4
+/// \param attr_168 PREPROCCESSINGINFO5   
+   
+   
    // Stock DYNSPEC metadata in an object
    
     // DYNSPEC group meta-data
@@ -257,6 +372,27 @@ using namespace std;
 
   void Stock_Write_Dynspec_Metadata::writeDynspecMetadata(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM)
   {
+
+    
+/// <br /> Usage:
+/// <br />   void Stock_Write_Dynspec_Metadata::writeDynspecMetadata(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM)
+
+/// \param  &dynspec_grp Group Object (Dynspec Group generated for write metadata)
+/// \param  pathDir Path for ICD3 observation directory
+/// \param  obsName Obsevartion ID
+/// \param  pathFile Complete Path for ICD3 observation
+/// \param  outputFile Output file (Dynamic spectrum file)
+/// \param  &root_grp File Object(Root Group for link Dynspec Group with the Root group in the same output file)
+/// \param  i loop index (on SAP)
+/// \param  j loop index (on BEAM)
+/// \param  k iterator
+/// \param  l iterator 
+/// \param  q loop index (on Pxxx if nomenclature Pxxx is used)
+/// \param  obsNofStockes number of Stokes 
+/// \param stokesComponent vector of Stokes
+/// \param  memoryRAM RAM memory consumption (choose by user)    
+    
+    
     
       // Write the DYNSPEC meta-data in the output file
 

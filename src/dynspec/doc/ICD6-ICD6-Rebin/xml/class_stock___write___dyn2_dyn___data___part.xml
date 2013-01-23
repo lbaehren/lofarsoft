@@ -1,0 +1,367 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.7.6.1">
+  <compounddef id="class_stock___write___dyn2_dyn___data___part" kind="class" prot="public">
+    <compoundname>Stock_Write_Dyn2Dyn_Data_Part</compoundname>
+    <includes refid="_stock___write___dyn2_dyn___data___part_8h" local="no">Stock_Write_Dyn2Dyn_Data_Part.h</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_stock___write___dyn2_dyn___data___part_1aecf518779e69b71a46ab80c83b36ee36" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Dyn2Dyn_Data_Part::m_Ntime</definition>
+        <argsstring></argsstring>
+        <name>m_Ntime</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="41" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___dyn2_dyn___data___part_1a5edca2bad445d99c35078772c1879dc3" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Dyn2Dyn_Data_Part::m_Nspectral</definition>
+        <argsstring></argsstring>
+        <name>m_Nspectral</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="42" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" bodystart="42" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___dyn2_dyn___data___part_1ae37512992e7d36afa59fd99bdb3c2ac6" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Dyn2Dyn_Data_Part::m_NtimeReal</definition>
+        <argsstring></argsstring>
+        <name>m_NtimeReal</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="44" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" bodystart="44" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___dyn2_dyn___data___part_1af85ea43984825df942240167825078cf" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Dyn2Dyn_Data_Part::m_NspectralReal</definition>
+        <argsstring></argsstring>
+        <name>m_NspectralReal</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="45" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_stock___write___dyn2_dyn___data___part_1a0c2a8de651ff13681a151427f105a1c2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Stock_Write_Dyn2Dyn_Data_Part::Stock_Write_Dyn2Dyn_Data_Part</definition>
+        <argsstring>()</argsstring>
+        <name>Stock_Write_Dyn2Dyn_Data_Part</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="27" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.cpp" bodystart="22" bodyend="22"/>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___dyn2_dyn___data___part_1a12db045516180def5d04939d3aee1ea6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Stock_Write_Dyn2Dyn_Data_Part::~Stock_Write_Dyn2Dyn_Data_Part</definition>
+        <argsstring>()</argsstring>
+        <name>~Stock_Write_Dyn2Dyn_Data_Part</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="28" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.cpp" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___dyn2_dyn___data___part_1a55ef0859c6880694dfa4b4dd518c7caf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Stock_Write_Dyn2Dyn_Data_Part::stockDynspecData</definition>
+        <argsstring>(int Ntime, int Nspectral, int NtimeReal, int NspectralReal)</argsstring>
+        <name>stockDynspecData</name>
+        <param>
+          <type>int</type>
+          <declname>Ntime</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>Nspectral</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>NtimeReal</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>NspectralReal</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ void <ref refid="class_stock___write___dyn2_dyn___data___part_1a55ef0859c6880694dfa4b4dd518c7caf" kindref="member">Stock_Write_Dyn2Dyn_Data_Part::stockDynspecData(int Ntime,int Nspectral,  int NtimeReal, int NspectralReal)</ref> <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>Ntime</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>new time binning </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>Nspectral</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>new spectral (frequency) binning (number of channels per subbands) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>NtimeReal</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>current time binning before rebinning </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>NspectralReal</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>current spectral (frequency) binning (number of channels per subbands) before rebinning </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="31" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.cpp" bodystart="25" bodyend="40"/>
+        <referencedby refid="class_reader___dyn2_dyn___part_1afc585a83045e15ff8cb73109a35459b3" compoundref="_reader___dyn2_dyn___part_8cpp" startline="31" endline="426">Reader_Dyn2Dyn_Part::readDynspec</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___dyn2_dyn___data___part_1a3540232fd59486cf3d619483820b63a4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Stock_Write_Dyn2Dyn_Data_Part::writeDynspecData</definition>
+        <argsstring>(Group &amp;dynspec_grp, std::string obsName, std::string pathFile, std::string outputFile, File &amp;root_grp, int j, int k, int obsNofStockes, std::vector&lt; std::string &gt; stokesComponent, float memoryRAM, float timeMinSelect, float timeMaxSelect, float timeRebin, float frequencyMin, float frequencyMax, float frequencyRebin)</argsstring>
+        <name>writeDynspecData</name>
+        <param>
+          <type>Group &amp;</type>
+          <declname>dynspec_grp</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>obsName</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>pathFile</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>outputFile</declname>
+        </param>
+        <param>
+          <type>File &amp;</type>
+          <declname>root_grp</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>j</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>obsNofStockes</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>stokesComponent</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>memoryRAM</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>timeMinSelect</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>timeMaxSelect</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>timeRebin</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>frequencyMin</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>frequencyMax</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>frequencyRebin</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ void Stock_Write_Dyn2Dyn_Data_Part::writeDynspecData(Group &amp;dynspec_grp,string obsName,string pathFile,string outputFile,File &amp;root_grp,int j,int k,int obsNofStockes,vector&lt;string&gt; stokesComponent,float memoryRAM,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin) <parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>&amp;dynspec_grp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Group Object(Dynamic spectrum object) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>obsName</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Observation ID </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>pathFile</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ICD3 path for loading file </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>outputFile</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>output file </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>&amp;root_grp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>File Object (Root Group object) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>j</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Beams loop index </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>k</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>loop index </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>obsNofStockes</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>number of Stokes components </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>stokesComponent</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>vector which contains all Stokes components </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>memoryRAM</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>RAM memory consuption by processing </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>SAPindex</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Subarray pointings to process </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timeMinSelect</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>time minimum selected </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timeMaxSelect</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>time maximum selected </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>timeRebin</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>time binning </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>frequencyMin</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>frequency minimum selected </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>frequencyMax</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>frequency maximum selected </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>frequencyRebin</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>frequency binning </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="34" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.cpp" bodystart="43" bodyend="370"/>
+        <referencedby refid="_dyn2_dyn_8cpp_1a0ddf1224851353fc92bfbff6f499fa97" compoundref="_dyn2_dyn_8cpp" startline="77" endline="275">main</referencedby>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Class object for stocking data parameters, processing the (select or rebin) and write data Matrix in the ICD6&apos;s Dynspec Groups. </para>    </briefdescription>
+    <detaileddescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ This class need as parameter all metadata of the dynamic spectrum Goup for process the data. Data have 3 dimensions. The additionnal dimension is Stokes. The function stockDynspecData stocks parameter (for rebinning the data) in private attributes, and the function writeDynspecData process the data themselves. </para>    </detaileddescription>
+    <location file="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" line="23" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Stock_Write_Dyn2Dyn_Data_Part.h" bodystart="22" bodyend="46"/>
+    <listofallmembers>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1a5edca2bad445d99c35078772c1879dc3" prot="private" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>m_Nspectral</name></member>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1af85ea43984825df942240167825078cf" prot="private" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>m_NspectralReal</name></member>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1aecf518779e69b71a46ab80c83b36ee36" prot="private" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>m_Ntime</name></member>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1ae37512992e7d36afa59fd99bdb3c2ac6" prot="private" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>m_NtimeReal</name></member>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1a0c2a8de651ff13681a151427f105a1c2" prot="public" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>Stock_Write_Dyn2Dyn_Data_Part</name></member>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1a55ef0859c6880694dfa4b4dd518c7caf" prot="public" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>stockDynspecData</name></member>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1a3540232fd59486cf3d619483820b63a4" prot="public" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>writeDynspecData</name></member>
+      <member refid="class_stock___write___dyn2_dyn___data___part_1a12db045516180def5d04939d3aee1ea6" prot="public" virt="non-virtual"><scope>Stock_Write_Dyn2Dyn_Data_Part</scope><name>~Stock_Write_Dyn2Dyn_Data_Part</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

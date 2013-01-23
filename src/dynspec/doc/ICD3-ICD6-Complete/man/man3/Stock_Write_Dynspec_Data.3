@@ -1,0 +1,116 @@
+.TH "Stock_Write_Dynspec_Data" 3 "Thu Jan 10 2013" "LOFAR-ICD3 Convertor without any  selection and rebinning" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+Stock_Write_Dynspec_Data \- 
+.PP
+Class object for stocking data parameters and write datas for the ICD6's Dynspec Group\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <Stock_Write_Dynspec_Data\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBStock_Write_Dynspec_Data\fP ()"
+.br
+.ti -1c
+.RI "\fB~Stock_Write_Dynspec_Data\fP ()"
+.br
+.ti -1c
+.RI "void \fBstockDynspecData\fP (int Ntime, int Nspectral)"
+.br
+.ti -1c
+.RI "void \fBwriteDynspecData\fP (Group &dynspec_grp, std::string pathDir, std::string obsName, std::string pathFile, std::string outputFile, File &root_grp, int i, int j, int k, int l, int q, int obsNofStockes, std::vector< std::string > stokesComponent, float memoryRAM, int SAPindex)"
+.br
+.in -1c
+.SS "Private Attributes"
+
+.in +1c
+.ti -1c
+.RI "int \fBm_Ntime\fP"
+.br
+.ti -1c
+.RI "int \fBm_Nspectral\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Class object for stocking data parameters and write datas for the ICD6's Dynspec Group\&. 
+
+
+.br
+ Usage: 
+.br
+ This class need as parameter all metadata of the dynamic spectrum Goup for process the data\&. Data have 3 dimensions (at the opposite to ICD3 data which have 2)\&. The additionnal dimension is Stokes\&. The function stockDynspecData stocks paramerter in private attributes, and the function writeDynspecData process the data themselves\&. 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "\fBStock_Write_Dynspec_Data::Stock_Write_Dynspec_Data\fP ()"
+.SS "\fBStock_Write_Dynspec_Data::~Stock_Write_Dynspec_Data\fP ()"
+.SH "Member Function Documentation"
+.PP 
+.SS "void \fBStock_Write_Dynspec_Data::stockDynspecData\fP (intNtime, intNspectral)"
+.br
+ Usage: 
+.br
+ void \fBStock_Write_Dynspec_Data::stockDynspecData(int Ntime,int Nspectral)\fP 
+.PP
+\fBParameters:\fP
+.RS 4
+\fINtime\fP time binning 
+.br
+\fINspectral\fP spectral (frequency) binning (number of channels per subbands) 
+.RE
+.PP
+
+.SS "void \fBStock_Write_Dynspec_Data::writeDynspecData\fP (Group &dynspec_grp, std::stringpathDir, std::stringobsName, std::stringpathFile, std::stringoutputFile, File &root_grp, inti, intj, intk, intl, intq, intobsNofStockes, std::vector< std::string >stokesComponent, floatmemoryRAM, intSAPindex)"
+.br
+ Usage: 
+.br
+ void Stock_Write_Dynspec_Data::writeDynspecData(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM, int SAPindex)
+.PP
+\fBParameters:\fP
+.RS 4
+\fI&dynspec_grp\fP Group Object(Dynamic spectrum object) 
+.br
+\fIpathDir\fP ICD3 path directory 
+.br
+\fIobsName\fP Observation ID 
+.br
+\fIpathFile\fP ICD3 path for loading file 
+.br
+\fIoutputFile\fP output file 
+.br
+\fI&root_grp\fP File Object (Root Group object) 
+.br
+\fIi\fP Subarray pointing loop index 
+.br
+\fIj\fP Beams loop index 
+.br
+\fIk\fP loop index 
+.br
+\fIl\fP loop index 
+.br
+\fIq\fP Pxx nomenclature loop index 
+.br
+\fIobsNofStockes\fP number of Stokes components 
+.br
+\fIstokesComponent\fP vector which contains all Stokes components 
+.br
+\fImemoryRAM\fP RAM memory consuption by processing 
+.br
+\fISAPindex\fP Subarray pointings to process 
+.RE
+.PP
+
+.SH "Member Data Documentation"
+.PP 
+.SS "int \fBStock_Write_Dynspec_Data::m_Nspectral\fP\fC [private]\fP"
+.SS "int \fBStock_Write_Dynspec_Data::m_Ntime\fP\fC [private]\fP"
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for LOFAR-ICD3 Convertor without any selection and rebinning from the source code\&.

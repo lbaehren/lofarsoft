@@ -5,6 +5,16 @@
 
 #include <dal/lofar/BF_File.h>
 
+
+/// \file Stock_Write_Dyn2Dyn_Data_Part.cpp
+///  \brief File C++ (associated to Stock_Write_Dyn2Dyn_Data_Part.h) for stocking data parameters, processing the (select or rebin) and write data Matrix in the ICD6's Dynspec Groups 
+///  \details  
+/// <br /> Overview:
+/// <br /> Functions stockDynspecData and writeDynspecData are described (programmed) here. 
+/// The first one (stockDynspecData) will take as parameter processing parameters and stok them as private attributes. 
+/// The second function (writeDynspecData) will write them in the hdf5 output file (in the corresponding dynspec).
+/// Data processing is coded here !!
+
 using namespace dal;
 using namespace std;
 
@@ -14,6 +24,14 @@ using namespace std;
   
   void Stock_Write_Dyn2Dyn_Data_Part::stockDynspecData(int Ntime,int Nspectral,  int NtimeReal, int NspectralReal)
   {
+    
+  /// <br /> Usage:
+  /// <br />   void Stock_Write_Dyn2Dyn_Data_Part::stockDynspecData(int Ntime,int Nspectral,  int NtimeReal, int NspectralReal)
+  /// \param   Ntime  new time binning
+  /// \param   Nspectral new spectral (frequency)  binning (number of channels per subbands)
+  /// \param   NtimeReal current time binning before rebinning 
+  /// \param   NspectralReal current spectral (frequency)  binning (number of channels per subbands) before rebinning     
+    
     m_Ntime = Ntime;
     m_Nspectral = Nspectral;
     
@@ -24,6 +42,28 @@ using namespace std;
 
   void Stock_Write_Dyn2Dyn_Data_Part::writeDynspecData(Group &dynspec_grp,string obsName,string pathFile,string outputFile,File &root_grp,int j,int k,int obsNofStockes,vector<string> stokesComponent,float memoryRAM,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)  
   {
+      
+    
+  /// <br /> Usage:
+  /// <br />   void Stock_Write_Dyn2Dyn_Data_Part::writeDynspecData(Group &dynspec_grp,string obsName,string pathFile,string outputFile,File &root_grp,int j,int k,int obsNofStockes,vector<string> stokesComponent,float memoryRAM,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)  
+  /// \param  &dynspec_grp Group Object(Dynamic spectrum object)
+  /// \param  obsName Observation ID
+  /// \param  pathFile ICD3 path for loading file
+  /// \param  outputFile output file 
+  /// \param  &root_grp File Object (Root Group object)
+  /// \param  j Beams loop index
+  /// \param  k loop index
+  /// \param  obsNofStockes number of Stokes components
+  /// \param  stokesComponent vector which contains all Stokes components
+  /// \param  memoryRAM RAM memory consuption by processing
+  /// \param  SAPindex Subarray pointings to process
+  /// \param  timeMinSelect time minimum selected
+  /// \param  timeMaxSelect time maximum selected
+  /// \param  timeRebin time binning
+  /// \param  frequencyMin frequency minimum selected
+  /// \param  frequencyMax frequency maximum selected
+  /// \param  frequencyRebin frequency binning    
+    
       string index_j1;     
       std::ostringstream oss_j;oss_j << j;string index_j(oss_j.str()); 
       if (j<10){index_j1="_00"+index_j;}

@@ -7,6 +7,15 @@
 
 #include <dal/lofar/BF_File.h>
 
+/// \class Stock_Write_Dynspec_Metadata
+///  \brief Class object for stock and write metadatas for the ICD6's Dynspec Groups (loop on Beams ...) 
+///  \details  
+/// <br /> Usage: 
+/// <br /> This class need as parameter all metadata for the ICD6 (or dynamic spectrum)'s Dynspec Groups. 
+/// The function stockDynspecMetadata stocks dynspec metadata in private attributes, and the function writeDynspecMetadata
+/// write them in the corresponding dynamic spectrum  Group of the hdf5 file in output
+
+
 using namespace dal;
 
 class Stock_Write_Dynspec_Metadata

@@ -1,0 +1,140 @@
+\section{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part \-Class \-Reference}
+\label{class_stock___write___dyn2_dyn___data___part}\index{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part@{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part}}
+
+
+\-Class object for stocking data parameters, processing the (select or rebin) and write data \-Matrix in the \-I\-C\-D6's \-Dynspec \-Groups.  
+
+
+
+
+{\ttfamily \#include $<$\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part.\-h$>$}
+
+\subsection*{\-Public \-Member \-Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bf stock\-Dynspec\-Data} (int \-Ntime, int \-Nspectral, int \-Ntime\-Real, int \-Nspectral\-Real)
+\item 
+void {\bf write\-Dynspec\-Data} (\-Group \&dynspec\-\_\-grp, std\-::string obs\-Name, std\-::string path\-File, std\-::string output\-File, \-File \&root\-\_\-grp, int j, int k, int obs\-Nof\-Stockes, std\-::vector$<$ std\-::string $>$ stokes\-Component, float memory\-R\-A\-M, float time\-Min\-Select, float time\-Max\-Select, float time\-Rebin, float frequency\-Min, float frequency\-Max, float frequency\-Rebin)
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Class object for stocking data parameters, processing the (select or rebin) and write data \-Matrix in the \-I\-C\-D6's \-Dynspec \-Groups. 
+
+\par
+ \-Usage\-: \par
+ \-This class need as parameter all metadata of the dynamic spectrum \-Goup for process the data. \-Data have 3 dimensions. \-The additionnal dimension is \-Stokes. \-The function stock\-Dynspec\-Data stocks parameter (for rebinning the data) in private attributes, and the function write\-Dynspec\-Data process the data themselves. 
+
+\subsection{\-Member \-Function \-Documentation}
+\index{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part@{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part}!stock\-Dynspec\-Data@{stock\-Dynspec\-Data}}
+\index{stock\-Dynspec\-Data@{stock\-Dynspec\-Data}!Stock_Write_Dyn2Dyn_Data_Part@{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part}}
+\subsubsection[{stock\-Dynspec\-Data}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part\-::stock\-Dynspec\-Data} (
+\begin{DoxyParamCaption}
+\item[{int}]{\-Ntime, }
+\item[{int}]{\-Nspectral, }
+\item[{int}]{\-Ntime\-Real, }
+\item[{int}]{\-Nspectral\-Real}
+\end{DoxyParamCaption}
+)}\label{class_stock___write___dyn2_dyn___data___part_a55ef0859c6880694dfa4b4dd518c7caf}
+\par
+ \-Usage\-: \par
+ void \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part\-::stock\-Dynspec\-Data(int Ntime,int Nspectral,  int Ntime\-Real, int Nspectral\-Real)}{p.}{class_stock___write___dyn2_dyn___data___part_a55ef0859c6880694dfa4b4dd518c7caf} 
+\begin{DoxyParams}{\-Parameters}
+{\em \-Ntime} & new time binning \\
+\hline
+{\em \-Nspectral} & new spectral (frequency) binning (number of channels per subbands) \\
+\hline
+{\em \-Ntime\-Real} & current time binning before rebinning \\
+\hline
+{\em \-Nspectral\-Real} & current spectral (frequency) binning (number of channels per subbands) before rebinning \\
+\hline
+\end{DoxyParams}
+
+
+\-Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_stock___write___dyn2_dyn___data___part_a55ef0859c6880694dfa4b4dd518c7caf_icgraph}
+\end{center}
+\end{figure}
+
+
+\index{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part@{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part}!write\-Dynspec\-Data@{write\-Dynspec\-Data}}
+\index{write\-Dynspec\-Data@{write\-Dynspec\-Data}!Stock_Write_Dyn2Dyn_Data_Part@{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part}}
+\subsubsection[{write\-Dynspec\-Data}]{\setlength{\rightskip}{0pt plus 5cm}void {\bf \-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part\-::write\-Dynspec\-Data} (
+\begin{DoxyParamCaption}
+\item[{\-Group \&}]{dynspec\-\_\-grp, }
+\item[{std\-::string}]{obs\-Name, }
+\item[{std\-::string}]{path\-File, }
+\item[{std\-::string}]{output\-File, }
+\item[{\-File \&}]{root\-\_\-grp, }
+\item[{int}]{j, }
+\item[{int}]{k, }
+\item[{int}]{obs\-Nof\-Stockes, }
+\item[{std\-::vector$<$ std\-::string $>$}]{stokes\-Component, }
+\item[{float}]{memory\-R\-A\-M, }
+\item[{float}]{time\-Min\-Select, }
+\item[{float}]{time\-Max\-Select, }
+\item[{float}]{time\-Rebin, }
+\item[{float}]{frequency\-Min, }
+\item[{float}]{frequency\-Max, }
+\item[{float}]{frequency\-Rebin}
+\end{DoxyParamCaption}
+)}\label{class_stock___write___dyn2_dyn___data___part_a3540232fd59486cf3d619483820b63a4}
+\par
+ \-Usage\-: \par
+ void \-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part\-::write\-Dynspec\-Data(\-Group \&dynspec\-\_\-grp,string obs\-Name,string path\-File,string output\-File,\-File \&root\-\_\-grp,int j,int k,int obs\-Nof\-Stockes,vector$<$string$>$ stokes\-Component,float memory\-R\-A\-M,float time\-Min\-Select,float time\-Max\-Select,float time\-Rebin,float frequency\-Min,float frequency\-Max,float frequency\-Rebin) 
+\begin{DoxyParams}{\-Parameters}
+{\em \&dynspec\-\_\-grp} & \-Group \-Object(\-Dynamic spectrum object) \\
+\hline
+{\em obs\-Name} & \-Observation \-I\-D \\
+\hline
+{\em path\-File} & \-I\-C\-D3 path for loading file \\
+\hline
+{\em output\-File} & output file \\
+\hline
+{\em \&root\-\_\-grp} & \-File \-Object (\-Root \-Group object) \\
+\hline
+{\em j} & \-Beams loop index \\
+\hline
+{\em k} & loop index \\
+\hline
+{\em obs\-Nof\-Stockes} & number of \-Stokes components \\
+\hline
+{\em stokes\-Component} & vector which contains all \-Stokes components \\
+\hline
+{\em memory\-R\-A\-M} & \-R\-A\-M memory consuption by processing \\
+\hline
+{\em \-S\-A\-Pindex} & \-Subarray pointings to process \\
+\hline
+{\em time\-Min\-Select} & time minimum selected \\
+\hline
+{\em time\-Max\-Select} & time maximum selected \\
+\hline
+{\em time\-Rebin} & time binning \\
+\hline
+{\em frequency\-Min} & frequency minimum selected \\
+\hline
+{\em frequency\-Max} & frequency maximum selected \\
+\hline
+{\em frequency\-Rebin} & frequency binning \\
+\hline
+\end{DoxyParams}
+
+
+\-Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_stock___write___dyn2_dyn___data___part_a3540232fd59486cf3d619483820b63a4_icgraph}
+\end{center}
+\end{figure}
+
+
+
+
+\-The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D6-\/\-I\-C\-D6-\/\-Rebin/\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part.\-h\item 
+/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D6-\/\-I\-C\-D6-\/\-Rebin/{\bf \-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part.\-cpp}\end{DoxyCompactItemize}

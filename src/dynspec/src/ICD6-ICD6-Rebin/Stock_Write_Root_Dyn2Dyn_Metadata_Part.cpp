@@ -5,6 +5,17 @@
 
 #include <dal/lofar/BF_File.h>
 
+
+/// \file Stock_Write_Root_Dyn2Dyn_Metadata_Part.cpp
+///  \brief File C++ (associated to Stock_Write_Root_Dyn2Dyn_Metadata_Part.h) for stock and write metadatas for the ICD6's Root Group 
+///  \details  
+/// <br /> Overview:
+/// <br /> Functions stockRootMetadata and writeRootMetadata are described (programmed) here. 
+/// The first one (stockRootMetadata) will take as parameter all Root Group's metadata and stock them in the 
+/// private attributes of the class object. The second function (writeRootMetadata) will write them in the hdf5 output
+/// file. 
+
+
 using namespace dal;
 using namespace std;
 
@@ -22,6 +33,81 @@ using namespace std;
 				       int attr_59,double attr_60,string attr_61,double attr_62,string attr_63,double attr_64,vector<string> attr_65,vector<double> attr_66,
 				       vector<double> attr_67,vector<double> attr_68) 
  {
+   
+/// <br /> Usage:
+/// <br />   void Stock_Write_Root_Dyn2Dyn_Metadata_Part::stockRootMetadata(string attr_1,string attr_2,string attr_3,string attr_4,string attr_5,string attr_7,string attr_8,string attr_9,string attr_10,
+/// string attr_11,string attr_12,string attr_13,double attr_14,string attr_16,double attr_17,int attr_19,
+/// vector<string> attr_20,double attr_21,double attr_22,double attr_23,string attr_24,int attr_25,double attr_26,string attr_27,
+/// string attr_28,string attr_29,string attr_30,string attr_31,string attr_32,string attr_33,string attr_34,string attr_35,string attr_36,
+/// bool attr_37,int attr_38,int attr_39,string attr_40,string attr_41,string attr_42,double attr_45,double attr_46,double attr_47,
+/// vector<string> attr_48,vector<string> attr_49,int attr_52,double attr_53,string attr_54,double attr_55,string attr_56,double attr_57,string attr_58,
+/// int attr_59,double attr_60,string attr_61,double attr_62,string attr_63,double attr_64,vector<string> attr_65,vector<double> attr_66,
+/// vector<double> attr_67,vector<double> attr_68) 
+	
+/// \param  attr_1 GROUPETYPE
+/// \param  attr_2 FILENAME
+/// \param  attr_3 FILEDATE
+/// \param  attr_4 FILETYPE
+/// \param  attr_5 TELESCOPE
+/// \param  attr_7 PROJECT_ID
+/// \param  attr_8 PROJECT_TITLE
+/// \param  attr_9 PROJECT_PI
+/// \param  attr_10 PROJECT_CO_I
+/// \param  attr_11 PROJECT_CONTACT
+/// \param  attr_12 OBSERVATION_ID
+/// \param  attr_13 OBSERVATION_START_UTC
+/// \param  attr_14 OBSERVATION_START_MJD
+/// \param  attr_16 OBSERVATION_END_UTC
+/// \param  attr_17 OBSERVATION_END_MJD
+/// \param  attr_19 OBSERVATION_NOF_STATIONS
+/// \param  attr_20 OBSERVATION_STATIONS_LIST
+/// \param  attr_21 OBSERVATION_FREQUENCY_MAX
+/// \param  attr_22 OBSERVATION_FREQUENCY_MIN
+/// \param  attr_23 OBSERVATION_FREQUENCY_CENTER
+/// \param  attr_24 OBSERVATION_FREQUENCY_UNIT
+/// \param  attr_25 OBSERVATION_NOF_BITS_PER_SAMPLE
+/// \param  attr_26 CLOCK_FREQUENCY
+/// \param  attr_27 CLOCK_FREQUENCY_UNIT
+/// \param  attr_28 ANTENNA_SET
+/// \param  attr_29 FILTER_SELECTION
+/// \param  attr_30 TARGET
+/// \param  attr_31 SYSTEM_VERSION
+/// \param  attr_32 PIPELINE_NAME
+/// \param  attr_33 PIPELINE_VERSION
+/// \param  attr_34 DOC_NAME
+/// \param  attr_35 DOC_VERSION
+/// \param  attr_36 NOTES
+/// \param  attr_37 DYNSPEC_GROUP
+/// \param  attr_38 NOF_DYNSPEC
+/// \param  attr_39 NOF_TILED_DYNSPEC
+/// \param  attr_40 CREATE_OFFLINE_ONLINE
+/// \param  attr_41 BF_FORMAT
+/// \param  attr_42 BF_VERSION
+/// \param  attr_45 PRIMARY_POINTING_DIAMETER
+/// \param  attr_46 POINT_RA
+/// \param  attr_47 POINT_DEC
+/// \param  attr_48 POINT_ALTITUDE
+/// \param  attr_49 POINT_AZIMUTH
+/// \param  attr_52 NOF_SAMPLES
+/// \param  attr_53 SAMPLING_RATE
+/// \param  attr_54 SAMPLING_RATE_UNIT
+/// \param  attr_55 SAMPLING_TIME
+/// \param  attr_56 SAMPLING_TIME_UNIT
+/// \param  attr_57 TOTAL_INTEGRATION_TIME
+/// \param  attr_58 TOTAL_INTEGRATION_TIME_UNIT
+/// \param  attr_59 CHANNELS_PER_SUBANDS
+/// \param  attr_60 SUBBAND_WIDTH
+/// \param  attr_61 SUBBAND_WIDTH_UNIT
+/// \param  attr_62 CHANNEL_WIDTH
+/// \param  attr_63 CHANNEL_WIDTH_UNIT
+/// \param  attr_64 TOTAL_BAND_WIDTH
+/// \param  attr_65 WHEATER_STATIONS_LIST
+/// \param  attr_66 WHEATER_TEMPERATURE
+/// \param  attr_67 WHEATER_HUMIDITY
+/// \param  attr_68 SYSTEM_TEMPERATURE
+ 
+/// \return nothing    
+   
     // Stock metadata in an object
     // ROOT group meta-data
     
@@ -125,6 +211,14 @@ using namespace std;
 
   void Stock_Write_Root_Dyn2Dyn_Metadata_Part::writeRootMetadata(string outputFile,File &root_grp)
   {
+     
+/// <br /> Usage:
+/// <br /> void Stock_Write_Root_Dyn2Dyn_Metadata_Part::writeRootMetadata(string outputFile,File &root_grp)
+
+/// \param outputFile this is the output file (dynamic spectrum file)
+/// \param &root_grp Stock_Write_Root_Metadata_Part Object for catching stocked private attributes    
+    
+    
       // Write the ROOT meta-data in the output file
     
     

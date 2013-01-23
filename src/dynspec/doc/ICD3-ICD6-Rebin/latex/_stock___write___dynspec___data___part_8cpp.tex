@@ -1,0 +1,59 @@
+\section{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Rebin/\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.cpp \-File \-Reference}
+\label{_stock___write___dynspec___data___part_8cpp}\index{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Rebin/\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-cpp@{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D3-\/\-I\-C\-D6-\/\-Rebin/\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-cpp}}
+
+
+\-File \-C++ (associated to \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-h}{p.}{_stock___write___dynspec___data___part_8h_source}) for stocking data parameters, processing the (select or rebin) and write data \-Matrix in the \-I\-C\-D6's \-Dynspec \-Groups.  
+
+
+{\ttfamily \#include $<$iostream$>$}\*
+{\ttfamily \#include $<$string$>$}\*
+{\ttfamily \#include $<$fstream$>$}\*
+{\ttfamily \#include \char`\"{}\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-h\char`\"{}}\*
+{\ttfamily \#include $<$dal/lofar/\-B\-F\-\_\-\-File.\-h$>$}\*
+\-Include dependency graph for \-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-cpp\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{_stock___write___dynspec___data___part_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool {\bf is\-\_\-readable} (const std\-::string \&file)
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-File \-C++ (associated to \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-h}{p.}{_stock___write___dynspec___data___part_8h_source}) for stocking data parameters, processing the (select or rebin) and write data \-Matrix in the \-I\-C\-D6's \-Dynspec \-Groups. \par
+ \-Overview\-: \par
+ \-Functions stock\-Dynspec\-Data and write\-Dynspec\-Data are described (programmed) here. \-The first one (stock\-Dynspec\-Data) will take as parameter processing parameters and stok them as private attributes. \-The second function (write\-Dynspec\-Data) will write them in the hdf5 output file (in the corresponding dynspec). \-Data processing is coded here !! 
+
+\subsection{\-Function \-Documentation}
+\index{\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-cpp@{\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-cpp}!is\-\_\-readable@{is\-\_\-readable}}
+\index{is\-\_\-readable@{is\-\_\-readable}!Stock_Write_Dynspec_Data_Part.cpp@{\-Stock\-\_\-\-Write\-\_\-\-Dynspec\-\_\-\-Data\-\_\-\-Part.\-cpp}}
+\subsubsection[{is\-\_\-readable}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf is\-\_\-readable} (
+\begin{DoxyParamCaption}
+\item[{const std\-::string \&}]{file}
+\end{DoxyParamCaption}
+)}\label{_stock___write___dynspec___data___part_8cpp_a740c0c834395069b060fe8d7e31653cd}
+
+\begin{DoxyParams}{\-Parameters}
+{\em file} & \par
+\-Check if file is readable, so if file exists ! \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{\-Returns}
+boolean value 
+\end{DoxyReturn}
+
+
+\-Here is the caller graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{_stock___write___dynspec___data___part_8cpp_a740c0c834395069b060fe8d7e31653cd_icgraph}
+\end{center}
+\end{figure}
+
+

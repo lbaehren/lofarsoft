@@ -1,0 +1,36 @@
+.TH "/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Reader_Dyn2Dyn_Part.cpp" 3 "Thu Jan 10 2013" "LOFAR-ICD6 Convertor with selection and/or rebinning" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/vilchez/Bureau/dynspec/src/ICD6-ICD6-Rebin/Reader_Dyn2Dyn_Part.cpp \- 
+.PP
+File C++ (associated to \fBReader_Dyn2Dyn_Part\&.h\fP)for read ICD6 files and put in variables metadatas for the ICD6's Dynspec Group\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <iostream>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include 'Reader_Dyn2Dyn_Part\&.h'\fP
+.br
+\fC#include 'Stock_Write_Dyn2Dyn_Metadata_Part\&.h'\fP
+.br
+\fC#include 'Stock_Write_Dyn2Dyn_Data_Part\&.h'\fP
+.br
+\fC#include <dal/lofar/BF_File\&.h>\fP
+.br
+
+.SH "Detailed Description"
+.PP 
+File C++ (associated to \fBReader_Dyn2Dyn_Part\&.h\fP)for read ICD6 files and put in variables metadatas for the ICD6's Dynspec Group\&. 
+
+
+.br
+ Overview: 
+.br
+ This function readDynspec is described (programmed) here\&. It needs as parameter a \fBStock_Write_Dyn2Dyn_Metadata_Part\fP object\&. The readDynspec function will read dynspec metadatas and stock them in the \fBStock_Write_Dyn2Dyn_Metadata_Part\fP object as private attributes thanks to stockDynspecMetadata function\&. These attributes will be written in the next step by writeDynspecMetadata function which is in the class \fBStock_Write_Dyn2Dyn_Metadata_Part\&.h\fP and called at the end of this \fBReader_Dyn2Dyn_Part\&.cpp\fP 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for LOFAR-ICD6 Convertor with selection and/or rebinning from the source code\&.

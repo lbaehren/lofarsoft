@@ -1,0 +1,143 @@
+\section{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D6-\/\-I\-C\-D6-\/\-Rebin/\-Dyn2\-Dyn.cpp \-File \-Reference}
+\label{_dyn2_dyn_8cpp}\index{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D6-\/\-I\-C\-D6-\/\-Rebin/\-Dyn2\-Dyn.\-cpp@{/home/vilchez/\-Bureau/dynspec/src/\-I\-C\-D6-\/\-I\-C\-D6-\/\-Rebin/\-Dyn2\-Dyn.\-cpp}}
+
+
+\-Main program for converting \-I\-C\-D3 files to \-I\-C\-D6 (dynamic spectrum) files with (or not) a time-\/frequency selection and/or rebinning.  
+
+
+{\ttfamily \#include $<$iostream$>$}\*
+{\ttfamily \#include $<$string$>$}\*
+{\ttfamily \#include $<$time.\-h$>$}\*
+{\ttfamily \#include $<$unistd.\-h$>$}\*
+{\ttfamily \#include \char`\"{}\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Reader\-\_\-\-Dyn2\-Dyn\-\_\-\-Part.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part.\-h\char`\"{}}\*
+{\ttfamily \#include \char`\"{}\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part.\-h\char`\"{}}\*
+{\ttfamily \#include $<$dal/lofar/\-B\-F\-\_\-\-File.\-h$>$}\*
+\-Include dependency graph for \-Dyn2\-Dyn.\-cpp\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{_dyn2_dyn_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{\-Functions}
+\begin{DoxyCompactItemize}
+\item 
+int {\bf main} (int argc, char $\ast$argv[$\,$])
+\end{DoxyCompactItemize}
+
+
+\subsection{\-Detailed \-Description}
+\-Main program for converting \-I\-C\-D3 files to \-I\-C\-D6 (dynamic spectrum) files with (or not) a time-\/frequency selection and/or rebinning. \-Projet \-L\-O\-F\-A\-R
+
+\begin{DoxyDate}{\-Date}
+10/01/2013 
+\end{DoxyDate}
+\begin{DoxyAuthor}{\-Author}
+\-Nicolas \-V\-I\-L\-C\-H\-E\-Z 
+\end{DoxyAuthor}
+\begin{DoxyVersion}{\-Version}
+1.\-0 
+\end{DoxyVersion}
+\begin{DoxyCopyright}{\-Copyright}
+\-L\-P\-C2\-E/\-C\-N\-R\-S \-Station de radio-\/astronomie de \-Nançay 
+\end{DoxyCopyright}
+\begin{DoxySeeAlso}{\-See also}
+\-D\-A\-L \-Library 2.\-5 (library for hdf5 file)
+\end{DoxySeeAlso}
+\par
+\-Algorithm overview\-: \par
+\-This code (pipeline) uses several classes. \-Each classes has a particular role for processing dynamic spectrum data (\-I\-C\-D6). \-The role of this code is to convert a dynamic spectrum file in another lighter dynamic spectrum file. \-In fact, after a first processing, we obtain a first dynamic spectrum, but this dynamic spectrum is to massive to be visualized or the user needs only a smaller part of this spectrum. \-It is useless and unoptimized to reprocess all the \-I\-C\-D3 data ! \-Because \-I\-C\-D3 data must be very massive (more than 100 \-To) and time reprocessing could be very long (more than several day) ! \-So we introduce this tool to avoid reprocessing !
+
+\par
+\-Main code etablishes principal parameters of the observation (number of \-S\-A\-P, \-Beam and \-Stokes parameters. \-Thanks to robustess nomenclature of \-I\-C\-D3 format, with these parameter we are able to know which file we have to process for a given \-S\-A\-P, \-Beam and \-Stokes parameter) \-After existency tests and principal parameters determination, the main code will loop of the \-S\-A\-Ps that it has to process\-:
+
+\-First the code wil stock \-Root group metadata. \-Root \-Metadata are red by a function named read\-Root and contained in the class \doxyref{\-Reader\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Part.\-h}{p.}{_reader___root___dyn2_dyn___part_8h_source}, the \-Root group is generated and \-Root's matadata are stocked, then written by a function named write\-Root\-Metadata and contained in the class \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Root\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part.\-h}{p.}{_stock___write___root___dyn2_dyn___metadata___part_8h_source}
+
+\-Secondly, the main code will loop on \-Beam, and generate dynamic spectrum group and its metadata. \-The dynamic spectrum's metadata are red by a function named read\-Dynspec and contained in the class \doxyref{\-Reader\-\_\-\-Dyn2\-Dyn\-\_\-\-Part.\-h}{p.}{_reader___dyn2_dyn___part_8h_source}, after, metadata are stocked, then written by a function named write\-Dynspec\-Metadata contained in \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Metadata\-\_\-\-Part.\-h}{p.}{_stock___write___dyn2_dyn___metadata___part_8h_source}
+
+\-Finaly, data are processed. \-Because \-L\-O\-F\-A\-R data are very voluminous, we have to develop a strategy for\-: \par
+ -\/ \-To avoid swaping \par
+ -\/ \-To have enough memory for loading data \par
+ -\/ etc ... \-We decide to use a frozen quantity of \-R\-A\-M for a processing. \-This quantity is chosen by the user and corresponds to a number of time bins that we can process for this \-R\-A\-M. \-So, the code will loop of the number of \-Time series we need to process all the selected data. \-Rebinning is done inside these blocks. \-To conclude, data processing is done time blocks by time blocks, and data generation is done by the function write\-Dynspec\-Data which is included in the class \doxyref{\-Stock\-\_\-\-Write\-\_\-\-Dyn2\-Dyn\-\_\-\-Data\-\_\-\-Part.\-h}{p.}{_stock___write___dyn2_dyn___data___part_8h_source} \-Only selected data (time-\/frequency selection) are processed and/or rebinned !! 
+
+\subsection{\-Function \-Documentation}
+\index{\-Dyn2\-Dyn.\-cpp@{\-Dyn2\-Dyn.\-cpp}!main@{main}}
+\index{main@{main}!Dyn2Dyn.cpp@{\-Dyn2\-Dyn.\-cpp}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf main} (
+\begin{DoxyParamCaption}
+\item[{int}]{argc, }
+\item[{char $\ast$}]{argv[$\,$]}
+\end{DoxyParamCaption}
+)}\label{_dyn2_dyn_8cpp_a0ddf1224851353fc92bfbff6f499fa97}
+\par
+ \-U\-S\-A\-G\-E\-: \-Dyn2\-Dyn \-Dynspec\-\_\-\-File \-Observation-\/\-Number(ex\-:\-Lxxxxx) \-Output-\/hdf5-\/\-File \-Time\-Min \-Time\-Max \-Time\-Rebin(s/pixel) \-Frequency\-Min \-Frequency\-Max \-Frequency\-Rebin(\-M\-Hz/pixel) \-Rebin\-All(yes or no) [\-Facultative\-: \-Dataset-\/\-R\-A\-M-\/allocation (in \-Go; default value\-: 1\-Go) \-Number\-Of\-S\-A\-P(if \-No, number of \-S\-A\-P to rebin/ if yes put 0 as default \-Value)]
+
+
+\begin{DoxyParams}{\-Parameters}
+{\em argc} & \-Number of arguments \\
+\hline
+{\em argv} & \-Table of arguments(see above c.\-f \-Usage)\\
+\hline
+\end{DoxyParams}
+\par
+\begin{DoxySeeAlso}{\-See also}
+\-Variables\-: \par
+\-Dynspec\-\_\-\-File\-: \-Observation \-File (\-I\-C\-D6 file) \par
+obs\-Name\-: \-Observation \-I\-D \par
+output\-File\-: \-Output file for \-One \-S\-A\-P contains all dynamic spectrum associated to this \-S\-A\-P \par
+time\-Min\-Select\-: \-Minimum \-Time selection \par
+time\-Max\-Select\-: \-Maximum \-Time selection \par
+time\-Rebin\-: \-Time rebinning \par
+frequency\-Min\-: \-Minimum \-Frequency selection \par
+frequency\-Max\-: \-Maximum \-Frequency selection \par
+frequency\-Rebin\-: \-Frequency rebinning in a subbands =$>$ equal to 1 or a multiply of 2$^\wedge$n \par
+rebin\-All\-Dynspec\-: yes or no =$>$ convert one or all \-S\-A\-P (\-Sub array pointing i.\-e line of sight for an observation i.\-e observed source) \par
+\-S\-A\-P\-Number \-Number\-: of \-S\-A\-P to process \par
+memory\-R\-A\-M\-: \-R\-A\-M \-Memory allocation for processing \par
+ \par
+\-Test \-Existing files allow to determinine \doxyref{main}{p.}{_dyn2_dyn_8cpp_a0ddf1224851353fc92bfbff6f499fa97} observation parameter\-: \par
+obs\-Nof\-S\-A\-P\-: \-Number of \-S\-A\-P contained in the observation directory \par
+obs\-Nof\-Beam\-: \-Number of \-B\-E\-A\-M (i.\-e signals from a station or a correlated sum) in the observation directory \par
+obs\-Nof\-Stockes\-: \-Number of \-Stokes paramters contained in the observation directory \par
+stokes\-Component\-: \-Vector of \-Stokes parameter \par
+ \par
+\-We have 2 kinds of observation\-: using or not \-Pxxx nomenclature \par
+rebin\-All\-Dynspec\-: \-Flag which allow to process only one selected \-S\-A\-P or \-All \par
+method\-Flag\-: \-Flag which allow to know if \-Pxxxnomenclatureis used
+\end{DoxySeeAlso}
+\par
+\begin{DoxySeeAlso}{\-See also}
+2 modes (depends with nomenclature)\-: \par
+ \par
+ \-F\-I\-R\-S\-T \-M\-O\-D\-E\-: \par
+\-Loop on \-S\-A\-Ps \par
+\-Root group generation =$>$ generation of the output file ($\ast$.h5) and its metadata \par
+\-Loop on \-B\-E\-A\-Ms \par
+generation of a dynamic spectrum in the \-Root group and its metadata \par
+\-Data processing for this dynamic spectrum \par
+ \par
+ \-S\-E\-C\-O\-N\-D \-M\-O\-D\-E\-: \par
+(if \-Pxxx nomenclature is used\-:) \-Loop on \-S\-A\-Ps \par
+(if \-Pxxx nomenclature is used\-:) \-Loop on \-B\-E\-A\-Ms \par
+(if \-Pxxx nomenclature is used) \-Loop on differents \-Parts of the dynamic spectrum \par
+(if \-Pxxx nomenclature is used) generation of a dynamic spectrum in the \-Root group and its metadata, \-One dynamic spectrum for each \-Part \par
+(if \-Pxxx nomenclature is used) \-Data processing for this dynamic spectrum
+\end{DoxySeeAlso}
+\par
+\begin{DoxyReturn}{\-Returns}
+\-I\-C\-D6files 
+\end{DoxyReturn}
+
+
+\-Here is the call graph for this function\-:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{_dyn2_dyn_8cpp_a0ddf1224851353fc92bfbff6f499fa97_cgraph}
+\end{center}
+\end{figure}
+
+

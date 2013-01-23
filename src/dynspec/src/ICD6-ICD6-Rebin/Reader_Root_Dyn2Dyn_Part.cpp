@@ -8,6 +8,15 @@
 
 #include <dal/lofar/BF_File.h>
 
+/// \file Reader_Root_Dyn2Dyn_Part.cpp
+///  \brief File C++ (associated to Reader_Root_Dyn2Dyn_Part.h) for read ICD3 files and put in variables metadatas for the ICD6's Root Group  
+///  \details  
+/// <br /> Overview:
+/// <br /> This function readRoot is described (programmed) here. It needs as parameter a Stock_Write_Root_Dyn2Dyn_Metadata_Part object. The readRoot function will read 
+///  root metadatas and stock them in the Stock_Write_Root_Dyn2Dyn_Metadata_Part object as private attributes thanks to stockRootMetadata function.
+///  These attributes will be written in the next step by writeRootMetadata function which is in the class 
+///  Stock_Write_Root_Dyn2Dyn_Metadata_Part.h  and called at the end of this Reader_Root_Part.cpp
+
 
 using namespace dal;
 using namespace std;
@@ -22,6 +31,23 @@ using namespace std;
 
   { 
    
+/// <br /> Usage:
+/// <br />   void Reader_Root_Dyn2Dyn_Part::readRoot(string pathFile,string obsName,Stock_Write_Root_Dyn2Dyn_Metadata_Part *rootMetadata,int obsNofBeam,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)
+ 
+/// \param pathFile file (dynamic spectrum) to read
+/// \param obsName observation ID
+/// \param *rootMetadata Stock_Write_Root_Dyn2Dyn_Metadata_Part class object
+/// \param  obsNofBeam number of beam
+/// \param  timeMinSelect minimum time selection 
+/// \param  timeMaxSelect maximum time selection 
+/// \param  timeRebin time rebinning
+/// \param  frequencyMin minimum frequency selection
+/// \param  frequencyMax maximum frequency selection
+/// \param  frequencyRebin frequency rebinning          
+   
+/// \return nothing       
+    
+    
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // Programm  Load the hdf5's root part
 

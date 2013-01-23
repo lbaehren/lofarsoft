@@ -9,6 +9,19 @@
 #include <dal/lofar/BF_File.h>
 
 
+/// \file Reader_Root.cpp
+///  \brief File C++ (associated to Reader_Root.h) for read ICD3 files and put in variables metadatas for the ICD6's Root Group  
+///  \details  
+/// <br /> Overview:
+/// <br /> This function readRoot is described (programmed) here. It needs as parameter a Stock_Write_Root_Metadata_Part object. The readRoot function will read 
+///  root metadatas and stock them in the Stock_Write_Root_Metadata_Part object as private attributes thanks to stockRootMetadata function.
+///  These attributes will be written in the next step by writeRootMetadata function which is in the class 
+///  Stock_Write_Root_Metadata_Part.h  and called at the end of this Reader_Root.cpp
+
+
+
+
+
 using namespace dal;
 using namespace std;
 
@@ -18,9 +31,27 @@ using namespace std;
   
   
     
-  void Reader_Root::readRoot(string pathFile,string obsName,Stock_Write_Root_Metadata *rootMetadata,int obsNofSource,int obsNofBeam,int obsNofFrequencyBand,int obsNofTiledDynspec, string SAPname, int SAPindex)
+  void Reader_Root::readRoot(string pathFile,string obsName,Stock_Write_Root_Metadata *rootMetadata,int obsNofSource,int obsNofBeam,int obsNofFrequencyBand,int obsNofTiledDynspec, string SAPname, int SAPindex, int j_indicator)
     { 
+
+/// <br /> Usage:
+/// <br />   void Reader_Root::readRoot(string pathFile,string obsName,Stock_Write_Root_Metadata *rootMetadata,int obsNofSource,int obsNofBeam,int obsNofFrequencyBand,int obsNofTiledDynspec, string SAPname, int SAPindex)
+
+ 
+/// \param pathFileICD3 file to read
+/// \param obsName observation ID
+/// \param *rootMetadata Stock_Write_Root_Metadata_Part class object
+/// \param  obsNofSource number of sources
+/// \param  obsNofBeam number of beam
+/// \param  obsNofFrequencyBandnumber of frequency band 
+/// \param  obsNofTiledDynspecnumber of tiled dynspec
+/// \param  SAPname name of SubArrayPointing
+/// \param  SAPindex index of SubArrayPointing
+      
    
+/// \return nothing         
+      
+      
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // Programm  Load the hdf5's root part
 
@@ -29,7 +60,7 @@ using namespace std;
 
       BF_SubArrayPointing SAP 		= file.subArrayPointing(SAPindex);		// generate an object called SAP contains subarray pointings
 
-      BF_BeamGroup BEAM			= SAP.beam(0);      			// generate an object called BEAM contains Beams
+      BF_BeamGroup BEAM			= SAP.beam(j_indicator);      			// generate an object called BEAM contains Beams
 
       
       CoordinatesGroup COORDS		= BEAM.coordinates();      		// generate an object called COORDS contains Coodinates directory
@@ -101,7 +132,7 @@ using namespace std;
       //Variables Initialization && Additionnal Root group variables      
       
       bool DYNSPEC_GROUP(true);
-      int NOF_DYNSPEC(obsNofBeam*obsNofFrequencyBand);
+      int NOF_DYNSPEC(obsNofBeam);
       int NOF_TILED_DYNSPEC(obsNofTiledDynspec);
       string CREATE_OFFLINE_ONLINE("Offline");
       

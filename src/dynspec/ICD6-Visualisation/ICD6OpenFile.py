@@ -555,7 +555,7 @@ class ICD6OpenFile():
 	      
 	      ## Plot Rebin0
 	      subPlot = self.figure.add_subplot(111)
-	      plotBox = subPlot.imshow(flatdata, vmin=0.1, vmax=self.plotLevel, aspect='auto', extent=[self.minFrequency,self.maxFrequency,self.timePixel0*self.timeIncrement*timeComp2Sum0,0]) 
+	      plotBox = subPlot.imshow(flatdata, vmin=0.1, vmax=self.plotLevel, aspect='auto', extent=[self.minFrequency,self.maxFrequency,self.timePixel0*self.timeIncrement*timeComp2Sum0,0], interpolation='nearest') 
 	      subPlot.set_xlabel('Frequency (MHz)')
 	      subPlot.set_ylabel('Time (s)')	
 	      colBox = self.figure.colorbar(plotBox)

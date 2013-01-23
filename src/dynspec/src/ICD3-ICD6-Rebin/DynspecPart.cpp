@@ -10,6 +10,46 @@ systeme Ubuntu 12.04 x86 LTS
 DAL v2.5 (library for hdf5 file)
 
 */
+
+
+
+/// Projet       LOFAR
+/// \file        DynspecPart.cpp 
+/// \date        17/12/2012
+/// \author      Nicolas VILCHEZ
+/// \version     1.0
+/// \copyright   LPC2E/CNRS Station de radio-astronomie de Nançay
+///  \see DAL Library 2.5 (library for hdf5 file)
+///  \brief 	 Main program for converting ICD3 files to ICD6 (dynamic spectrum) files with (or not) a time-frequency selection and/or rebinning
+///  \details  
+/// <br />Algorithm overview:
+/// <br />This code (pipeline) uses several classes. Each classes has a particular role for processing ICD3 data to dynamic spectrum data (ICD6)
+///   	 Main code etablishes the principal parameter of the observation (number of SAP, Beam and Stokes parameters. Thanks to robustess 
+///   	 nomenclature of ICD3 format, with these parameter we are able to know which file we have to process for a given SAP, Beam and Stokes parameter)
+///   	 After existency tests and principal parameters determination, the main code will loop of the SAPs that it has to process:
+///   	 
+///   	 First the code wil stock Root group metadata. Root Metadata are red by a function named readRoot and contained in the class Reader_Root_Part.h, the
+///   	  Root group is generated and Root's matadata are stocked, then written by a function named writeRootMetadata and contained in the class Stock_Write_Root_Metadata_Part.h
+///   	 
+///   	 Secondly, the main code will loop on Beam, and generate dynamic spectrum group and its metadata. The dynamic spectrum's metadata are red by a function named
+///   	 readDynspec and contained in the class Reader_Dynspec_Part.h, after, metadata are stocked, then written by a function named writeDynspecMetadata contained in
+///   	 Stock_Write_Dynspec_Metadata_Part.h
+///   	 
+///   	 Finaly, data are processed. Because LOFAR data are very voluminous, we have to develop a strategy for:
+/// <br /> - To avoid swaping
+/// <br /> - To have enough memory for loading data
+/// <br /> - etc ...
+///   	 We decide to use a frozen quantity of RAM for a processing. This quantity is chosen by the user and corresponds to a number of time bins that we can process
+///   	 for this RAM.
+///   	 So, the code will loop of the number of Time series we need to process all the selected data. Rebinning is done inside these blocks. 
+///   	 To conclude, data processing is done time blocks by time blocks, and data generation is done by the function  writeDynspecData which is included in the class 
+///   	 Stock_Write_Dynspec_Data_Part.h
+/// 	 Only selected data (time-frequency selection) are processed and/or rebinned !!
+
+
+
+
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -33,6 +73,11 @@ using namespace std;
 
    bool is_readableTer( const std::string & file ) 
   { 
+ 
+/// \param file
+/// <br />Check if file is readable, so if file exists !
+/// \return boolean value 
+
     std::ifstream fichier( file.c_str() ); 
     return !fichier.fail(); 
   } 
@@ -41,6 +86,55 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+
+/// <br />Usage: DynspecPart Observation-Path-DIRObservation-Number(ex:Lxxxxx) Output-hdf5-DIR TimeMin TimeMax TimeRebin(s/pixel) FrequencyMin FrequencyMax FrequencyRebin(MHz/pixel) RebinAll(yes or no) [Facultative: Dataset-RAM-allocation (in Go; default value: 1Go) NumberOfSAP(if No, number of SAP to rebin/ if yes put 0 as default Value))] 
+
+/// \param argc Number of arguments
+/// \param argv Table of arguments(see above c.f Usage)
+
+/// <br />\see Variables:
+/// <br />pathDir: Observation (ICD3) directory
+/// <br />obsName: Observation ID
+/// <br />outputFile Output file for One SAP contains all dynamic spectrum
+/// <br />timeMinSelect: Minimum Time selection
+/// <br />timeMaxSelect: Maximum Time selection
+/// <br />timeRebin: Time rebinning
+/// <br />frequencyMin: Minimum Frequency selection
+/// <br />frequencyMax: Maximum Frequency selection
+/// <br />frequencyRebin: Frequency rebinning in a subbands => equal to 1 or a multiply of 2^n
+/// <br />rebinAllDynspec: yes or no => convert one or all SAP (Sub array pointing i.e line of sight for an observation i.e observed source)
+/// <br />SAPNumber: Number of SAP to process 
+/// <br />memoryRAM: RAM Memory allocation for processing 
+/// <br />
+/// <br />Test Existing files allow to determinine main observation parameter:
+/// <br />obsNofSAP: Number of SAP contained in the observation directory
+/// <br />obsNofBeam: Number of BEAM (i.e signals from a station or a correlated sum) in the observation directory
+/// <br />obsNofStockes: Number of Stokes paramters contained in the observation directory
+/// <br />stokesComponent: Vector of Stokes parameter
+/// <br />
+/// <br />We have 2 kinds of observation: using or not Pxxx nomenclature 
+/// <br />rebinAllDynspec: Flag which allow to process only one selected SAP or All
+/// <br />methodFlag: Flag which allow to know if Pxxxnomenclatureis used
+
+/// <br />\see 2 modes (depends with nomenclature):
+/// <br />
+/// <br /> FIRST MODE:
+/// <br />Loop on SAPs
+/// <br />Root group generation => generation of the output file (*.h5) and its metadata	
+/// <br />Loop on BEAMs
+/// <br />generation of a dynamic spectrum in the Root group and its metadata
+/// <br />Data processing for this dynamic spectrum
+/// <br />
+/// <br /> SECOND MODE:
+/// <br />(if Pxxx nomenclature is used:) Loop on SAPs
+/// <br />(if Pxxx nomenclature is used:) Loop on BEAMs	
+/// <br />(if Pxxx nomenclature is used) Loop on differents Parts of the dynamic spectrum
+/// <br />(if Pxxx nomenclature is used) generation of a dynamic spectrum in the Root group and its metadata, One dynamic spectrum for each Part
+/// <br />(if Pxxx nomenclature is used) Data processing for this dynamic spectrum	  
+  
+/// <br />\return ICD6files
+  
+  
   // Time CPU computation  
   clock_t start, end;
   double cpu_time_used;  
@@ -50,9 +144,8 @@ int main(int argc, char *argv[])
   ////////////////////////////////////////////////////////////////////////////////////////  
   //INPUT PARAMETERS
   
-  
-  if (argc< 11 ){cout << "   " << endl; cout << "missing parameter: USAGE: Dynspec  Observation-Path-DIR  Observation-Number(ex:Lxxxxx) Output-hdf5-DIR TimeMin TimeMax TimeRebin(s/pixel) FrequencyMin FrequencyMax FrequencyRebin(MHz/pixel) RebinAll(yes or no) [Facultative: Dataset-RAM-allocation (in Go; default value: 1Go) NumberOfSAP(if No, number of SAP to rebin)] " << endl;}
-  if (argc> 13 ){cout << "   " << endl; cout << "too much parameters: USAGE: Dynspec  Observation-Path-DIR  Observation-Number(ex:Lxxxxx) Output-hdf5-DIR TimeMin TimeMax TimeRebin(s/pixel) FrequencyMin FrequencyMax FrequencyRebin(MHz/pixel) RebinAll(yes or no) [Facultative: Dataset-RAM-allocation (in Go; default value: 1Go) Number-Of-SAP(if RebinAll=No, number of SAP to rebin is needed)] " << endl;}
+  if (argc< 11 ){cout << "   " << endl; cout << "missing parameter: USAGE: Dynspec  Observation-Path-DIR  Observation-Number(ex:Lxxxxx) Output-hdf5-DIR TimeMin TimeMax TimeRebin(s/pixel) FrequencyMin FrequencyMax FrequencyRebin(MHz/pixel) RebinAll(yes or no) [Facultative: Dataset-RAM-allocation (in Go; default value: 1Go) NumberOfSAP(if No, number of SAP to rebin/ if yes put 0 as default Value)] " << endl;}
+  if (argc> 13 ){cout << "   " << endl; cout << "too much parameters: USAGE: Dynspec  Observation-Path-DIR  Observation-Number(ex:Lxxxxx) Output-hdf5-DIR TimeMin TimeMax TimeRebin(s/pixel) FrequencyMin FrequencyMax FrequencyRebin(MHz/pixel) RebinAll(yes or no) [Facultative: Dataset-RAM-allocation (in Go; default value: 1Go) Number-Of-SAP(if RebinAll=No, number of SAP to rebin is needed/ if yes put 0 as default Value)] " << endl;}
     
   if (argc <= 13 && argc >= 11)
   {
@@ -78,19 +171,16 @@ int main(int argc, char *argv[])
   string rebinAllDynspec(argv[10]);
   int SAPNumber(atof(argv[12]));
   
-  
+ 
 
   ////////////////////////////////////////////////////////////////////////////////////////    
   // PARAMETERS Determination
-
-
+  
   int i(0);  // loop index initilization
   
-  ////////////////////////////////////  
-  // Stockes component determination
 
   
-  // Test of existing files (if files are missing ....
+  // Test of existing files (if files are missing ....  => Find the first readable h5 file for getting Root metadata
   
   string pathFile0(pathDir+obsName);
   string pathFile(pathFile0+"_SAP000_B000_S0_P000_bf.h5");
@@ -124,28 +214,32 @@ int main(int argc, char *argv[])
  		    
 			pathFile = pathFile0+index_itest+index_jtest+index_ktest+"_P000_bf.h5";
 			if (is_readableTer(pathFile)) 
-			      {testIndicator++; i_indicator = itest, j_indicator = jtest;cout << pathFile  << "  test indic:" << testIndicator  << endl; }
+			      {testIndicator++; i_indicator = itest, j_indicator = jtest;}
 			}
 		  }
 	      }
 	  }
     
 	  	  
-  // First right file found
+  // => First right file has been found 
+  // end of first right file determination
+  
+  
+  ////////////////////////////////////////////////////////////////////////////////////////    
+  // Number of Beam, Stokes and Stokes Component Determination 
   
   if (testIndicator != 0)
   {
-  cout << "   " << endl;
-  cout << pathFile  << endl;
   BF_File file(pathFile);  							// generate an object called file contains Root
-  BF_SubArrayPointing SAP = file.subArrayPointing(i_indicator);				// generate an object called SAP contains 1 subarray pointing
-  BF_BeamGroup BEAM	= SAP.beam(j_indicator); 						// generate an object called BEAM contains 1 beam					
+  BF_SubArrayPointing SAP = file.subArrayPointing(i_indicator);		// generate an object called SAP contains 1 subarray pointing
+  BF_BeamGroup BEAM	= SAP.beam(j_indicator); 				// generate an object called BEAM contains 1 beam					
 
-  int obsNofStockes(BEAM.nofStokes().get());
-  
+  int obsNofStockes(BEAM.nofStokes().get());  
   vector<string> stokesComponent(BEAM.stokesComponents().get()); 
 
 
+  
+  
   ////////////////////////////////////  
   // Others Parameters determination
     
@@ -284,6 +378,9 @@ int main(int argc, char *argv[])
     */ 
 
 
+
+
+
   ////////////////////////////////////////////////////////////////////////////////////////
   // SAP  PART  => Each SAP => One ICD6 hdf5 file 
   
@@ -293,7 +390,7 @@ int main(int argc, char *argv[])
   
   int k(0),l(0),q(0);  // Dynspec iterator
 
-  
+
   // Dynspec using SAP method
 
   if (methodFlag == 0)
@@ -315,7 +412,7 @@ int main(int argc, char *argv[])
 	  string outputFile(argv[3]);
 	  string pathFile(pathDir+obsName+index_i1+"_B000_S0_P000_bf.h5");
 	  outputFile = outputFile+obsName+index_i1+".h5";
-	  
+
 
 	  //HDF5FileBase root_grp(outputFile, HDF5FileBase::CREATE);
 	  File root_grp( outputFile, File::CREATE );
@@ -342,7 +439,7 @@ int main(int argc, char *argv[])
 
 	  
 	  for (j=0;j<obsNofBeam;j++)
- 	    {
+ 	    { 		    
 	     
 		    // Generate Dynspec Group
 		    string index_k1;  
@@ -406,7 +503,7 @@ int main(int argc, char *argv[])
       
       // SAP method
       for (i=i_indicator;i<obsNofSAP;i++)  // Loop on SAP
-	{
+	{  
 	  k = 0;
 	  string index_i1;
 	  std::ostringstream oss_i;oss_i << i;string index_i(oss_i.str());
@@ -441,9 +538,11 @@ int main(int argc, char *argv[])
 
 	  for (j=0;j<obsNofBeam;j++)
 	    {
-	      
+
+  
 	      for (q=0;q<obsNofFrequencyBand;q++)
 		{
+
 		    // Generate Dynspec Group
 		    string index_k1;  
 		    std::ostringstream oss_k;oss_k << k;string index_k(oss_k.str());

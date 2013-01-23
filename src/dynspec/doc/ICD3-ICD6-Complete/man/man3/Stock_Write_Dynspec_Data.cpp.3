@@ -1,0 +1,56 @@
+.TH "/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Dynspec_Data.cpp" 3 "Thu Jan 10 2013" "LOFAR-ICD3 Convertor without any  selection and rebinning" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Dynspec_Data.cpp \- 
+.PP
+File C++ (associated to Stock_Write_Dynspec_Data_Part\&.h) for stock process parameters (for rebinning the data) and write data Matrix for the ICD6's Dynspec Groups\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <iostream>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <fstream>\fP
+.br
+\fC#include 'Stock_Write_Dynspec_Data\&.h'\fP
+.br
+\fC#include <dal/lofar/BF_File\&.h>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBis_readable\fP (const std::string &file)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+File C++ (associated to Stock_Write_Dynspec_Data_Part\&.h) for stock process parameters (for rebinning the data) and write data Matrix for the ICD6's Dynspec Groups\&. 
+
+
+.br
+ Overview: 
+.br
+ Functions stockDynspecData and writeDynspecData are described (programmed) here\&. The first one (stockDynspecData) will take as parameter processing parameters and stok them as private attributes\&. The second function (writeDynspecData) will write them in the hdf5 output file (in the corresponding dynspec)\&. Data processing is coded here !! 
+.SH "Function Documentation"
+.PP 
+.SS "bool \fBis_readable\fP (const std::string &file)"\fBParameters:\fP
+.RS 4
+\fIfile\fP 
+.br
+Check if file is readable, so if file exists ! 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+boolean value 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for LOFAR-ICD3 Convertor without any selection and rebinning from the source code\&.

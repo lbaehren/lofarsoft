@@ -1,0 +1,1730 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.7.6.1">
+  <compounddef id="class_stock___write___root___metadata" kind="class" prot="public">
+    <compoundname>Stock_Write_Root_Metadata</compoundname>
+    <includes refid="_stock___write___root___metadata_8h" local="no">Stock_Write_Root_Metadata.h</includes>
+      <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a20ef8c791b24eab35217e5a23f16c4e3" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_1</definition>
+        <argsstring></argsstring>
+        <name>m_attr_1</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="46" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a3b76a44d7a5153c806a64ce483783030" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_2</definition>
+        <argsstring></argsstring>
+        <name>m_attr_2</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="47" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a0b5018c0f04cb08b73b030aba903cb46" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_3</definition>
+        <argsstring></argsstring>
+        <name>m_attr_3</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="48" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a55703599ca02ef4c1cf66f297806dfe6" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_4</definition>
+        <argsstring></argsstring>
+        <name>m_attr_4</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="49" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a96191c40163360d63f4a14397aac93df" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_5</definition>
+        <argsstring></argsstring>
+        <name>m_attr_5</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="50" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1aec466e04472b4962ba3d495483ca28a3" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_7</definition>
+        <argsstring></argsstring>
+        <name>m_attr_7</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="51" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a24161de7b4a5380201cefb8d09773bb2" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_8</definition>
+        <argsstring></argsstring>
+        <name>m_attr_8</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="52" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="52" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a8f9264138b79c5102da3d2cdf5aa2a60" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_9</definition>
+        <argsstring></argsstring>
+        <name>m_attr_9</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="53" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1abefc26a5d0122542c254c3027684e630" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_10</definition>
+        <argsstring></argsstring>
+        <name>m_attr_10</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="54" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a6de4329dc64d3bb9bed5b1cd47a3799e" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_11</definition>
+        <argsstring></argsstring>
+        <name>m_attr_11</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="55" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ad6ac6bd0ca3b22f3144d68c560c78808" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_12</definition>
+        <argsstring></argsstring>
+        <name>m_attr_12</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="56" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="56" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a21385d63e2e9917484021353fd7b8ed1" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_13</definition>
+        <argsstring></argsstring>
+        <name>m_attr_13</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="57" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a2c27988b26d5a86dab0eac353b0cfead" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_14</definition>
+        <argsstring></argsstring>
+        <name>m_attr_14</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="58" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a5a8ccf7bb9ea1ee65058421869962dfd" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_16</definition>
+        <argsstring></argsstring>
+        <name>m_attr_16</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="59" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a5d805d4f50ced0dd62a85746da9effb1" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_17</definition>
+        <argsstring></argsstring>
+        <name>m_attr_17</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="60" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="60" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ae39aa0f37d7fee4a00967fc81194fe26" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_attr_19</definition>
+        <argsstring></argsstring>
+        <name>m_attr_19</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="61" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1aba636d9d393a08a06f02a53f09e0cdfa" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_size_attr_20</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_20</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="63" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a09b64739e31354e3fa3d82a99bfd6c68" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Metadata::m_attr_20</definition>
+        <argsstring></argsstring>
+        <name>m_attr_20</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="64" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a0dcd64e9a1726518d4a4c5ee92a7ec00" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_21</definition>
+        <argsstring></argsstring>
+        <name>m_attr_21</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="66" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="66" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a0eded54e260116c8a96f8a00da6e5790" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_22</definition>
+        <argsstring></argsstring>
+        <name>m_attr_22</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="67" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ad350005475d2d49adbddab08168ffc08" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_23</definition>
+        <argsstring></argsstring>
+        <name>m_attr_23</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="68" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="68" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a3df4810d4ded2dbac5f281d23350cbe7" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_24</definition>
+        <argsstring></argsstring>
+        <name>m_attr_24</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="70" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a9d8bd4d8fccfad5ea6f316b2075198a1" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_attr_25</definition>
+        <argsstring></argsstring>
+        <name>m_attr_25</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="71" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a847e78fed14e72f8345b250c1b4e3aae" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_26</definition>
+        <argsstring></argsstring>
+        <name>m_attr_26</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="72" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ad2ce6b3f8e34a15f84ce1c10cfef7e7c" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_27</definition>
+        <argsstring></argsstring>
+        <name>m_attr_27</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="73" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="73" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a4ae5eda01b4a4a5e6d29b60911cc1250" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_28</definition>
+        <argsstring></argsstring>
+        <name>m_attr_28</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="74" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="74" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a3f49cf42a29381562da17c9bea90ca92" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_29</definition>
+        <argsstring></argsstring>
+        <name>m_attr_29</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="75" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="75" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1af2852b84eee3b2a708d91d1b40104f6d" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_30</definition>
+        <argsstring></argsstring>
+        <name>m_attr_30</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="76" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="76" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a5add164c21497e420ecafdbcf4d0b658" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_31</definition>
+        <argsstring></argsstring>
+        <name>m_attr_31</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="77" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ad31cb1257f4d3a851ddda48b39249aaf" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_32</definition>
+        <argsstring></argsstring>
+        <name>m_attr_32</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="78" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="78" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a0a0455257ddade7c97489a3ff519572c" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_33</definition>
+        <argsstring></argsstring>
+        <name>m_attr_33</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="79" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="79" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ab4f7912dfe02fcfdc7ba13586ea2b754" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_34</definition>
+        <argsstring></argsstring>
+        <name>m_attr_34</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="80" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="80" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a05e75e3a359008b5d13e9195bb48c622" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_35</definition>
+        <argsstring></argsstring>
+        <name>m_attr_35</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="81" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="81" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a104ff128d2d311761a77584ca5a06f53" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_36</definition>
+        <argsstring></argsstring>
+        <name>m_attr_36</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="82" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="82" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a99e158c406eb5ab3decde1e029f05993" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool Stock_Write_Root_Metadata::m_attr_37</definition>
+        <argsstring></argsstring>
+        <name>m_attr_37</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="83" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="83" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a3fab25d4714c3cb93e8d5186fe7c5e24" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_attr_38</definition>
+        <argsstring></argsstring>
+        <name>m_attr_38</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="84" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="84" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a1fc64ed7fb8ce950f519d1df66a3f7dc" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_attr_39</definition>
+        <argsstring></argsstring>
+        <name>m_attr_39</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="85" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="85" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1af9641a6e2f7835b586361c6ce5950695" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_40</definition>
+        <argsstring></argsstring>
+        <name>m_attr_40</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="86" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="86" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a62cc5f25949bae6598a35d34bcd43075" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_41</definition>
+        <argsstring></argsstring>
+        <name>m_attr_41</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="87" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="87" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a4ae5b1e8fdba44cc6d980a4ac147dc73" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_42</definition>
+        <argsstring></argsstring>
+        <name>m_attr_42</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="88" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="88" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a1b7f0a6d085c31e4c99c81a034149f00" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_45</definition>
+        <argsstring></argsstring>
+        <name>m_attr_45</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="90" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="90" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ae712a2bc6e5013cfb3218e7c5460da9a" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_46</definition>
+        <argsstring></argsstring>
+        <name>m_attr_46</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="91" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="91" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ad7b9f56b0c7b035a80085707456687b5" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_47</definition>
+        <argsstring></argsstring>
+        <name>m_attr_47</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="92" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="92" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ac9f9079f01c6df6e5de32d5dceeff3a6" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_size_attr_48</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_48</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="94" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="94" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a858b840ab30dedbc61acf02f1bb71159" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Metadata::m_attr_48</definition>
+        <argsstring></argsstring>
+        <name>m_attr_48</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="95" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="95" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a54db6dcb7ba53b7a6d0f2240c062cbcf" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_size_attr_49</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_49</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="97" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="97" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ae631ead38e2cdb7838d2bf6d8f93de06" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Metadata::m_attr_49</definition>
+        <argsstring></argsstring>
+        <name>m_attr_49</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="98" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="98" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1abb23628896edcb990cd39384355ebedb" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_attr_52</definition>
+        <argsstring></argsstring>
+        <name>m_attr_52</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="100" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="100" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ad0b16020234c586639ebccde1e7051bf" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_53</definition>
+        <argsstring></argsstring>
+        <name>m_attr_53</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="101" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="101" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1af32a7d74fcdeea8f653dd95d6e6ed01b" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_54</definition>
+        <argsstring></argsstring>
+        <name>m_attr_54</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="102" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="102" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1af83313c46762faf270aaa4389c84a7b6" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_55</definition>
+        <argsstring></argsstring>
+        <name>m_attr_55</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="103" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="103" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ad8decd581c26756ca2fcb97153b7e6c5" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_56</definition>
+        <argsstring></argsstring>
+        <name>m_attr_56</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="104" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="104" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ab03f5c42cbfabcfca897957f7a8b08be" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_57</definition>
+        <argsstring></argsstring>
+        <name>m_attr_57</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="105" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a1ca865e267e08cd7962aecfca842a0fd" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_58</definition>
+        <argsstring></argsstring>
+        <name>m_attr_58</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="106" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a1ca88b7d21bad4883d527ff4ae53297d" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_attr_59</definition>
+        <argsstring></argsstring>
+        <name>m_attr_59</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="107" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a0154f2c94b11759f711ff3ccff10cbf0" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_60</definition>
+        <argsstring></argsstring>
+        <name>m_attr_60</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="108" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="108" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1aca9a665c07545d4a2232b16ddba955c4" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_61</definition>
+        <argsstring></argsstring>
+        <name>m_attr_61</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="109" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="109" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ae6362c18b16f31d71281601f419b1b94" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_62</definition>
+        <argsstring></argsstring>
+        <name>m_attr_62</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="110" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="110" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a7c61b5dbd726b8e2a32b3a1716af0e05" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string Stock_Write_Root_Metadata::m_attr_63</definition>
+        <argsstring></argsstring>
+        <name>m_attr_63</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="111" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="111" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a0b939ee11c3c5ef8868f4fd3d16db8ca" prot="private" static="no" mutable="no">
+        <type>double</type>
+        <definition>double Stock_Write_Root_Metadata::m_attr_64</definition>
+        <argsstring></argsstring>
+        <name>m_attr_64</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="112" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="112" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a195f071a8de4a94d314920ee55cc8fc3" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_size_attr_65</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_65</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="114" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="114" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ae9978180ea6916fc533e784a2ae1ab58" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; std::string &gt;</type>
+        <definition>std::vector&lt;std::string&gt; Stock_Write_Root_Metadata::m_attr_65</definition>
+        <argsstring></argsstring>
+        <name>m_attr_65</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="115" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="115" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a7b81ed4d7d82a115fffb6bc358f27727" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_size_attr_66</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_66</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="117" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="117" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a1bc1a29ef584ac58d3ca48548eb6395b" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Stock_Write_Root_Metadata::m_attr_66</definition>
+        <argsstring></argsstring>
+        <name>m_attr_66</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="118" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="118" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a5b9a5dc41917b40049ded685e20dd6fc" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_size_attr_67</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_67</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="120" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="120" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1a497ee5ea51e940a1ee4b5636057569c7" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Stock_Write_Root_Metadata::m_attr_67</definition>
+        <argsstring></argsstring>
+        <name>m_attr_67</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="121" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="121" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ac8b2128b689f38eba91f547849923f38" prot="private" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Stock_Write_Root_Metadata::m_size_attr_68</definition>
+        <argsstring></argsstring>
+        <name>m_size_attr_68</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="123" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="123" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="class_stock___write___root___metadata_1ab5456da078ff8a95c5a4f2975b9cce83" prot="private" static="no" mutable="no">
+        <type>std::vector&lt; double &gt;</type>
+        <definition>std::vector&lt;double&gt; Stock_Write_Root_Metadata::m_attr_68</definition>
+        <argsstring></argsstring>
+        <name>m_attr_68</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="124" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="124" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="class_stock___write___root___metadata_1a88901b9f4294242666ecd22fee3be4a4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Stock_Write_Root_Metadata::Stock_Write_Root_Metadata</definition>
+        <argsstring>()</argsstring>
+        <name>Stock_Write_Root_Metadata</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="27" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.cpp" bodystart="22" bodyend="22"/>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___root___metadata_1ae8bf107876da6f981b013a43c9be059b" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>Stock_Write_Root_Metadata::~Stock_Write_Root_Metadata</definition>
+        <argsstring>()</argsstring>
+        <name>~Stock_Write_Root_Metadata</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="28" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.cpp" bodystart="23" bodyend="23"/>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___root___metadata_1ad5e23815d68593a61e14431927b7f716" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Stock_Write_Root_Metadata::stockRootMetadata</definition>
+        <argsstring>(std::string attr_1, std::string attr_2, std::string attr_3, std::string attr_4, std::string attr_5, std::string attr_7, std::string attr_8, std::string attr_9, std::string attr_10, std::string attr_11, std::string attr_12, std::string attr_13, double attr_14, std::string attr_16, double attr_17, int attr_19, std::vector&lt; std::string &gt; attr_20, double attr_21, double attr_22, double attr_23, std::string attr_24, int attr_25, double attr_26, std::string attr_27, std::string attr_28, std::string attr_29, std::string attr_30, std::string attr_31, std::string attr_32, std::string attr_33, std::string attr_34, std::string attr_35, std::string attr_36, bool attr_37, int attr_38, int attr_39, std::string attr_40, std::string attr_41, std::string attr_42, double attr_45, double attr_46, double attr_47, std::vector&lt; std::string &gt; attr_48, std::vector&lt; std::string &gt; attr_49, int attr_52, double attr_53, std::string attr_54, double attr_55, std::string attr_56, double attr_57, std::string attr_58, int attr_59, double attr_60, std::string attr_61, double attr_62, std::string attr_63, double attr_64, std::vector&lt; std::string &gt; attr_65, std::vector&lt; double &gt; attr_66, std::vector&lt; double &gt; attr_67, std::vector&lt; double &gt; attr_68)</argsstring>
+        <name>stockRootMetadata</name>
+        <param>
+          <type>std::string</type>
+          <declname>attr_1</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_2</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_3</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_4</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_5</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_7</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_8</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_9</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_10</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_11</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_12</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_13</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_14</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_16</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_17</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_19</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_20</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_21</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_22</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_23</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_24</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_25</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_26</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_27</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_28</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_29</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_30</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_31</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_32</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_33</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_34</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_35</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_36</declname>
+        </param>
+        <param>
+          <type>bool</type>
+          <declname>attr_37</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_38</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_39</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_40</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_41</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_42</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_45</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_46</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_47</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_48</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_49</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_52</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_53</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_54</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_55</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_56</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_57</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_58</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>attr_59</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_60</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_61</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_62</declname>
+        </param>
+        <param>
+          <type>std::string</type>
+          <declname>attr_63</declname>
+        </param>
+        <param>
+          <type>double</type>
+          <declname>attr_64</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; std::string &gt;</type>
+          <declname>attr_65</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>attr_66</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>attr_67</declname>
+        </param>
+        <param>
+          <type>std::vector&lt; double &gt;</type>
+          <declname>attr_68</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ void <ref refid="class_stock___write___root___metadata_1ad5e23815d68593a61e14431927b7f716" kindref="member">Stock_Write_Root_Metadata::stockRootMetadata</ref>(string attr_1,string attr_2,string attr_3,string attr_4,string attr_5,string attr_7,string attr_8,string attr_9,string attr_10, string attr_11,string attr_12,string attr_13,double attr_14,string attr_16,double attr_17,int attr_19, vector&lt;string&gt; attr_20,double attr_21,double attr_22,double attr_23,string attr_24,int attr_25,double attr_26,string attr_27, string attr_28,string attr_29,string attr_30,string attr_31,string attr_32,string attr_33,string attr_34,string attr_35,string attr_36, bool attr_37,int attr_38,int attr_39,string attr_40,string attr_41,string attr_42,double attr_45,double attr_46,double attr_47, vector&lt;string&gt; attr_48,vector&lt;string&gt; attr_49,int attr_52,double attr_53,string attr_54,double attr_55,string attr_56,double attr_57,string attr_58, int attr_59,double attr_60,string attr_61,double attr_62,string attr_63,double attr_64,vector&lt;string&gt; attr_65,vector&lt;double&gt; attr_66, vector&lt;double&gt; attr_67,vector&lt;double&gt; attr_68)</para><para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>attr_1</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>GROUPETYPE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_2</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILENAME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_3</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILEDATE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_4</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILETYPE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_5</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TELESCOPE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_7</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_ID </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_8</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_TITLE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_9</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_PI </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_10</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_CO_I </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_11</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PROJECT_CONTACT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_12</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_ID </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_13</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_START_UTC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_14</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_START_MJD </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_16</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_END_UTC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_17</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_END_MJD </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_19</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_NOF_STATIONS </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_20</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_STATIONS_LIST </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_21</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_MAX </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_22</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_MIN </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_23</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_CENTER </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_24</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_FREQUENCY_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_25</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>OBSERVATION_NOF_BITS_PER_SAMPLE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_26</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CLOCK_FREQUENCY </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_27</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CLOCK_FREQUENCY_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_28</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>ANTENNA_SET </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_29</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>FILTER_SELECTION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_30</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TARGET </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_31</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SYSTEM_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_32</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PIPELINE_NAME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_33</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PIPELINE_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_34</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>DOC_NAME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_35</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>DOC_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_36</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOTES </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_37</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>DYNSPEC_GROUP </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_38</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOF_DYNSPEC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_39</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOF_TILED_DYNSPEC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_40</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CREATE_OFFLINE_ONLINE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_41</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>BF_FORMAT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_42</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>BF_VERSION </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_45</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PRIMARY_POINTING_DIAMETER </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_46</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_RA </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_47</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_DEC </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_48</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_ALTITUDE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_49</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>POINT_AZIMUTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_52</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>NOF_SAMPLES </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_53</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_RATE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_54</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_RATE_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_55</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_TIME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_56</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SAMPLING_TIME_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_57</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TOTAL_INTEGRATION_TIME </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_58</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TOTAL_INTEGRATION_TIME_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_59</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CHANNELS_PER_SUBANDS </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_60</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SUBBAND_WIDTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_61</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SUBBAND_WIDTH_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_62</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CHANNEL_WIDTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_63</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>CHANNEL_WIDTH_UNIT </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_64</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>TOTAL_BAND_WIDTH </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_65</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>WHEATER_STATIONS_LIST </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_66</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>WHEATER_TEMPERATURE </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_67</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>WHEATER_HUMIDITY </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>attr_68</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>SYSTEM_TEMPERATURE</para></parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para>nothing </para></simplesect>
+</para>        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="38" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.cpp" bodystart="26" bodyend="208"/>
+        <referencedby refid="class_reader___root_1a6a022809888fdc2b66fccc63ebac2dd9" compoundref="_reader___root_8cpp" startline="34" endline="215">Reader_Root::readRoot</referencedby>
+      </memberdef>
+      <memberdef kind="function" id="class_stock___write___root___metadata_1a247f269a27e24a4ce97ba7a759cfe3b7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void Stock_Write_Root_Metadata::writeRootMetadata</definition>
+        <argsstring>(std::string outputFile, File &amp;root_grp)</argsstring>
+        <name>writeRootMetadata</name>
+        <param>
+          <type>std::string</type>
+          <declname>outputFile</declname>
+        </param>
+        <param>
+          <type>File &amp;</type>
+          <declname>root_grp</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ void Stock_Write_Root_Metadata::writeRootMetadata(string outputFile,File &amp;root_grp)</para><para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>outputFile</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>this is the output file (dynamic spectrum file) </para></parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>&amp;root_grp</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Stock_Write_Root_Metadata_Part Object for catching stocked private attributes </para></parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>        </inbodydescription>
+        <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="41" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.cpp" bodystart="212" bodyend="353"/>
+        <referencedby refid="_dynspec_all_8cpp_1a0ddf1224851353fc92bfbff6f499fa97" compoundref="_dynspec_all_8cpp" startline="83" endline="573">main</referencedby>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Class object for stock and write metadatas for the ICD6&apos;s Root Group. </para>    </briefdescription>
+    <detaileddescription>
+<para><linebreak/>
+ Usage: <linebreak/>
+ This class need as parameter all metadata for the ICD6( or dynamic spectrum)&apos;s Root Group. The function stockRootMetadata stocks Root metadata in private attributes, and the function writeRootMetadata write them in the Root Group of the hdf5 file in output </para>    </detaileddescription>
+    <location file="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" line="23" bodyfile="/home/vilchez/Bureau/dynspec/src/ICD3-ICD6-Complete/Stock_Write_Root_Metadata.h" bodystart="22" bodyend="126"/>
+    <listofallmembers>
+      <member refid="class_stock___write___root___metadata_1a20ef8c791b24eab35217e5a23f16c4e3" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_1</name></member>
+      <member refid="class_stock___write___root___metadata_1abefc26a5d0122542c254c3027684e630" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_10</name></member>
+      <member refid="class_stock___write___root___metadata_1a6de4329dc64d3bb9bed5b1cd47a3799e" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_11</name></member>
+      <member refid="class_stock___write___root___metadata_1ad6ac6bd0ca3b22f3144d68c560c78808" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_12</name></member>
+      <member refid="class_stock___write___root___metadata_1a21385d63e2e9917484021353fd7b8ed1" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_13</name></member>
+      <member refid="class_stock___write___root___metadata_1a2c27988b26d5a86dab0eac353b0cfead" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_14</name></member>
+      <member refid="class_stock___write___root___metadata_1a5a8ccf7bb9ea1ee65058421869962dfd" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_16</name></member>
+      <member refid="class_stock___write___root___metadata_1a5d805d4f50ced0dd62a85746da9effb1" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_17</name></member>
+      <member refid="class_stock___write___root___metadata_1ae39aa0f37d7fee4a00967fc81194fe26" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_19</name></member>
+      <member refid="class_stock___write___root___metadata_1a3b76a44d7a5153c806a64ce483783030" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_2</name></member>
+      <member refid="class_stock___write___root___metadata_1a09b64739e31354e3fa3d82a99bfd6c68" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_20</name></member>
+      <member refid="class_stock___write___root___metadata_1a0dcd64e9a1726518d4a4c5ee92a7ec00" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_21</name></member>
+      <member refid="class_stock___write___root___metadata_1a0eded54e260116c8a96f8a00da6e5790" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_22</name></member>
+      <member refid="class_stock___write___root___metadata_1ad350005475d2d49adbddab08168ffc08" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_23</name></member>
+      <member refid="class_stock___write___root___metadata_1a3df4810d4ded2dbac5f281d23350cbe7" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_24</name></member>
+      <member refid="class_stock___write___root___metadata_1a9d8bd4d8fccfad5ea6f316b2075198a1" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_25</name></member>
+      <member refid="class_stock___write___root___metadata_1a847e78fed14e72f8345b250c1b4e3aae" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_26</name></member>
+      <member refid="class_stock___write___root___metadata_1ad2ce6b3f8e34a15f84ce1c10cfef7e7c" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_27</name></member>
+      <member refid="class_stock___write___root___metadata_1a4ae5eda01b4a4a5e6d29b60911cc1250" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_28</name></member>
+      <member refid="class_stock___write___root___metadata_1a3f49cf42a29381562da17c9bea90ca92" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_29</name></member>
+      <member refid="class_stock___write___root___metadata_1a0b5018c0f04cb08b73b030aba903cb46" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_3</name></member>
+      <member refid="class_stock___write___root___metadata_1af2852b84eee3b2a708d91d1b40104f6d" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_30</name></member>
+      <member refid="class_stock___write___root___metadata_1a5add164c21497e420ecafdbcf4d0b658" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_31</name></member>
+      <member refid="class_stock___write___root___metadata_1ad31cb1257f4d3a851ddda48b39249aaf" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_32</name></member>
+      <member refid="class_stock___write___root___metadata_1a0a0455257ddade7c97489a3ff519572c" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_33</name></member>
+      <member refid="class_stock___write___root___metadata_1ab4f7912dfe02fcfdc7ba13586ea2b754" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_34</name></member>
+      <member refid="class_stock___write___root___metadata_1a05e75e3a359008b5d13e9195bb48c622" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_35</name></member>
+      <member refid="class_stock___write___root___metadata_1a104ff128d2d311761a77584ca5a06f53" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_36</name></member>
+      <member refid="class_stock___write___root___metadata_1a99e158c406eb5ab3decde1e029f05993" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_37</name></member>
+      <member refid="class_stock___write___root___metadata_1a3fab25d4714c3cb93e8d5186fe7c5e24" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_38</name></member>
+      <member refid="class_stock___write___root___metadata_1a1fc64ed7fb8ce950f519d1df66a3f7dc" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_39</name></member>
+      <member refid="class_stock___write___root___metadata_1a55703599ca02ef4c1cf66f297806dfe6" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_4</name></member>
+      <member refid="class_stock___write___root___metadata_1af9641a6e2f7835b586361c6ce5950695" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_40</name></member>
+      <member refid="class_stock___write___root___metadata_1a62cc5f25949bae6598a35d34bcd43075" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_41</name></member>
+      <member refid="class_stock___write___root___metadata_1a4ae5b1e8fdba44cc6d980a4ac147dc73" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_42</name></member>
+      <member refid="class_stock___write___root___metadata_1a1b7f0a6d085c31e4c99c81a034149f00" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_45</name></member>
+      <member refid="class_stock___write___root___metadata_1ae712a2bc6e5013cfb3218e7c5460da9a" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_46</name></member>
+      <member refid="class_stock___write___root___metadata_1ad7b9f56b0c7b035a80085707456687b5" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_47</name></member>
+      <member refid="class_stock___write___root___metadata_1a858b840ab30dedbc61acf02f1bb71159" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_48</name></member>
+      <member refid="class_stock___write___root___metadata_1ae631ead38e2cdb7838d2bf6d8f93de06" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_49</name></member>
+      <member refid="class_stock___write___root___metadata_1a96191c40163360d63f4a14397aac93df" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_5</name></member>
+      <member refid="class_stock___write___root___metadata_1abb23628896edcb990cd39384355ebedb" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_52</name></member>
+      <member refid="class_stock___write___root___metadata_1ad0b16020234c586639ebccde1e7051bf" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_53</name></member>
+      <member refid="class_stock___write___root___metadata_1af32a7d74fcdeea8f653dd95d6e6ed01b" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_54</name></member>
+      <member refid="class_stock___write___root___metadata_1af83313c46762faf270aaa4389c84a7b6" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_55</name></member>
+      <member refid="class_stock___write___root___metadata_1ad8decd581c26756ca2fcb97153b7e6c5" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_56</name></member>
+      <member refid="class_stock___write___root___metadata_1ab03f5c42cbfabcfca897957f7a8b08be" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_57</name></member>
+      <member refid="class_stock___write___root___metadata_1a1ca865e267e08cd7962aecfca842a0fd" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_58</name></member>
+      <member refid="class_stock___write___root___metadata_1a1ca88b7d21bad4883d527ff4ae53297d" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_59</name></member>
+      <member refid="class_stock___write___root___metadata_1a0154f2c94b11759f711ff3ccff10cbf0" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_60</name></member>
+      <member refid="class_stock___write___root___metadata_1aca9a665c07545d4a2232b16ddba955c4" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_61</name></member>
+      <member refid="class_stock___write___root___metadata_1ae6362c18b16f31d71281601f419b1b94" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_62</name></member>
+      <member refid="class_stock___write___root___metadata_1a7c61b5dbd726b8e2a32b3a1716af0e05" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_63</name></member>
+      <member refid="class_stock___write___root___metadata_1a0b939ee11c3c5ef8868f4fd3d16db8ca" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_64</name></member>
+      <member refid="class_stock___write___root___metadata_1ae9978180ea6916fc533e784a2ae1ab58" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_65</name></member>
+      <member refid="class_stock___write___root___metadata_1a1bc1a29ef584ac58d3ca48548eb6395b" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_66</name></member>
+      <member refid="class_stock___write___root___metadata_1a497ee5ea51e940a1ee4b5636057569c7" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_67</name></member>
+      <member refid="class_stock___write___root___metadata_1ab5456da078ff8a95c5a4f2975b9cce83" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_68</name></member>
+      <member refid="class_stock___write___root___metadata_1aec466e04472b4962ba3d495483ca28a3" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_7</name></member>
+      <member refid="class_stock___write___root___metadata_1a24161de7b4a5380201cefb8d09773bb2" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_8</name></member>
+      <member refid="class_stock___write___root___metadata_1a8f9264138b79c5102da3d2cdf5aa2a60" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_attr_9</name></member>
+      <member refid="class_stock___write___root___metadata_1aba636d9d393a08a06f02a53f09e0cdfa" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_size_attr_20</name></member>
+      <member refid="class_stock___write___root___metadata_1ac9f9079f01c6df6e5de32d5dceeff3a6" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_size_attr_48</name></member>
+      <member refid="class_stock___write___root___metadata_1a54db6dcb7ba53b7a6d0f2240c062cbcf" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_size_attr_49</name></member>
+      <member refid="class_stock___write___root___metadata_1a195f071a8de4a94d314920ee55cc8fc3" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_size_attr_65</name></member>
+      <member refid="class_stock___write___root___metadata_1a7b81ed4d7d82a115fffb6bc358f27727" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_size_attr_66</name></member>
+      <member refid="class_stock___write___root___metadata_1a5b9a5dc41917b40049ded685e20dd6fc" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_size_attr_67</name></member>
+      <member refid="class_stock___write___root___metadata_1ac8b2128b689f38eba91f547849923f38" prot="private" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>m_size_attr_68</name></member>
+      <member refid="class_stock___write___root___metadata_1a88901b9f4294242666ecd22fee3be4a4" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>Stock_Write_Root_Metadata</name></member>
+      <member refid="class_stock___write___root___metadata_1ad5e23815d68593a61e14431927b7f716" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>stockRootMetadata</name></member>
+      <member refid="class_stock___write___root___metadata_1a247f269a27e24a4ce97ba7a759cfe3b7" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>writeRootMetadata</name></member>
+      <member refid="class_stock___write___root___metadata_1ae8bf107876da6f981b013a43c9be059b" prot="public" virt="non-virtual"><scope>Stock_Write_Root_Metadata</scope><name>~Stock_Write_Root_Metadata</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

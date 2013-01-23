@@ -9,6 +9,16 @@
 #include <dal/lofar/BF_File.h>
 
 
+/// \file Reader_Dyn2Dyn_Part.cpp
+///  \brief File C++ (associated to Reader_Dyn2Dyn_Part.h)for read ICD6 files and put in variables metadatas for the ICD6's Dynspec Group  
+///  \details  
+/// <br /> Overview:
+/// <br /> This function readDynspec is described (programmed) here. It needs as parameter a Stock_Write_Dyn2Dyn_Metadata_Part object. The readDynspec function will read 
+///  dynspec metadatas and stock them in the Stock_Write_Dyn2Dyn_Metadata_Part object as private attributes thanks to stockDynspecMetadata function.
+///  These attributes will be written in the next step by writeDynspecMetadata function which is in the class 
+///  Stock_Write_Dyn2Dyn_Metadata_Part.h  and called at the end of this Reader_Dyn2Dyn_Part.cpp
+
+
 using namespace dal;
 using namespace std;
 
@@ -20,6 +30,28 @@ using namespace std;
     
   void Reader_Dyn2Dyn_Part::readDynspec(string pathFile,Stock_Write_Dyn2Dyn_Metadata_Part *dynspecMetadata,Stock_Write_Dyn2Dyn_Data_Part *dynspecData,int j,int obsNofStockes,vector<string> stokesComponent, float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)
     { 
+      
+/// <br /> Usage:
+/// <br />    void Reader_Dyn2Dyn_Part::readDynspec(string pathFile,Stock_Write_Dyn2Dyn_Metadata_Part *dynspecMetadata,Stock_Write_Dyn2Dyn_Data_Part *dynspecData,int j,int obsNofStockes,vector<string> stokesComponent, float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)
+
+/// \param  pathFile  ICD6 (dynamic spectrum) file to read 
+/// \param  *dynspecMetadata Reader_Dyn2Dyn_Part Object for loading dynspec metadata in private attributes
+/// \param  *dynspecData Stock_Write_Dyn2Dyn_Data_Part Object for loading new rebinning for data matrix processing 
+/// \param  j loop index on Beams
+/// \param  obsNofStocke number of Stokes parameter
+/// \param  stokesComponent vector with Stokes component 
+/// \param  SAPindex Index of the SAP in current processing 
+/// \param  timeMinSelect minimum time selection 
+/// \param  timeMaxSelect maximum time selection 
+/// \param  timeRebin time rebinning
+/// \param  frequencyMin minimum frequency selection
+/// \param  frequencyMax maximum frequency selection
+/// \param  frequencyRebin frequency rebinning    
+   
+/// \return nothing              
+      
+      
+      
       string index_j1;     
       std::ostringstream oss_j;oss_j << j;string index_j(oss_j.str()); 
       if (j<10){index_j1="_00"+index_j;}

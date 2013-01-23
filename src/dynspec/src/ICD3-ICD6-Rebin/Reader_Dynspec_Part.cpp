@@ -9,6 +9,16 @@
 
 #include <dal/lofar/BF_File.h>
 
+/// \file Reader_Dynspec_Part.cpp
+///  \brief File C++ (associated to Reader_Dynspec_Part.h)for read ICD3 files and put in variables metadatas for the ICD6's Dynspec Group  
+///  \details  
+/// <br /> Overview:
+/// <br /> This function readDynspec is described (programmed) here. It needs as parameter a Stock_Write_Dynspec_Metadata_Part object. The readDynspec function will read 
+///  dynspec metadatas and stock them in the Stock_Write_Dynspec_Metadata_Part object as private attributes thanks to stockDynspecMetadata function.
+///  These attributes will be written in the next step by writeDynspecMetadata function which is in the class 
+///  Stock_Write_Dynspec_Metadata_Part.h  and called at the end of this Reader_Dynspec_Part.cpp
+
+
 
 using namespace dal;
 using namespace std;
@@ -20,6 +30,11 @@ using namespace std;
 
    bool is_readableBis( const std::string & file ) 
   { 
+
+/// \param file
+/// <br />Check if file is readable, so if file exists !
+/// \return boolean value 
+
     std::ifstream fichier( file.c_str() ); 
     return !fichier.fail(); 
   } 
@@ -28,6 +43,31 @@ using namespace std;
   void Reader_Dynspec_Part::readDynspec(string pathFile,Stock_Write_Dynspec_Metadata_Part *dynspecMetadata,Stock_Write_Dynspec_Data_Part *dynspecData,int i,int j,int q,int obsNofSAP,int obsNofSource,int obsNofFrequencyBand,int obsNofStockes,vector<string> stokesComponent, int SAPindex,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)
     {        
        
+  
+/// <br /> Usage:
+/// <br />   void Reader_Dynspec_Part::readDynspec(string pathFile,Stock_Write_Dynspec_Metadata_Part *dynspecMetadata,Stock_Write_Dynspec_Data_Part *dynspecData,int i,int j,int q,int obsNofSAP,int obsNofSource,int obsNofFrequencyBand,int obsNofStockes,vector<string> stokesComponent, int SAPindex,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)
+ 
+/// \param  pathFile  ICD3 file to read 
+/// \param  *dynspecMetadata Reader_Dynspec_Part Object for loading dynspec metadata in private attributes
+/// \param  *dynspecData Stock_Write_Dynspec_Data_Part Object for loading new rebinning for data matrix processing 
+/// \param  i loop index on SAP
+/// \param  j loop index on Beams
+/// \param  q loop index on Pxxx if this nomenclature is used
+/// \param  obsNofSAP number of SAP
+/// \param  obsNofSource number of Sources
+/// \param  obsNofFrequencyBand number of Frequency Band
+/// \param  obsNofStocke number of Stokes parameter
+/// \param  stokesComponent vector with Stokes component 
+/// \param  SAPindex Index of the SAP in current processing 
+/// \param  timeMinSelect minimum time selection 
+/// \param  timeMaxSelect maximum time selection 
+/// \param  timeRebin time rebinning
+/// \param  frequencyMin minimum frequency selection
+/// \param  frequencyMax maximum frequency selection
+/// \param  frequencyRebin frequency rebinning    
+   
+/// \return nothing        
+      
       
       string index_i1,index_j1,index_q1;
       std::ostringstream oss_i;oss_i << i;string index_i(oss_i.str());

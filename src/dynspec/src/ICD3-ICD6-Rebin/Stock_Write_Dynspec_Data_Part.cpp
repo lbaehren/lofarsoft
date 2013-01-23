@@ -6,6 +6,17 @@
 
 #include <dal/lofar/BF_File.h>
 
+
+/// \file Stock_Write_Dynspec_Data_Part.cpp
+///  \brief File C++ (associated to Stock_Write_Dynspec_Data_Part.h) for stocking data parameters, processing the (select or rebin) and write data Matrix in the ICD6's Dynspec Groups 
+///  \details  
+/// <br /> Overview:
+/// <br /> Functions stockDynspecData and writeDynspecData are described (programmed) here. 
+/// The first one (stockDynspecData) will take as parameter processing parameters and stok them as private attributes. 
+/// The second function (writeDynspecData) will write them in the hdf5 output file (in the corresponding dynspec).
+/// Data processing is coded here !!
+
+
 using namespace dal;
 using namespace std;
 
@@ -14,7 +25,14 @@ using namespace std;
   Stock_Write_Dynspec_Data_Part::~Stock_Write_Dynspec_Data_Part(){}
   
   void Stock_Write_Dynspec_Data_Part::stockDynspecData(int Ntime,int Nspectral,  int NtimeReal, int NspectralReal)
-  {
+  { 
+  /// <br /> Usage:
+  /// <br />   void Stock_Write_Dynspec_Data_Part::stockDynspecData(int Ntime,int Nspectral,  int NtimeReal, int NspectralReal)
+  /// \param   Ntime  new time binning
+  /// \param   Nspectral new spectral (frequency)  binning (number of channels per subbands)
+  /// \param   NtimeReal current time binning before rebinning 
+  /// \param   NspectralReal current spectral (frequency)  binning (number of channels per subbands) before rebinning 
+  
     m_Ntime = Ntime;
     m_Nspectral = Nspectral;
     
@@ -25,6 +43,10 @@ using namespace std;
   
    bool is_readable( const std::string & file ) 
   { 
+    /// \param file
+    /// <br />Check if file is readable, so if file exists !
+    /// \return boolean value 
+
     std::ifstream fichier( file.c_str() ); 
     return !fichier.fail(); 
   } 
@@ -32,7 +54,31 @@ using namespace std;
   
   void Stock_Write_Dynspec_Data_Part::writeDynspecData(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM, int SAPindex,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)  
   {
-      
+  /// <br /> Usage:
+  /// <br />   void Stock_Write_Dynspec_Data_Part::writeDynspecData(Group &dynspec_grp,string pathDir,string obsName,string pathFile,string outputFile,File &root_grp,int i,int j,int k,int l,int q,int obsNofStockes,vector<string> stokesComponent,float memoryRAM, int SAPindex,float timeMinSelect,float timeMaxSelect,float timeRebin,float frequencyMin,float frequencyMax,float frequencyRebin)  
+  /// \param  &dynspec_grp Group Object(Dynamic spectrum object)
+  /// \param  pathDir ICD3 path directory
+  /// \param  obsName Observation ID
+  /// \param  pathFile ICD3 path for loading file
+  /// \param  outputFile output file 
+  /// \param  &root_grp File Object (Root Group object)
+  /// \param  i Subarray pointing loop index
+  /// \param  j Beams loop index
+  /// \param  k loop index
+  /// \param  l loop index
+  /// \param  q Pxx nomenclature loop index
+  /// \param  obsNofStockes number of Stokes components
+  /// \param  stokesComponent vector which contains all Stokes components
+  /// \param  memoryRAM RAM memory consuption by processing
+  /// \param  SAPindex Subarray pointings to process
+  /// \param  timeMinSelect time minimum selected
+  /// \param  timeMaxSelect time maximum selected
+  /// \param  timeRebin time binning
+  /// \param  frequencyMin frequency minimum selected
+  /// \param  frequencyMax frequency maximum selected
+  /// \param  frequencyRebin frequency binning
+
+  
       cout << "begin BEAM N° :" <<  j << endl;
 
       // Go for Writting, but before test if files exists !!	    
@@ -69,7 +115,7 @@ using namespace std;
     
       // Condition for generating the Dynamic Spectrum Stockes I must
       
-      int noEmptyStokes(0);
+      unsigned long int noEmptyStokes(0);
       
       if ( is_readable(pathRaw) and is_readable(pathFile)) 
 	  {noEmptyStokes =0;}
@@ -135,39 +181,39 @@ using namespace std;
 	    float timeIcrementReal(1/(BEAM.nofSamples().get()/file.totalIntegrationTime().get())) ;
 
 		
-	    int timeIndexIncrementRebin(timeRebin/timeIcrementReal);
+	    unsigned long int timeIndexIncrementRebin(timeRebin/timeIcrementReal);
 	    timeRebin = timeIndexIncrementRebin*(1/(BEAM.nofSamples().get()/file.totalIntegrationTime().get()));
 
 	    
-	    int timeIndexStart(timeMinSelect/timeIcrementReal);
+	    unsigned long int timeIndexStart(timeMinSelect/timeIcrementReal);
 	    timeIndexStart = (timeIndexStart/timeIndexIncrementRebin)*timeIndexIncrementRebin;
 	    timeMinSelect  = timeIndexStart*timeIcrementReal;
 	    
-	    int timeIndexStop(timeMaxSelect/timeIcrementReal);
+	    unsigned long int timeIndexStop(timeMaxSelect/timeIcrementReal);
 	    timeIndexStop = timeIndexStop/timeIndexIncrementRebin*timeIndexIncrementRebin;
 	    timeMaxSelect = timeIndexStop*timeIcrementReal;
 	    
   
 	    // Define Spectral start and stop indexes
 	    vector<double> AXIS_VALUE_WORLD_SPECTRAL_TEMP(NUM_COORD_SPECTRAL->axisValuesWorld().get());      
-      	    int NOF_SUBBANDS_TEMP= (AXIS_VALUE_WORLD_SPECTRAL_TEMP.size())/(BEAM.channelsPerSubband().get());
-	    int CHANNELS_PER_SUBANDS_TEMP=(BEAM.channelsPerSubband().get());
+      	    unsigned long int NOF_SUBBANDS_TEMP= (AXIS_VALUE_WORLD_SPECTRAL_TEMP.size())/(BEAM.channelsPerSubband().get());
+	    unsigned long int CHANNELS_PER_SUBANDS_TEMP=(BEAM.channelsPerSubband().get());
 	    
 	    // Find the Number of Subband for beginning the processing (min and max subbands indexes)
-	    int index_fmin(0);
+	    unsigned long int index_fmin(0);
 	    float start_min(AXIS_VALUE_WORLD_SPECTRAL_TEMP[index_fmin]);    
 	    while (start_min < frequencyMin*1E6)
 	    {	  index_fmin 	= index_fmin +1;
 		start_min 	= AXIS_VALUE_WORLD_SPECTRAL_TEMP[index_fmin*CHANNELS_PER_SUBANDS_TEMP];}
 	
-	    int index_fmax((AXIS_VALUE_WORLD_SPECTRAL_TEMP.size()/BEAM.channelsPerSubband().get())-1); 
+	    unsigned long int index_fmax((AXIS_VALUE_WORLD_SPECTRAL_TEMP.size()/BEAM.channelsPerSubband().get())-1); 
 	    float start_max(AXIS_VALUE_WORLD_SPECTRAL_TEMP[AXIS_VALUE_WORLD_SPECTRAL_TEMP.size()-1]);
 	    while (start_max > frequencyMax*1E6)
 	    {	  index_fmax 	= index_fmax -1;
 		start_max 	= AXIS_VALUE_WORLD_SPECTRAL_TEMP[index_fmax*CHANNELS_PER_SUBANDS_TEMP+CHANNELS_PER_SUBANDS_TEMP-1];}	  
 		
 	    // Avoid border effect about the frequency selection
-	    for (int k=0; k < NOF_SUBBANDS_TEMP;k++)
+	    for (unsigned long int k=0; k < NOF_SUBBANDS_TEMP;k++)
 	      {
 		float miniFreq(AXIS_VALUE_WORLD_SPECTRAL_TEMP[k*CHANNELS_PER_SUBANDS_TEMP]);
 		float maxiFreq(AXIS_VALUE_WORLD_SPECTRAL_TEMP[k*CHANNELS_PER_SUBANDS_TEMP+CHANNELS_PER_SUBANDS_TEMP-1]);
@@ -175,32 +221,33 @@ using namespace std;
 		if (frequencyMax*1E6 < maxiFreq && frequencyMax*1E6 > miniFreq){index_fmax 	= index_fmax+1;start_max = AXIS_VALUE_WORLD_SPECTRAL_TEMP[index_fmax*CHANNELS_PER_SUBANDS_TEMP+CHANNELS_PER_SUBANDS_TEMP-1];}
 	      }
 	    
-	    int NOF_SUBBANDS=index_fmax-index_fmin+1;
+	    unsigned long int NOF_SUBBANDS=index_fmax-index_fmin+1;
 	    if (NOF_SUBBANDS == 0){NOF_SUBBANDS++;}
 	    int Nspectral=NOF_SUBBANDS*frequencyRebin;   
 	    
-	    int spectralIndexStart(index_fmin*CHANNELS_PER_SUBANDS_TEMP);
-	    int spectralIndexStop(index_fmax*CHANNELS_PER_SUBANDS_TEMP+CHANNELS_PER_SUBANDS_TEMP-1);
-	    int spectralIndexIncrementRebin((spectralIndexStop-spectralIndexStart+1)/Nspectral);
+	    unsigned long int spectralIndexStart(index_fmin*CHANNELS_PER_SUBANDS_TEMP);
+	    unsigned long int spectralIndexStop(index_fmax*CHANNELS_PER_SUBANDS_TEMP+CHANNELS_PER_SUBANDS_TEMP-1);
+	    unsigned long int spectralIndexIncrementRebin((spectralIndexStop-spectralIndexStart+1)/Nspectral);
 	    
 		    
 	    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	    // define the time step for filling the dataset
-	    int p(0),m(0),n(0);
-	    int sizeTimeLimit((1.277E8*memoryRAM)/((spectralIndexStop-spectralIndexStart+1)*obsNofStockes));	// time step ~ 1Go RAM memory maximum !        
+	    unsigned long int p(0),n(0),m(0);
+
+	    unsigned long int sizeTimeLimit((1.08E9*memoryRAM)/((spectralIndexStop-spectralIndexStart+1)*obsNofStockes));	// time step ~ 1Go RAM memory maximum !        
 	    
 	    // SizeTimeLimit must be a multiple of Time Rebin for well cycling and avoid to lost data
-	    int timeFactor(sizeTimeLimit/timeIndexIncrementRebin);
+	    unsigned long int timeFactor(sizeTimeLimit/timeIndexIncrementRebin);
 	    if (timeFactor == 0){timeFactor=1;}
 	    
 	    sizeTimeLimit = timeFactor*timeIndexIncrementRebin;
 	    
 	    // Determine with frac time the number of loop needed for splited data needed to be rebin etc... by blocks
-	    int fracTime((timeIndexStop-timeIndexStart)/sizeTimeLimit+1);         
-	    int nofLastElements((timeIndexStop-timeIndexStart)-((fracTime-1)*sizeTimeLimit));
+	    unsigned long int fracTime((timeIndexStop-timeIndexStart)/sizeTimeLimit+1);         
+	    unsigned long int nofLastElements((timeIndexStop-timeIndexStart)-((fracTime-1)*sizeTimeLimit));
 	    
 	    // nofLastElements must be a multiple of Time Rebin for well cycling and avoid to lost data     
-	    int nofLastElementsFactor(nofLastElements/timeIndexIncrementRebin);
+	    unsigned long int nofLastElementsFactor(nofLastElements/timeIndexIncrementRebin);
 	    nofLastElements = nofLastElementsFactor*timeIndexIncrementRebin;
 	    
 
@@ -210,6 +257,8 @@ using namespace std;
       //WRITE THE DATA Matrix
             
       // generating the dataset
+
+      unsigned long int m_Nspectral_longversion(m_Nspectral);
       
       Dataset<float> data_grp(dynspec_grp, "DATA");
       vector<ssize_t> dimensions(3);
@@ -231,9 +280,13 @@ using namespace std;
 
 	      for (l=0;l<obsNofStockes;l++)
 		{
-		    vector<float> DATA_2D(sizeTimeLimit*(spectralIndexStop-spectralIndexStart+1));
-		    vector<float> DATA2DRebin(sizeTimeLimit/timeIndexIncrementRebin*m_Nspectral);
+		    double size3D(sizeTimeLimit*(spectralIndexStop-spectralIndexStart+1));
+		    float size2D(sizeTimeLimit/timeIndexIncrementRebin*m_Nspectral);
+
+		    vector<float> DATA_2D(size3D);
+		    vector<float> DATA2DRebin(size2D);
 		    
+
 		    // Initialization of DATA2D Matrixes to 0 
 		    for (m=0;m<sizeTimeLimit*(spectralIndexStop-spectralIndexStart+1);m++){DATA_2D[m]=0;}
 		    for (m=0;m<sizeTimeLimit/timeIndexIncrementRebin*m_Nspectral;m++){DATA2DRebin[m]=0;}
@@ -295,16 +348,18 @@ using namespace std;
 				size[0] = sizeTimeLimit;
 				size[1] = (spectralIndexStop-spectralIndexStart+1);
 			      
+
 				STOCKES.getMatrix( pos, &DATA_2D[0], size );
-						
-				for (int I=0;I<sizeTimeLimit/timeIndexIncrementRebin;I++)
+
+
+				for (unsigned long int I=0;I<sizeTimeLimit/timeIndexIncrementRebin;I++)
 				  {
-				    for (int J=0;J<m_Nspectral;J++)
+				    for (unsigned long int J=0;J<m_Nspectral_longversion;J++)
 				      { 
 					float rebinPixel = 0;
-					for (int K=0;K<timeIndexIncrementRebin;K++)
+					for (unsigned long int K=0;K<timeIndexIncrementRebin;K++)
 					  {
-					    for (int L=0;L<spectralIndexIncrementRebin;L++)
+					    for (unsigned long int L=0;L<spectralIndexIncrementRebin;L++)
 					      {				  
 						rebinPixel = rebinPixel+DATA_2D[L+K*(spectralIndexStop-spectralIndexStart+1)+J*spectralIndexIncrementRebin+I*timeIndexIncrementRebin*(spectralIndexStop-spectralIndexStart+1)];
 					      }
@@ -316,12 +371,9 @@ using namespace std;
 				
 				for (m=0;m<sizeTimeLimit/timeIndexIncrementRebin;m++)
 				  {
-				    for (n=0; n<m_Nspectral;n++)
+				    for (n=0; n<m_Nspectral_longversion;n++)
 				      {		  			  
-					if (l==0){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)]=DATA2DRebin[(m*m_Nspectral)+n];}
-					if (l==1){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+1]=DATA2DRebin[(m*m_Nspectral)+n];}
-					if (l==2){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+2]=DATA2DRebin[(m*m_Nspectral)+n];}
-					if (l==3){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+3]=DATA2DRebin[(m*m_Nspectral)+n];}
+					DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+l]=DATA2DRebin[(m*m_Nspectral)+n];
 				      }	  
 				  }	    
 			      }
@@ -340,14 +392,14 @@ using namespace std;
 				
 				    STOCKES.getMatrix( pos, &DATA_2D[0], size );
 										    
-				    for (int I=0;I<nofLastElements/timeIndexIncrementRebin;I++)
+				    for (unsigned long int I=0;I<nofLastElements/timeIndexIncrementRebin;I++)
 				      {
-					for (int J=0;J<m_Nspectral;J++)
+					for (unsigned long int J=0;J<m_Nspectral_longversion;J++)
 					  { 
 					    float rebinPixel = 0;
-					    for (int K=0;K<timeIndexIncrementRebin;K++)
+					    for (unsigned long int K=0;K<timeIndexIncrementRebin;K++)
 					      {
-						for (int L=0;L<spectralIndexIncrementRebin;L++)
+						for (unsigned long int L=0;L<spectralIndexIncrementRebin;L++)
 						  {				  
 						    rebinPixel = rebinPixel+DATA_2D[L+K*(spectralIndexStop-spectralIndexStart+1)+J*spectralIndexIncrementRebin+I*timeIndexIncrementRebin*(spectralIndexStop-spectralIndexStart+1)];
 						  }
@@ -357,12 +409,9 @@ using namespace std;
 				      }		      
 				for (m=0;m<nofLastElements/timeIndexIncrementRebin;m++)
 				  {
-				    for (n=0; n<m_Nspectral;n++)
+				    for (n=0; n<m_Nspectral_longversion;n++)
 				      {		  			  
-							if (l==0){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)]=DATA2DRebin[(m*m_Nspectral)+n];}
-							if (l==1){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+1]=DATA2DRebin[(m*m_Nspectral)+n];}
-							if (l==2){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+2]=DATA2DRebin[(m*m_Nspectral)+n];}
-							if (l==3){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+3]=DATA2DRebin[(m*m_Nspectral)+n];}
+					DATA_3D[obsNofStockes*((m_Nspectral*m)+n+l)]=DATA2DRebin[(m*m_Nspectral)+n];
 				      }	  
 				  }
 				  }
@@ -375,12 +424,9 @@ using namespace std;
 			      { 
 				for (m=0;m<sizeTimeLimit/timeIndexIncrementRebin;m++)
 				  {
-				    for (n=0; n<m_Nspectral;n++)
+				    for (n=0; n<m_Nspectral_longversion;n++)
 				      {		  			  
-					if (l==0){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)]=DATA2DRebin[(m*m_Nspectral)+n];}
-					if (l==1){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+1]=DATA2DRebin[(m*m_Nspectral)+n];}
-					if (l==2){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+2]=DATA2DRebin[(m*m_Nspectral)+n];}
-					if (l==3){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+3]=DATA2DRebin[(m*m_Nspectral)+n];}
+					DATA_3D[obsNofStockes*((m_Nspectral*m)+n+l)]=DATA2DRebin[(m*m_Nspectral)+n];
 				      }	  
 				  }	
 			       }
@@ -390,12 +436,9 @@ using namespace std;
 				  {
 					for (m=0;m<nofLastElements/timeIndexIncrementRebin;m++)
 				  	{
-				    		for (n=0; n<m_Nspectral;n++)
+				    		for (n=0; n<m_Nspectral_longversion;n++)
 				      		{		  			  
-							if (l==0){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)]=DATA2DRebin[(m*m_Nspectral)+n];}
-							if (l==1){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+1]=DATA2DRebin[(m*m_Nspectral)+n];}
-							if (l==2){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+2]=DATA2DRebin[(m*m_Nspectral)+n];}
-							if (l==3){DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+3]=DATA2DRebin[(m*m_Nspectral)+n];}
+						  DATA_3D[obsNofStockes*((m_Nspectral*m)+n)+l]=DATA2DRebin[(m*m_Nspectral)+n];
 				      		}	  
 				  	}
 				  }
@@ -460,13 +503,13 @@ using namespace std;
 	      
 	    string GROUPE_TYPE_DATA("Data");
 	    string WCSINFO("/Coordinates");
-	    int DATASET_NOF_AXIS(3);
-	    vector<int> DATASET_SHAPE(1);DATASET_SHAPE[0];
+	    unsigned long int DATASET_NOF_AXIS(3);
+	    vector<unsigned long int> DATASET_SHAPE(1);DATASET_SHAPE[0];
 		      
 	    Attribute<string> attr_143(data_grp, "GROUPE_TYPE");
 	    Attribute<string> attr_144 (data_grp, "WCSINFO");
-	    Attribute<int> attr_145(data_grp, "DATASET_NOF_AXIS");
-	    Attribute< vector<int> > attr_146(data_grp, "DATASET_SHAPE");
+	    Attribute<unsigned long int> attr_145(data_grp, "DATASET_NOF_AXIS");
+	    Attribute< vector<unsigned long int> > attr_146(data_grp, "DATASET_SHAPE");
 		
 	    attr_143.value = GROUPE_TYPE_DATA;
 	    attr_144.value = WCSINFO;
@@ -500,13 +543,13 @@ using namespace std;
 
 	    string GROUPE_TYPE_DATA("Data");
 	    string WCSINFO("/Coordinates");
-	    int DATASET_NOF_AXIS(3);
-	    vector<int> DATASET_SHAPE(1);DATASET_SHAPE[0];
+	    unsigned long int DATASET_NOF_AXIS(3);
+	    vector<unsigned long int> DATASET_SHAPE(1);DATASET_SHAPE[0];
 		      
 	    Attribute<string> attr_143(data_grp, "GROUPE_TYPE");
 	    Attribute<string> attr_144 (data_grp, "WCSINFO: DATA SET IS EMPTY (BEFORE PROCESSING)");
-	    Attribute<int> attr_145(data_grp, "DATASET_NOF_AXIS");
-	    Attribute< vector<int> > attr_146(data_grp, "DATASET_SHAPE");
+	    Attribute<unsigned long int> attr_145(data_grp, "DATASET_NOF_AXIS");
+	    Attribute< vector<unsigned long int> > attr_146(data_grp, "DATASET_SHAPE");
 		
 	    attr_143.value = GROUPE_TYPE_DATA;
 	    attr_144.value = WCSINFO;
