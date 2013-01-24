@@ -264,18 +264,18 @@ class obsinfo:
 		self.logdir=parset_logdir + self.id + "/"
 		if os.path.exists(self.logdir): 
 			self.get_parset_name(self.logdir, id_suffix)
-			return
+			if self.parset != "": return
 		# for D20??_ obsids also checking L20??_ directories
 		if re.search("D20", self.id):			
 			self.logdir=parset_logdir + re.sub("D20", "L20", self.id) + "/"
 			if os.path.exists(self.logdir):
 				self.get_parset_name(self.logdir, id_suffix)
-				return
+				if self.parset != "": return
 		# checking in the oldlog directory (0)
 		self.logdir=parset_oldlogdir + self.id + "/"
 		if os.path.exists(self.logdir):
 			self.get_parset_name(self.logdir, id_suffix)
-			return
+			if self.parset != "": return
 		# Due to new naming convention and location of the parset files, also looking for the parset file
 		# in any L2010-??-??_?????? directories	(2)
 		cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_logdir, id_suffix)
@@ -284,7 +284,7 @@ class obsinfo:
 			# it means we found the directory with parset file
 			self.parset=status[0][:-1]
 			self.logdir="/".join(status[0][:-1].split("/")[:-1]) + "/"
-			return
+			if self.parset != "": return
 		# now checking the new parset directory (3)
 		cmd="find %s -type f -name '*%s.parset' -print 2>/dev/null | grep -v Permission | grep -v such" % (parset_newlogdir, id_suffix)
 		status=os.popen(cmd).readlines()
@@ -292,7 +292,14 @@ class obsinfo:
 			# it means we found the directory with parset file
 			self.parset=status[0][:-1]
 			self.logdir="/".join(status[0][:-1].split("/")[:-1]) + "/"
-			return
+			if self.parset != "": return
+                # now checking if parset file is present in pulsar archive summary directories
+                summary_nodes={"locus092" : "CSplots", "locus093" : "CVplots", "locus094" : "redIS"}
+                for node in summary_nodes.keys():
+                        self.logdir=psr_archive_dir + node + "/" + self.id + "_" + summary_nodes[node] + "/"
+                        if os.path.exists(self.logdir):
+                                self.get_parset_name(self.logdir, id_suffix)
+                                if self.parset != "": return
 		self.logdir=""
 		self.parset=""
 
@@ -2373,6 +2380,7 @@ if __name__ == "__main__":
 				oi=obsinfo(id)
 
 			if not oi.is_parset():
+				continue # not keeping records of ObsIDs without parset in the table -- too many and are not from pulsar obs - Vlad, Jan 24, 2013
 				comment = "NO PARSET FILE FOUND!"
 				# search for nodeslist and datadir with raw data
 				# we do this search only if ObsID is _NOT_ in obsids_redonly list
