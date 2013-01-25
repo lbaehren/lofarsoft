@@ -99,7 +99,7 @@ class CRDatabasePopulator(object):
         self.sqlList.append(sql)
 
         # Write empty row for later updating of parameters
-        sql = "INSERT INTO datafileparameters (datafileID) VALUES ({0})".format(self.ID['datafile'])
+        sql = "INSERT INTO datafileparameters (datafileID) VALUES ({0});".format(self.ID['datafile'])
         self.sqlList.append(sql)
 
         # Write datafile parameters to list of SQL statements
@@ -170,7 +170,7 @@ class CRDatabasePopulator(object):
             self.sqlList.append(sql)
 
             # Write empty row for later updating of parameters
-            sql = "INSERT INTO stationparameters (stationID) VALUES ({0})".format(self.ID['station'])
+            sql = "INSERT INTO stationparameters (stationID) VALUES ({0});".format(self.ID['station'])
             self.sqlList.append(sql)
 
 
@@ -188,7 +188,7 @@ class CRDatabasePopulator(object):
                 self.sqlList.append(sql)
 
                 # Write empty row for later updating of parameters
-                sql = "INSERT INTO polarizationparameters (polarizationID) VALUES ({0})".format(self.ID['polarization'])
+                sql = "INSERT INTO polarizationparameters (polarizationID) VALUES ({0});".format(self.ID['polarization'])
                 self.sqlList.append(sql)
 
                 # Write polarization parameters to list of SQL statements
@@ -379,7 +379,7 @@ class CRParameter(object):
             sql_keys += ", {0}".format(key)
             sql_values += ", '{0}'".format(self.pickle_parameter(self._parameters[key]))
 
-        sql += "INSERT INTO {0} ({1}) VALUES ({2});\n".format(self._parentname+"parameters", sql_keys, sql_values)
+        sql += "INSERT INTO {0} ({1}) VALUES ({2});".format(self._parentname+"parameters", sql_keys, sql_values)
 
         return sql
 
