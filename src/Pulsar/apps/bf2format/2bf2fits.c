@@ -11,7 +11,7 @@
 #include "patricklib.h"
 #include "patricklib_lofar.c"
 
-#define parsetmaxnrlines     3000
+#define parsetmaxnrlines     5000
 #define parsetmaxlinelength  1000
 
 /* NOTE: for old data sets (before PBW5) there is no 512 byte alignment,
