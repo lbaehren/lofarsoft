@@ -51,9 +51,6 @@ class AntennaResponse(Task):
         """Run.
         """
 
-        # Copy FFT data over for correction
-        self.on_sky_polarization.copy(self.instrumental_polarization)
-
         # Read tables with antenna model simulation
         vt = np.loadtxt(os.environ["LOFARSOFT"] + "/data/lofar/antenna_response_model/LBA_Vout_theta.txt", skiprows=1)
         vp = np.loadtxt(os.environ["LOFARSOFT"] + "/data/lofar/antenna_response_model/LBA_Vout_phi.txt", skiprows=1)
@@ -81,10 +78,14 @@ class AntennaResponse(Task):
             cr.hInvertComplexMatrix2D(self.inverse_jones_matrix, self.jones_matrix)
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
-        if self.apply_to_data and not self.backwards:
-            print "unfolding antenna pattern"
-            cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...], self.inverse_jones_matrix)
-        elif self.apply_to_data:
-            print "unfolding antenna pattern (backwards)"
-            cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...], self.jones_matrix)
+        if self.apply_to_data:
+            # Copy FFT data over for correction
+            self.on_sky_polarization.copy(self.instrumental_polarization)
+
+            if not self.backwards:
+                print "unfolding antenna pattern"
+                cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...], self.inverse_jones_matrix)
+            else:
+                print "unfolding antenna pattern (backwards)"
+                cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...], self.jones_matrix)
 
