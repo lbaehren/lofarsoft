@@ -63,14 +63,14 @@ def runAnalysis(sigma=4.0,window=70):
     plt.bar([a[0] for a in purity],[a[1] for a in purity],width=0.4,color='b')
     plt.xlabel('number of coincidence channels')
     plt.title('windowsize='+str(window)+', threshold='+str(sigma))
-    plt.ylabel('Eff (G) and purity (B) fraction') 
+    plt.ylabel('Eff (G) and purity (B) fraction')
     return efficiency,purity
 
 def selectPulsar(msgs,pulsar):
     """ selects trigger messages only in a certain DM range
         options: 1919 ,filters between 12.4 and 12.5
                  0329 , filters between 26.45 and 27.465
-        
+
         *mgs*     Dict of triggermessages
         *pulsar*  Pulsar
     """
@@ -84,7 +84,7 @@ def selectThreshold(msgs,threshold):
     [filterDatabase(m,'max',threshold,100000000) for m in msgs]
 
 def getTimeSubband(msg):
-    """ Returns time and subband from the trigger messages 
+    """ Returns time and subband from the trigger messages
         * msg * Database with trigger messages
     """
     return filterTriggers2(msg,-1,'time','subband')
@@ -112,7 +112,7 @@ def numberBeams(triggermsgDBlist):
 def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=True,bReturnArray=True,analysedOn32bit=False):
     """
     Trigger messages are stored in a log file, made by the writetriggermessages program. These can be read in by this function. The underlying format is:
-    
+
     fmt='i3L3i2f2i1f'
     new version: 'i3L3i2f2i4f3i'
 
@@ -138,7 +138,7 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=True,bRetur
     trmsg[i]['nrFlaggedChannels']
     trmsg[i]['width']
 
-        
+
 
     """
 # Needed to unpack the data format
@@ -150,7 +150,7 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=True,bRetur
         ft=open(filename)
     data=ft.read()
 # the data will be put in a dictionary, with a number for the trigger number and different properties
-# the format in which the data is stored 
+# the format in which the data is stored
     fmt='<3q4i2f2i1f1i'
     if newVersion:
         fmt='<3q4i2f2i4f3i'
@@ -217,9 +217,9 @@ def loadTriggerMsg(directory='',filename='TriggerMsg.log',newVersion=True,bRetur
 
 def filterTriggers(trmsg,subband, keyword,strictKeywordchecking=True):
     """ Returns the keyword at which the specified subband was triggered. A negative subband returns all keywords.
-    
+
     The keyword should be out of
-    
+
     'time',
     'utc_second',
     'utc_nanosecond',
@@ -231,27 +231,27 @@ def filterTriggers(trmsg,subband, keyword,strictKeywordchecking=True):
     'max',
     'obsID',
     'beam',
-    'DM', 
+    'DM',
     'SBaverage',
     'SBstddev',
     'Threshold',
     'nrFlaggedSamples',
     'nrFlaggedChannels'
-    
+
      """
     if strictKeywordchecking and keyword not in ['time','utc_second','utc_nanosecond','length','sample','block','subband','sum','max','obsID','beam','DM','SBaverage','SBstddev','Threshold','nrFlaggedSamples','nrFlaggedChannels']:
         raise ValueError("Keyword "+str(keyword)+" not in database")
     if type(subband) != type(1):
         raise ValueError("Subband "+str(subband)+" is not an integer")
-    if subband < 0: 
+    if subband < 0:
         return [a[keyword] for a in trmsg.values()]
     return [a[keyword] for a in trmsg.values() if a['subband']==subband]
 
 def filterTriggers2(trmsg,subband, keyword1, keyword2):
     """ Returns the values of both keywords at which the specified subband was triggered. A negative subband returns values for all subbands.
-    
+
     The keyword should be one out of
-    
+
     'time',
     'utc_second',
     'utc_nanosecond',
@@ -263,13 +263,13 @@ def filterTriggers2(trmsg,subband, keyword1, keyword2):
     'max',
     'obsID',
     'beam',
-    'DM', 
+    'DM',
 
     * trmsg     * database with trigger messages
     * subband   * specified observation band, or negative for all streams
     * keyword 1 * first keyword for which values are returned
     * keyword 2 * second keyword for which values are returned
-    
+
     return value:
         list of tuple(value1,value2) for each message.
      """
@@ -282,7 +282,7 @@ def filterTriggers2(trmsg,subband, keyword1, keyword2):
         raise ValueError("Keyword "+str(keyword2)+" not in database")
     if type(subband) != type(1):
         raise ValueError("Subband "+str(subband)+" is not an integer")
-    if subband < 0: 
+    if subband < 0:
         return [(a[keyword1],a[keyword2]) for a in trmsg.values()]
     return [(a[keyword1],a[keyword2]) for a in trmsg.values() if a['subband']==subband]
 
@@ -331,12 +331,12 @@ def loadTimeseries(directory='',DM=DM):
         DMstr=DM
     dfiles=glob.glob(directory+'dedisp*'+str(DM)+'_*')
     #assert len(dfiles)<10,"please check if file order is correct for ..."+str(["..."+f[-15:] for f in dfiles])
-        
+
     ts=[np.fromfile(f,'float32') for f in dfiles]
     return ts
 
 def obsParameters(directory='',file=None):
-    """ 
+    """
 
     """
     if len(directory) > 0 and directory[-1]!='/':
@@ -351,7 +351,7 @@ def obsParameters(directory='',file=None):
                 print 'Using frats_dedisperse.sh file'
         else:
             print "Using beam*.sh file"
-        
+
     else:
         files=[directory+'/'+file]
     if len(files)>1:
@@ -374,7 +374,7 @@ def obsParameters(directory='',file=None):
     keyword=''
     intkeywords=['ch', 'Cnr', 'stb', 'startSB', 'n', 'nrCSB', 'il', 'tInt', 'sa', 'obsstart', 'Ctime']
     floatkeywords=['tl']
-    listkeywords=['freq', 'DM','ilrange'] 
+    listkeywords=['freq', 'DM','ilrange']
     rangekeywords=['DMrange']
     for i in rawdata[1:]:
         if not newkeyword:
@@ -385,7 +385,7 @@ def obsParameters(directory='',file=None):
             if i[0]=='-':
                 parameters[keyword]=True
                 keyword=i[1:]
-            else: # fill in single value of keyword     
+            else: # fill in single value of keyword
                 if keyword not in listkeywords and keyword not in rangekeywords:
                     if keyword in intkeywords:
                         try:
@@ -455,9 +455,11 @@ def derivedParameters(par,DM=DM):
         * alldelaysPerDM * mulyiply with DM to get delays for all frequencies
         * nrdivs *         how many streams are used
         * nrstreams *      how many streams are used
-    
-    """ 
-    par['timeresolution']=5e-9*1024*par['ch']*par['tInt']
+
+    """
+    if 'resampleT' not in par.keys():
+        par['resampleT']=1
+    par['timeresolution']=5e-9*1024*par['ch']*par['tInt']*int(par['resampleT'])
     par['nrfreqs']=len(par['freq'])
     par['startchannels']=range(0,par['nrfreqs'],par['nrCSB']*par['ch'])
     par['endchannels']=range(par['nrCSB']*par['ch']-1,par['nrfreqs'],par['nrCSB']*par['ch'])
@@ -488,7 +490,7 @@ def copyPart(par,DM,sample):
     infile=par['i'].split('/')[-1]
     remotedir="/mnt/lofar1/lofar/FRATS/data/"
     from os import environ
-    localdir=environ["FRATS_DATA_DIR"]    
+    localdir=environ["FRATS_DATA_DIR"]
     if startSample<0:
         startSample=0
     size=int(par['nrfreqs']*4)
@@ -501,7 +503,7 @@ def copyPart(par,DM,sample):
     print "ssh helios dd bs="+sizestr+" count="+str(nrSamples)+" skip="+str(startSample)+" if="+remotedir+str(infile)+" of="+remotedir+"temp.raw"
     print "scp helios:"+remotedir+"temp.raw "+localdir+str(infile)[0:-4]+"st_"+str(startSample)+".raw"
 
-        
+
 
 
 def getDirectory(obsid,run,maindir='/Users/STV/Astro/Analysis/FRAT/analysis/'):
@@ -515,7 +517,7 @@ def getDirectory(obsid,run,maindir='/Users/STV/Astro/Analysis/FRAT/analysis/'):
     return maindir+'/'+obsid+'/'+run+'/'
 
 def getPulsedir(obsid,sap,pulse,maindir=None,checkdir=True):
-    """ Returns directory where a pulse is stored. 
+    """ Returns directory where a pulse is stored.
         * obsid *    Observation ID. L????? or ?????
         * sap *      Sub Array Pointing SAP???
         * pulse *    pulse nr (integer or pulse??)
@@ -523,7 +525,7 @@ def getPulsedir(obsid,sap,pulse,maindir=None,checkdir=True):
         * checkdir * Check if directory exists
 
         returns maindir/L?????/SAP???/pulse?/
-    
+
     """
     if type(obsid) == type(1): #int
         obsid='L'+str(obsid)
@@ -540,23 +542,23 @@ def getPulsedir(obsid,sap,pulse,maindir=None,checkdir=True):
         from os import environ
         maindir=environ['FRATS_ANALYSIS_DIR']
     from os import path
-    pulsedir=maindir+'/'+obsid+'/'+sap+'/'+pulse+'/' 
+    pulsedir=maindir+'/'+obsid+'/'+sap+'/'+pulse+'/'
     if checkdir:
         if not path.isdir(pulsedir):
             raise NameError('Directory '+pulsedir+' does not exist. If you want to skip this check, use checkdir=False as an argument')
     return pulsedir
 
-                
-    
+
+
 
 def coincidenceSummary(trmsg,pulses=anadb['pulses'],nrstreams=10,windows=[10,20,30,40,50,60,70,80,90,100]):
     """ Make a summary of the coincidences w.r.t. known pulses
-    
+
         * trmsg *       database with triggermessages
         * pulses *      list with pulse times
         * nrstreams *   number of streams
         * windows *     timewindows of coincidences
-        
+
 
         returns data base with:
             coincidence[number][window] * from coincidencesCount
@@ -565,13 +567,13 @@ def coincidenceSummary(trmsg,pulses=anadb['pulses'],nrstreams=10,windows=[10,20,
         and as extra
             times  | trigger times per band
             totnr  | triggers per band
-          
+
 
     """
     coinDB=dict()
     # all the triggered times per subband
     coinDB['times']=[filterTriggers(trmsg,s,'time') for s in range(nrstreams)]
-    # nr of triggers per subband 
+    # nr of triggers per subband
     coinDB['totnr']=[len(t) for t in coinDB['times']]
     # triggers in each subband that are within a range of the normal pulses
     coinDB['coincidence']=dict()
@@ -590,14 +592,14 @@ def coincidenceSummary(trmsg,pulses=anadb['pulses'],nrstreams=10,windows=[10,20,
 def coincidencesCount(pulses,times,number,window):
     """ Check how often a coincidence between streams falls within the timewindow of the
     assumed arrival time of the pulses.
-     
+
         * pulses * times of arrival of actual pulses
         * times *  trigger times
         * number * number of coincidences
         * window * timewindow in which the coincidence should fall. NOTE: could be double the window.
-    
+
         returns: number of coincidences
-    
+
     """
     nrstreams=len(times)
     if number > nrstreams:
@@ -617,12 +619,12 @@ def coincidencesCount(pulses,times,number,window):
 def coincidencesCountFast(pulses,timesSub,number,window):
     """ Check how often a coincidence between streams falls within the timewindow of the
     assumed arrival time of the pulses. Faster method than coincidencesCount.
-     
+
         * pulses * times of arrival of actual pulses
         * times *  trigger times
         * number * number of coincidences
         * window * timewindow in which the coincidence should fall. NOTE: could be double the window.
-    
+
         returns: number of coincidences
     """
     #timesSub=np.array(timesSub)
@@ -635,16 +637,16 @@ def coincidencesCountFast(pulses,timesSub,number,window):
 
 
 def coincidencesFast(pulses,timesSub,number,window):
-    """ Returns number of coincidences with each assumed pulse. 
-    
+    """ Returns number of coincidences with each assumed pulse.
+
         * pulses * times of arrival of actual pulses
         * times *  trigger times
         * number * number of coincidences
         * window * timewindow in which the coincidence should fall. NOTE: could be double the window.
-    
+
         returns: number of coincidences
     """
-    
+
     #timesSub=np.array(timesSub)
     import itertools
     nrcoin=[len(set(timesSub[np.searchsorted(timesSub[:,0],p-window/2):np.searchsorted(timesSub[:,0],p+window/2)][:,1])) for p in pulses]
@@ -661,18 +663,18 @@ def triggercoincidenceSets(timesSub,number,window):
     return coinsets3
 
 def triggercoincidenceSets2(timesSub,window):
-    """ 
-    Function checks for all messages withing time to time+window for all 
-    timestamps. For each timestamp it checks the number of unique subbands 
-    and the minimum trigger level. It doesn't check if a subband appears 
-    twice with different trigger levels. It also doesn't check for 
+    """
+    Function checks for all messages withing time to time+window for all
+    timestamps. For each timestamp it checks the number of unique subbands
+    and the minimum trigger level. It doesn't check if a subband appears
+    twice with different trigger levels. It also doesn't check for
     overlapping triggers.
 
 
-    * timesSub * time-sorted array with 4 columns. The colums are: 
+    * timesSub * time-sorted array with 4 columns. The colums are:
     time, subband, max, DM. The DM should be selected beforehand.
-    * window * timewindow in which coincidences fall 
-    
+    * window * timewindow in which coincidences fall
+
 
     Returns: time, nrOfCoincidences, minimum triggerlevel, duration"""
 
@@ -693,7 +695,7 @@ def selectTriggers(coinsets,pulses,number,window):
     * window *      timewindow of the trigger. Actually takes double timewindow for searching.
 
     return tuple of #real coincicedence pulses, # non-coincidence triggers
-    
+
     """
     wstart=[c[0][0] for c in coinsets if c[1]>=number]
     wstop=[c[0][1] for c in coinsets if c[1]>=number]
@@ -701,9 +703,9 @@ def selectTriggers(coinsets,pulses,number,window):
     return len([a for a in pulsefound if a[0]]),len([a for a in pulsefound if not a[0]])
 
 def anticoincidencesCount(pulses,times,number,window):
-    """ Check how often a time from a coincidence of streams doesn't fall in the correct window 
+    """ Check how often a time from a coincidence of streams doesn't fall in the correct window
     of a pre-assumed position of a pulse.
-    
+
     * pulses * known timestamps of arrival of a pulse
     * times * trigger times for each stream
     * number * number of coincidences required
@@ -736,7 +738,7 @@ def triggercoincidencesCount(times,number,window):
     * times * list of lists of time stamp of triggers for each stream
     * number * how many coincidences should there be
     * window * time window in which the coincidences should fall.
-    
+
     returns number of coincidences
     """
     nrstreams=len(times)
@@ -798,7 +800,7 @@ def plotCoincidenceWindowfixed(coinDB,types,coinNrs,window,pretitle='',newfigure
     * pretitle *    additional start of the title of the plot
     * newfigure *   make a new figure
     * totalwidth *  width of all type bars together.
-    """    
+    """
 
     width=(totalwidth-1)/len(types)
     mycolor2=dict()
@@ -819,7 +821,7 @@ def plotCoincidenceWindowfixed(coinDB,types,coinNrs,window,pretitle='',newfigure
 
 def getBaseline(directory,filename="baseline.log",channels=5120,matrixoutput=True):
     """ Load the baseline of each block of data.
-    
+
     * directory * directory where the file is stored
     * filename *  name of the file
     * channels *  total number of channels in the file
@@ -854,7 +856,7 @@ def getBaseline(directory,filename="baseline.log",channels=5120,matrixoutput=Tru
         return fcs
     else:
         return fc2
-    
+
 def getFlaggedChannels(directory,filename="flaggedchans.log",channels=5120,matrixoutput=True):
     """ Load the flagged channels of each block of data.
 
@@ -947,9 +949,9 @@ def loadAverage(nrDMs,nrStreams,directory,filename='average.log'):
         * nrStreams * number of streams, that all have a seperate overage.
         * directory * directory where the file is stored
         * filename *  name of file
-    
-        returns dictionary with averages for each DM and stream 
-    """ 
+
+        returns dictionary with averages for each DM and stream
+    """
     f=open(directory+'/'+filename)
     f.seek(0)
     datadict=dict()
@@ -968,9 +970,9 @@ def loadOffset(nrDMs,nrStreams,directory,filename='offset.log'):
         * nrStreams * number of streams, that all have a seperate overage.
         * directory * directory where the file is stored
         * filename *  name of file
-    
-        returns dictionary with averages for each DM and stream 
-    """ 
+
+        returns dictionary with averages for each DM and stream
+    """
     f=open(directory+'/'+filename)
     f.seek(0)
     datadict=dict()
@@ -988,9 +990,9 @@ def loadStddev(nrDMs,nrStreams,directory,filename='stddev.log'):
         * nrStreams * number of streams, that all have a seperate overage.
         * directory * directory where the file is stored
         * filename *  name of file
-    
-        returns dictionary with averages for each DM and stream 
-    """ 
+
+        returns dictionary with averages for each DM and stream
+    """
     f=open(directory+'/'+filename)
     f.seek(0)
     datadict=dict()
@@ -1003,11 +1005,11 @@ def loadStddev(nrDMs,nrStreams,directory,filename='stddev.log'):
     return datadict
 
 def makeTimeAxes(reftime,delays,length,unit=1):
-    """ Make time axis for timeseries data. 
+    """ Make time axis for timeseries data.
      * reftime: reference time
      * delays:  list of delays with respect to reftime
      * length:  lenght of array
-     * unit:    timestep 
+     * unit:    timestep
 
     """
     timeaxes=np.zeros([len(delays),length])
@@ -1016,13 +1018,13 @@ def makeTimeAxes(reftime,delays,length,unit=1):
     return timeaxes
 
 def makeSets(msg,threshold,window):
-    """ 
-    Returns coincidence sets for each DM. 
-    
+    """
+    Returns coincidence sets for each DM.
+
     * msg *       database with triggermessages
     * threshold * only uses messages above this threshold
     * window *    time window for finding coincidences
-    
+
     Returns array of time, nr of streams triggered, lowest trigger threshold and DM as database entry for each DM.
 
 
@@ -1037,12 +1039,12 @@ def makeSets(msg,threshold,window):
     DMvalues=list(set(trval['DM']))
     timesSubband=zip(trval['time'],trval['subband'],trval['max'],trval['DM'])
 # sort on time
-    timesSubband.sort() 
+    timesSubband.sort()
     timesSubband=np.array(timesSubband)
     alltimesSubband=np.copy(timesSubband)
     sets=dict()
     for DM in DMvalues:
-        sets[DM]=np.array(triggercoincidenceSets2(timesSubband[timesSubband[:,3]==DM],window))   
+        sets[DM]=np.array(triggercoincidenceSets2(timesSubband[timesSubband[:,3]==DM],window))
     print "tuples of time, nr subband, lowest trigger threshold, DM"
     return sets
 
@@ -1052,10 +1054,10 @@ def msgFromCoincidence(trmsg,timestamp,window,DM):
 
 def filterSets(sets,coincidenceThreshold):
     """ filters set made by makeSets, such that the pulse power should at least be coincidenceThreshold in all streams.
-    
+
 
     """
-    sets2=dict()    
+    sets2=dict()
     for k,v in sets.iteritems():
         sets2[k]=[s for s in v if s[1]>=coincidenceThreshold]
     return sets2
@@ -1082,7 +1084,7 @@ def plotSets(sets,saveFig,coincidences,timeres,pdfp,obsid,sap,cumulative=False,t
             mysets=filterSets(sets,c)
         else:
             mysets=sets
-        print c 
+        print c
         totallen=np.sum([len(v) for k,v in mysets.iteritems()])
         xdata=np.zeros(totallen)
         ydata=np.ones(totallen)
@@ -1112,17 +1114,17 @@ def plotSets(sets,saveFig,coincidences,timeres,pdfp,obsid,sap,cumulative=False,t
             plt.title(title)
         if not cumulative:
             if saveFig:
-                pdfp.savefig() 
+                pdfp.savefig()
             plt.figure()
     if cumulative and saveFig:
-        pdfp.savefig() 
-        
-        
-        
+        pdfp.savefig()
+
+
+
 
 def addmsg(msg,msgnew):
-    """ Adds databases to another database. The keys of each database are 
-    continuous numbers. The new keys are continously numbered. 
+    """ Adds databases to another database. The keys of each database are
+    continuous numbers. The new keys are continously numbered.
 
     * msg * Database that gets new database added to it
     * msgnew * Database that the data is taken from.
@@ -1154,28 +1156,28 @@ def RFIcalcBadSamples(data,cutlevel,subdiv=4,reqsubdiv=2):
     level=avdiv+cutlevel*stddiv
     index=np.arange(sa)
     flagsa=[index[collapsedData[i]>level[i]] for i in range(subdiv)]
-    return flagsa    
+    return flagsa
 
 
 def getTimeseriesPar(directory,DMindex=0,DMvalue=False):
-    par=obsParameters(directory) 
+    par=obsParameters(directory)
     if DMvalue:
         DMvalue=str(DMvalue)
-    
-    DM=par['DM'][DMindex] 
+
+    DM=par['DM'][DMindex]
     if DMvalue:
         DM=[a for a in par['DM'] if np.abs(a-float(DMvalue.strip('_'))) < 0.5*np.min(np.diff(par['DM'])[np.diff(par['DM'])>0])][0]
     derivedParameters(par,DM)
 #    timeseries=loadTimeseries(directory,str(round(DM,2)))
     timeseries=loadTimeseries(directory,DMvalue)
-    assert len(timeseries)==par['nrstreams'],"Not loading correct number of timeseries"
+    #assert len(timeseries)==par['nrstreams'],"Not loading correct number of timeseries"
     trmsg=loadTriggerMsg(directory,bReturnArray=True,newVersion=3)
     av=loadAverage(len(par['DM']),par['nrstreams'],directory)
     std=loadStddev(len(par['DM']),par['nrstreams'],directory)
     DMav=[a for a in av.keys() if np.abs(a-DM) < 0.5*np.min(np.diff(av.keys()))][0]
     av=av[DMav]
     std=std[DMav]
-    return (timeseries,DM,par,trmsg,av,std)        
+    return (timeseries,DM,par,trmsg,av,std)
 
 def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationlength=1,centraltime=0,window=0,trmsgoffset=15,offset=30,saveplot=None,legend=False,bTimeInSeconds=False,bMsgAllLengths=False,plotTimeseries=True,plotThreshold=False):
     """ Plot timeseries within a certain timewindow.
@@ -1185,7 +1187,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
     * par        *  Parameters with which the data was dedispersed.
     * trmsg  *       numpy array with trigger message (msg=fa.loadTriggerMsg(mydir,newVersion=True,bReturnArray=True)
     These first three values can be replaced by *fa.getTimeseriesPar(mydir)
-    
+
     * integration length * Over how many samples should the data be integrated. \
     This works with a running sum (boxcar profile)
     * central time * central time of plotting
@@ -1219,7 +1221,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
             toutall.append(tout[0:length-integrationlength])
     else:
         toutall=ts
-    
+
     if bTimeInSeconds:
         unit=par['timeresolution']
         plt.xlabel('Time (seconds)')
@@ -1241,19 +1243,19 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
         [plt.plot(trmsg['time'],offset*trmsg['subband']+trmsg['sum'],'x')]#trmsgoffset+par['ch']*par['nrCSB']*integrationlength,'*')]
         plt.title('Timeseries and trigger messages, DM='+str(DM)+', L='+str(integrationlength))
     if plotTimeseries:
-        if window>0: 
+        if window>0:
             [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
         else:
             print [(len(timeaxis),len(toutall)) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
-            [plt.plot(t,s+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]        
+            [plt.plot(t,s+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,toutall)]
     if plotThreshold and av and std:
         Threshold=[avv*integrationlength+np.sqrt(integrationlength)*par['tl']*stdd for avv,stdd in zip(av.values(),std.values())]
         print par['sa']
         T2=[convertArrayBar(t,par['sa']) for t in Threshold]
-        if window>0: 
+        if window>0:
             [plt.plot(t[np.abs(t-centraltime)<window],s[np.abs(t-centraltime)<window]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]
         else:
-            [plt.plot(t,s[0:len(t)]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]        
+            [plt.plot(t,s[0:len(t)]+num*offset,color=mycolors[num]) for num,t,s in zip(range(len(timeaxis)),timeaxis,T2)]
     if legend:
         legendentries=[str(round(f/1e6,1))+"-"+str(round(f2/1e6,1))+" MHz" for f,f2 in zip(par['refFreqs'],par['endFreqs'])]
         if type(trmsg)==type(np.zeros(1)):
@@ -1262,14 +1264,14 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
     if saveplot:
         plt.savefig(saveplot)
 
-        
+
 
 def convertArrayBar(t,elem):
-    t2=np.zeros((elem,)+t.shape)        
+    t2=np.zeros((elem,)+t.shape)
     nrelem=elem*t.shape[0]
     t2[:]=t
     return t2.transpose().reshape(nrelem)#t2.shape[0]*t2.shape[1])
-    
+
 def filterUniqueTime(t12):
     t12b=np.copy(t12)
     i1=0
@@ -1277,7 +1279,7 @@ def filterUniqueTime(t12):
         t12s=t12[t12['subband']==s]
         for l in list(set(t12['length'])):
             t12sl=t12s[t12s['length']==l]
-            timedif=np.diff(t12sl['time']); 
+            timedif=np.diff(t12sl['time']);
             i2=i1+len(t12sl[timedif>1]); print i1,i2
             t12b[i1:i2]=t12sl[timedif>1]
             i1=i2
@@ -1286,11 +1288,11 @@ def filterUniqueTime(t12):
 
 def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ["parsetdir"],datadir=os.environ["FRATS_DATA_DIR"].rstrip("data/"),plotwindow=None,savefig=False,plotdir=False):
     """ Outputs command of openBFdata.py to make dedispersed timeseries for this trigger message.
-   
+
    * msg *   Trigger message
    * mydir * Directory with saved output (averages, flagged samples etc
    * prefix * run or python or ipython, to be put before opening the program
-   * extrablock * how many blocks to dedisperse the data for (default 10) 
+   * extrablock * how many blocks to dedisperse the data for (default 10)
    * datadir * Main directory of the data (with the last data/). Default:
                 os.environ["FRATS_DATA_DIR"].rstrip("data/")
    * plotwindow* How much time to plot to both sides. Default one block
@@ -1324,7 +1326,7 @@ def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ[
         saveoption=""
     command=prefix+" openBFdata.py -o L"+str(msg_obsID)+" -m "+str(msg_beam)+" -s "+str(startblock)+" -n "+str(nblocks)+" -y -R -D "+mydir+" --ts --DM="+str(msg_DM)+" -c "+str(par['ch'])+" --plot --pc="+str(msg_time)+" --pw="+str(plotwindow)+" --il="+str(msg_length)+" --parsetdir "+parsetdir+" --datadir \""+datadir+"\""+saveoption
     return command
-             
 
 
-     
+
+
