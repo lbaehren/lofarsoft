@@ -354,9 +354,13 @@ namespace FRAT {
 			trigger.DM=DM;
             trigger.utc_second=1234;
             trigger.utc_nanosecond=56789;
+            trigger.lastBadBlock=-10000;
 			
 		}
-		
+	
+        void SubbandTrigger::setLastBadBlock(int block){
+            trigger.lastBadBlock=block;
+        }
 		
 		void SubbandTrigger::summary()
 		{
@@ -1612,6 +1616,25 @@ Save timeseries (append)
 
             return badChans.size();
         }
+
+        bool RFIcleaning::checkDataloss(int requiredsamples){
+            int lossCount=0;
+            for(int sa=0; sa<itsNrSamples; sa++){
+                if(*(itsDataStart+sa*itsNrChannels)==0.0){
+                    lossCount++;
+                }
+            }
+            if(lossCount>=requiredsamples){
+                cout << "Dataloss occured" << endl;
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
+
+
+
 
         int RFIcleaning::calcBadSamples(int cutlevel) {
 // Channel collapse:

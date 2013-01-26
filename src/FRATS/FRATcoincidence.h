@@ -86,6 +86,7 @@ struct triggerEvent {
     int nrFlaggedChannels;
     int nrFlaggedSamples;
     int width;
+    int lastBadBlock;
 };
 
 
@@ -324,6 +325,7 @@ namespace FRAT {
               bool setObsid(int obsID);
               // dispersion measure used for dedispersing the data
               float itsDM;
+              void setLastBadBlock(int block);
 			  
 		  private:
 
@@ -454,6 +456,7 @@ namespace FRAT {
                 bool calcBaseline(); // sum over time of the sample for each channel
                 bool calcSqrBaseline(); // sum over time of samples^2 for each channel
                 int calcBadChannels(int cutlevel, bool useInterpolatedBaseline); // True if SqrBaseline/Baseline > average+cutlevel*stddev for a certain frequencychannel
+                bool checkDataloss(int requiredsamples);
                 int calcBadSamples(int cutlevel); // True if 
                 bool cleanChannels(std::string method); // replace bad channels
                 int cleanChannel0(std::string method); // replace 0th channel of each subband/ return number of 0th channels that are cleaned
@@ -471,6 +474,7 @@ namespace FRAT {
                 bool printTimeseries(bool printindex); // print timeseries with or without sampleindex
                 bool printAverageTimeseries(bool printindex); // print average timeseries with or without sampleindex
                 bool printAverageTimeseriesStream(bool printindex); // print average timeseries with or without sampleindex
+
                 bool printSqrTimeseries(bool printindex); // print sqrTimeseries with or without sampleindex
                 bool divideBaseline(bool useInterPolatedBaseline); // divide data at each sample by the baseline
                 bool subtractAverageTimeseries(); // subtract average timeseries, ZeroDMing
