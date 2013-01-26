@@ -81,11 +81,11 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   // getting  the instance of SAP 
   // checking all SAPs if they exist to pick the right one (if there will be two SAPs in one file, only
   // the first one will be picked up)
-  unsigned index;
-  for (index=0; index<nsap.get(); index++) {
-    if (bf_file->subArrayPointing(index).exists()) break;
+  unsigned sap_index;
+  for (sap_index=0; sap_index<nsap.get(); sap_index++) {
+    if (bf_file->subArrayPointing(sap_index).exists()) break;
   }
-  BF_SubArrayPointing sap = bf_file->subArrayPointing(index);
+  BF_SubArrayPointing sap = bf_file->subArrayPointing(sap_index);
 
   Attribute<unsigned> nbeam = sap.nofBeams();
   if (nbeam.exists())
@@ -97,10 +97,11 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 
   // getting the instance of first TA beam in the SAP
   // checking all TABs in the SAP if they exist in the file until the first one that exists is found
-  for (index=0; index<nbeam.get(); index++) {
-    if (sap.beam(index).exists()) break;
+  unsigned tab_index;
+  for (tab_index=0; tab_index<nbeam.get(); tab_index++) {
+    if (sap.beam(tab_index).exists()) break;
   }
-  BF_BeamGroup beam = sap.beam(index);
+  BF_BeamGroup beam = sap.beam(tab_index);
 
   // getting the center frequency of the beam
   Attribute<double> freq2 = beam.beamFrequencyCenter();
@@ -407,8 +408,14 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
 	fname[ found+2 ] = '0' + i;
 	cerr << "opening " << fname << endl;
 	BF_File* the_file = new BF_File (fname);
-	BF_SubArrayPointing sap = the_file->subArrayPointing (0);
-	BF_BeamGroup beam = sap.beam (0);
+  	for (sap_index=0; sap_index<nsap.get(); sap_index++) {
+    		if (the_file->subArrayPointing(sap_index).exists()) break;
+  	}
+	BF_SubArrayPointing sap = the_file->subArrayPointing(sap_index);
+  	for (tab_index=0; tab_index<nbeam.get(); tab_index++) {
+    		if (sap.beam(tab_index).exists()) break;
+  	}
+  	BF_BeamGroup beam = sap.beam(tab_index);
 	
 	BF_StokesDataset* the_stokes = new BF_StokesDataset (beam.stokes(i));
 
