@@ -7,12 +7,12 @@ import struct
 import numpy as np
 try:
     import bfdata as bf
-except ImportError: 
+except ImportError:
     from pycrtools import bfdata as bf
 import signal,sys
 import os
 import glob
-from FRATSanalysis import obsParameters,derivedParameters
+from FRATSanalysis import obsParameters,derivedParameters,msgToPlotcommand
 from optparse import OptionParser
 parser=OptionParser()
 parser.add_option("--startDM",type="float")
@@ -31,6 +31,8 @@ parser.add_option("-l","--logfile",type="string")
 parser.add_option("-t","--threshold",type="float",default=5.5)
 parser.add_option("-m","--maxlength",type="int",default=1024)
 parser.add_option("--nosend",action="store_true",dest="nosend",default="False")
+parser.add_option("--resampleT",type="int",default=1)
+parser.add_option("--beam",type="string",default="B012")
 
 (options,args)=parser.parse_args()
 print options
@@ -60,7 +62,12 @@ minDM=options.startDM
 DMstep=options.stepDM
 threshold=options.threshold
 outfilename=options.file #'/home/veen/FRATS/TriggerMsgRecent.log'
+resampleT=options.resampleT
 mydir=os.path.split(outfilename)[0]
+beam=options.beam
+
+
+
 
 nosend=options.nosend
 if options.logfile:
@@ -72,7 +79,7 @@ else:
     logging=False
 
 print "Nr of blocks",n
-print "samples per block",sa 
+print "samples per block",sa
 print "Nr of streams",nstreams
 print "Coincidence window",halfwindow
 print "Writing to file",options.file
@@ -102,7 +109,7 @@ sourceID='\x65' # identifies FRATS
 magic1='\x99'
 magic2='\xA0'
 
-#senddata=str(sec)+"_"i+str(nsec) 
+#senddata=str(sec)+"_"i+str(nsec)
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 if 'server_socket' not in dir():
@@ -127,14 +134,14 @@ def get_pointing(obsID,beam):
     RA=p['beam'][beam]['RA']
     DEC=p['beam'][beam]['DEC']
     return (RA,DEC)
-        
+
 def DMtoIndex(DM,minDM,DMstep):
     return int(round((DM-minDM)/DMstep,0))
 
 def IndexToDM(index,minDM,DMstep):
     return minDM+index*DMstep
 
-    
+
 checkdurations=[]
 coincidences=[]
 #filename='/Users/STV/Astro/Analysis/FRAT/analysis/L65367/SAP002_11-16/TriggerMsg.log'
@@ -185,44 +192,50 @@ while True:
             #print DMindex,timeindex,-1
                 t_offset=+1
                 mysum=np.sum(trmatrix[DMindex,length,timeindex]|trmatrix[DMindex,length,timeindex+t_offset])
-        
+
             #print DMindex,timeindex,+1
             if mysum >= streamsRequired:
                 triggers.append((DMindex,timeindex,mysum,t_offset))
                 print IndexToDM(DMindex,minDM,DMstep),msg[11],msg[0],msg[1],msg[2],mysum,msg[8],length
                 par=obsParameters(mydir)
+                if 'resampleT' not in par.keys():
+                    par['resampleT']=1
                 files=glob.glob(mydir+"/*beam*")
                 if len(files)==1:
                     programname=os.path.split(files[0])[1]
+                    if "LOTAAS" in programname:
+                        programname="frats_beam_LOTAAS_verification.sh"
                 else:
                     programname="Run "
-                        
+
                 derivedParameters(par,msg[11])
                 totalDelay=round(max(par['delaysPerDM'])*DM/par['sa'])
-                startblock=int(msg[0]/par['sa']-totalDelay-5)
+                startblock=int(msg[0]/par['sa']*int(par['resampleT'])-totalDelay-5)
                 nblocks=int(totalDelay+10)
-                if DM%1<1e-6:
-                    DMstr=str(int(DM))
-                elif DM%0.1<1e-6:
+                if DM%1<1e-5:
+                    DMstr=str(round(DM+0.001,3)) #meed to add a bit extra else other program has problems
+                elif DM%0.1<1e-5:
                     DMstr=str(round(DM,1))
-                elif DM%0.01<1e-6:
+                elif DM%0.01<1e-5:
                     DMstr=str(round(DM,2))
-                elif DM%0.03<1e-6:
+                elif DM%0.001<1e-5:
                     DMstr=str(round(DM,3))
                 else:
                     DMstr=str(DM)
 
-                print programname,"L"+str(msg[9]),'SAP00'+str(msg[10]),0,DM,DM,startblock,nblocks
-                print "fa.plotTimeseries(*fa.getTimeseriesPar(\""+mydir+"\",DMvalue="+DMstr+"),integrationlength="+str(msg[3])+",centraltime="+str(msg[0])+",window="+str(par['sa'])+",plotThreshold=True)" 
+                print programname,"L"+str(msg[9]),'SAP00'+str(msg[10]),0,DMstr,DMstr,startblock,nblocks,beam
+                print "fa.plotTimeseries(*fa.getTimeseriesPar(\""+mydir+"\",DMvalue="+DMstr+"),integrationlength="+str(msg[3])+",centraltime="+str(msg[0])+",window="+str(par['sa'])+",plotThreshold=True)"
+                print msgToPlotcommand(msg,mydir,"run")
                 if logging:
                     logfile.writelines(['Trigger found at'+str(time.time())+' , not sending='+str(nosend)+', DM='+str(msg[11])+' time='+str(msg[0])+' / '+str(msg[1]) \
                 +'s'+str(msg[2])+'ns + coinStreams='+str(mysum)+' strength='+str(msg[8])+' l='+str(msg[3])+' in streams '+ \
                 str(np.arange(nstreams)[trmatrix[DMindex,length,timeindex]|trmatrix[DMindex,length,timeindex+t_offset]])+'\n'])
                     logfile.writelines([str(msg)+'\n'])
-                    logfile.writelines([programname+" L"+str(msg[9])+" SAP00"+str(msg[10])+" 0 "+DMstr+" "+DMstr+" "+str(startblock)+" "+str(nblocks)+"\n"])
-                    logfile.writelines(["fa.plotTimeseries(*fa.getTimeseriesPar(\""+mydir+"\",DMvalue="+DMstr+"),integrationlength="+str(msg[3])+",centraltime="+str(msg[0])+",window="+str(par['sa'])+",plotThreshold=True)"+"\n"]) 
+                    logfile.writelines([programname+" L"+str(msg[9])+" SAP00"+str(msg[10])+" 0 "+DMstr+" "+DMstr+" "+str(startblock)+" "+str(nblocks)+" "+str(beam)+"\n"])
+                    logfile.writelines(["fa.plotTimeseries(*fa.getTimeseriesPar(\""+mydir+"\",DMvalue="+DMstr+"),integrationlength="+str(msg[3])+",centraltime="+str(msg[0])+",window="+str(par['sa'])+",plotThreshold=True)"+"\n"])
+                    logfile.writelines([msgToPlotcommand(msg,mydir,"run")])
                     logfile.flush()
-                if True:# and msg[10]>0:#not nosend:
+                if True and msg[10]!=1:#not nosend:
                    print "sending time only to ",sendadress,port2
                    sec=msg[1]
                    nsec=msg[2]
@@ -238,15 +251,15 @@ while True:
 t1=time.time()
 triggers=list(set(triggers))
 
-    
-     
 
-    
+
+
+
     #('\x99','\xA0',sec,nsec,DM,referenceFrequency,sourceID)
  #   print "sending time only to ",sendadress,port2
  #   senddata=struct.pack(fmtsend,magic1,magic2,sec,nsec,sourceID)
  #   client_socket.sendto(senddata, (sendadress,port2))
-    
+
 
 
 
