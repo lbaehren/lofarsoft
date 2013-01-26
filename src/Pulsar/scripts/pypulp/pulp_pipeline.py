@@ -621,15 +621,21 @@ class Pipeline:
 					log.info("Creating TA heatmap with %d rings for SAP=%d..." % (sap.nrRings, sap.sapid))
 					for psr in psrs:
 						log.info(psr)
-						cmd="cat %s/chi-squared.txt | grep _SAP%d | grep %s > %s/%s-chi-squared.txt" % (sumdir, sap.sapid, psr, sumdir, psr)
-						self.execute(cmd, log, is_os=True)
-						cmd="plot_LOFAR_TA_multibeam2.py --sap %d --chi %s-chi-squared.txt --parset %s.parset --out_logscale %s_SAP%d_%s_TA_heatmap_log.png --out_linscale %s_SAP%d_%s_TA_heatmap_linear.png --target %s" % (sap.sapid, psr, obs.id, obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, psr)
-						self.execute(cmd, log, workdir=sumdir)
-						cmd="rm -f %s-chi-squared.txt" % (psr)
-						self.execute(cmd, log, workdir=sumdir)
-						# combining TA heatmap log and linear plots
-						cmd="convert %s_SAP%d_%s_TA_heatmap_log.png %s_SAP%d_%s_TA_heatmap_linear.png -append ta_heatmap_sap%d_%s.png" % (obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, sap.sapid, psr)
-						self.execute(cmd, log, workdir=sumdir)
+						# I need this try/except block here, to avoid situation, when there are more than 1 pulsar in the SAP
+						# but processing was done only for 1 - this is the case when pulsar is not specified in the command line
+						try:
+							cmd="cat %s/chi-squared.txt | grep _SAP%d | grep %s > %s/%s-chi-squared.txt" % (sumdir, sap.sapid, psr, sumdir, psr)
+							self.execute(cmd, log, is_os=True)
+							cmd="plot_LOFAR_TA_multibeam2.py --sap %d --chi %s-chi-squared.txt --parset %s.parset --out_logscale %s_SAP%d_%s_TA_heatmap_log.png --out_linscale %s_SAP%d_%s_TA_heatmap_linear.png --target %s" % (sap.sapid, psr, obs.id, obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, psr)
+							self.execute(cmd, log, workdir=sumdir)
+							cmd="rm -f %s-chi-squared.txt" % (psr)
+							self.execute(cmd, log, workdir=sumdir)
+							# combining TA heatmap log and linear plots
+							cmd="convert %s_SAP%d_%s_TA_heatmap_log.png %s_SAP%d_%s_TA_heatmap_linear.png -append ta_heatmap_sap%d_%s.png" % (obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, sap.sapid, psr)
+							self.execute(cmd, log, workdir=sumdir)
+						except: 
+							log.info("Can't make a heatmap plot for pulsar %s" % (psr))
+							continue
 
 					# combining TA heatmaps for different pulsars
 					heatmaps=glob.glob("%s/ta_heatmap_sap%d_*.png" % (sumdir, sap.sapid))
