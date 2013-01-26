@@ -375,6 +375,10 @@ int main (int argc,
 	int channels=CHANNELS;
 // samples used for reading one block of data
 	int samples=SAMPLES;
+// resampling in time of raw data, before doing all the analysis
+    int resampleFactorTime=1;
+// resampling in frequency of raw data, before doing all the analysis
+    int resampleFactorFreq=1;
 // lowest subband of the data
 	int startsubbandnumber=321;
 // padding now used only for swapping floats. 
@@ -393,6 +397,7 @@ int main (int argc,
 	int HBAmode = 1;
 // where to store output 
 	string pulsedir = "pulses";
+    bool cleanRFI = true;
 // extra sleep time between blocks
     int sleeptime = 0;
 // starttime is used to calculate actual trigger time. Not calculated at te moment when the 
@@ -435,6 +440,7 @@ int main (int argc,
 			"-nrCSB number of subbands to combine as one"
 			"-tInt <time integration>"
 			"-LBA LBA mode"
+            "-nocleanRFI"
             "-noSend do not send trigger messages over UDP"
             "-sleep <sleeptime (sec)>"
             "-obsID <obsID>"
@@ -535,9 +541,20 @@ int main (int argc,
 			argcounter++;
 			samples = atoi(argv[argcounter]);
 			cout << "nr of samples " << samples << endl;
+		} else if(topic == "-resampleT"){
+			argcounter++;
+			resampleFactorTime = atoi(argv[argcounter]);
+			cout << "time resampling factor" << resampleFactorTime << endl;
+		} else if(topic == "-resampleF"){
+			argcounter++;
+			resampleFactorFreq = atoi(argv[argcounter]);
+			cout << "frequency resampling factor" << resampleFactorFreq << endl;
 		} else if(topic == "-LBA"){
 			HBAmode = 0;
 			cout << "using LBA data" << endl;
+		} else if(topic == "-nocleanRFI"){
+			cleanRFI = false;
+			cout << "not cleaning RFI" << endl;
 		} else if(topic == "-noSend"){
 			DoNotSendUDPtriggers = true;
 			cout << "not sending triggers" << endl;
@@ -650,7 +667,7 @@ int main (int argc,
 	
 	float ReferenceFreq=SubbandToFreq(startsubbandnumber,HBAmode);
 	float FreqResolution = CalcFreqResolution(channels);
-	float TimeResolution = CalcTimeResolution(channels,timeintegration);
+	float TimeResolution = CalcTimeResolution(channels,timeintegration)*resampleFactorTime;
 	//int ninputfiles=lastSB-firstSB+1;
     int ninputfiles=nFreqs/channels;
 	int nstreams = ninputfiles/nrCombinedSBs;
@@ -661,6 +678,10 @@ int main (int argc,
 		cout << "Last subband: " << lastSB << endl;
 		cout << "ninputfiles: " << ninputfiles << endl;
 	}
+    if(samples%resampleFactorTime != 0){
+        samples-=samples%resampleFactorTime;
+        cout << "new samples per datablock " << samples << ", to enable resampling";
+    }
     int NrChPerSB = channels;
 	int NrChannels=nrCombinedSBs*channels;
     int TotNrChannels=nFreqs; //nstreams*nrCombinedSBs*channels;
@@ -709,7 +730,7 @@ int main (int argc,
                 // total number of channels in this stream
                 printf("Channel, %i, Integration, %i ",channels,timeintegration);
                 //if(stream==1 && DMcounter==0)
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, UDPtransmitter, startpos, integrationlength, DoPadding, DoPadding, verbose, DoNotSendUDPtriggers, obsID, beam); // Add obsID and beam    
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples/resampleFactorTime,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, UDPtransmitter, startpos, integrationlength, DoPadding, DoPadding, verbose, DoNotSendUDPtriggers, obsID, beam); // Add obsID and beam    
                 
                 //}
             }
@@ -793,29 +814,46 @@ int main (int argc,
 	fpos_t pos;
     // Datasize is total number of channels (frequencies) * number of samples
 	long blockdatasize=nFreqs*samples*sizeof(float);
-	long stokesdatasize=blockdatasize;
+    long blockdatasizeResampled=nFreqs*samples*sizeof(float)/resampleFactorTime;
     // allocate memory
 	float *data=(float*)malloc(blockdatasize);
     // get pointer to the end of a data block
-    float *data_end=data+nFreqs*samples;
+    float *data_end=data+blockdatasize/sizeof(float);
 	if (data==NULL)
 	{
 		cerr << "Memory could not be allocated\n";
 		return 1;
 	}
-    cout << "stokesdatasize " << stokesdatasize << endl;
+    cout << "blockdatasize " << blockdatasize << endl;
+    float *resamp_data;
+    float *resamp_data_end;
+    if(resampleFactorTime>=1){
+        resamp_data=(float*)malloc(blockdatasizeResampled);
+        resamp_data_end=resamp_data+blockdatasizeResampled/sizeof(float);
+        if (resamp_data==NULL)
+        {
+            cerr << "Memory could not be allocated\n";
+            return 1;
+        }
+    } else {
+        resamp_data=data;
+        resamp_data_end=data_end;
+    }
+    cout << "resampled blockdatasize " << blockdatasizeResampled << endl;
+
+
 
     // indicator for new data format
     bool Transposed=true;
 
     // Setting up RFI clean task.
     // Number of divisions to search for short time RFI
-    int number_of_divisions=4;
+    int number_of_divisions=nstreams;
     // default cutlevel
     int cutlevel=5;
     // should put this in pulsedir? Should check what is actually logged.
     std:string outFileName="RFIsummary.txt" ;
-    RFIcleaning RFIcleaner(data, data_end, nFreqs, NrChPerSB, samples, cutlevel, number_of_divisions, outFileName);
+    RFIcleaning RFIcleaner(resamp_data, resamp_data_end, nFreqs, NrChPerSB, samples/resampleFactorTime, cutlevel, number_of_divisions, outFileName);
 	
 	
     int ch;
@@ -828,10 +866,9 @@ int main (int argc,
         // Read data
         cout << " Analyzing block " << blockNr << endl;
         fgetpos(pFile,&pos);
-        if(verbose){
+      //  if(verbose){
             cout << "Current positions " << blockNr << " " << startpos << " " << ftell(pFile)/blockdatasize << endl;
-        }
-        
+      //  }
         num = fread( &(data[0]), blockdatasize, 1, pFile); //read data
         
         if( !num) {
@@ -845,11 +882,11 @@ int main (int argc,
             //i--; //1 file k--
             continue;
         }
-        
         // swap endianness of the data. NOTE see if we can make this parallel?
         if(verbose) {
             cout << "About to swap " << blockdatasize << " floats" << endl;
         }
+
         unsigned char *datachar=(unsigned char*) data;
         if(DoPadding){
             SwapFloats(datachar,nFreqs*samples);//nFreqs*samples);
@@ -858,6 +895,70 @@ int main (int argc,
             cout << "Done swapping floats" << endl;
         }
 
+        // Resample data
+
+        for(float *it3=resamp_data; it3<resamp_data_end; it3++){
+            *it3=0;
+        }
+        
+        if(resampleFactorTime>=1){
+            float *dptr;
+            float *dptrRes;
+            #ifdef _OPENMP
+                #pragma omp parallel for private(dptr,dptrRes)
+            #else
+            #endif // _OPENMP  
+            for(int ch=0; ch<TotNrChannels;ch++){
+                for(int step=0;step<resampleFactorTime;step++){
+                    dptr=data+step*TotNrChannels+ch;
+                    dptrRes=resamp_data+ch;
+                    for ( ; dptr<data_end ; dptr+=resampleFactorTime*TotNrChannels){
+                        if(step==0){*dptrRes=0.0;}
+                        *dptrRes+=*dptr; 
+                        dptrRes+=TotNrChannels;
+
+
+                    }
+                }
+            }
+        }
+        
+   /* 
+        float sum1=0;
+        float sum2=0;
+        float sum3=0;
+        int sam2=0;
+        int numsam=0;
+        if(resampleFactorTime>=1){
+            for(int ch=0; ch<TotNrChannels;ch++){
+                sam2=0;
+
+                for(int sam=0; sam<samples/resampleFactorTime; sam++){
+                //for(int sam=0; sam<samples; sam++){
+                    //*(resamp_data+sam*TotNrChannels+ch)=0;
+                    for(int samcnt=0; samcnt<resampleFactorTime; samcnt++){
+                        sum2+=*(data+sam2*TotNrChannels+ch);
+                        *(resamp_data+sam*TotNrChannels+ch)+=*(data+sam2*TotNrChannels+ch);
+                        sam2++;
+                        numsam++;
+                    }
+                }
+            }
+        }
+
+        for(float *it3=data; it3<data_end; it3++){
+            sum1+=*it3;
+        }
+        for(float *it3=resamp_data; it3<resamp_data_end; it3++){
+            sum3+=*it3;
+        }
+        if((sum3-sum1)/sum1>0.001 || (sum1-sum3)/sum1>0.001){
+            cout << "Breaking, " << sum3 << " != " << sum1 << " " << sum1-sum3 << " " << endl;
+            return 155;
+        }
+    */
+
+
 //      Find out what the bad channels are NOTE check if we can skip this, as this is already done with the RFI cleaner
         int validchannels=TotNrChannels;
         int validsamples=samples;
@@ -865,7 +966,7 @@ int main (int argc,
 
 if(doFlagging){
         if(verbose){
-            cout << "Flagging channels in bewtween " << data << " " << data_end << endl; 
+            cout << "Flagging channels in bewtween " << resamp_data << " " << resamp_data_end << endl; 
         }
 
 // RFI cleaning. Calculate baseline (sum over time for each channel) and divide by it. 
@@ -874,7 +975,9 @@ if(doFlagging){
 // This should be roughly equal for pure noise
 // RFI channels stick out here, and are cut off by calculating and cleaning bad channels 
         RFIcleaner.calcBaseline();
+        RFIcleaner.writeBaseline(basefile, blockNr);
         RFIcleaner.divideBaseline();
+    if(cleanRFI){
         RFIcleaner.calcBaseline(); // NOTE this should be one? Do we need to calculate it?
         //RFIcleaner.printBaseline();
         RFIcleaner.calcSqrBaseline();
@@ -933,19 +1036,19 @@ if(doFlagging){
             }
 
         }
+    } // if clean
 
         // Write baseline and sqrt timeseries to files
         RFIcleaner.calcBaseline();
         RFIcleaner.writeSqrTimeseries(sqrtimeseriesfile, blockNr);
 
-        RFIcleaner.writeBaseline(basefile, blockNr);
+        //RFIcleaner.writeBaseline(basefile, blockNr);
 
         if(verbose){
             cout << " We are here now . 1 " << sizeof(chanIdVal)<< endl;     
         }
 
 } //do flagging
-   
         if(verbose){
             cout << " We are here now . 2 " << endl;     
         }
@@ -971,7 +1074,7 @@ if(doFlagging){
                 //# dedisperseData2 : calculates dedispersed data
                 SBTs[sc][DMcounter]->setNrFlaggedChannels(nrFlaggedChannels);
                 SBTs[sc][DMcounter]->setNrFlaggedSamples(nrFlaggedSamples);
-				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
+				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(resamp_data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 //# calcAverageStddev : calculates average, stddev and thresholdlevel
 				foundpulse=SBTs[sc][DMcounter]->calcAverageStddev(blockNr);
                 int intLength;
