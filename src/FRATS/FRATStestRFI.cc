@@ -657,7 +657,7 @@ int main (int argc,
 	
 	
 	
-	cout << logfilename << endl << triggerlogfilename << endl;
+	//cout << logfilename << endl << triggerlogfilename << endl;
 	
 	//============================= NEW I/O code ======================================================
 	
@@ -796,10 +796,9 @@ int main (int argc,
     stdfile->open(stdfilename.c_str(), ios::binary  | ios::out);
     ofstream * offsetfile = new ofstream;
     offsetfile->open(offsetfilename.c_str(), ios::binary  | ios::out);
-	ofstream triggerlogfile;
 	ofstream alltriggerlogfile;
 	//logfile.open(logfilename.c_str());
-	triggerlogfile.open(triggerlogfilename.c_str());
+	//triggerlogfile.open(triggerlogfilename.c_str());
 	alltriggerlogfile.open(alltriggerlogfilename.c_str(),ios::out | ios::app);
 
     //writing offsets to file	
@@ -860,7 +859,7 @@ int main (int argc,
     // Data can start at another block
 	fseek(pFile, startpos*blockdatasize, SEEK_SET);
     cout << "Current positions before reading " <<  startpos << " " << ftell(pFile)/blockdatasize << " " << startpos*blockdatasize <<  endl;
-
+    int lastBadBlock=-10000;
     // Read all blocks
 	for(int blockNr = 0; blockNr< nrblocks; blockNr++){
         // Read data
@@ -974,6 +973,11 @@ if(doFlagging){
 // Calculate the sum of the square of the samples
 // This should be roughly equal for pure noise
 // RFI channels stick out here, and are cut off by calculating and cleaning bad channels 
+        if(RFIcleaner.checkDataloss(3)){
+            lastBadBlock=blockNr;
+        }
+
+
         RFIcleaner.calcBaseline();
         RFIcleaner.writeBaseline(basefile, blockNr);
         RFIcleaner.divideBaseline();
@@ -1074,6 +1078,8 @@ if(doFlagging){
                 //# dedisperseData2 : calculates dedispersed data
                 SBTs[sc][DMcounter]->setNrFlaggedChannels(nrFlaggedChannels);
                 SBTs[sc][DMcounter]->setNrFlaggedSamples(nrFlaggedSamples);
+                SBTs[sc][DMcounter]->setLastBadBlock(lastBadBlock);
+                
 				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(resamp_data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 //# calcAverageStddev : calculates average, stddev and thresholdlevel
 				foundpulse=SBTs[sc][DMcounter]->calcAverageStddev(blockNr);
@@ -1112,6 +1118,8 @@ if(doFlagging){
                 // output dedispersed timeseries, if number of DMs is less than 3. NOTE: make this configurable?
                 if(nDMs <=3){
 						stringstream pulselogfn;
+                        pulselogfn.precision(3);
+                        pulselogfn.setf(ios::fixed,ios::floatfield);
 						pulselogfn << pulsedir << "/dedisptimeseries_" << SBTs[sc][DMcounter]->itsDM << "_" << sc << ".log";
 						string pulselogfilename;
 						pulselogfn >> pulselogfilename;
@@ -1138,7 +1146,7 @@ if(doFlagging){
     fsfile->close();
     avfile->close();
     stdfile->close();
-    triggerlogfile.close();
+    //triggerlogfile.close();
     alltriggerlogfile.close();
     basefile->close();
     sqrtimeseriesfile->close();
