@@ -325,11 +325,13 @@ def loadTimeseries(directory='',DM=DM):
             DMstr=str(round(DM,1))
         elif DM%0.01<1e-6:
             DMstr=str(round(DM,2))
+        elif DM%0.001<1e-6:
+            DMstr=str(round(DM,3))
         else:
             DMstr=DM
     else:
         DMstr=DM
-    dfiles=glob.glob(directory+'dedisp*'+str(DM)+'_*')
+    dfiles=glob.glob(directory+'dedisp*'+DMstr+'*_*')
     #assert len(dfiles)<10,"please check if file order is correct for ..."+str(["..."+f[-15:] for f in dfiles])
 
     ts=[np.fromfile(f,'float32') for f in dfiles]
