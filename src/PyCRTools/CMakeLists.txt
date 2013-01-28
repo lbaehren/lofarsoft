@@ -112,11 +112,30 @@ else (PYCRTOOLS_WITH_DEBUG_SYMBOLS)
   set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} -g0")
 endif (PYCRTOOLS_WITH_DEBUG_SYMBOLS)
 
+if (CMAKE_COMPILER_IS_GNUCC)
+  execute_process(
+    COMMAND ${CMAKE_C_COMPILER} -dumpversion
+    OUTPUT_VARIABLE GCC_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
 if (PYCRTOOLS_WITH_OPTIMIZATIONS)
   if (APPLE)
     set (PYCRTOOLS_OPTIMIZATION_FLAGS "-O2")
   else (APPLE)
-    set (PYCRTOOLS_OPTIMIZATION_FLAGS "-falign-functions -falign-jumps -falign-labels -falign-loops -fasynchronous-unwind-tables -fauto-inc-dec -fbranch-count-reg -fcaller-saves -fcombine-stack-adjustments -fcommon -fcompare-elim -fcprop-registers -fcrossjumping -fcse-follow-jumps -fcse-skip-blocks -fdce -fdefer-pop -fdelete-null-pointer-checks -fdevirtualize -fdse -fearly-inlining -fexpensive-optimizations -fforward-propagate -fgcse -fgcse-lm -fguess-branch-probability -fif-conversion -fif-conversion2 -findirect-inlining -finline-functions-called-once -finline-small-functions -fipa-cp -fipa-profile -fipa-pure-const -fipa-reference -fipa-sra -fivopts -fjump-tables -fmath-errno -fmerge-constants -fmove-loop-invariants -fno-threadsafe-statics -foptimize-register-move -foptimize-sibling-calls -fpartial-inlining -fpeephole -fpeephole2 -fprefetch-loop-arrays -fregmove -frename-registers -freorder-blocks -freorder-functions -frerun-cse-after-loop -frtti -fsched-critical-path-heuristic -fsched-dep-count-heuristic -fsched-group-heuristic -fsched-interblock -fsched-last-insn-heuristic -fsched-rank-heuristic -fsched-spec -fsched-spec-insn-heuristic -fsched-stalled-insns-dep -fschedule-insns -fschedule-insns2 -fshort-enums -fsigned-zeros -fsplit-ivs-in-unroller -fsplit-wide-types -fstrict-aliasing -fstrict-overflow -fthread-jumps -ftoplevel-reorder -ftrapping-math -ftree-bit-ccp -ftree-builtin-call-dce -ftree-ccp -ftree-ch -ftree-copy-prop -ftree-copyrename -ftree-cselim -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-loop-if-convert -ftree-loop-im -ftree-loop-ivcanon -ftree-loop-optimize -ftree-phiprop -ftree-pre -ftree-pta -ftree-reassoc -ftree-scev-cprop -ftree-sink -ftree-slp-vectorize -ftree-sra -ftree-switch-conversion -ftree-ter -ftree-vect-loop-version -ftree-vrp -funit-at-a-time -fvar-tracking -fvar-tracking-assignments -fvect-cost-model -fweb")
+    if (GCC_VERSION)
+      if (GCC_VERSION VERSION_EQUAL "4.4" OR GCC_VERSION VERSION_GREATER "4.4")
+        if (GCC_VERSION VERSION_LESS "4.6")
+          set (PYCRTOOLS_OPTIMIZATION_FLAGS "-falign-functions -falign-jumps -falign-labels -falign-loops -fasynchronous-unwind-tables -fauto-inc-dec -fbranch-count-reg -fcaller-saves -fcommon -fcprop-registers -fcrossjumping -fcse-follow-jumps -fcse-skip-blocks -fdce -fdefer-pop -fdelete-null-pointer-checks -fdse -fearly-inlining -fexpensive-optimizations -fforward-propagate -fgcse -fgcse-lm -fguess-branch-probability -fif-conversion -fif-conversion2 -findirect-inlining -finline-functions-called-once -finline-small-functions -fipa-cp -fipa-pure-const -fipa-reference -fivopts -fjump-tables -fmath-errno -fmerge-constants -fmove-loop-invariants -fno-threadsafe-statics -foptimize-register-move -foptimize-sibling-calls -fpeephole -fpeephole2 -fprefetch-loop-arrays -fregmove -frename-registers -freorder-blocks -freorder-functions -frerun-cse-after-loop -frtti -fsched-interblock -fsched-spec -fsched-stalled-insns-dep -fschedule-insns -fschedule-insns2 -fshort-enums -fsigned-zeros -fsplit-ivs-in-unroller -fsplit-wide-types -fstrict-aliasing -fstrict-overflow -fthread-jumps -ftoplevel-reorder -ftrapping-math -ftree-builtin-call-dce -ftree-ccp -ftree-ch -ftree-copy-prop -ftree-copyrename -ftree-cselim -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-fre -ftree-loop-im -ftree-loop-ivcanon -ftree-loop-optimize -ftree-pre -ftree-reassoc -ftree-scev-cprop -ftree-sink -ftree-sra -ftree-switch-conversion -ftree-ter -ftree-vect-loop-version -ftree-vrp -funit-at-a-time -fvar-tracking -fvect-cost-model -fweb")
+        else (GCC_VERSION VERSION_LESS "4.6")
+          set (PYCRTOOLS_OPTIMIZATION_FLAGS "-falign-functions -falign-jumps -falign-labels -falign-loops -fasynchronous-unwind-tables -fauto-inc-dec -fbranch-count-reg -fcaller-saves -fcombine-stack-adjustments -fcommon -fcompare-elim -fcprop-registers -fcrossjumping -fcse-follow-jumps -fcse-skip-blocks -fdce -fdefer-pop -fdelete-null-pointer-checks -fdevirtualize -fdse -fearly-inlining -fexpensive-optimizations -fforward-propagate -fgcse -fgcse-lm -fguess-branch-probability -fif-conversion -fif-conversion2 -findirect-inlining -finline-functions-called-once -finline-small-functions -fipa-cp -fipa-profile -fipa-pure-const -fipa-reference -fipa-sra -fivopts -fjump-tables -fmath-errno -fmerge-constants -fmove-loop-invariants -fno-threadsafe-statics -foptimize-register-move -foptimize-sibling-calls -fpartial-inlining -fpeephole -fpeephole2 -fprefetch-loop-arrays -fregmove -frename-registers -freorder-blocks -freorder-functions -frerun-cse-after-loop -frtti -fsched-critical-path-heuristic -fsched-dep-count-heuristic -fsched-group-heuristic -fsched-interblock -fsched-last-insn-heuristic -fsched-rank-heuristic -fsched-spec -fsched-spec-insn-heuristic -fsched-stalled-insns-dep -fschedule-insns -fschedule-insns2 -fshort-enums -fsigned-zeros -fsplit-ivs-in-unroller -fsplit-wide-types -fstrict-aliasing -fstrict-overflow -fthread-jumps -ftoplevel-reorder -ftrapping-math -ftree-bit-ccp -ftree-builtin-call-dce -ftree-ccp -ftree-ch -ftree-copy-prop -ftree-copyrename -ftree-cselim -ftree-dce -ftree-dominator-opts -ftree-dse -ftree-forwprop -ftree-fre -ftree-loop-if-convert -ftree-loop-im -ftree-loop-ivcanon -ftree-loop-optimize -ftree-phiprop -ftree-pre -ftree-pta -ftree-reassoc -ftree-scev-cprop -ftree-sink -ftree-slp-vectorize -ftree-sra -ftree-switch-conversion -ftree-ter -ftree-vect-loop-version -ftree-vrp -funit-at-a-time -fvar-tracking -fvar-tracking-assignments -fvect-cost-model -fweb")
+        endif (GCC_VERSION VERSION_LESS "4.6")
+      else (GCC_VERSION VERSION_EQUAL "4.4" OR GCC_VERSION VERSION_GREATER "4.4")
+        set (PYCRTOOLS_OPTIMIZATION_FLAGS "-O2")
+      endif (GCC_VERSION VERSION_EQUAL "4.4" OR GCC_VERSION VERSION_GREATER "4.4")
+    else (GCC_VERSION)
+      set (PYCRTOOLS_OPTIMIZATION_FLAGS "-O2")
+    endif (GCC_VERSION)
   endif (APPLE)
   set (PYCRTOOLS_CXX_FLAGS "${PYCRTOOLS_CXX_FLAGS} ${PYCRTOOLS_OPTIMIZATION_FLAGS}")
   if (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS)
@@ -241,7 +260,7 @@ foreach (FILE ${PYCRTOOLS_CPP_MODULES})
             ${PYCRTOOLS_CPP_MODULE_WRAPPER_HEADER_FILES}
             ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew-generatewrappers.def
             ${CMAKE_CURRENT_SOURCE_DIR}/core.h
-	    ${CMAKE_CURRENT_SOURCE_DIR}/pycrtools_config.h.in
+            ${CMAKE_CURRENT_SOURCE_DIR}/pycrtools_config.h.in
             ${CMAKE_CURRENT_SOURCE_DIR}/hfppnew.h
             ${CMAKE_CURRENT_SOURCE_DIR}/numpy_ptr.h
             ${CMAKE_CURRENT_SOURCE_DIR}/${PYCRTOOLS_CPP_MODULE_PREFIX}Module.h
