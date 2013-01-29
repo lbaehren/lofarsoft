@@ -118,7 +118,7 @@ class DirectionFitPlaneWave(tasks.Task):
             # if fit only remains with three antennas (or less) it should not be trusted as it always has a solution (fails)
             if self.goodcount < 3:
                 print "ERROR: too few good antennas for direction fit."
-                self.meandirection = cr.hArray((0, 0, 1))
+                self.meandirection = cr.hArray((0., 0., 1.))
                 self.fit_failed = True
                 break
 
@@ -180,6 +180,7 @@ class DirectionFitPlaneWave(tasks.Task):
                 indicesOfGoodAntennas = indicesOfGoodAntennas[goodSubset]
 
         cartesianDirection = [cos(el) * sin(az), cos(el) * cos(az), sin(el)]
+        print "direction input", cartesianDirection
         self.meandirection.copy(cr.hArray(cartesianDirection))
         # NB! Have to update the dependent parameters, or the previous value will come out.
         self.ws.updateParameter("meandirection_spherical", forced=True)
