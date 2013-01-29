@@ -184,6 +184,7 @@ class DirectionFitPlaneWave(tasks.Task):
         self.meandirection.copy(cr.hArray(cartesianDirection))
         print "Input for spherical", self.meandirection
         print "should be result:", pytmf.cartesian2spherical(self.meandirection[0], self.meandirection[1], self.meandirection[2])
+        print "it is before:", self.meandirection_spherical
         # NB! Have to update the dependent parameters, or the previous value will come out.
         self.ws.updateParameter("meandirection_spherical", forced=True)
         self.ws.updateParameter("meandirection_azel_deg", forced=True)
