@@ -182,7 +182,7 @@ class DirectionFitPlaneWave(tasks.Task):
         cartesianDirection = [cos(el) * sin(az), cos(el) * cos(az), sin(el)]
         self.meandirection.copy(cr.hArray(cartesianDirection))
         
-        if self.failed_fit != True:
+        if self.fit_failed != True:
             # NB! Have to update the dependent parameters, or the previous value will come out.
             self.ws.updateParameter("meandirection_spherical", forced=True)
             self.ws.updateParameter("meandirection_azel_deg", forced=True)
