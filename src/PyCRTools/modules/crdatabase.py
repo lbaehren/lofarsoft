@@ -1151,18 +1151,13 @@ class BaseParameter(object):
 
     def write(self):
         """Write parameters to the database."""
-        sql = ""
-        sql_keys = "{0}".format(self._idlabel)
-        sql_values = "{0}".format(self._id)
+        sql_list = self.__getUpdateSql()
+        self._db.executelist(sql_list)
 
-        for key in self._parameter.keys():
-            sql_keys += ", {0}".format(key)
-            sql_values += ", '{0}'".format(self.pickle_parameter(self._parameter[key]))
-
-            sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}';".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
-
-        if sql != "":
-            self._db.insert(sql)
+    def update(self):
+        """Write updated parameters to the database."""
+        sql_list =  self.__getUpdateSql()
+        self._db.executelist(sql_list)
 
     def __getUpdateSql(self):
         """Get a list of SQL statements to update the parameter
@@ -1171,18 +1166,9 @@ class BaseParameter(object):
         sql_list = []
 
         if len(self._parameter) > 0:
-
-            sql = ""
-            sql_keys = "{0}".format(self._idlabel)
-            sql_values = "{0}".format(self._id)
-
             for key in self._parameter.keys():
-                sql_keys += ", {0}".format(key)
-                sql_values += ", '{0}'".format(self.pickle_parameter(self._parameter[key]))
-
-                sql += "UPDATE {0} SET {1} = '{2}' WHERE {3} = '{4}';".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
-
-            sql_list.append(sql)
+                sql = "UPDATE {0} SET {1}='{2}' WHERE {3}='{4}';".format(self.tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
+                sql_list.append(sql)
 
         return sql_list
 
