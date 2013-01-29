@@ -1167,7 +1167,7 @@ class BaseParameter(object):
 
         if len(self._parameter) > 0:
             for key in self._parameter.keys():
-                sql = "UPDATE {0} SET {1}='{2}' WHERE {3}='{4}';".format(self.tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
+                sql = "UPDATE {0} SET {1}='{2}' WHERE {3}='{4}';".format(self._tablename, key, self.pickle_parameter(self._parameter[key]), self._idlabel, self._id)
                 sql_list.append(sql)
 
         return sql_list
