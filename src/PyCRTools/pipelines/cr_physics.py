@@ -330,8 +330,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
-                polarization['0']['crp_plotfiles'].append(findrfi.plotlist[0])
-                polarization['1']['crp_plotfiles'].append(findrfi.plotlist[1])
+                station["crp_plotfiles"].append(findrfi.plotlist)
 
                 # Select antennas which are marked good for both polarization
                 dipole_names = f["DIPOLE_NAMES"]
@@ -659,7 +658,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             if station.status == "GOOD":
                 try:
                     all_station_direction.append(station["crp_pulse_direction"])
-                    all_station_pulse_delays.append(station["crp_pulse_delay"] - station["clock_offset"])
+                    all_station_pulse_delays.append(station["crp_pulse_delay"] + station["clock_offset"])
                     all_station_antenna_positions.append(station["local_antenna_positions"])
                     all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"])
