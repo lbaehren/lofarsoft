@@ -330,7 +330,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
-                station["crp_plotfiles"].append(findrfi.plotlist)
+                for plot in findrfi.plotlist:
+                    station["crp_plotfiles"].append(plot)
 
                 # Select antennas which are marked good for both polarization
                 dipole_names = f["DIPOLE_NAMES"]
