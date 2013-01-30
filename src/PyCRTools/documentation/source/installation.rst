@@ -14,8 +14,8 @@ This chapter describes how to install the PyCRTools on the following operating s
 
 .. _installation_mac:
 
-Installation on Mac OS X
-========================
+Installation on Mac OS X 10.6
+=============================
 
 Introduction
 ------------
@@ -290,37 +290,13 @@ at this point you should have an image of a sine on your screen.
 Installing the PyCRTools.
 -------------------------
 
-Now we are ready to install PyCRTools itself.
-
-First get the latest source code from the LOFAR USG Subversion repository::
-
-  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
-
-Then add the following line to your ``.profile`` or ``.bash_profile``::
-
-  export LOFARSOFT=/path/to/lofarsoft
-  . $LOFARSOFT/devel_common/scripts/init.sh
-
-Don't forget to restart your shell or problems will arise along the way.
+.. include:: installation_pycrtools_build.rst
 
 .. note::
 
    .bashrc is not loaded by default on Mac OS X. Either .bash_profile
    or .profile is loaded by default, but only one of these. Therefore,
    make sure you have only one of the two.
-
-Now bootstrap the build system::
-
-  cd $LOFARSOFT
-  ./bootstrap
-
-Then run::
-
-  cd build
-
-Compile the PyCRTools::
-
-  make pycrtools
 
 Grab a good lunch and if all is well, the build of PyCRTools and its
 dependencies completes in about an hour.
@@ -385,76 +361,40 @@ The following Ubuntu packages need to be installed:
 
 This can be done by using following commands::
 
-  sudo apt-get install g++ gfortran flex swig bison subversion
-  sudo apt-get install zlib1g-dev libatlas-base-dev liblapack-dev
-  sudo apt-get install libncurses5-dev libfreetype6-dev libpng12-dev
-  sudo apt-get install python-dev python-tk python-pyfits tk8.5-dev fftw3-dev
-  sudo apt-get install libbz2-dev libghc-readline-dev
-  sudo apt-get install git git git-core git-doc git-man git-svn
-  sudo apt-get install valgrind
+  sudo apt-get install g++ gfortran flex swig bison subversion \
+                       zlib1g-dev libatlas-base-dev liblapack-dev \
+                       libncurses5-dev libfreetype6-dev libpng12-dev \
+                       python-dev python-tk python-pyfits tk8.5-dev fftw3-dev \
+                       libbz2-dev libghc-readline-dev \
+                       git git git-core git-doc git-man git-svn \
+                       valgrind
 
 
 Additionally you can install the following packages directly from the
 Ubuntu repository to reduce the amount of packages that need to be
 build during the build process of the PyCRTools::
 
-  sudo apt-get install libboost1.48-all-dev
-  sudo apt-get install wcslib-dev
-  sudo apt-get install cmake cmake-doc cmake-curses-gui
-  sudo apt-get install libgsl0-dev
-  sudo apt-get install python-matplotlib
-  sudo apt-get install python-sphinx
-  sudo apt-get install libcfitsio3-dev
-  sudo apt-get install python-numpy
-  sudo apt-get install num-utils
-  sudo apt-get install python-scipy
-  sudo apt-get install libblas-dev
-  sudo apt-get install python-sip-dev
-  sudo apt-get install openmpi-bin openmpi-common
-  sudo apt-get install ipython
+  sudo apt-get install libboost1.48-all-dev \
+                       wcslib-dev \
+                       cmake cmake-doc cmake-curses-gui \
+                       libgsl0-dev \
+                       python-matplotlib \
+                       python-sphinx \
+                       libcfitsio3-dev \
+                       python-numpy \
+                       num-utils \
+                       python-scipy \
+                       libblas-dev \
+                       python-sip-dev \
+                       openmpi-bin openmpi-common \
+                       ipython
 
 
 
 Building the Pycrtools
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Now we are ready to install PyCRTools itself. First get the latest
-source code from the LOFAR USG Subversion repository::
-
-  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
-
-Then add the following line to your ``.bashrc`` or ``.bash_profile``::
-
-  export LOFARSOFT=/path/to/lofarsoft
-  . $LOFARSOFT/devel_common/scripts/init.sh
-
-Don't forget to restart your shell or problems will arise along the way.
-
-Now bootstrap the build system::
-
-  cd $LOFARSOFT
-  ./bootstrap
-
-Then go to the build directory::
-
-  cd build
-
-The CasaCore package needs to build from the latest SVN
-revision. Therefor this needs some extra tweaking of the CMake
-settings. To do this run::
-
-  ccmake .
-
-and apply the following setting::
-
-  CASACORE_FROM_LATEST_SVN_REVISION ON
-
-Complete the CMake configuration by pressing ``c``, ``c``, and ``g``
-consecutively.
-
-Compile the PyCRTools::
-
-  make pycrtools
+.. include:: installation_pycrtools_build.rst
 
 Grab a cup of coffee and if all is well, in about 15 minutes you
 should have your very own working installation of the PyCRTools.
@@ -493,10 +433,10 @@ The following Ubuntu packages need to be installed:
 
 For this you can just use the package manager::
 
-  sudo apt-get install g++ gfortran flex swig bison subversion
-  sudo apt-get install zlib1g-dev libatlas-base-dev liblapack-dev
-  sudo apt-get install libncurses5-dev libfreetype6-dev libpng12-dev
-  sudo apt-get install python-dev python-tk python-pyfits tk8.5-dev fftw3-dev
+  sudo apt-get install g++ gfortran flex swig bison subversion \
+                       zlib1g-dev libatlas-base-dev liblapack-dev \
+                       libncurses5-dev libfreetype6-dev libpng12-dev \
+                       python-dev python-tk python-pyfits tk8.5-dev fftw3-dev
 
 
 Building the PyCRTools
@@ -515,30 +455,7 @@ Building the PyCRTools
   * In order to be able to use :mod:`pyrap` and :mod:`PyCRTools` at the same time, give the default location of the casacore library (``/opt/cep/casacore``) by hand, again both for LUS and DAL separately, since the DAL has its own cmake environment.
 
 
-Now we are ready to install PyCRTools itself. First get the latest
-source code from the LOFAR USG Subversion repository::
-
-  svn co http://usg.lofar.org/svn/code/trunk lofarsoft
-
-Then add the following line to your ``.bashrc`` or ``.bash_profile``::
-
-  export LOFARSOFT=/path/to/lofarsoft
-  . $LOFARSOFT/devel_common/scripts/init.sh
-
-Don't forget to restart your shell or problems will arise along the way.
-
-Now bootstrap the build system::
-
-  cd $LOFARSOFT
-  ./bootstrap
-
-Then run::
-
-  cd build
-
-Compile the PyCRTools::
-
-  make pycrtools
+.. include:: installation_pycrtools_build.rst
 
 Grab a cup of coffee and if all is well, in about 30 minutes you
 should have your very own working installation of the PyCRTools.
