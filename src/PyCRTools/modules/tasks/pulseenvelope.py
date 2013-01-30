@@ -149,8 +149,8 @@ class PulseEnvelope(Task):
         self.pulse_maximum_time /= self.sampling_frequency  # Converted to seconds
         self.pulse_maximum_time += self.delays  # Add the number of seconds of the pulse in the upsampled block
 
-        # Shift delays to be relative to reference antenna
-        self.delays -= self.delays[self.refant]
+        # Don't shift delays to be relative to reference antenna - get absolute time within given window
+        #self.delays -= self.delays[self.refant]
 
         # Calculate integrated pulse power
         cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[..., self.window_start:self.window_end], self.pulse_start - self.window_start, self.pulse_end - self.window_start)
