@@ -80,14 +80,15 @@ class Noise(Task):
         else:
             antennas = range(self.nantennas)
 
-        for i in antennas:
-            plt.clf()
+        if self.save_plots:
+            for i in antennas:
+                plt.clf()
 
-            plt.hist(s[i], bins=self.nbins, range=self.histrange, color='g')
+                plt.hist(s[i], bins=self.nbins, range=self.histrange, color='g')
 
-            p = self.plot_prefix + "noise_histogram_antenna-{0:d}.{1}".format(i, self.plot_type)
+                p = self.plot_prefix + "noise_histogram_antenna-{0:d}.{1}".format(i, self.plot_type)
 
-            plt.title(r"Noise histogram for antenna {0:d}, $\mu={1:f}, \sigma={2:f}$".format(i, self.mean[i], self.std[i]))
-            plt.savefig(p)
+                plt.title(r"Noise histogram for antenna {0:d}, $\mu={1:f}, \sigma={2:f}$".format(i, self.mean[i], self.std[i]))
+                plt.savefig(p)
 
-            self.plotlist.append(p)
+                self.plotlist.append(p)
