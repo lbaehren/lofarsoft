@@ -154,7 +154,7 @@ namespace PyCR { // Namespace PyCR -- begin
 #ifdef HAS_EXCEPTION_HANDLING
   void translateDAL1IOError(DAL1::IOError const& e)
   {
-    PyErr_SetString(PyExc_IOError, e.message.c_str()); 
+    PyErr_SetString(PyExc_IOError, e.message.c_str());
   }
 #endif
 
@@ -267,12 +267,12 @@ BOOST_PYTHON_MODULE(_hftools)
 
   def("trackHistory",&hArray_trackHistory);
 
-  //#include "../../../../build/pycrtools/mArray.def.h"
+  //#include "mArray.def.h"
 
 // ________________________________________________________________________
 //                                                                   Vector
 
-#include "../../../../build/pycrtools/mVector.def.h"
+#include "mVector.def.h"
 
   HString (*hWriteRawVectorHInteger)(std::vector<HInteger>&) = hWriteRawVector;
   HString (*hWriteRawVectorHNumber)(std::vector<HNumber>&) = hWriteRawVector;
@@ -299,22 +299,22 @@ BOOST_PYTHON_MODULE(_hftools)
     .value("GAUSSIAN", WEIGHTS_GAUSSIAN);
 
 
-#include "../../../../build/pycrtools/mMath.def.h"
+#include "mMath.def.h"
 
 // ________________________________________________________________________
 //                                                              Calibration
 
-#include "../../../../build/pycrtools/mCalibration.def.h"
+#include "mCalibration.def.h"
 
 // ________________________________________________________________________
 //                                                                      FFT
 
-#include "../../../../build/pycrtools/mFFT.def.h"
+#include "mFFT.def.h"
 
 // ________________________________________________________________________
 //                                                                     FFTW
 
-#include "../../../../build/pycrtools/mFFTW.def.h"
+#include "mFFTW.def.h"
 
   class_<FFTWPlanManyDft>("FFTWPlanManyDft", init<int, int, int, int, int, int, enum fftw_sign, enum fftw_flags>())
     ;
@@ -340,12 +340,12 @@ BOOST_PYTHON_MODULE(_hftools)
 // ________________________________________________________________________
 //                                                                   Filter
 
-#include "../../../../build/pycrtools/mFilter.def.h"
+#include "mFilter.def.h"
 
 // ________________________________________________________________________
 //                                                                  Fitting
 
-#include "../../../../build/pycrtools/mFitting.def.h"
+#include "mFitting.def.h"
 
 // ________________________________________________________________________
 //                                                                  Imaging
@@ -375,12 +375,12 @@ BOOST_PYTHON_MODULE(_hftools)
     //! Time
     .value("Time",CR::CoordinateType::Time);
 
-#include "../../../../build/pycrtools/mImaging.def.h"
+#include "mImaging.def.h"
 
 // ________________________________________________________________________
 //                                                                       IO
 
-#include "../../../../build/pycrtools/mIO.def.h"
+#include "mIO.def.h"
 
 #ifdef PYCRTOOLS_WITH_AERA
   class_<AERA::Datareader>("AERADatareader")
@@ -404,18 +404,18 @@ BOOST_PYTHON_MODULE(_hftools)
 // ________________________________________________________________________
 //                                                                       RF
 
-#include "../../../../build/pycrtools/mRF.def.h"
+#include "mRF.def.h"
 
 // ________________________________________________________________________
 //                                                        EndPointRadiation
 
-#include "../../../../build/pycrtools/mEndPointRadiation.def.h"
+#include "mEndPointRadiation.def.h"
 
 
 // ________________________________________________________________________
 //                                                                      TBB
 
-#include "../../../../build/pycrtools/mTBB.def.h"
+#include "mTBB.def.h"
 
   class_<TBBData>("TBBData", init<std::string>())
     .def("version", &TBBData::version)
