@@ -101,6 +101,8 @@ class FindRFI(Task):
             doc="Prefix for plots"),
         plot_type = dict(default="png",
             doc="Plot type (e.g. png, jpeg, pdf)"),
+        plot_title = dict(default=True,
+            doc="Plot with or without title (for publication)"),
         plotlist = dict(default=[],
             doc="List of plots"),
         plot_antennas = dict(default=lambda self: range(self.nantennas),
@@ -271,32 +273,44 @@ class FindRFI(Task):
 
             # Average spectrum (uncleaned)
             plt.clf()
-            # plot dirty channels into spectrum plot, in red
+            # Plot only the uncleaned spectrum
 #            plt.figure()
             plt.plot(freqs, logspectrum, c='b')
-            dirtyspectrum = np.zeros(len(logspectrum))
-            dirtyspectrum += np.float('nan')  # min(logspectrum)
-            dirtyspectrum[self.dirty_channels] = logspectrum[self.dirty_channels]
-            plt.plot(freqs, dirtyspectrum, 'x', c='r', markersize=8)
-            plt.title('Median-average spectrum of all antennas, with flagging')
+            if self.plot_title:
+                plt.title('Median-average spectrum of all antennas')
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('log-spectral power [adc units]')
 #            self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
 
             p = self.plot_prefix + "average_spectrum.{0}".format(self.plot_type)
-
             plt.savefig(p)
+            self.plotlist.append(p)
 
+
+            # Average spectrum (uncleaned)
+            plt.figure()
+            # plot dirty channels into spectrum plot, in red
+            plt.plot(freqs, logspectrum, c='b')
+            dirtyspectrum = np.zeros(len(logspectrum))
+            dirtyspectrum += np.float('nan')  # min(logspectrum)
+            dirtyspectrum[self.dirty_channels] = logspectrum[self.dirty_channels]
+            plt.plot(freqs, dirtyspectrum, 'x', c='r', markersize=8)
+            if self.plot_title:
+                plt.title('Median-average spectrum of all antennas, with flagging')
+            plt.xlabel('Frequency [MHz]')
+            plt.ylabel('log-spectral power [adc units]')
+#            self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
+
+            p = self.plot_prefix + "average_spectrum_flagged.{0}".format(self.plot_type)
+            plt.savefig(p)
             self.plotlist.append(p)
 
             # Average spectrum (cleaned)
             plt.figure()
-#            plt.clf()
-
-            ## Insert plot code here
             log_cleanedspectrum = np.log(median_cleaned_spectrum)
             plt.plot(freqs, log_cleanedspectrum, c='b')
-            plt.title('Median-average spectrum of all antennas, cleaned')
+            if self.plot_title:
+                plt.title('Median-average spectrum of all antennas, cleaned')
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('log-spectral power [adc units]')
             p = self.plot_prefix + "average_spectrum_cleaned.{0}".format(self.plot_type)
