@@ -1467,7 +1467,7 @@ template <class CIter, class Iter>
 void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
     const CIter fftdata, const CIter fftdata_end,
     const Iter frequencies, const Iter frequencies_end,
-    const Iter delays, const Iter delays_end,
+    const Iter delays, const Iter delays_end
     )
 {
   // Variables
