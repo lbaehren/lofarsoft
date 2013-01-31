@@ -44,6 +44,8 @@ class DirectionFitBF(Task):
             doc="Pointing as (az, el) tuple in degrees in the LOFAR convention."),
         beamformed_timeseries=dict(default=lambda self: cr.hArray(float, dimensions=(self.blocksize)), output = True,
             doc="Timeseries data."),
+        delays=dict(default=lambda self: cr.hArray(float, self.nantennas),
+            doc="Delays used for beamforming"),
     )
 
     def run(self):
@@ -55,9 +57,12 @@ class DirectionFitBF(Task):
             # Calculate Cartesian coordinates for direction
             self.direction_cartesian = cr.hArray(pytmf.spherical2cartesian(1.0, 2 * np.pi - pytmf.deg2rad(direction[1]), 2 * np.pi - pytmf.deg2rad(direction[0])))
 
+            # Calculate geometric delays for all sky positions for all antennas
+            cr.hGeometricDelays(self.delays, self.antpos, self.direction_cartesian, True)
+
             # Do beamforming
             self.beamformed_fft.fill(0.)
-            cr.hBeamformBlock(self.beamformed_fft, self.fft_data, self.frequencies, self.antpos, self.direction_cartesian)
+            cr.hBeamformBlock(self.beamformed_fft, self.fft_data, self.frequencies, self.delays)
 
             # Go to timeseries
             cr.hFFTWExecutePlan(self.beamformed_timeseries, self.beamformed_fft, self.ifftwplan)

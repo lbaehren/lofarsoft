@@ -1345,7 +1345,7 @@ void HFPP_FUNC_NAME (const IIter shifts, const IIter shifts_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
-//$DOCSTRING: Beamform block 
+//$DOCSTRING: Beamform block
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hBeamformBlock
 //-----------------------------------------------------------------------
@@ -1447,6 +1447,85 @@ void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Beamform block
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hBeamformBlock
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(out)()("Beamformer output.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(fftdata)()("Array with FFT data of each antenna. Expects data to be stored as ``[f(0,0), f(0,1), ..., f(0,nf), f(1,0), f(1,1), ..., f(1,nf), ..., f(na, 0), f(na,1), ..., f(na,nf)]`` e.g. ``f(i,j)`` where ``i`` is the antenna number and ``j`` is the frequency.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(frequencies)()("Array with frequencies [Hz] stored as ``[f_0, f_1, ..., f_n]``.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(delays)()("Array containing the delays [s] for all antennas")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+
+template <class CIter, class Iter>
+void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
+    const CIter fftdata, const CIter fftdata_end,
+    const Iter frequencies, const Iter frequencies_end,
+    const Iter delays, const Iter delays,
+    )
+{
+  // Variables
+  HInteger i, j;
+
+  // Inspect length of input arrays
+  const int Nout = std::distance(out, out_end);
+  const int Nfftdata = std::distance(fftdata, fftdata_end);
+  const int Nfrequencies = std::distance(frequencies, frequencies_end);
+
+  // Get relevant numbers
+  const int Nantennas = Ndelays;
+
+  if (Nfftdata != Nfrequencies * Nantennas)
+  {
+    char error_message[256];
+    sprintf(error_message, "FFT data array has wrong size: Nfftdata[=%d] != Nfrequencies[=%d] * Nantennas[=%d]", Nfftdata, Nfrequencies, Nantennas);
+    throw PyCR::ValueError(error_message);
+  }
+  if (Nout != Nfrequencies)
+  {
+    char error_message[256];
+    sprintf(error_message, "Output array has wrong size: Nout[=%d] != Nfrequencies[=%d]", Nout, Nfrequencies);
+    throw PyCR::ValueError(error_message);
+  }
+
+  // Get iterators
+  CIter it_out = out;
+  CIter it_fft = fftdata;
+  Iter it_freq = frequencies;
+  Iter it_delay = delays;
+
+  clock_t start = clock(), diff;
+
+  i = Nantennas;
+  while (i--)
+  {
+    it_out = out;
+    it_freq = frequencies;
+
+    j = Nfrequencies;
+    while (j--)
+    {
+      *it_out += (*it_fft) * polar(1.0, (2*M_PI)*((*it_freq) * (*it_delay)));
+      it_fft++;
+      it_out++;
+      it_freq++;
+    }
+
+    it_delay++;
+  }
+
+  diff = clock() - start;
+
+  std::cout<<"beamforming block done in "<< static_cast<float>(diff) / CLOCKS_PER_SEC<<" s"<<std::endl;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 #ifdef PYCRTOOLS_WITH_NUMPY
 
 //$DOCSTRING: Calculates the square of the absolute value and add it to output vector.
@@ -1471,14 +1550,14 @@ void HFPP_FUNC_NAME(ndarray out, const Iter in_begin, const Iter in_end)
   // Get pointers to memory of numpy array
   double* out_it = numpyBeginPtr<double>(out);
   double* out_end = numpyEndPtr<double>(out);
-  
+
   const HInteger Nout = std::distance(out_it, out_end);
   const HInteger Nin = std::distance(in_begin, in_end);
-  
+
   const HInteger Nf = Nin / Nout;
-  
+
   Iter in_it = in_begin;
-  
+
   for (HInteger i=0; i<Nout; i++)
   {
     for (HInteger j=0; j<Nf; j++)
