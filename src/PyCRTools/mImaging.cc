@@ -1467,7 +1467,7 @@ template <class CIter, class Iter>
 void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
     const CIter fftdata, const CIter fftdata_end,
     const Iter frequencies, const Iter frequencies_end,
-    const Iter delays, const Iter delays,
+    const Iter delays, const Iter delays_end,
     )
 {
   // Variables
@@ -1477,6 +1477,7 @@ void HFPP_FUNC_NAME (const CIter out, const CIter out_end,
   const int Nout = std::distance(out, out_end);
   const int Nfftdata = std::distance(fftdata, fftdata_end);
   const int Nfrequencies = std::distance(frequencies, frequencies_end);
+  const int Ndelays = std::distance(delays, delays_end);
 
   // Get relevant numbers
   const int Nantennas = Ndelays;
