@@ -527,7 +527,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 print "Hilbert envelope direction:", direction_fit_plane_wave.meandirection_azel_deg
 
                 # Find the direction using beamforming
-                dfb = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, antpos=antenna_positions, start_direction=pulse_direction)
+                dfb = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, frequencies=frequencies, antpos=antenna_positions, start_direction=pulse_direction)
 
                 print "Beamformed direction:", dfb.fit_direction
 
