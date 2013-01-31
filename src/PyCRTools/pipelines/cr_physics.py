@@ -520,7 +520,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Fit pulse direction
                 direction_fit_plane_wave_cc = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=find_pulse_delay.delays, reference_antenna=pulse_envelope.refant, verbose=True)
 
-                print "Cross correlation direction:", direction_fit_plane_wave.meandirection_azel_deg
+                print "Cross correlation direction:", direction_fit_plane_wave_cc.meandirection_azel_deg
 
                 direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
 
