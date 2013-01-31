@@ -235,7 +235,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
     # Get first estimate of pulse direction
     try:
-        pulse_direction = list(event["lora_direction"])
+        lora_direction = list(event["lora_direction"])
+        pulse_direction = lora_direction
     except KeyError:
         raise EventSkipped("have no lora_direction")
 
@@ -518,6 +519,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                         break
 
                 # Fit pulse direction
+                print "LORA direction:", lora_direction
+
                 direction_fit_plane_wave_cc = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=find_pulse_delay.delays, reference_antenna=pulse_envelope.refant, verbose=True)
 
                 print "Cross correlation direction:", direction_fit_plane_wave_cc.meandirection_azel_deg
