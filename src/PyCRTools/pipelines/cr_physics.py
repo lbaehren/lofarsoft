@@ -211,6 +211,7 @@ parser.add_option("--user", default=None, help="PostgreSQL user.")
 parser.add_option("--password", default=None, help="PostgreSQL password.")
 parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg, pdf.")
+parser.add_option("--use-cc-delay", default=False, action="store_true", help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
 parser.add_option("--use-hanning-window", default=False, action="store_true", help="Apply Hanning window before FFT.")
 
 (options, args) = parser.parse_args()
@@ -585,6 +586,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             # Add parameters
             station["crp_pulse_delay"] = delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
+            print 'Strongest polarization = %d' % pulse_envelope.strongest_polarization
+            station["crp_pulse_delay"] += float(block_number_lora * options.blocksize + max(f["SAMPLE_NUMBER"]) + shift + pulse_start) / f["SAMPLE_FREQUENCY"][0] + f["CLOCK_OFFSET"][0]
+            print 'Station: %s' % station.stationname
+            print 'BLock nr Lora = %d, max-min sample nr = %d, shift = %d, pulse_start = %d, clock offset = %f' % (block_number_lora, max(f["SAMPLE_NUMBER"]) - min(f["SAMPLE_NUMBER"]), shift, pulse_start, f["CLOCK_OFFSET"][0])
             station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
             station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
             station["clock_offset"] = f["CLOCK_OFFSET"][0]
@@ -668,7 +673,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             if station.status == "GOOD":
                 try:
                     all_station_direction.append(station["crp_pulse_direction"])
-                    all_station_pulse_delays.append(station["crp_pulse_delay"] + station["clock_offset"])
+                    all_station_pulse_delays.append(station["crp_pulse_delay"])# - station["clock_offset"])
                     all_station_antenna_positions.append(station["local_antenna_positions"])
                     all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"])
@@ -679,6 +684,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
         all_station_antenna_positions = np.vstack(all_station_antenna_positions)
         all_station_pulse_delays = np.hstack(all_station_pulse_delays)
+        all_station_pulse_delays -= all_station_pulse_delays.min() # Subtract global offset
         all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
         all_station_integrated_pulse_power = np.vstack(all_station_integrated_pulse_power)
         all_station_rms = np.vstack(all_station_rms)
@@ -708,6 +714,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         ldf_total = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, all_directions=all_station_direction, all_stations=all_station_names, ldf_enable=True, ldf_total_signal=True, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         ldf_power = cr.trun("Shower", positions=all_station_antenna_positions, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_integrated_pulse_power, direction_uncertainties=direction_uncertainties, ldf_enable=True, ldf_integrated_signal=True, ldf_logplot=False, ldf_remove_outliers=False, footprint_enable=False, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+
+        # Plot wavefront shape using arrival times (from all_station_pulse_delays)
+
+        wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         event.status = "CR_FOUND"
         event.statusmessage = ""
