@@ -69,7 +69,7 @@ class AntennaResponse(Task):
         pn = 37
 
         # Get inverse Jones matrix for each frequency
-        print "obtaining Jones matrix"
+        print "obtaining Jones matrix for direction", self.direction[0], self.direction[1]
         for i, f in enumerate(self.frequencies):
             cr.hGetJonesMatrix(self.jones_matrix[i], f, self.direction[0], self.direction[1], cvt, cvp, fstart, fstep, fn, tstart, tstep, tn, pstart, pstep, pn)
 

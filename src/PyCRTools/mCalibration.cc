@@ -92,34 +92,49 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
                                            const double x1, const double y1, const double z1)
 {
     double c00, c10, c01, c11, c0, c1, rho, theta;
+    double a[8];
+    int i;
 
-    /* Interpolate amplitude */
     const double xd = (x - x0) / (x1 - x0);
     const double yd = (y - y0) / (y1 - y0);
     const double zd = (z - z0) / (z1 - z0);
 
-    c00 = xd > 0 ? abs(V[0]) * (1 - xd) + abs(V[4]) * xd : abs(V[0]);
-    c10 = xd > 0 ? abs(V[2]) * (1 - xd) + abs(V[6]) * xd : abs(V[2]);
-    c01 = xd > 0 ? abs(V[1]) * (1 - xd) + abs(V[5]) * xd : abs(V[1]);
-    c11 = xd > 0 ? abs(V[3]) * (1 - xd) + abs(V[7]) * xd : abs(V[3]);
+    /* Interpolate amplitude */
+    for (i=0; i<8; i++)
+    {
+      a[i] = abs(V[i]);
+    }
 
-    c0 = yd > 0 ? c00 * (1 - yd) + c10 * yd : c00;
-    c1 = yd > 0 ? c01 * (1 - yd) + c11 * yd : c01;
+    c00 = a[0] * (1 - xd) + a[4] * xd;
+    c10 = a[2] * (1 - xd) + a[6] * xd;
+    c01 = a[1] * (1 - xd) + a[5] * xd;
+    c11 = a[3] * (1 - xd) + a[7] * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
 
     rho = c0 * (1 - zd) + c1 * zd;
 
     /* Interpolate phase */
-    c00 = xd > 0 ? arg(V[0]) * (1 - xd) + arg(V[4]) * xd : arg(V[0]);
-    c10 = xd > 0 ? arg(V[2]) * (1 - xd) + arg(V[6]) * xd : arg(V[2]);
-    c01 = xd > 0 ? arg(V[1]) * (1 - xd) + arg(V[5]) * xd : arg(V[1]);
-    c11 = xd > 0 ? arg(V[3]) * (1 - xd) + arg(V[7]) * xd : arg(V[3]);
+    for (i=0; i<8; i++)
+    {
+      a[i] = arg(V[i]);
 
-    c0 = yd > 0 ? c00 * (1 - yd) + c10 * yd : c00;
-    c1 = yd > 0 ? c01 * (1 - yd) + c11 * yd : c01;
+      if (a[i] < 0) a[i] = 2 * M_PI + a[i];
+    }
+
+    c00 = a[0] * (1 - xd) + a[4] * xd;
+    c10 = a[2] * (1 - xd) + a[6] * xd;
+    c01 = a[1] * (1 - xd) + a[5] * xd;
+    c11 = a[3] * (1 - xd) + a[7] * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
 
     theta = c0 * (1 - zd) + c1 * zd;
 
-    return polar(rho, (M_PI / 180.) * theta);
+    /* Return result as new complex value */
+    return polar(rho, theta);
 }
 
 //$DOCSTRING: Project on-sky polarizations onto x,y,z.
@@ -138,7 +153,7 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
-  
+
   Convention: pol0 represents the on sky polarization theta, while pol1 represents phi
 
 */
@@ -151,7 +166,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
     const NIter pol1, const NIter pol1_end,
     const HNumber az, const HNumber el)
 {
-  
+
   // Get length of output vector
   const int N = std::distance(pol0, pol0_end);
 
@@ -205,9 +220,9 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
 /*!
   \brief $DOCSTRING
   $PARDOCSTRING
-  
+
   Convention: pol0 represents the on sky polarization theta, while pol1 represents phi
-  Theta and phi are not related to the LOFAR antenna being rotated. 
+  Theta and phi are not related to the LOFAR antenna being rotated.
 
 */
 
@@ -220,7 +235,7 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
     const HNumber az, const HNumber el)
 {
   throw PyCR::ValueError("hProjectPolarizationsInverse is not defined.");
-  
+
   /*
   // Get length of output vector
   const int N = std::distance(pol0, pol0_end);
@@ -246,12 +261,12 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
   {
     // Project onto new coordinate frame
     // Cases are neccessary as the original equation system is overdefined and will get undefined for special cases of phi and theta
-    
+
     if (theta == 0. ){
         *pol0_it = -1.0 * *polx_it;
-        *pol1_it = *poly_it;    
+        *pol1_it = *poly_it;
         }
-    
+
     if (theta == M_PI / 2){
         if (phi == M_PI / 2 || phi == M_PI / 2 * 3.){
             *pol0_it = -1.0 * *polz_it;
@@ -260,9 +275,9 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
          else {
             *pol0_it = -1.0 * *polz_it;
             *pol1_it = -1.0 * *polx_it / sin(theta);
-            }   
+            }
         }
-        
+
     if (theta != 0. && theta != M_PI / 2)   {
         if (phi == M_PI / 2 ||  phi == M_PI / 2 * 3.){
             *pol0_it = *poly_it / cos(theta);
@@ -272,7 +287,7 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
             *pol0_it = -1.0 * *polz_it / sin(theta);
             *pol1_it = *poly_it/cos(theta) + tan(phi)/tan(theta) * *polz_it;
             }
-        } 
+        }
 
 
     ++pol0_it;
@@ -458,7 +473,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
     x = fend;
   }
 
-  y = fmod(theta, 90.0);
+  y = theta;
   z_xdipole = fmod(phi, 360.0);
   z_ydipole = fmod(phi + 90.0, 360.0);
 
@@ -473,13 +488,13 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   pi = int((z_xdipole - pstart) / pstep);
   pe = pi + 1;
-  
+
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
   V[2] = *(Vtheta + (fi * tn * pn) + (te * pn) + pi);
   V[3] = *(Vtheta + (fi * tn * pn) + (te * pn) + pe);
-  
+
   V[4] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pi);
   V[5] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pe);
   V[6] = *(Vtheta + (fe * tn * pn) + (te * pn) + pi);
@@ -489,7 +504,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   x0 = fstart + fi * fstep; x1 = x0 + fstep;
   y0 = tstart + ti * tstep; y1 = y0 + tstep;
   z0 = pstart + pi * pstep; z1 = z0 + pstep;
-  
+
   // Interpolate to find Jones matrix component for theta
   *J_it++ = interpolate_trilinear(V, x, y, z_xdipole, x0, y0, z0, x1, y1, z1);
 
@@ -498,13 +513,13 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   pi = int((z_ydipole - pstart) / pstep);
   pe = pi + 1;
-  
+
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
   V[2] = *(Vtheta + (fi * tn * pn) + (te * pn) + pi);
   V[3] = *(Vtheta + (fi * tn * pn) + (te * pn) + pe);
-  
+
   V[4] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pi);
   V[5] = *(Vtheta + (fe * tn * pn) + (ti * pn) + pe);
   V[6] = *(Vtheta + (fe * tn * pn) + (te * pn) + pi);
@@ -514,7 +529,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   x0 = fstart + fi * fstep; x1 = x0 + fstep;
   y0 = tstart + ti * tstep; y1 = y0 + tstep;
   z0 = pstart + pi * pstep; z1 = z0 + pstep;
-  
+
   // Interpolate to find Jones matrix component for theta
   *J_it++ = interpolate_trilinear(V, x, y, z_ydipole, x0, y0, z0, x1, y1, z1);
 
@@ -522,13 +537,13 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 
   pi = int((z_xdipole - pstart) / pstep);
   pe = pi + 1;
-  
+
   // Retrieve values from phi table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vphi + (fi * tn * pn) + (ti * pn) + pe);
   V[2] = *(Vphi + (fi * tn * pn) + (te * pn) + pi);
   V[3] = *(Vphi + (fi * tn * pn) + (te * pn) + pe);
-  
+
   V[4] = *(Vphi + (fe * tn * pn) + (ti * pn) + pi);
   V[5] = *(Vphi + (fe * tn * pn) + (ti * pn) + pe);
   V[6] = *(Vphi + (fe * tn * pn) + (te * pn) + pi);
@@ -538,7 +553,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   x0 = fstart + fi * fstep; x1 = x0 + fstep;
   y0 = tstart + ti * tstep; y1 = y0 + tstep;
   z0 = pstart + pi * pstep; z1 = z0 + pstep;
-  
+
   // Interpolate to find Jones matrix component for phi
   *J_it++ = interpolate_trilinear(V, x, y, z_xdipole, x0, y0, z0, x1, y1, z1);
 
@@ -547,13 +562,13 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   pi = int((z_ydipole - pstart) / pstep);
   pe = pi + 1;
-  
+
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vphi + (fi * tn * pn) + (ti * pn) + pe);
   V[2] = *(Vphi + (fi * tn * pn) + (te * pn) + pi);
   V[3] = *(Vphi + (fi * tn * pn) + (te * pn) + pe);
-  
+
   V[4] = *(Vphi + (fe * tn * pn) + (ti * pn) + pi);
   V[5] = *(Vphi + (fe * tn * pn) + (ti * pn) + pe);
   V[6] = *(Vphi + (fe * tn * pn) + (te * pn) + pi);
@@ -563,7 +578,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   x0 = fstart + fi * fstep; x1 = x0 + fstep;
   y0 = tstart + ti * tstep; y1 = y0 + tstep;
   z0 = pstart + pi * pstep; z1 = z0 + pstep;
-  
+
   // Interpolate to find Jones matrix component for theta
   *J_it++ = interpolate_trilinear(V, x, y, z_ydipole, x0, y0, z0, x1, y1, z1);
 }
@@ -664,7 +679,7 @@ void HFPP_FUNC_NAME (const NIter Minv, const NIter Minv_end,
       M_it++;
     }
   }
-  
+
   gsl_linalg_LU_decomp(work, p, &s);
   gsl_linalg_LU_invert(work, p, winv);
 
@@ -676,7 +691,7 @@ void HFPP_FUNC_NAME (const NIter Minv, const NIter Minv_end,
       Minv_it++;
     }
   }
-  
+
   gsl_matrix_free(work);
   gsl_matrix_free(winv);
   gsl_permutation_free(p);
@@ -727,7 +742,7 @@ void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
       M_it++;
     }
   }
-  
+
   gsl_linalg_complex_LU_decomp(work, p, &s);
   gsl_linalg_complex_LU_invert(work, p, winv);
 
@@ -739,7 +754,7 @@ void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
       Minv_it++;
     }
   }
-  
+
   gsl_matrix_complex_free(work);
   gsl_matrix_complex_free(winv);
   gsl_permutation_free(p);
