@@ -262,6 +262,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             continue
 
         with process_station(station) as station:
+            #Reset to LORA direction for initial values
+            pulse_direction = lora_direction
 
             station_plot_prefix = event_plot_prefix + "{0}-".format(station.stationname)
 
