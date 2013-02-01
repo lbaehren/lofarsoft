@@ -489,6 +489,8 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   pi = int((z_xdipole - pstart) / pstep);
   pe = pi + 1;
 
+  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
+
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
@@ -516,6 +518,8 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   pi = int((z_ydipole - pstart) / pstep);
   pe = pi + 1;
 
+  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
+
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
@@ -539,6 +543,8 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 
   pi = int((z_xdipole - pstart) / pstep);
   pe = pi + 1;
+
+  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
 
   // Retrieve values from phi table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
@@ -564,6 +570,8 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   pi = int((z_ydipole - pstart) / pstep);
   pe = pi + 1;
+
+  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
 
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
