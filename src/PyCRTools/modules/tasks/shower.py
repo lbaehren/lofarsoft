@@ -623,6 +623,9 @@ class Shower(Task):
 
                x_pol = np.cos(self.polarization_angle) * 20
                y_pol = np.sin(self.polarization_angle) * 20
+               
+               print self.positions.shape
+               print x_pol.shape
 
                for i in xrange(self.positions.shape[0]):
                      cr.plt.arrow(self.positions[i, 0] - x_pol[i] / 2., self.positions[i, 1] - y_pol[i] / 2., x_pol[i], y_pol[i], color='red', lw=2, head_length=1, head_width=1)
