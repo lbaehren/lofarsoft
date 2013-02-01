@@ -137,6 +137,78 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
     return polar(rho, theta);
 }
 
+/* Linear interpolation of complex values on a 3 dimensional grid.
+   Interpolation is performed using the phase and amplitude separately,
+   no phase wrapping is applied so care is needed. */
+double interpolate_amplitude_trilinear(const std::complex<double> (&V)[8],
+                                       const double x, const double y, const double z,
+                                       const double x0, const double y0, const double z0,
+                                       const double x1, const double y1, const double z1)
+{
+    double c00, c10, c01, c11, c0, c1, rho, theta;
+    double a[8];
+    int i;
+
+    const double xd = (x - x0) / (x1 - x0);
+    const double yd = (y - y0) / (y1 - y0);
+    const double zd = (z - z0) / (z1 - z0);
+
+    /* Interpolate amplitude */
+    for (i=0; i<8; i++)
+    {
+      a[i] = abs(V[i]);
+    }
+
+    c00 = a[0] * (1 - xd) + a[4] * xd;
+    c10 = a[2] * (1 - xd) + a[6] * xd;
+    c01 = a[1] * (1 - xd) + a[5] * xd;
+    c11 = a[3] * (1 - xd) + a[7] * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
+
+    rho = c0 * (1 - zd) + c1 * zd;
+
+    return rho;
+}
+
+/* Linear interpolation of complex values on a 3 dimensional grid.
+   Interpolation is performed using the phase and amplitude separately,
+   no phase wrapping is applied so care is needed. */
+double interpolate_phase_trilinear(const std::complex<double> (&V)[8],
+                                   const double x, const double y, const double z,
+                                   const double x0, const double y0, const double z0,
+                                   const double x1, const double y1, const double z1)
+{
+    double c00, c10, c01, c11, c0, c1, rho, theta;
+    double a[8];
+    int i;
+
+    const double xd = (x - x0) / (x1 - x0);
+    const double yd = (y - y0) / (y1 - y0);
+    const double zd = (z - z0) / (z1 - z0);
+
+    /* Interpolate phase */
+    for (i=0; i<8; i++)
+    {
+      a[i] = arg(V[i]);
+
+      if (a[i] < 0) a[i] = 2 * M_PI + a[i];
+    }
+
+    c00 = a[0] * (1 - xd) + a[4] * xd;
+    c10 = a[2] * (1 - xd) + a[6] * xd;
+    c01 = a[1] * (1 - xd) + a[5] * xd;
+    c11 = a[3] * (1 - xd) + a[7] * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
+
+    theta = c0 * (1 - zd) + c1 * zd;
+
+    return theta;
+}
+
 //$DOCSTRING: Project on-sky polarizations onto x,y,z.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hProjectPolarizations
@@ -489,8 +561,6 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   pi = int((z_xdipole - pstart) / pstep);
   pe = pi + 1;
 
-  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
-
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
@@ -518,8 +588,6 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   pi = int((z_ydipole - pstart) / pstep);
   pe = pi + 1;
 
-  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
-
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pi);
   V[1] = *(Vtheta + (fi * tn * pn) + (ti * pn) + pe);
@@ -543,8 +611,6 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
 
   pi = int((z_xdipole - pstart) / pstep);
   pe = pi + 1;
-
-  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
 
   // Retrieve values from phi table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
@@ -570,8 +636,6 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   // Calculate index into frequency, theta and phi parts of the array before the requested point
   pi = int((z_ydipole - pstart) / pstep);
   pe = pi + 1;
-
-  if (fmod(pstart + pstep * pe, 90.0) < 1e-10) pe++;
 
   // Retrieve values from theta table for corners of the cube surrounding the requested point
   V[0] = *(Vphi + (fi * tn * pn) + (ti * pn) + pi);
