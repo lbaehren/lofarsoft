@@ -532,13 +532,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 print "Hilbert envelope direction:", direction_fit_plane_wave.meandirection_azel_deg
 
-                # Find the direction using beamforming
-                dfb = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, frequencies=frequencies, antpos=antenna_positions, start_direction=pulse_direction)
-
-                print "Beamformed direction:", dfb.fit_direction
-
-                pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
-
                 # Check if fitting was succesful
                 if direction_fit_plane_wave.fit_failed:
                     break
@@ -668,6 +661,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         all_station_rms = []
         all_station_direction = []
         all_station_names = []
+        all_station_polarization_angle = []
 
         for station in stations:
             if station.status == "GOOD":
@@ -679,6 +673,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"])
                     all_station_rms.append(station.polarization['xyz']["crp_rms"])
                     all_station_names.append(station.stationname)
+                    all_station_polarization_angle.append(stokes_parameters.polarization_angle)
                 except Exception as e:
                     raise EventError("{0} when attempting to obtain parameters for station {1}".format(e.message, station.stationname))
 
@@ -689,6 +684,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         all_station_integrated_pulse_power = np.vstack(all_station_integrated_pulse_power)
         all_station_rms = np.vstack(all_station_rms)
         all_station_direction = np.asarray(all_station_direction)
+        all_station_polarization_angle = np.hstack(all_station_polarization_angle)
 
         # Convert to contiguous array of correct shape
         shape = all_station_antenna_positions.shape
@@ -714,6 +710,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         ldf_total = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, all_directions=all_station_direction, all_stations=all_station_names, ldf_enable=True, ldf_total_signal=True, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         ldf_power = cr.trun("Shower", positions=all_station_antenna_positions, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_integrated_pulse_power, direction_uncertainties=direction_uncertainties, ldf_enable=True, ldf_integrated_signal=True, ldf_logplot=False, ldf_remove_outliers=False, footprint_enable=False, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+        
+        polarization_footprint = cr.trun("Shower",positions=all_station_antenna_positions,signals=all_station_pulse_peak_amplitude,footprint_enable=False,ldf_enable = False ,direction= average_direction,core = core,polarization_angle=all_station_polarization_angle,azimuth_in_distance_bins_enable=Falsefootprint_polarization_enable=True)
 
         # Plot wavefront shape using arrival times (from all_station_pulse_delays)
 
