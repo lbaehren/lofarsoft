@@ -156,7 +156,7 @@ class PulseEnvelope(Task):
 
         # Calculate integrated pulse power
         self.maxpos_full[...].copy(self.maxpos[...])
-        self.maxpos_full /= self.sample_frequency
+        self.maxpos_full /= self.sampling_frequency
 
         cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[...], self.window_start + self.maxpos_full[...] - 10, self.window_start + self.maxpos_full[...] + 10)
         self.integrated_pulse_power /= self.sampling_frequency
