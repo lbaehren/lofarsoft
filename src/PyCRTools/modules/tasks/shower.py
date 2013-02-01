@@ -625,22 +625,18 @@ class Shower(Task):
 
                x_pol = np.cos(self.polarization_angle) * 20
                y_pol = np.sin(self.polarization_angle) * 20
-               
-               print self.positions.shape
-               print x_pol.shape
-               print x_pol
-               print y_pol
 
                for i in xrange(self.positions.shape[0]):
                      cr.plt.arrow(self.positions[i, 0] - x_pol[i] / 2., self.positions[i, 1] - y_pol[i] / 2., x_pol[i], y_pol[i], color='red', lw=2, head_length=1, head_width=1)
+                     cr.plt.ylabel("LOFAR North [meters]")
+                     cr.plt.xlabel("LOFAR East [meters] ")
 
                if self.core is not None and self.direction is not None:
-                    elev = self.direction[1]
+                    elev = 90 - self.direction[1]
                     dcos = cr.cos(cr.radians(self.direction[0]))
                     dsin = cr.sin(cr.radians(self.direction[0]))
-                    
-#                    cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
-#                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
+                    cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
+                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
 
             else:
                 print "Give positions and polarization angles to draw footprint in polarization"
