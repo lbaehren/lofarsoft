@@ -428,7 +428,6 @@ task_modules = ["averagespectrum",
 "ldf",
 "plotfootprint",
 "cabledelays",
-"rfilines",
 "findrfi",
 "antennaresponse",
 "eventstatistics",
@@ -442,6 +441,7 @@ task_modules = ["averagespectrum",
 "shower",
 "crosscorrelateantennas",
 "directionfitbf",
+"wavefront"
 ]
 
 import os
