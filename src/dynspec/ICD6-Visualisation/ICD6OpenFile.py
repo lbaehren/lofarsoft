@@ -458,42 +458,29 @@ class ICD6OpenFile():
 	      kdecile= range(self.dims[1])
 	      self.decile = np.zeros(self.dims[1])
 	      
-	      for i in kdecile:
-		
-		  if i == int(self.dims[1]/2):
-		      bar.update(0.3)
-		  
-		  self.dataSetDecile = list(np.sort(self.dataSet[:,i,self.selectedStokes]))	    
-		  while self.dataSetDecile[0] == 0:
-		      self.dataSetDecile.remove(0)
+	      if sum(self.dataSet[:,:,0]) !=0:
+	      
+		    for i in kdecile:
 		      
-		  limit = int(len(self.dataSetDecile)/10)
-		  self.decile[i] = self.dataSetDecile[limit]
-		  self.dataSet[:,i,self.selectedStokes] = self.dataSet[:,i,self.selectedStokes]/self.decile[i]
-		  
+			if i == int(self.dims[1]/2):
+			    bar.update(0.3)
+			
+			self.dataSetDecile = list(np.sort(self.dataSet[:,i,self.selectedStokes]))	    
+			while self.dataSetDecile[0] == 0:
+			    self.dataSetDecile.remove(0)
+			    
+			limit = int(len(self.dataSetDecile)/10)
+			self.decile[i] = self.dataSetDecile[limit]
+			if self.decile[i] >0:
+				  self.dataSet[:,i,self.selectedStokes] = self.dataSet[:,i,self.selectedStokes]/self.decile[i]
+			else:
+				  self.dataSet[:,i,self.selectedStokes]  = 0
+			
 	      
 	      # Progress bar 30%
 	      bar.update(0.3)
 		      
-	      
-	      
-	      ###### Generate Data Matrix (included non continous band)  
-	      
-	      
-	      #if int(self.FrequencyTotalBanWidth) == int(self.maxFrequency-self.minFrequency):
-		
-		    #self.timePixel0		= self.dims[0]
-		    #self.spectralPixel0	= self.dims[1]
-		
-		    #self.dataSetRebin	= np.zeros(shape=(self.dims[0],self.dims[1]))
-		    #kTimeRebin0 = range(self.dims[0])
-		    #kSpecRebin0 = range(self.dims[1])
-		    #for i in kTimeRebin0:	 
-			#if i == int(self.timePixel0/2):
-			    ## Progress bar 70%
-			    #bar.update(0.7)
-			#for j in kSpecRebin0:	  		    
-			    #self.dataSetRebin[i,j] = self.dataSet[i,j,self.selectedStokes]	
+	     
 	      
 
 		
@@ -512,7 +499,7 @@ class ICD6OpenFile():
 	          for k in kSpecRebin0:
 		      freqTemp = self.minFrequency+k*self.ChannelWidth
 
-		      if round(self.AXIS_VALUE_WORLD[j]/1E6,3) == round(freqTemp,3):
+		      if round(self.AXIS_VALUE_WORLD[j]/1E6,2) == round(freqTemp,2):
 		
 			      self.dataSetRebin[:,k] = self.dataSet[:,j,self.selectedStokes]
 			      
@@ -593,7 +580,8 @@ class ICD6OpenFile():
 	self.timePixel0		= self.dims[0]
 	self.spectralPixel0	= int(self.dims[1])#+self.NofSubband*5)   
 		      
-	      
+	
+	
 	if self.timePixel0*self.spectralPixel0	 > 200E6:       
 	      
 	      self.MsgBox	= Tk()
@@ -628,20 +616,24 @@ class ICD6OpenFile():
 	      ## Progress bar 10%
 	      bar.update(0.1)
 	    
-	      ##### Decile (10% median histogramme) correction
-	      kdecile= range(self.dims[1])
-	      self.decile = np.zeros(self.dims[1])
-	      for i in kdecile:		
-		  if i == int(self.dims[1]/2):
-		      bar.update(0.3)		  
-		  self.dataSetDecile = list(np.sort(self.dataSet[:,i,self.selectedStokes]))	    
-		  while self.dataSetDecile[0] == 0:
-		      self.dataSetDecile.remove(0)		      
-		  limit = int(len(self.dataSetDecile)/10)
-		  self.decile[i] = self.dataSetDecile[limit]
-		  self.dataSet[:,i,self.selectedStokes] = self.dataSet[:,i,self.selectedStokes]/self.decile[i]
-		  	      
-	      # Progress bar 30%
+	      if sum(self.dataSet[:,:,0]) !=0:
+	    
+		    ##### Decile (10% median histogramme) correction
+		    kdecile= range(self.dims[1])
+		    self.decile = np.zeros(self.dims[1])
+		    for i in kdecile:		
+			if i == int(self.dims[1]/2):
+			    bar.update(0.3)		  
+			self.dataSetDecile = list(np.sort(self.dataSet[:,i,self.selectedStokes]))	    
+			while self.dataSetDecile[0] == 0:
+			    self.dataSetDecile.remove(0)		      
+			limit = int(len(self.dataSetDecile)/10)
+			self.decile[i] = self.dataSetDecile[limit]
+			if self.decile[i] >0:
+				  self.dataSet[:,i,self.selectedStokes] = self.dataSet[:,i,self.selectedStokes]/self.decile[i]
+			else:
+				  self.dataSet[:,i,self.selectedStokes]  = 0		  	      
+		    # Progress bar 30%
 	      bar.update(0.3)
 		      
 	      
