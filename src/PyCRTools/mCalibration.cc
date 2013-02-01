@@ -505,6 +505,8 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   y0 = tstart + ti * tstep; y1 = y0 + tstep;
   z0 = pstart + pi * pstep; z1 = z0 + pstep;
 
+  std::cout<<"pi "<<pi<<" pe "<<pe<<" z0 "<<z0<<" z1 "<<z1<<std::endl;
+
   // Interpolate to find Jones matrix component for theta
   *J_it++ = interpolate_trilinear(V, x, y, z_xdipole, x0, y0, z0, x1, y1, z1);
 
