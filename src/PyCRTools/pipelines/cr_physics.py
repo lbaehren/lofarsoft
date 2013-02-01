@@ -673,7 +673,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"])
                     all_station_rms.append(station.polarization['xyz']["crp_rms"])
                     all_station_names.append(station.stationname)
-                    all_station_polarization_angle.append(stokes_parameters.polarization_angle)
+                    all_station_polarization_angle.append(stokes_parameters.polarization_angle.toNumpy())
                 except Exception as e:
                     raise EventError("{0} when attempting to obtain parameters for station {1}".format(e.message, station.stationname))
 
