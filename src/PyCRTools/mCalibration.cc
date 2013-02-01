@@ -83,6 +83,30 @@ std::complex<double> gsl_to_complex(const gsl_complex &g)
   return d;
 }
 
+double phase_interpolate(const double a, const double b, const double delta)
+{
+  double phase = 0.0;
+
+  if (a * b > 0)
+  {
+    phase = a * (1 - delta) + b * delta;
+  }
+  else if (abs(a - b) < M_PI)
+  {
+    phase = (a + M_PI) * (1 - delta) + (b + M_PI) * delta - M_PI;
+  }
+  else if (a < 0)
+  {
+    phase = (a + 2 * M_PI) * (1 - delta) + b * delta;
+  }
+  else
+  {
+    phase = a * (1 - delta) + (b + 2 * M_PI) * delta;
+  }
+
+  return phase;
+}
+
 /* Linear interpolation of complex values on a 3 dimensional grid.
    Interpolation is performed using the phase and amplitude separately,
    no phase wrapping is applied so care is needed. */
@@ -119,19 +143,17 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
     for (i=0; i<8; i++)
     {
       a[i] = arg(V[i]);
-
-      if (a[i] < 0) a[i] = 2 * M_PI + a[i];
     }
 
-    c00 = a[0] * (1 - xd) + a[4] * xd;
-    c10 = a[2] * (1 - xd) + a[6] * xd;
-    c01 = a[1] * (1 - xd) + a[5] * xd;
-    c11 = a[3] * (1 - xd) + a[7] * xd;
+    c00 = phase_interpolate(a[0], a[4], xd);
+    c10 = phase_interpolate(a[2], a[6], xd);
+    c01 = phase_interpolate(a[1], a[5], xd);
+    c11 = phase_interpolate(a[3], a[7], xd);
 
-    c0 = c00 * (1 - yd) + c10 * yd;
-    c1 = c01 * (1 - yd) + c11 * yd;
+    c0 = phase_interpolate(c00, c10, yd);
+    c1 = phase_interpolate(c01, c11, yd);
 
-    theta = c0 * (1 - zd) + c1 * zd;
+    theta = phase_interpolate(c0, c1, zd);
 
     /* Return result as new complex value */
     return polar(rho, theta);
