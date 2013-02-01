@@ -66,6 +66,8 @@ class PulseEnvelope(Task):
             doc = "Integrated pulse power."),
         maxpos=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
             doc = "Position of pulse maximum relative to *pulse_start*."),
+        maxpos_full=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
+            doc = "Position of pulse maximum relative to *pulse_start*."),
         meanpos=dict(default = lambda self: cr.hMean(cr.hArray([self.maxpos[i] for i in self.antennas_with_significant_pulses]))[0],
             doc = "Mean pulse position (in samples)."),
         maxdiff=dict(default = lambda self: cr.hMaxDiff(cr.hArray([self.maxpos[i] for i in self.antennas_with_significant_pulses]))[0],
@@ -153,7 +155,10 @@ class PulseEnvelope(Task):
         #self.delays -= self.delays[self.refant]
 
         # Calculate integrated pulse power
-        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[...], self.window_start + int(self.maxpos[...] / self.resample_factor) - 10, self.window_start + int(self.maxpos[...] / self.resample_factor) + 10)
+        self.maxpos_full[...].copy(self.maxpos[...])
+        self.maxpos_full /= self.sample_frequency
+
+        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[...], self.window_start + self.maxpos_full[...] - 10, self.window_start + self.maxpos_full[...] + 10)
         self.integrated_pulse_power /= self.sampling_frequency
 
         if self.save_plots:
