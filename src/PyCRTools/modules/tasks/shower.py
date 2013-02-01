@@ -618,7 +618,7 @@ class Shower(Task):
         if self.footprint_polarization_enable:
 
             if self.positions is not None and self.polarization_angle is not None:
-
+               cr.plt.figure()
                cr.plt.scatter(self.positions[:, 0], self.positions[:, 1])
                
                print "angles", self.polarization_angle
@@ -638,9 +638,9 @@ class Shower(Task):
                     elev = self.direction[1]
                     dcos = cr.cos(cr.radians(self.direction[0]))
                     dsin = cr.sin(cr.radians(self.direction[0]))
-                    cr.plt.figure()
-                    cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
-                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
+                    
+#                    cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
+#                    cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
 
             else:
                 print "Give positions and polarization angles to draw footprint in polarization"
