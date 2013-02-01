@@ -620,8 +620,6 @@ class Shower(Task):
             if self.positions is not None and self.polarization_angle is not None:
                cr.plt.figure()
                cr.plt.scatter(self.positions[:, 0], self.positions[:, 1])
-               
-               print "angles", self.polarization_angle
 
                x_pol = np.cos(self.polarization_angle) * 20
                y_pol = np.sin(self.polarization_angle) * 20
