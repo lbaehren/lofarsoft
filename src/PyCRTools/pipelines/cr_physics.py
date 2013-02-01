@@ -498,9 +498,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2)
 
 
-                # Find the delays defined as the position of the maxima of the cross correlations
-                find_pulse_delay = cr.trun("FindPulseDelay", trace=cross_correlate_antennas.crosscorr_data, refant=pulse_envelope.refant, sampling_frequency = 16 * 200.e6)
-
                 delays = pulse_envelope.delays
 
                 # Use current direction if not enough significant pulses are found for direction fitting
