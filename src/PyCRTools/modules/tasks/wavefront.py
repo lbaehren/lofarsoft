@@ -179,8 +179,14 @@ class Wavefront(Task):
         # plt.figure()
         # arrivaltime.plot()
         # plt.title('Arrival times, matched with offsets per station (check!)')
-        times = self.arrivaltimes.toNumpy()
-        positions2D = self.positions.toNumpy()
+        if isinstance(self.arrivaltimes,np.ndarray):
+            times = self.arrivaltimes
+        else:
+            times = self.arrivaltimes.toNumpy()
+        if isinstance(self.arrivaltimes,np.ndarray):
+             positions2D = self.positions
+        else:
+            positions2D = self.positions.toNumpy()
         positions = positions2D.ravel()
         # now make footprint plot of all arrival times
 
