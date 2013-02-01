@@ -475,8 +475,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
             pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
 
-            timeseries_data_cut = cr.hArray(float, dimensions=[timeseries_data.shape()[0], options.narrow_search_window_width])
-
             print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
 
             # Start direction fitting loopim
@@ -496,14 +494,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     # Get timeseries data
                     cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], ifftwplan)
 
-                # Calculate delays using cross correlations
-                timeseries_data_cut[...].copy(timeseries_data[..., pulse_start:pulse_end])
-
                 # Calculate delays using Hilbert transform
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2)
 
-                # Calculate the cross correlations of all the signals with respect to the reference antenna
-                cross_correlate_antennas = cr.trun("CrossCorrelateAntennas", timeseries_data=timeseries_data_cut, refant=pulse_envelope.refant, oversamplefactor=16)
 
                 # Find the delays defined as the position of the maxima of the cross correlations
                 find_pulse_delay = cr.trun("FindPulseDelay", trace=cross_correlate_antennas.crosscorr_data, refant=pulse_envelope.refant, sampling_frequency = 16 * 200.e6)
@@ -522,11 +515,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                         break
 
                 # Fit pulse direction
-                print "LORA direction:", lora_direction
-
-                direction_fit_plane_wave_cc = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=find_pulse_delay.delays, reference_antenna=pulse_envelope.refant, verbose=True)
-
-                print "Cross correlation direction:", direction_fit_plane_wave_cc.meandirection_azel_deg
 
                 direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
 
