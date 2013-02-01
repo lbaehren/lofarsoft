@@ -634,6 +634,7 @@ class Shower(Task):
                     elev = self.direction[1]
                     dcos = cr.cos(cr.radians(self.direction[0]))
                     dsin = cr.sin(cr.radians(self.direction[0]))
+                    cr.figure()
                     cr.plt.arrow(self.core[0] + elev * dsin, self.core[1] + elev * dcos, -elev * dsin, -elev * dcos, lw=4, color=self.footprint_shower_color)
                     cr.plt.scatter(self.core[0], self.core[1], marker='x', s=400, color=self.footprint_shower_color, linewidth=3)
 
