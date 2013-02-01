@@ -1693,7 +1693,7 @@ void  HFPP_FUNC_NAME(const Iter1 vec, const Iter1 vec_end, const Iter2 phasevec,
  */
 HNumber HFPP_FUNC_NAME(const HComplex z)
 {
-    return arg(z); 
+    return arg(z);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
@@ -1709,10 +1709,10 @@ HNumber HFPP_FUNC_NAME(const HComplex z)
 /*!
  \brief $DOCSTRING
  $PARDOCSTRING
- 
+
  Description:
  If input vector is shorter it will be repeated until the output vector is filled.
- 
+
  Usage:
  hComplexToPhase(outvec, complex_in) -> outvec = [arg(z_0), arg(z_1),..., arg(z_{n-1}]
  outvec.complextophase(complex_in) -> outvec = [arg(z_0), arg(z_1),..., arg(z_{n-1})]
@@ -1725,12 +1725,12 @@ void  HFPP_FUNC_NAME(const Iter1 phasevec, const Iter1 phasevec_end, const Iter2
     Iter2 it2 = vec;
     HInteger lenOut = phasevec_end - phasevec;
     HInteger lenPhase = vec_end - vec;
-    
+
     // Sanity check
     if ((lenPhase <= 0) || (lenOut <= 0)) {
         throw PyCR::ValueError("Illegal size of phase vector");
     }
-    
+
     // Vector operation
     while (it1 != phasevec_end) {
         *it1=hComplexToPhase(*it2);
@@ -1771,10 +1771,10 @@ HNumber HFPP_FUNC_NAME(const HNumber phase)
 /*!
  \brief $DOCSTRING
  $PARDOCSTRING
- 
+
  Description:
  If input vector is shorter it will be repeated until the output vector is filled.
- 
+
  Usage:
  hPhaseWrap(outvec, phase_in) -> outvec = [wrap(phi_0), wrap(phi_1),..., wrap(phi_{n-1}]
  outvec.phasewrap(phase_in) -> outvec = [wrap(phi_0), wrap(phi_1),..., wrap(phi_{n-1})]
@@ -1787,12 +1787,12 @@ void  HFPP_FUNC_NAME(const Iter1 wrappedvec, const Iter1 wrappedvec_end, const I
     Iter2 it2 = vec;
     HInteger lenOut = wrappedvec_end - wrappedvec;
     HInteger lenPhase = vec_end - vec;
-    
+
     // Sanity check
     if ((lenPhase <= 0) || (lenOut <= 0)) {
         throw PyCR::ValueError("Illegal size of phase vector");
     }
-    
+
     // Vector operation
     while (it1 != wrappedvec_end) {
         *it1 = hPhaseWrap(*it2);
@@ -2600,10 +2600,10 @@ $PARDOCSTRING
 
 Usage:
 hDifferentiate(Vector([a,b,c,...]), outputVector) -> [b-a,c-b,...]
- 
+
 Will stop if the end of either input or output vector is reached.
- 
-See Also: 
+
+See Also:
  hDiffSum, hDiff
 */
 template <class Iter>
@@ -2617,9 +2617,9 @@ void HFPP_FUNC_NAME (const Iter vec1,const Iter vec1_end,const Iter vec2,const I
   };
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-      
-      
-      
+
+
+
 //$DOCSTRING: Piecewise subtraction of the elements in a vector and summing of the square of the results.
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hDiffSquaredSum
@@ -5993,7 +5993,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
   // Get vector length
   const HInteger n = std::distance(vec, vec_end);
   const HInteger nm = n - (signal_end - signal_start);
-  
+
   // Initialize values
   *snr = 0;
   *mean = 0;
@@ -6081,8 +6081,8 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(power)()("Integrated pulse power.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HInteger)(signal_start)()("Start of signal window.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (HInteger)(signal_end)()("End of signal window.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(signal_start)()("Start of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_3 (HInteger)(signal_end)()("End of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -6093,12 +6093,13 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 template <class NIter>
 void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
                      const NIter vec, const NIter vec_end,
-                     const HInteger signal_start, const HInteger signal_end)
+                     const Iter signal_start, const Iter signal_start_stub,
+                     const Iter signal_end, const Iter signal_end_stub)
 {
   // Get vector length
   const HInteger n = std::distance(vec, vec_end);
   const HInteger nm = n - (signal_end - signal_start);
-  
+
   // Initialize values
   *power = 0;
   HNumber noise_power = 0;
@@ -6107,44 +6108,44 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   NIter it = vec;
 
   // Sanity checks
-  if (signal_start < 0)
+  if (*signal_start < 0)
   {
     char error_message[256];
-    sprintf(error_message, "[hIntegratedPulsePower] signal_start[=%ld] < 0", signal_start);
+    sprintf(error_message, "[hIntegratedPulsePower] *signal_start[=%ld] < 0", *signal_start);
     throw PyCR::ValueError(error_message);
   }
 
-  if (signal_end < signal_start)
+  if (*signal_end < *signal_start)
   {
     char error_message[256];
-    sprintf(error_message, "[hIntegratedPulsePower] signal_end[=%ld] < signal_start[=%ld]", signal_end, signal_start);
+    sprintf(error_message, "[hIntegratedPulsePower] *signal_end[=%ld] < *signal_start[=%ld]", *signal_end, *signal_start);
     throw PyCR::ValueError(error_message);
   }
 
-  if (signal_end > n)
+  if (*signal_end > n)
   {
     char error_message[256];
-    sprintf(error_message, "[hIntegratedPulsePower] signal_end[=%ld] > n=[%ld]", signal_end, n);
+    sprintf(error_message, "[hIntegratedPulsePower] *signal_end[=%ld] > n=[%ld]", *signal_end, n);
     throw PyCR::ValueError(error_message);
   }
 
   // Power before signal window
   it = vec;
-  for (HInteger i=0; i<signal_start; i++)
+  for (HInteger i=0; i<*signal_start; i++)
   {
     noise_power += (*it * *it);
     it++;
   }
 
   // Power in pulse window
-  for (HInteger i=signal_start; i<signal_end; i++)
+  for (HInteger i=*signal_start; i<*signal_end; i++)
   {
     *power += (*it * *it);
     it++;
   }
 
   // Noise after signal window
-  for (HInteger i=signal_end; i<n; i++)
+  for (HInteger i=*signal_end; i<n; i++)
   {
     noise_power += (*it * *it);
     it++;
