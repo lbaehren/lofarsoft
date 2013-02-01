@@ -153,7 +153,8 @@ class PulseEnvelope(Task):
         #self.delays -= self.delays[self.refant]
 
         # Calculate integrated pulse power
-        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[..., self.window_start:self.window_end], self.pulse_start - self.window_start, self.pulse_end - self.window_start)
+        for i in range(self.timeseries_data.shape()[0]):
+            cr.hIntegratedPulsePower(self.integrated_pulse_power[i], self.timeseries_data[i], self.window_start + int(self.maxpos[i] / self.resample_factor) - 10, self.window_start + int(self.maxpos[i] / self.resample_factor) + 10)
         self.integrated_pulse_power /= self.sampling_frequency
 
         if self.save_plots:
