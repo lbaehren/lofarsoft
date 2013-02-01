@@ -90,9 +90,14 @@ class DirectionFitPlaneWave(tasks.Task):
         c = 299792458.0  # speed of light in m/s
         rad2deg = 180.0 / np.pi
         
-
-        positions = self.positions.toNumpy()
-        times = self.timelags.toNumpy()
+        if isinstance(self.positions,np.ndarray):
+            positions = self.positions
+        else:
+            positions = self.positions.toNumpy()
+        if isinstance( self.timelags,np.ndarray): 
+            times = self.timelags 
+        else:
+            times = self.timelags.toNumpy()
 
         # Allow for self.positions to be specified either as flat array or as 2D-array with shape (NAnt, 3)
 #        import pdb; pdb.set_trace()
