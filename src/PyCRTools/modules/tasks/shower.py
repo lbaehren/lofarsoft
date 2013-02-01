@@ -620,12 +620,16 @@ class Shower(Task):
             if self.positions is not None and self.polarization_angle is not None:
 
                cr.plt.scatter(self.positions[:, 0], self.positions[:, 1])
+               
+               print "angles", self.polarization_angle
 
                x_pol = np.cos(self.polarization_angle) * 20
                y_pol = np.sin(self.polarization_angle) * 20
                
                print self.positions.shape
                print x_pol.shape
+               print x_pol
+               print y_pol
 
                for i in xrange(self.positions.shape[0]):
                      cr.plt.arrow(self.positions[i, 0] - x_pol[i] / 2., self.positions[i, 1] - y_pol[i] / 2., x_pol[i], y_pol[i], color='red', lw=2, head_length=1, head_width=1)
