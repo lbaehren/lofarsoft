@@ -248,7 +248,7 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
     throw PyCR::ValueError("[hProjectPolarizations] input vectors have incompatible sizes.");
   }
 
-  // Direction in spherical coordinates with +x direction along N-S
+  // Direction in spherical coordinates with +x direction along E-W (phi = 0 is east)
   const double theta = (M_PI / 2) - el;
   const double phi = (M_PI / 2) - az;
 
