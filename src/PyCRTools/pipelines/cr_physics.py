@@ -202,6 +202,7 @@ parser.add_option("-a", "--accept_snr", type="int", default=5, help="accept puls
 parser.add_option("--maximum_nof_iterations", type="int", default=5, help="maximum number of iterations in antenna pattern unfolding loop")
 parser.add_option("--maximum_angular_diff", type="float", default=0.5, help="maximum angular difference in direction fit iteration (in degrees), corresponds to angular resolution of a LOFAR station")
 parser.add_option("--maximum_allowed_residual_delay", type="float", default=9e-8, help="average delay that is still allowed for a station to be called good")
+parser.add_option("--maximum_allowed_outliers", type="float", default=4, help="number of outliers that can be ignored when calculating the average residuals")
 parser.add_option("--broad_search_window_width", type="int", default=2 ** 14, help="width of window around expected location for first pulse search")
 parser.add_option("--narrow_search_window_width", type="int", default=2 ** 7, help="width of window around expected location for subsequent pulse search")
 parser.add_option("-l", "--lora_directory", default="./", help="directory containing LORA information")
@@ -589,12 +590,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
 
             if average_residual > options.maximum_allowed_residual_delay:
-                print "direction fit residuals too large, average_residual = {0}".format(average_residual)
-                station.status = "BAD"
-                station.statusmessage = "average_residual = {0}".format(average_residual)
-                station.statuscategory = "average_residual"
-                pulse_direction = list(event["lora_direction"])
-                direction_fit_successful = False
+                limited_residuals = average_residual.sort()
+                limited_residuals = limited_residuals[options.maximum_allowed_outliers:-1.*options.maximum_allowed_outliers]
+                limited_residuals_mean = limited_residuals.mean()
+                if limited_residuals_mean > options.maximum_allowed_residual_delay:
+                    print "direction fit residuals too large, average_residual = {0}".format(average_residual)
+                    station.status = "BAD"
+                    station.statusmessage = "average_residual = {0}".format(average_residual)
+                    station.statuscategory = "average_residual"
+                    pulse_direction = list(event["lora_direction"])
+                    direction_fit_successful = False
 
             else:
                 print "direction fit residuals ok, average_residual = {0}".format(average_residual)
