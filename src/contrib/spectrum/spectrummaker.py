@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-# $Id: spectrummaker.py 321 2013-02-02 12:02:04Z fkbreitl $
+# $Id: spectrummaker.py 322 2013-02-04 17:29:35Z fkbreitl $
 
 # LOFAR Solar Imaging Pipeline, Frank Breitling, 2012
 
 # DESCRIPTION: Program for saving spectra from BF HDF5 files to JPG files.
 
 
-"""Produces and saves dynamic spectra from beam formed HDF5 to JPG/PNG files."""
+"""Produces and saves dynamic spectra from beam formed HDF5 to JPG files."""
 
 import matplotlib as ml; ml.use('Agg')  #disable any Xwindows backend
 import h5py, pylab as pl, numpy as np, time, sys, os, datetime, getopt, \
@@ -53,7 +53,7 @@ if (len(remainder) == 0): sys.exit(usage())
 fn=os.path.abspath(remainder[0])
 if not os.path.exists(fn): sys.exit(fn+' does not exist')
 
-if not vmax: vmax=0.3 if logscale else 1.2
+if not vmax: vmax=0.3 if logscale else 1.3
 
 ticks10=ml.dates.SecondLocator(bysecond=range(0,60,4))
 ticks600=ml.dates.MinuteLocator(byminute=range(0,60,4))
@@ -67,17 +67,20 @@ def medians():
 
 def plot_medians(medians):
     pl.plot(medians); pl.xlim(0,channels); pl.yscale('log');
-    pl.ylabel('median(intensity)'); pl.xlabel('channel no.'); 
-    pl.savefig(bn+'-medians.jpg',dpi=100)
+    pl.ylabel('median(intensity)'); pl.xlabel('channel no.')
+    pl.axes().xaxis.set_minor_locator(ml.ticker.MultipleLocator(chpsb))
+    pl.grid(which="minor")
+    pl.savefig('channels.jpg', dpi=100)
 
 
 def average_channels(Spectrum):
-    return Spectrum.reshape(sbs,chpsb,-1).sum(1)/chpsb
+    return Spectrum.reshape(sbs,chpsb,-1).mean(1)
 
 
 def rebin_spectrum(nbins):
     nsamples=samples/nbins*nbins
-    return Spectrum[:,0:nsamples].reshape(sbs,nsamples/nbins,-1).sum(2)/nbins
+    return Spectrum[:,0:nsamples].reshape(
+        np.shape(Spectrum)[0],nsamples/nbins,-1).mean(2)
 
 
 def save_jpg(sname, f):
@@ -117,7 +120,7 @@ def plot_and_save(s1,s2,c,rebin,spec):
     nt1,nt2=ml.dates.date2num([t1,t2])
 
     fig = pl.figure()
-    imax=fig.add_axes([0.09,0.1,0.816*f,0.8])
+    imax=fig.add_axes([0.09,0.06,0.768*f,0.88])
     cb_label="log(intenisty/median(intensity))"
     if logscale:
         sp=imax.imshow(np.log(spec[:,s1:s2]+1e-9), aspect='auto',
@@ -128,12 +131,13 @@ def plot_and_save(s1,s2,c,rebin,spec):
                        cmap='gist_heat') #,interpolation='None')
 
     imax.set_xticks([]); imax.set_yticks([])
+    imax.set_frame_on(False)
 
-    cb=pl.colorbar(sp, fraction=0.04,pad=0.02)
-    cb.set_label(cb_label)
+    path=ml.path.Path([[0,0],[s2-s1,0],[s2-s1,len(fH)-1],[0,len(fH)-1],[0,0]])
+    patch=ml.patches.PathPatch(path, transform=sp.axes.transData)
+    sp.set_clip_path(patch)
 
-    ax=fig.add_axes([0.09,0.1,0.768,0.8],
-                    xlim=[nt1,nt2], ylim=[fedges[-1]*1e-6,fedges[0]*1e-6])
+    ax=fig.add_axes([0.09,0.1,0.814,0.8], xlim=[nt1,nt2], ylim=[fmax,fmin])
     ax.patch.set_alpha(0)
     #ax.set_xticks([]); ax.set_yticks([])
 
@@ -159,6 +163,9 @@ def plot_and_save(s1,s2,c,rebin,spec):
     ax.tick_params(axis='y', direction='out', width=1.4,length=6)
     #pl.grid(linestyle='-', linewidth=1, color='w')
 
+    cb=pl.colorbar(sp, fraction=0.0368, pad=0.02, ax=ax)
+    cb.set_label(cb_label)
+
     pl.xlabel('time [h:m:s]')
     pl.ylabel('f [MHz]')
     t=pl.title(bn).set_y(1.03) 
@@ -178,8 +185,8 @@ pl.rcParams['font.size']=14
 rebin_res=600
 
 f5=h5py.File(fn,'r')
-#fmin=f5.attrs.get('OBSERVATION_FREQUENCY_MIN')
-#fmax=f5.attrs.get('OBSERVATION_FREQUENCY_MAX')
+fmin=f5.attrs.get('OBSERVATION_FREQUENCY_MIN')
+fmax=f5.attrs.get('OBSERVATION_FREQUENCY_MAX')
 obsstart=datetime.datetime.strptime(f5.attrs.get('OBSERVATION_START_UTC')
                                     [:-4], "%Y-%m-%dT%H:%M:%S.%f")
 chpsb=f5.get('SUB_ARRAY_POINTING_000/BEAM_000'
@@ -191,7 +198,7 @@ samples,channels=np.shape(STOKES_0.value[:,:])
 sbs=channels/chpsb
 f_channels=f5.get('SUB_ARRAY_POINTING_000/BEAM_000/COORDINATES/COORDINATE_1'
                   ).attrs.get('AXIS_VALUES_WORLD')
-f_sbs=f_channels.reshape(-1,chpsb).sum(axis=1)/chpsb
+f_sbs=f_channels.reshape(-1,chpsb).mean(axis=1)
 exposure=f5.get('SUB_ARRAY_POINTING_000/BEAM_000').attrs.get('SAMPLING_TIME')
 samples_per_image=96 if exposure<0.03 else 32
 #print samples_per_image
@@ -200,32 +207,32 @@ dt_image=datetime.timedelta(seconds=samples_per_image*exposure)
 tstart=time.time()
 
 sec1,sec2 = '',''; 
-if (len(remainder)>1): sec1,sec2 = remainder[1].split('~')
+if len(remainder)>1 and not automatic: sec1,sec2 = remainder[1].split('~')
 s1=0 if sec1=='' else int(float(sec1)/exposure)
 s2=samples if sec2=='' else int(float(sec2)/exposure)
 if s2<=s1: sys.exit('Error: startsec >= stopsec')
 Spectrum=np.swapaxes(STOKES_0.value[s1:s2,:],0,1)
 medians=medians()
-plot_medians(medians)
 Spectrum=Spectrum[:,:]/medians
 Spectrum=average_channels(Spectrum)
 
 fedges=np.arange(f_sbs[0]-2.5e6,f_sbs[-1]+5e6,5e6)
 fH = np.histogram(f_sbs, bins=fedges)[0]
 for n in range(len(fH)):
-    Spectrum[n,:]=Spectrum[n:n+fH[n],:].sum(axis=0)/fH[n]
+    Spectrum[n,:]=Spectrum[n:n+fH[n],:].mean(axis=0)
     Spectrum=np.delete(Spectrum,range(1,fH[n]),axis=0)
 
 
 #Non automatic mode:
 if not automatic:
     os.chdir(wd)
+    plot_medians(medians)
     obsstart=obsstart+datetime.timedelta(seconds=s1*exposure)
     s2=s2-s1; spec=Spectrum; rebin=1
     if 1.*s2/samples_per_image>=rebin_res:
         s2=1.*s2/samples_per_image
-        spec=rebin_spectrum(samples_per_image)
         rebin=samples_per_image
+        spec=rebin_spectrum(samples_per_image)
     plot_and_save(0,s2,-1,rebin,spec)
     sys.exit('Total processing time: '+str(time.time()-tstart)+' s')
 
@@ -233,6 +240,8 @@ if not automatic:
 #Automatic mode:
 if not overwrite and os.path.exists(wd+'/'+bn):
     sys.exit('Warning: Directory exists. Use --overwrite to overwrite.')
+os.chdir(wd+'/'+bn)
+plot_medians(medians)
 
 spectrum=rebin_spectrum(samples_per_image)
 time_res=np.array([3600, 600, 60, 1]) #time_res=np.array([60])
