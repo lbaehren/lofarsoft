@@ -6152,8 +6152,6 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   }
 
   *power -= noise_power * (static_cast<HNumber>(n - nm) / nm);
-
-  std::cout<<" final "<<*power<<std::endl;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
