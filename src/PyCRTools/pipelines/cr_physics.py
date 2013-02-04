@@ -594,13 +594,15 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 limited_residuals = limited_residuals[options.maximum_allowed_outliers:-1.*options.maximum_allowed_outliers]
                 limited_residuals_mean = limited_residuals.mean()
                 if limited_residuals_mean > options.maximum_allowed_residual_delay:
-                    print "direction fit residuals too large, average_residual = {0}".format(average_residual)
+                    print "direction fit residuals too large, average_residual = {0}, limited = {1}".format(average_residual,limited_residuals_mean)
                     station.status = "BAD"
-                    station.statusmessage = "average_residual = {0}".format(average_residual)
+                    station.statusmessage = "average_residual = {0}, limited = {1}".format(average_residual,limited_residuals_mean )
                     station.statuscategory = "average_residual"
                     pulse_direction = list(event["lora_direction"])
                     direction_fit_successful = False
 
+                else:
+                    print "direction fit limited residuals ok, average_residual = {0}, limited = {1}".format(average_residual,limited_residuals_mean)
             else:
                 print "direction fit residuals ok, average_residual = {0}".format(average_residual)
 
@@ -705,9 +707,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
         # Plot wavefront shape using arrival times (from all_station_pulse_delays)
         try:
-            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
         except ValueError:
-            continue    
+           print "wavefront returned problem"    
 
         event.status = "CR_FOUND"
         event.statusmessage = ""
