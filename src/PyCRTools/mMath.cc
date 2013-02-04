@@ -6094,7 +6094,7 @@ template <class NIter, class Iter>
 void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
                      const NIter vec, const NIter vec_end,
                      const Iter signal_start, const Iter signal_start_stub,
-                     const Iter signal_end, const Iter, signal_end_stub)
+                     const Iter signal_end, const Iter signal_end_stub)
 {
   // Get vector length
   const HInteger n = std::distance(vec, vec_end);
