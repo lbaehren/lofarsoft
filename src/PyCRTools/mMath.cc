@@ -6081,8 +6081,8 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(power)()("Integrated pulse power.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HInteger)(signal_start)()("Start of signal window.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_3 (HInteger)(signal_end)()("End of signal window.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(signal_start)()("Start of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(signal_end)()("End of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -6090,14 +6090,15 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 
   Calculates the integrated pulse power.
 */
-template <class NIter>
+template <class NIter, class Iter>
 void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
                      const NIter vec, const NIter vec_end,
-                     const HInteger signal_start, const HInteger signal_end)
+                     const Iter signal_start, const Iter signal_start_stub,
+                     const Iter signal_end, const Iter, signal_end_stub)
 {
   // Get vector length
   const HInteger n = std::distance(vec, vec_end);
-  const HInteger nm = n - (signal_end - signal_start);
+  const HInteger nm = n - (*signal_end - *signal_start);
 
   // Initialize values
   *power = 0;
@@ -6107,50 +6108,50 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   NIter it = vec;
 
   // Sanity checks
-  if (signal_start < 0)
+  if (*signal_start < 0)
   {
     char error_message[256];
-    sprintf(error_message, "[hIntegratedPulsePower] signal_start[=%ld] < 0", signal_start);
+    sprintf(error_message, "[hIntegratedPulsePower] *signal_start[=%ld] < 0", *signal_start);
     throw PyCR::ValueError(error_message);
   }
 
-  if (signal_end < signal_start)
+  if (*signal_end < *signal_start)
   {
     char error_message[256];
-    sprintf(error_message, "[hIntegratedPulsePower] signal_end[=%ld] < signal_start[=%ld]", signal_end, signal_start);
+    sprintf(error_message, "[hIntegratedPulsePower] *signal_end[=%ld] < *signal_start[=%ld]", *signal_end, *signal_start);
     throw PyCR::ValueError(error_message);
   }
 
-  if (signal_end > n)
+  if (*signal_end > n)
   {
     char error_message[256];
-    sprintf(error_message, "[hIntegratedPulsePower] signal_end[=%ld] > n=[%ld]", signal_end, n);
+    sprintf(error_message, "[hIntegratedPulsePower] *signal_end[=%ld] > n=[%ld]", *signal_end, n);
     throw PyCR::ValueError(error_message);
   }
 
   // Power before signal window
   it = vec;
-  for (HInteger i=0; i<signal_start; i++)
+  for (HInteger i=0; i<*signal_start; i++)
   {
     noise_power += (*it * *it);
     it++;
   }
 
   // Power in pulse window
-  for (HInteger i=signal_start; i<signal_end; i++)
+  for (HInteger i=*signal_start; i<*signal_end; i++)
   {
     *power += (*it * *it);
     it++;
   }
 
   // Noise after signal window
-  for (HInteger i=signal_end; i<n; i++)
+  for (HInteger i=*signal_end; i<n; i++)
   {
     noise_power += (*it * *it);
     it++;
   }
 
-  std::cout<<"signal_start "<<signal_start<<" signal_end "<<signal_end<<" power "<<*power<<" noise_power "<<noise_power<<" n "<<n<<" nm "<<nm<<" correction factor "<<(static_cast<HNumber>(n - nm) / nm);
+  std::cout<<"*signal_start "<<*signal_start<<" *signal_end "<<*signal_end<<" power "<<*power<<" noise_power "<<noise_power<<" n "<<n<<" nm "<<nm<<" correction factor "<<(static_cast<HNumber>(n - nm) / nm);
 
   *power -= noise_power * (static_cast<HNumber>(n - nm) / nm);
 
