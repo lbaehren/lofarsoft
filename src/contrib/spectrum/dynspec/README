@@ -1,0 +1,23 @@
+=== Dynspec ===
+
+is a package for working with spectra from LOFAR's beam formed HDF5 files 
+using LOFAR's DAL.
+
+Features include:
+* rebinning
+* saving and reading from and to FITS
+* plotting
+* saving to PNG
+
+Specview folder contains:
+* specview.py
+* rebin.py
+* downsample.py
+
+Author: Frank Breitling, 2009
+
+Update 2013:
+Due to many changes on DAL and the BF format, this program became obsolete
+and serves for academic purposes.
+
+Its successor is the spectrummaker.py
