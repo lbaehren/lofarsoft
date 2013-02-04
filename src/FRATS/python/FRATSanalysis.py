@@ -328,9 +328,10 @@ def loadTimeseries(directory='',DM=DM):
         elif DM%0.001<1e-6:
             DMstr=str(round(DM,3))
         else:
-            DMstr=DM
+            DMstr=str(DM)
     else:
         DMstr=DM
+    print "Reading timeseries of DM",DMstr
     dfiles=glob.glob(directory+'dedisp*'+DMstr+'*_*')
     #assert len(dfiles)<10,"please check if file order is correct for ..."+str(["..."+f[-15:] for f in dfiles])
 
@@ -374,7 +375,7 @@ def obsParameters(directory='',file=None):
     count=0
     nr=0
     keyword=''
-    intkeywords=['ch', 'Cnr', 'stb', 'startSB', 'n', 'nrCSB', 'il', 'tInt', 'sa', 'obsstart', 'Ctime']
+    intkeywords=['ch', 'Cnr', 'stb', 'startSB', 'n', 'nrCSB', 'il', 'tInt', 'sa', 'obsstart', 'Ctime','resampleT']
     floatkeywords=['tl']
     listkeywords=['freq', 'DM','ilrange']
     rangekeywords=['DMrange']
@@ -439,6 +440,8 @@ def obsParameters(directory='',file=None):
     for k in rangekeywords:
         if k in parameters.keys():
             parameters[k[0:-5]]=np.arange(parameters[k][0],parameters[k][2]+0.0001,parameters[k][1])
+    if 'resampleT' not in parameters.keys():
+        parameters['resampleT']=1 # to make it compatible with previous versions
     return parameters
 
 def derivedParameters(par,DM=DM):
@@ -1207,7 +1210,7 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
     mycolors=['r','g','b','k','y','m','c','0.5','r','g','b','k','y','m','c','0.5']
     ts=np.copy(timeseries)
     derivedParameters(par,DM)
-    reftime=par['sa']*par['stb'] # samples per block time startblock
+    reftime=par['sa']*par['stb']/par['resampleT'] # samples per block time startblock
     delays=par['delays']
     delays-=max(delays)
     length=min([len(ts[i]) for i in range(len(ts))])
@@ -1311,8 +1314,8 @@ def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ[
         raise ValueError("unknown length of msg")
     par=obsParameters(mydir)
     derivedParameters(par,DM=msg_DM)
-    totalDelay=round(max(abs(par['delaysPerDM']))*msg_DM/par['sa'])
-    startblock=int(msg[0]/par['sa']-totalDelay-extrablocks/2)
+    totalDelay=round(max(abs(par['delaysPerDM']))*msg_DM/(par['sa']/par['resampleT']))
+    startblock=int(msg[0]/(par['sa']/par['resampleT'])-totalDelay-extrablocks/2)
     nblocks=int(totalDelay+extrablocks)
     if not plotwindow:
         plotwindow=par['sa']
@@ -1326,7 +1329,7 @@ def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ[
             saveoption+=" --plotname="+plotdir+"/plotstreams_L"+str(msg_obsID)+"_SAP00"+str(msg_beam)+"_DM="+str(msg_DM)+"_time="+str(msg_time)+".png"
     else:
         saveoption=""
-    command=prefix+" openBFdata.py -o L"+str(msg_obsID)+" -m "+str(msg_beam)+" -s "+str(startblock)+" -n "+str(nblocks)+" -y -R -D "+mydir+" --ts --DM="+str(msg_DM)+" -c "+str(par['ch'])+" --plot --pc="+str(msg_time)+" --pw="+str(plotwindow)+" --il="+str(msg_length)+" --parsetdir "+parsetdir+" --datadir \""+datadir+"\""+saveoption
+    command=prefix+" openBFdata.py -o L"+str(msg_obsID)+" -m "+str(msg_beam)+" -s "+str(startblock)+" -n "+str(nblocks)+" -y -R -D "+mydir+" --ts --DM="+str(msg_DM)+" -c "+str(par['ch'])+" --plot --pc="+str(msg_time)+" --pw="+str(plotwindow)+" --il="+str(msg_length)+" --parsetdir "+parsetdir+" --datadir \""+datadir+"\""+saveoption+" --subav "+" -z "+str(par['sa'])+" --resampleT="+str(par['resampleT'])
     return command
 
 
