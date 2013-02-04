@@ -590,7 +590,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
 
             if average_residual > options.maximum_allowed_residual_delay:
-                limited_residuals = average_residual.sort()
+                limited_residuals = residual_delays.sort()
                 limited_residuals = limited_residuals[options.maximum_allowed_outliers:-1.*options.maximum_allowed_outliers]
                 limited_residuals_mean = limited_residuals.mean()
                 if limited_residuals_mean > options.maximum_allowed_residual_delay:
