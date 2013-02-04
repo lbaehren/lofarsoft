@@ -6151,8 +6151,6 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
     it++;
   }
 
-  std::cout<<"*signal_start "<<*signal_start<<" *signal_end "<<*signal_end<<" power "<<*power<<" noise_power "<<noise_power<<" n "<<n<<" nm "<<nm<<" correction factor "<<(static_cast<HNumber>(n - nm) / nm);
-
   *power -= noise_power * (static_cast<HNumber>(n - nm) / nm);
 
   std::cout<<" final "<<*power<<std::endl;
