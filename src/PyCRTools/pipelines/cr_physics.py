@@ -699,8 +699,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         polarization_footprint = cr.trun("Shower",positions=all_station_antenna_positions,signals=all_station_pulse_peak_amplitude,footprint_enable=False,ldf_enable = False ,direction= average_direction,core = core,polarization_angle=all_station_polarization_angle,azimuth_in_distance_bins_enable=False,footprint_polarization_enable=True,save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         # Plot wavefront shape using arrival times (from all_station_pulse_delays)
-
-        wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+        try:
+            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+        except ValueError:
+            continue    
 
         event.status = "CR_FOUND"
         event.statusmessage = ""
