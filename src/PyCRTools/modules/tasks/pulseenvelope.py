@@ -158,7 +158,15 @@ class PulseEnvelope(Task):
         self.maxpos_full[...].copy(self.maxpos[...])
         self.maxpos_full /= self.sampling_frequency
 
-        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[...], self.window_start + self.maxpos_full[...] - 10, self.window_start + self.maxpos_full[...] + 10)
+        start = cr.hArray(int, self.maxpos_full.shape()[0])
+        start[...].copy(self.maxpos_full)
+        start += self.window_start - 5
+
+        end = cr.hArray(int, self.maxpos_full.shape()[0])
+        end[...].copy(self.maxpos_full)
+        end += self.window_start + 5
+
+        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[...], start, end)
         self.integrated_pulse_power /= self.sampling_frequency
 
         if self.save_plots:
