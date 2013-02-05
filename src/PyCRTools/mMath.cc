@@ -6101,11 +6101,13 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   const HInteger nm = n - (*signal_end - *signal_start);
 
   // Initialize values
-  *power = 0;
   HNumber noise_power = 0;
 
   // Get iterator
   NIter it = vec;
+  NIter it_power = power;
+
+  *it_power = 0;
 
   // Sanity checks
   if (*signal_start < 0)
@@ -6151,7 +6153,9 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
     it++;
   }
 
-  *power -= noise_power * (static_cast<HNumber>(n - nm) / nm);
+  *it_power -= noise_power * (static_cast<HNumber>(n - nm) / nm);
+
+  it_power++;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
