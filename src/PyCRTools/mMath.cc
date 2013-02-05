@@ -6105,7 +6105,7 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   // Get iterator
   NIter it = vec;
   NIter it_power = power;
-  Niter it_noise_power = noise_power;
+  NIter it_noise_power = noise_power;
 
   *it_power = 0;
 
