@@ -134,7 +134,7 @@ class CRDatabase(object):
             sql_list.append("CREATE TABLE stations (stationID INTEGER PRIMARY KEY, stationname TEXT, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT, statuscategory TEXT);")
 
             # Station parameters table
-            sql_list.append("CREATE TABLE stationparameters (stationID INTEGER PRIMARY KEY, crp_pulse_direction TEXT, plotfiles TEXT, crp_plotfiles TEXT, crp_selected_dipoles TEXT, crp_antennas_cleaned_power TEXT, crp_antennas_cleaned_sum_amplitudes TEXT, crp_galactic_noise TEXT, crp_pulse_time TEXT, crp_pulse_delay TEXT, crp_pulse_delay_fit_residual TEXT, crp_dirty_channels TEXT, local_antenna_positions TEXT, crp_bf_pulse_position TEXT, clock_offset TEXT);")
+            sql_list.append("CREATE TABLE stationparameters (stationID INTEGER PRIMARY KEY, crp_pulse_direction TEXT, plotfiles TEXT, crp_plotfiles TEXT, crp_selected_dipoles TEXT, crp_antennas_cleaned_power TEXT, crp_antennas_cleaned_sum_amplitudes TEXT, crp_galactic_noise TEXT, crp_pulse_time TEXT, crp_pulse_delay TEXT, crp_pulse_delay_fit_residual TEXT, crp_dirty_channels TEXT, local_antenna_positions TEXT, itrf_antenna_positions TEXT, crp_bf_pulse_position TEXT, clock_offset TEXT);")
 
             # Polarizations table
             sql_list.append("CREATE TABLE polarizations (polarizationID INTEGER PRIMARY KEY, antennaset TEXT, direction TEXT, status TEXT, resultsfile TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
