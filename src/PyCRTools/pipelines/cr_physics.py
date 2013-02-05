@@ -663,7 +663,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     all_station_pulse_delays.append(station["crp_pulse_delay"])# - station["clock_offset"])
                     all_station_antenna_positions.append(station["local_antenna_positions"])
                     all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
-                    all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"])
+                    all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"]*10**9) #scaling for plotting
                     all_station_rms.append(station.polarization['xyz']["crp_rms"])
                     all_station_names.append(station.stationname)
                     all_station_polarization_angle.append(station.polarization['xyz']["crp_polarization_angle"])
