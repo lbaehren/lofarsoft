@@ -570,7 +570,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             print 'Station: %s' % station.stationname
             print 'BLock nr Lora = %d, max-min sample nr = %d, shift = %d, pulse_start = %d, clock offset = %f' % (block_number_lora, max(f["SAMPLE_NUMBER"]) - min(f["SAMPLE_NUMBER"]), shift, pulse_start, f["CLOCK_OFFSET"][0])
             station["crp_pulse_delay_fit_residual"] = direction_fit_plane_wave.residual_delays.toNumpy()
-            station["itrf_antenna_positions"] = f["ITRFANTENNA_POSITIONS"]
+            station["itrf_antenna_positions"] = f["ITRFANTENNA_POSITIONS"].toNumpy()
             station["local_antenna_positions"] = md.convertITRFToLocal(f["ITRFANTENNA_POSITIONS"]).toNumpy()
             station["clock_offset"] = f["CLOCK_OFFSET"][0]
 
