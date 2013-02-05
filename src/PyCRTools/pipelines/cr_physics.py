@@ -473,8 +473,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             # Get pulse window
             station['crp_bf_pulse_position'] = int(pulse_envelope_bf.meanpos)
-            pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
-            pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + max(options.narrow_search_window_width / 2, pulse_envelope_bf.maxdiff / 2)
+            pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - options.narrow_search_window_width / 2
+            pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + options.narrow_search_window_width / 2
 
             print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
 
@@ -703,14 +703,14 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         ldf_total = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, all_directions=all_station_direction, all_stations=all_station_names, ldf_enable=True, ldf_total_signal=True, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         ldf_power = cr.trun("Shower", positions=all_station_antenna_positions, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_integrated_pulse_power, direction_uncertainties=direction_uncertainties, ldf_enable=True, ldf_integrated_signal=True, ldf_logplot=False, ldf_remove_outliers=False, footprint_enable=False, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
-        
+
         polarization_footprint = cr.trun("Shower",positions=all_station_antenna_positions,signals=all_station_pulse_peak_amplitude,footprint_enable=False,ldf_enable = False ,direction= average_direction,core = core,polarization_angle=all_station_polarization_angle,azimuth_in_distance_bins_enable=False,footprint_polarization_enable=True,save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         # Plot wavefront shape using arrival times (from all_station_pulse_delays)
         try:
             wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
         except ValueError:
-           print "wavefront returned problem"    
+           print "wavefront returned problem"
 
         event.status = "CR_FOUND"
         event.statusmessage = ""
