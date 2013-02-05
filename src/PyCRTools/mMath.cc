@@ -6080,9 +6080,10 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HNumber)(power)()("Integrated pulse power.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_1 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_2 (HInteger)(signal_start)()("Start of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HInteger)(signal_end)()("End of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(noise_power)()("Integrated noise power per sample.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (HNumber)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HInteger)(signal_start)()("Start of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HInteger)(signal_end)()("End of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -6092,6 +6093,7 @@ void HFPP_FUNC_NAME (const NIter snr, const NIter snr_end,
 */
 template <class NIter, class Iter>
 void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
+                     const NIter noise_power, const NIter noise_power_end,
                      const NIter vec, const NIter vec_end,
                      const Iter signal_start, const Iter signal_start_stub,
                      const Iter signal_end, const Iter signal_end_stub)
@@ -6100,12 +6102,10 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   const HInteger n = std::distance(vec, vec_end);
   const HInteger nm = n - (*signal_end - *signal_start);
 
-  // Initialize values
-  HNumber noise_power = 0;
-
   // Get iterator
   NIter it = vec;
   NIter it_power = power;
+  Niter it_noise_power = noise_power;
 
   *it_power = 0;
 
@@ -6135,7 +6135,7 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   it = vec;
   for (HInteger i=0; i<*signal_start; i++)
   {
-    noise_power += (*it * *it);
+    *it_noise_power += (*it * *it);
     it++;
   }
 
@@ -6149,13 +6149,13 @@ void HFPP_FUNC_NAME (const NIter power, const NIter power_end,
   // Noise after signal window
   for (HInteger i=*signal_end; i<n; i++)
   {
-    noise_power += (*it * *it);
+    *it_noise_power += (*it * *it);
     it++;
   }
 
-  *it_power -= noise_power * (static_cast<HNumber>(n - nm) / nm);
+  *it_noise_power /= nm;
 
-  it_power++;
+  *it_power -= *it_noise_power * static_cast<HNumber>(n - nm);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

@@ -630,6 +630,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 polarization['xyz']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_xyz.peak_amplitude).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_integrated_pulse_power"] = cr.hArray(pulse_envelope_xyz.integrated_pulse_power).toNumpy().reshape((nantennas, 3))
+                polarization['xyz']["crp_integrated_noise_power"] = cr.hArray(pulse_envelope_xyz.integrated_noise_power).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
                 polarization['xyz']["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()

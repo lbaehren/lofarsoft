@@ -64,6 +64,8 @@ class PulseEnvelope(Task):
             doc = "Pulse maximum."),
         integrated_pulse_power=dict(default = lambda self: cr.hArray(float, self.nantennas), output = True,
             doc = "Integrated pulse power."),
+        integrated_noise_power=dict(default = lambda self: cr.hArray(float, self.nantennas), output = True,
+            doc = "Integrated noise power per sample."),
         maxpos=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
             doc = "Position of pulse maximum relative to *pulse_start*."),
         maxpos_full=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
@@ -168,9 +170,10 @@ class PulseEnvelope(Task):
         end.copy(self.maxpos_full)
         end += self.pulse_start + 5
 
-        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.timeseries_data[...], start[...], end[...])
+        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.integrated_noise_power[...], self.timeseries_data[...], start[...], end[...])
 
         self.integrated_pulse_power /= self.sampling_frequency
+        self.integrated_noise_power /= self.sampling_frequency
 
         if self.save_plots:
 
