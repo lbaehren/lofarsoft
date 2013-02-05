@@ -68,7 +68,7 @@ class PulseEnvelope(Task):
             doc = "Position of pulse maximum relative to *pulse_start*."),
         maxpos_full=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
             doc = "Position of pulse maximum relative to *pulse_start*."),
-        best=dict(default = lambda self: cr.hMaxPos(self.snr.toNumpy),
+        best=dict(default = lambda self: cr.hMaxPos(self.snr),
             doc = "Antenna with highest signal to noise."),
         bestpos=dict(default = lambda self: self.maxpos[self.best],
             doc = "Position of pulse maximum relative to *pulse_start* in antenna with highest signal to noise."),
