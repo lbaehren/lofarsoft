@@ -472,9 +472,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 continue
 
             # Get pulse window
-            station['crp_bf_pulse_position'] = int(pulse_envelope_bf.meanpos)
-            pulse_start = pulse_search_window_start + int(pulse_envelope_bf.meanpos) - options.narrow_search_window_width / 2
-            pulse_end = pulse_search_window_start + int(pulse_envelope_bf.meanpos) + options.narrow_search_window_width / 2
+            station['crp_bf_pulse_position'] = int(pulse_envelope_bf.bestpos)
+            pulse_start = pulse_search_window_start + int(pulse_envelope_bf.bestpos) - options.narrow_search_window_width / 2
+            pulse_end = pulse_search_window_start + int(pulse_envelope_bf.bestpos) + options.narrow_search_window_width / 2
 
             print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
 
