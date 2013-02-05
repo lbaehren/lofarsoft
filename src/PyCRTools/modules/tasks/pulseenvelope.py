@@ -174,13 +174,13 @@ class PulseEnvelope(Task):
 
         if self.save_plots:
 
+            s = self.timeseries_data_resampled.toNumpy()
+            y = self.envelope.toNumpy()
+            x = 5.e-6 * self.resample_factor * np.arange(y.shape[1])
+
             # Single pulse envelope of first antenna
             for i in self.plot_antennas:
                 plt.clf()
-
-                s = self.timeseries_data_resampled.toNumpy()
-                y = self.envelope.toNumpy()
-                x = 5.e-6 * self.resample_factor * np.arange(y.shape[1])
 
                 plt.plot(x, s[i], linestyle='-', color='#68C8F7', label="Signal")
                 plt.plot(x, y[i], linestyle='-', color='#B30424', label="Envelope")
