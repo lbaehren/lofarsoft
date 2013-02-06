@@ -29,6 +29,7 @@ from pycrtools.tasks import minibeamformer
 from pycrtools.tasks import directionfitplanewave
 from pycrtools.tasks import pulseenvelope
 from pycrtools.tasks import stokesparameters
+from pycrtools.tasks import wavefront
 
 from optparse import OptionParser
 from contextlib import contextmanager
