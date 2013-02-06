@@ -190,9 +190,9 @@ class PulseEnvelope(Task):
                     l_envelope = plt.plot(x, y[i], linestyle='-', color='#B30424', label="Envelope")
                     l_rms = plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'k--', label="RMS")
                 else:
-                    l_signal[0].set_ydata(s[i])
-                    l_envelope[0].set_ydata(y[i])
-                    l_rms[0].set_ydata(np.zeros(y.shape[1]) + self.mean[i] + self.rms[i])
+                    l_signal.set_ydata(s[i])
+                    l_envelope.set_ydata(y[i])
+                    l_rms.set_ydata(np.zeros(y.shape[1]) + self.mean[i] + self.rms[i])
 
                 plt.annotate("pulse maximum", xy=(x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.peak_amplitude[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
