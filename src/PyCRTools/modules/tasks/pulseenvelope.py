@@ -190,7 +190,7 @@ class PulseEnvelope(Task):
                     l_envelope = plt.plot(x, y[i], linestyle='-', color='#B30424', label="Envelope")
                     l_rms = plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'k--', label="RMS")
                 else:
-                    l_sigma.set_ydata(s[i])
+                    l_signal.set_ydata(s[i])
                     l_envelope.set_ydata(y[i])
                     l_rms.set_ydata(np.zeros(y.shape[1]) + self.mean[i] + self.rms[i])
 
