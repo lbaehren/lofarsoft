@@ -26,6 +26,7 @@ from pycrtools.tasks import Task
 import pycrtools as cr
 from pycrtools import srcfind as sf
 from pycrtools import lora
+from pycrtools.tasks import directionfitplanewave
 import os
 import numpy as np
 from scipy.optimize import fmin
