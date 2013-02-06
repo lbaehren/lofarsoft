@@ -46,4 +46,3 @@ class MiniBeamformer(Task):
 
         # Do beamforming
         cr.hBeamformBlock(self.beamformed_fft, self.fft_data, self.frequencies, self.antpos, self.direction_cartesian)
-

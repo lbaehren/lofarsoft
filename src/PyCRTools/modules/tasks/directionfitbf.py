@@ -73,4 +73,3 @@ class DirectionFitBF(Task):
             return -1 * cr.hMax(self.beamformed_timeseries).val()
 
         self.fit_direction = fmin_powell(negative_bf_signal, np.asarray(self.start_direction), maxiter=self.maxiter, xtol=1.0)
-

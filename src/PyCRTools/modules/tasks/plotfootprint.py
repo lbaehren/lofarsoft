@@ -291,23 +291,23 @@ class plotfootprint(tasks.Task):
                 raise TypeError("PlotAntennaLayout: parameter 'sizes' needs to be a number or an hArray of numbers.")
 
             if self.lorapositions:
-                    if self.loracolor is "time":
-                        if self.loraarrivaltimes:
-                            self.loracolor = self.loraarrivaltimes
-                            for i in xrange(len(self.loracolor)):
-                                if self.loracolor[i] == 0:
-                                    self.loracolor[i] += max(self.loracolor)
+                if self.loracolor is "time":
+                    if self.loraarrivaltimes:
+                        self.loracolor = self.loraarrivaltimes
+                        for i in xrange(len(self.loracolor)):
+                            if self.loracolor[i] == 0:
+                                self.loracolor[i] += max(self.loracolor)
 
-                            cr.plt.scatter(self.lorapositions[0].vec(), self.lorapositions[1].vec(), s=self.lsizes, c=self.loracolor, marker=self.lorashape, cmap="winter")
-                    else:
-                        cr.plt.scatter(self.lorapositions[0].vec(), self.lorapositions[1].vec(), s=self.lsizes, c=self.loracolor, marker=self.lorashape)
+                        cr.plt.scatter(self.lorapositions[0].vec(), self.lorapositions[1].vec(), s=self.lsizes, c=self.loracolor, marker=self.lorashape, cmap="winter")
+                else:
+                    cr.plt.scatter(self.lorapositions[0].vec(), self.lorapositions[1].vec(), s=self.lsizes, c=self.loracolor, marker=self.lorashape)
 
             if self.loracore:
 
                 if type(self.loracolor) is str:
-                     cr.plt.scatter(self.loracore[0], self.loracore[1], marker='x', s=600, color=self.loracolor, linewidth=4)
+                    cr.plt.scatter(self.loracore[0], self.loracore[1], marker='x', s=600, color=self.loracolor, linewidth=4)
                 else:
-                     cr.plt.scatter(self.loracore[0], self.loracore[1], marker='x', s=600, color="#151B8D", linewidth=4)
+                    cr.plt.scatter(self.loracore[0], self.loracore[1], marker='x', s=600, color="#151B8D", linewidth=4)
 
                 if self.loradirection:
                     dcos = cr.cos(cr.radians(self.loradirection[0]))
@@ -379,26 +379,26 @@ class plotfootprint(tasks.Task):
                 self.plot_name = self.filefilter + "/" + name_extension
                 if self.save_images:
 
-                   cr.plt.savefig(self.plot_name)
+                    cr.plt.savefig(self.plot_name)
 
             if self.generate_html:
-                    status = "new"
-                    check_file = open(self.filefilter + 'index.html', 'r')
-                    for line in check_file:
-                        if "footprint_pol" + str(self.pol) in line:
-                            status = "filled"
-                    check_file.close()
+                status = "new"
+                check_file = open(self.filefilter + 'index.html', 'r')
+                for line in check_file:
+                    if "footprint_pol" + str(self.pol) in line:
+                        status = "filled"
+                check_file.close()
 
-                    if status == "new":
-                        html_file = open(self.filefilter + 'index.html', 'a')
-                        name = "pol" + str(self.pol) + "/pycrfig-0001-" + name_extension + ".png"
+                if status == "new":
+                    html_file = open(self.filefilter + 'index.html', 'a')
+                    name = "pol" + str(self.pol) + "/pycrfig-0001-" + name_extension + ".png"
 
-                        html_file.write("\n<a name=\"%s" % name)
-                        html_file.write("\" href=\"%s" % name)
-                        html_file.write("\">%s</a> <br>" % name)
-                        html_file.write("\n<a href=\"%s" % name)
-                        html_file.write("\"><img src=\"%s\" width=800></a><br>" % name)
-                        html_file.close()
+                    html_file.write("\n<a name=\"%s" % name)
+                    html_file.write("\" href=\"%s" % name)
+                    html_file.write("\">%s</a> <br>" % name)
+                    html_file.write("\n<a href=\"%s" % name)
+                    html_file.write("\"><img src=\"%s\" width=800></a><br>" % name)
+                    html_file.close()
 
             if not self.save_images:
                 cr.plt.show()

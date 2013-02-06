@@ -164,4 +164,3 @@ class FindPulseDelay(Task):
         if self.refant is not None:
             print "using reference antenna", self.refant
             self.delays -= self.delays[self.refant]
-

@@ -184,7 +184,7 @@ class Wavefront(Task):
         else:
             times = self.arrivaltimes.toNumpy()
         if isinstance(self.positions,np.ndarray):
-             positions2D = self.positions
+            positions2D = self.positions
         else:
             positions2D = self.positions.toNumpy()
         positions = positions2D.ravel()

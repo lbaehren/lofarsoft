@@ -384,4 +384,3 @@ class CalibrateFM(Task):
         self.strongestFrequency = freqs[bestchannel]
         self.bestPhaseRMS = self.median_phase_spreads[bestchannel]
         self.timestamp = self.f["TIME"][0]
-

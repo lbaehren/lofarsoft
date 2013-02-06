@@ -67,22 +67,22 @@ def loraInfo(lora_second, datadir="/data/VHECR/LORAtriggered/LORA/", checkSurrou
         # print os.path.isfile(datadir+filename)
         if not os.path.isfile(datadir + filename):
             if checkSurroundingSecond:
-               if not silent:
-                   print "Unable to find file, looking at neighbouring seconds"
-               timestr = time.strftime("%Y%m%dT%H%M%S", time.gmtime(lora_second + 1))
-               filename = "LORAdata-" + timestr + ".dat"
-               if not silent:
-                  print "file was not there. Now checking file", datadir + filename
-               if not os.path.isfile(datadir + filename):
-                  timestr = time.strftime("%Y%m%dT%H%M%S", time.gmtime(lora_second - 1))
-                  filename = "LORAdata-" + timestr + ".dat"
-                  if not silent:
-                     print "file was not there. Now checking file", datadir + filename
-                  if not os.path.isfile(datadir + filename):
-                     print "File does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file"
-                     return None
+                if not silent:
+                    print "Unable to find file, looking at neighbouring seconds"
+                timestr = time.strftime("%Y%m%dT%H%M%S", time.gmtime(lora_second + 1))
+                filename = "LORAdata-" + timestr + ".dat"
+                if not silent:
+                    print "file was not there. Now checking file", datadir + filename
+                if not os.path.isfile(datadir + filename):
+                    timestr = time.strftime("%Y%m%dT%H%M%S", time.gmtime(lora_second - 1))
+                    filename = "LORAdata-" + timestr + ".dat"
+                    if not silent:
+                        print "file was not there. Now checking file", datadir + filename
+                    if not os.path.isfile(datadir + filename):
+                        print "File does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file"
+                        return None
             else:
-	        print "1 File", datadir + filename, "does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file. If the timestamp is just one second off you can try it again with set checkSurroundingSeconds = True"
+                print "1 File", datadir + filename, "does not exist. Either the directory is wrong,the LORA event is not yet processed or there was no LORA trigger for this file. If the timestamp is just one second off you can try it again with set checkSurroundingSeconds = True"
                 return None
     else:
         filename = lora_second
@@ -171,13 +171,13 @@ def nsecFromSec(lora_second, logfile="/data/VHECR/LORAtriggered/LORA/LORAtime4")
         lspl = l.split()
         p[int(lspl[0])] = int(lspl[1])
     if lora_second in p.keys():
-       return (lora_second, p[lora_second])
+        return (lora_second, p[lora_second])
     elif lora_second - 1 in p.keys():
-       return (lora_second - 1, p[lora_second - 1])
+        return (lora_second - 1, p[lora_second - 1])
     elif lora_second + 1 in p.keys():
-       return (lora_second + 1, p[lora_second + 1])
+        return (lora_second + 1, p[lora_second + 1])
     else:
-       return (None, None)
+        return (None, None)
 
 
 def plotReceived(logfile="/data/VHECR/LORAtriggered/LORA/LORAreceived", days_to_average=1, cumulative=True, plotAllowed=True, plotNotAllowed=True, plotNoObservation=True, stacked=True):

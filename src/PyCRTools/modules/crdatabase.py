@@ -849,7 +849,7 @@ class CRDatabase(object):
             else:
                 print "Unable to unlock the database."
         else:
-           print "Database is already unlocked."
+            print "Database is already unlocked."
 
     def summary(self):
         """Summary of the CRDatabase object."""

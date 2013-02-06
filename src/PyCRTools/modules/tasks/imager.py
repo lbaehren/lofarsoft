@@ -213,7 +213,7 @@ class Imager(Task):
                 cr.hBeamformImage(self.t_image, self.fftdata, self.frequencies, self.delays)
 
                 if self.intgrfreq:
-                    cr.hFrequencyIntegratedImage(self.image[tstep], self.t_image)                    
+                    cr.hFrequencyIntegratedImage(self.image[tstep], self.t_image)
                 elif self.inversefft:
                     cr.hFFTWExecutePlan(self.t_image2, self.t_image, self.plan)
                     cr.hSquareAddTransposed(self.image[tstep], self.t_image2, self.blocksize)

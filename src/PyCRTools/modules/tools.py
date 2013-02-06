@@ -91,8 +91,8 @@ def applyLORAcuts(core, moliere, elevation):
 
 
 def spaceAngle(zen1, az1, zen2, az2):
-  return np.arccos(np.sin(zen1) * np.sin(zen2) * np.cos(az1 - az2)
-              + np.cos(zen1) * np.cos(zen2))
+    return np.arccos(np.sin(zen1) * np.sin(zen2) * np.cos(az1 - az2)
+                + np.cos(zen1) * np.cos(zen2))
 
 
 def select_quadrant(antenna_coordinates, core_position, rotation=45.0):

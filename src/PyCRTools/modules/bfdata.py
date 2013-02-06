@@ -111,64 +111,64 @@ class BFDataReader():
             print "More than one datatype in observation. Select the one you want to read with setDatatype(type), where type is incoherentstokes, coherentstokes or rawvoltage"
 
     def setDatatype(self, type):
-            if type == "incoherentstokes":
-                if self.par["stokestype"] == "I":
-                    print "Changing datatype to: incoherentstokes I"
-                    self.datatype = "IncoherentStokesI"
-                    self.files = []
+        if type == "incoherentstokes":
+            if self.par["stokestype"] == "I":
+                print "Changing datatype to: incoherentstokes I"
+                self.datatype = "IncoherentStokesI"
+                self.files = []
+                for file in self.par["files"]:
+                    if '.incoherentstokes' in file and os.path.isfile(file):
+                        self.files.append(open(file))
+                if self.h5:
                     for file in self.par["files"]:
-                         if '.incoherentstokes' in file and os.path.isfile(file):
-                              self.files.append(open(file))
-                    if self.h5:
-                        for file in self.par["files"]:
-                            if '.h5' in file and os.path.isfile(file[0:-3] + '.raw') and file[0:-3] + '.raw' not in self.par['files']:
-                                self.files.append(open(file[0:-3] + '.raw'))
-                    self.data = np.zeros((self.samples, self.channels * len(self.files)))
-                if self.par["stokestype"] == "IQUV":
-                    print "Changing datatype to: incoherentstokes IQUV"
-                    self.datatype = "IncoherentStokesIQUV"
-                    self.files = []
+                        if '.h5' in file and os.path.isfile(file[0:-3] + '.raw') and file[0:-3] + '.raw' not in self.par['files']:
+                            self.files.append(open(file[0:-3] + '.raw'))
+                self.data = np.zeros((self.samples, self.channels * len(self.files)))
+            if self.par["stokestype"] == "IQUV":
+                print "Changing datatype to: incoherentstokes IQUV"
+                self.datatype = "IncoherentStokesIQUV"
+                self.files = []
+                for file in self.par["files"]:
+                    if '.incoherentstokes' in file and os.path.isfile(file):
+                        self.files.append(open(file))
+                if self.h5:
                     for file in self.par["files"]:
-                         if '.incoherentstokes' in file and os.path.isfile(file):
-                              self.files.append(open(file))
-                    if self.h5:
-                        for file in self.par["files"]:
-                            if '.h5' in file and os.path.isfile(file[0:-3] + '.raw'):
-                                self.files.append(open(file[0:-3] + '.raw'))
-                    self.data = np.zeros((4, self.samples, self.channels * len(self.files)))
-            elif type == "coherentstokes":
-                if self.par["stokestype"] == "I":
-                    print "Changing datatype to: coherentstokes I"
-                    self.datatype = "CoherentStokesI"
-                    self.files = []
+                        if '.h5' in file and os.path.isfile(file[0:-3] + '.raw'):
+                            self.files.append(open(file[0:-3] + '.raw'))
+                self.data = np.zeros((4, self.samples, self.channels * len(self.files)))
+        elif type == "coherentstokes":
+            if self.par["stokestype"] == "I":
+                print "Changing datatype to: coherentstokes I"
+                self.datatype = "CoherentStokesI"
+                self.files = []
+                for file in self.par["files"]:
+                    if '.raw' in file and os.path.isfile(file):
+                        self.files.append(open(file))
+                if self.h5:
                     for file in self.par["files"]:
-                        if '.raw' in file and os.path.isfile(file):
-                            self.files.append(open(file))
-                    if self.h5:
-                        for file in self.par["files"]:
-                            if '.h5' in file and os.path.isfile(file[0:-3] + '.raw') and file[0:-3] + '.raw' not in self.par['files']:
-                                self.files.append(open(file[0:-3] + '.raw'))
-                    self.data = np.zeros((len(self.files), self.samples, self.channels * self.nrsubbands))
-                elif self.par["stokestype"] == "IQUV":
-                    print "Changing datatype to: coherentstokes IQUV"
-                    self.datatype = "CoherentStokesIQUV"
-                    self.files = []
+                        if '.h5' in file and os.path.isfile(file[0:-3] + '.raw') and file[0:-3] + '.raw' not in self.par['files']:
+                            self.files.append(open(file[0:-3] + '.raw'))
+                self.data = np.zeros((len(self.files), self.samples, self.channels * self.nrsubbands))
+            elif self.par["stokestype"] == "IQUV":
+                print "Changing datatype to: coherentstokes IQUV"
+                self.datatype = "CoherentStokesIQUV"
+                self.files = []
+                for file in self.par["files"]:
+                    if '.raw' in file and os.path.isfile(file):
+                        self.files.append(open(file))
+                if self.h5:
                     for file in self.par["files"]:
-                         if '.raw' in file and os.path.isfile(file):
-                              self.files.append(open(file))
-                    if self.h5:
-                        for file in self.par["files"]:
-                            if '.h5' in file and os.path.isfile(file[0:-3] + '.raw'):
-                                self.files.append(open(file[0:-3] + '.raw'))
-            elif type == "complexvoltage":
-                self.datatype = "ComplexVoltage"
-                self.samples = self.par["samples"]
-            else:
-                print "Invalide type"
-                return False
-            print "datatype set to", self.datatype
-            print "nr files", len(self.files)
-            return True
+                        if '.h5' in file and os.path.isfile(file[0:-3] + '.raw'):
+                            self.files.append(open(file[0:-3] + '.raw'))
+        elif type == "complexvoltage":
+            self.datatype = "ComplexVoltage"
+            self.samples = self.par["samples"]
+        else:
+            print "Invalide type"
+            return False
+        print "datatype set to", self.datatype
+        print "nr files", len(self.files)
+        return True
 
     def read(self, block):
         if self.datatype is "IncoherentStokesI":
@@ -188,54 +188,54 @@ class BFDataReader():
         return self.data
 
     def useAccessibleFiles(self, type):
-            if type == "incoherentstokes":
-                if self.par["stokestype"] == "I":
-                    print "Changing datatype to: incoherentstokes I"
-                    self.datatype = "IncoherentStokesI"
-                    self.files = []
-                    for file1 in self.par["files"]:
-                      for file in os.listdir(getDir(file1, self.obsID)):
-                         if '.incoherentstokes' in file and os.path.isfile(file) and file not in [f.name for f in self.files]:
-                              self.files.append(open(file))
-                    self.data = np.zeros((self.samples, self.channels * len(self.files)))
-                if self.par["stokestype"] == "IQUV":
-                    print "Changing datatype to: incoherentstokes IQUV"
-                    self.datatype = "IncoherentStokesIQUV"
-                    self.files = []
-                    for file1 in self.par["files"]:
-                      for file in os.listdir(getDir(file1, self.obsID)):
-                         if '.incoherentstokes' in file and os.path.isfile(file) and file not in [f.name for f in self.files]:
-                              self.files.append(open(file))
-                    self.data = np.zeros((4, self.samples, self.channels * len(self.files)))
-            elif type == "coherentstokes":
-                if self.par["stokestype"] == "I":
-                    print "Changing datatype to: coherentstokes I"
-                    self.datatype = "CoherentStokesI"
-                    self.files = []
-                    tempdirs = set([getDir(file1, self.obsID) for file1 in self.par["files"]])
-                    for tempdir in tempdirs:
-                      if os.path.isdir(tempdir):
+        if type == "incoherentstokes":
+            if self.par["stokestype"] == "I":
+                print "Changing datatype to: incoherentstokes I"
+                self.datatype = "IncoherentStokesI"
+                self.files = []
+                for file1 in self.par["files"]:
+                    for file in os.listdir(getDir(file1, self.obsID)):
+                        if '.incoherentstokes' in file and os.path.isfile(file) and file not in [f.name for f in self.files]:
+                            self.files.append(open(file))
+                self.data = np.zeros((self.samples, self.channels * len(self.files)))
+            if self.par["stokestype"] == "IQUV":
+                print "Changing datatype to: incoherentstokes IQUV"
+                self.datatype = "IncoherentStokesIQUV"
+                self.files = []
+                for file1 in self.par["files"]:
+                    for file in os.listdir(getDir(file1, self.obsID)):
+                        if '.incoherentstokes' in file and os.path.isfile(file) and file not in [f.name for f in self.files]:
+                            self.files.append(open(file))
+                self.data = np.zeros((4, self.samples, self.channels * len(self.files)))
+        elif type == "coherentstokes":
+            if self.par["stokestype"] == "I":
+                print "Changing datatype to: coherentstokes I"
+                self.datatype = "CoherentStokesI"
+                self.files = []
+                tempdirs = set([getDir(file1, self.obsID) for file1 in self.par["files"]])
+                for tempdir in tempdirs:
+                    if os.path.isdir(tempdir):
                         for file in os.listdir(tempdir):
-                         if '.raw' in file and os.path.isfile(tempdir + file) and file not in [f.name for f in self.files]:
-                              self.files.append(open(tempdir + file))
-                    self.data = np.zeros((len(self.files), self.samples, self.channels * self.nrsubbands))
-                elif self.par["stokestype"] == "IQUV":
-                    print "Changing datatype to: coherentstokes IQUV"
-                    self.datatype = "CoherentStokesIQUV"
-                    self.files = []
-                    for file1 in self.par["files"]:
-                      for file in os.listdir(getDir(file1, self.obsID)):
-                         if '.raw' in file and os.path.isfile(file) and file not in [f.name for f in self.files]:
-                              self.files.append(open(file))
-            elif type == "complexvoltage":
-                self.datatype = "ComplexVoltage"
-                self.samples = self.par["samples"]
-            else:
-                print "Invalide type"
-                return False
-            print "datatype set to", self.datatype
-            print "nr files", len(self.files)
-            return True
+                            if '.raw' in file and os.path.isfile(tempdir + file) and file not in [f.name for f in self.files]:
+                                self.files.append(open(tempdir + file))
+                self.data = np.zeros((len(self.files), self.samples, self.channels * self.nrsubbands))
+            elif self.par["stokestype"] == "IQUV":
+                print "Changing datatype to: coherentstokes IQUV"
+                self.datatype = "CoherentStokesIQUV"
+                self.files = []
+                for file1 in self.par["files"]:
+                    for file in os.listdir(getDir(file1, self.obsID)):
+                        if '.raw' in file and os.path.isfile(file) and file not in [f.name for f in self.files]:
+                            self.files.append(open(file))
+        elif type == "complexvoltage":
+            self.datatype = "ComplexVoltage"
+            self.samples = self.par["samples"]
+        else:
+            print "Invalide type"
+            return False
+        print "datatype set to", self.datatype
+        print "nr files", len(self.files)
+        return True
 
     def setblocksize(self, blocksize):
         self.samples = blocksize
@@ -309,12 +309,12 @@ def get_stokes_data(file, block, channels, samples, nrsubbands=1, type="StokesI"
         print "h5=", h5
         if not put_file_at_sequence(file, block, szD, h5):  # searches for block with sequencence nr block in the data.returns false if sequence number not available. Otherwise put filepointer after header of this block
             if h5:
-                 if noSubbandAxis:
-                      data = np.zeros((samples, channels * nrsubbands))
-                 else:
-                      data = np.zeros((samples, nrsubbands, channels))
+                if noSubbandAxis:
+                    data = np.zeros((samples, channels * nrsubbands))
+                else:
+                    data = np.zeros((samples, nrsubbands, channels))
             else:
-                 data = np.zeros((nrStokes, channels, samples))
+                data = np.zeros((nrStokes, channels, samples))
             return data
 
     # read data from file
@@ -1245,39 +1245,39 @@ def get_parameters_new(obsid, useFilename=False):  # svn version
                     name2 = name + '_S' + str(pol) + '_P000_bf.raw'
                     names.append(name2)
         elif "Observation.DataProducts.Output_CoherentStokes.filenames" in allparameters.keys():
-             DPprefix = "Observation.DataProducts.Output_CoherentStokes."
-             if "OLAP.IncoherentStokesAreTransposed" in allparameters.keys():
-                 DPprefix = "Observation.DataProducts.Output_Beamformed."
-             DPfilenames = allparameters[DPprefix + "filenames"].strip('[]').split(',')
-             DPdir = allparameters[DPprefix + 'locations'].strip('[]').split(':')[1].split(',')[0]
-             DPfulldir = allparameters[DPprefix + 'locations'].strip('[]').split(',')
-             for num, name in enumerate(DPfilenames):
-                 names.append(DPdir + name)
-                 fullnames.append(DPfulldir[num % len(DPfulldir)] + name)
+            DPprefix = "Observation.DataProducts.Output_CoherentStokes."
+            if "OLAP.IncoherentStokesAreTransposed" in allparameters.keys():
+                DPprefix = "Observation.DataProducts.Output_Beamformed."
+            DPfilenames = allparameters[DPprefix + "filenames"].strip('[]').split(',')
+            DPdir = allparameters[DPprefix + 'locations'].strip('[]').split(':')[1].split(',')[0]
+            DPfulldir = allparameters[DPprefix + 'locations'].strip('[]').split(',')
+            for num, name in enumerate(DPfilenames):
+                names.append(DPdir + name)
+                fullnames.append(DPfulldir[num % len(DPfulldir)] + name)
 
     if parameters["incoherentstokes"]:
-            sb = 0
-            for i in range(len(parameters["storagenodes"])):
-                node = parameters["storagenodes"][i]
-                nrpernode = parameters["sbspernode"][i]
-                if "namemask" in parameters.keys():
-                    mask = parameters["namemask"]
-                    for j in range(int(nrpernode)):
-                        name = '/net/' + subcluster[node] + '/' + node
-                        name = name + mask.replace('${YEAR}_${MSNUMBER}', year + '_' + parameters['obsid']).replace('/SB${SUBBAND}', '/L' + parameters['obsid'] + '_SB' + sb2str(sb))
-                        name = name + '_bf.incoherentstokes'
-                        names.append(name)
-                        sb += 1
-                elif "Observation.DataProducts.Output_IncoherentStokes.filenames" in allparameters.keys():
-                     DPprefix = "Observation.DataProducts.Output_IncoherentStokes."
-                     if "OLAP.IncoherentStokesAreTransposed" in allparameters.keys():
-                         DPprefix = "Observation.DataProducts.Output_Beamformed."
-                     DPfilenames = allparameters[DPprefix + "filenames"].strip('[]').split(',')
-                     DPdir = allparameters[DPprefix + 'locations'].strip('[]').split(':')[1].split(',')[0]
-                     DPfulldir = allparameters[DPprefix + 'locations'].strip('[]').split(',')
-                     for num, name in enumerate(DPfilenames):
-                         names.append(DPdir + name)
-                         fullnames.append(DPfulldir[num % len(DPfulldir)] + name)
+        sb = 0
+        for i in range(len(parameters["storagenodes"])):
+            node = parameters["storagenodes"][i]
+            nrpernode = parameters["sbspernode"][i]
+            if "namemask" in parameters.keys():
+                mask = parameters["namemask"]
+                for j in range(int(nrpernode)):
+                    name = '/net/' + subcluster[node] + '/' + node
+                    name = name + mask.replace('${YEAR}_${MSNUMBER}', year + '_' + parameters['obsid']).replace('/SB${SUBBAND}', '/L' + parameters['obsid'] + '_SB' + sb2str(sb))
+                    name = name + '_bf.incoherentstokes'
+                    names.append(name)
+                    sb += 1
+            elif "Observation.DataProducts.Output_IncoherentStokes.filenames" in allparameters.keys():
+                DPprefix = "Observation.DataProducts.Output_IncoherentStokes."
+                if "OLAP.IncoherentStokesAreTransposed" in allparameters.keys():
+                    DPprefix = "Observation.DataProducts.Output_Beamformed."
+                DPfilenames = allparameters[DPprefix + "filenames"].strip('[]').split(',')
+                DPdir = allparameters[DPprefix + 'locations'].strip('[]').split(':')[1].split(',')[0]
+                DPfulldir = allparameters[DPprefix + 'locations'].strip('[]').split(',')
+                for num, name in enumerate(DPfilenames):
+                    names.append(DPdir + name)
+                    fullnames.append(DPfulldir[num % len(DPfulldir)] + name)
 
     if parameters["beamformeddata"]:
         sb = 0
@@ -1293,13 +1293,13 @@ def get_parameters_new(obsid, useFilename=False):  # svn version
                     name = name + '_S' + str(pol) + '_bf.raw'
                     names.append(name)
                 elif "Observation.DataProducts.Output_Beamformed.locations" in allparameters.keys():
-                     DPprefix = "Observation.DataProducts.Output_Beamformed."
-                     DPfilenames = allparameters[DPprefix + "filenames"].strip('[]').split(',')
-                     DPdir = allparameters[DPprefix + 'locations'].strip('[]').split(':')[1].split(',')[0]
-                     DPfulldir = allparameters[DPprefix + 'locations'].strip('[]').split(',')
-                     for num, name in enumerate(DPfilenames):
-                         names.append(DPdir + name)
-                         fullnames.append(DPfulldir[num % len(DPfulldir)] + name)
+                    DPprefix = "Observation.DataProducts.Output_Beamformed."
+                    DPfilenames = allparameters[DPprefix + "filenames"].strip('[]').split(',')
+                    DPdir = allparameters[DPprefix + 'locations'].strip('[]').split(':')[1].split(',')[0]
+                    DPfulldir = allparameters[DPprefix + 'locations'].strip('[]').split(',')
+                    for num, name in enumerate(DPfilenames):
+                        names.append(DPdir + name)
+                        fullnames.append(DPfulldir[num % len(DPfulldir)] + name)
 
     if parameters["correlateddata"]:
         sb = 0

@@ -563,8 +563,8 @@ class TaskInit(type):
                 if isinstance(v[sc.default], (str, unicode, basestring)):
                     par_doc += "'" + par_doc_default + "'"
                 else:
-                   if par_doc_default:
-                       par_doc += "``" + par_doc_default + "``"
+                    if par_doc_default:
+                        par_doc += "``" + par_doc_default + "``"
                 par_doc += "]"
             par_doc += newline
             # Check for documentation
@@ -816,10 +816,10 @@ class Task(object):
                                 execution_time=self["tduration"])
                            )
 
-	if retval == None:
-	    return self
-	else:
-	    return retval
+        if retval == None:
+            return self
+        else:
+            return retval
 
     def __getitem__(self, par):
         """
@@ -851,19 +851,19 @@ class Task(object):
 
         Task.get(name) will retrieve the parameters stored under 'name'
 
-	*delete* = False - If True the database entry will be deleted.
+        *delete* = False - If True the database entry will be deleted.
 
         """
         # # Open task database
         taskdb = shelve.open(dbfile)
 
-	if not name == "":
-	    name = "_" + str(name)
+        if not name == "":
+            name = "_" + str(name)
 
-	if delete:
-	    del taskdb[self.__taskname__ + name]
-	else:
-	    taskdb[self.__taskname__ + name] = self.ws.getInputParametersDict()
+        if delete:
+            del taskdb[self.__taskname__ + name]
+        else:
+            taskdb[self.__taskname__ + name] = self.ws.getInputParametersDict()
 
         taskdb.close()
 
@@ -876,25 +876,25 @@ class Task(object):
         task.put(name) will store the parameters under the keyword
         name and can be retrieved with put under this name.
 
-	If the name is not known a list of all known names is given.
+        If the name is not known a list of all known names is given.
         """
         # # Open task database
         taskdb = shelve.open(dbfile)
 
-	if not name == "":
-	    name = "_" + str(name)
+        if not name == "":
+            name = "_" + str(name)
 
         if self.__taskname__ + name in taskdb:
             # Restoring from database
             args = taskdb[self.__taskname__ + name]
             self.ws(**args)
-	    retval = True
-	else:
-	    print "Available parameter sets:\n-------------------------\n", ", ".join(taskdb.keys()), "\n"
-	    retval = False
+            retval = True
+        else:
+            print "Available parameter sets:\n-------------------------\n", ", ".join(taskdb.keys()), "\n"
+            retval = False
 
         taskdb.close()
-	return retval
+        return retval
 
     def reset(self, restorecallparameters=False, init=True, **args):
         """
@@ -909,7 +909,7 @@ class Task(object):
         -> reset all parameters to their state at initialization, but
         keep the parameters provided during the last initialisation.
 
-	*init* = True - If False, don't force a re-run of the init routine.
+        *init* = True - If False, don't force a re-run of the init routine.
         """
         self.ws.reset(restorecallparameters=restorecallparameters)
         self.ws.__init__(**args)
@@ -1858,11 +1858,11 @@ class WorkSpace(object):
         pars = sorted(self.parameter_properties.items())
         for p, v in pars:
             if hasattr(self, "_" + p):
-		val = getattr(self, "_" + p)
+                val = getattr(self, "_" + p)
             else:
-		val = "'UNDEFINED'"
-	    if type(val) in cr.hAllContainerTypes:
-		val = val.__repr__(8)
+                val = "'UNDEFINED'"
+            if type(val) in cr.hAllContainerTypes:
+                val = val.__repr__(8)
             if (sc.positional in v) and (v[sc.positional]):
                 s += "# {0:s} = {1!r} - {2:s}".format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
             if (sc.export in v) and (not v[sc.export]):
@@ -1878,7 +1878,7 @@ class WorkSpace(object):
                         deps = " <- [" + ", ".join(v[sc.dependencies]) + "]"
                     else:
                         deps = ""
-		    s2 += ("# {2:s}\n# {0:s} = {1!r}" + deps).format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
+                    s2 += ("# {2:s}\n# {0:s} = {1!r}" + deps).format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
             elif noninputparameters:
                 if sc.dependencies in v:
                     deps = " <- [" + ", ".join(v[sc.dependencies]) + "]"

@@ -88,4 +88,3 @@ class AntennaResponse(Task):
             else:
                 print "unfolding antenna pattern (backwards)"
                 cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...], self.jones_matrix)
-

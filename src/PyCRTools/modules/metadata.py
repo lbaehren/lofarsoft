@@ -1337,7 +1337,7 @@ def getStationPositions(station, antennaset, return_as_hArray=False, coordinates
     f = open(filename, 'r')
 
     if 'HBA_DUAL' in antennaset:
-            antennaset = "HBA"
+        antennaset = "HBA"
 
     if "LBA" in antennaset:
         antennaset = "LBA"

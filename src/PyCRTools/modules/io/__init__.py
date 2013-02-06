@@ -42,9 +42,9 @@ def open(filename, *args, **kwargs):
             else:
                 ext = list(ext)[0]
     else:
-       filename = os.path.expandvars(os.path.expanduser(filename))
-       # Get file extension to determine type
-       ext = filename.split(".")[-1].strip().lower()
+        filename = os.path.expandvars(os.path.expanduser(filename))
+        # Get file extension to determine type
+        ext = filename.split(".")[-1].strip().lower()
 
     if ext == "h5":
         # Open file with LOFAR TBB data

@@ -95,4 +95,3 @@ class GalacticNoise(Task):
 
             # Correct FFT data
             cr.hMul(self.fft_data[...], self.correction_factor[...])
-

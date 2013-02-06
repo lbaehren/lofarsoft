@@ -151,7 +151,7 @@ class BeamData(IOInterface):
             key = self.keys()
             key = sorted([k for k in key if 'EMPTY' not in k])
         else:
-             key = ['FILENAMES', 'TBB_TIME_HR', 'DATA_LENGTH', 'DATA_LENGTH_TIME', 'STATION_NAME', 'NOF_BEAM_DATASETS', 'BEAM_POINTINGS']
+            key = ['FILENAMES', 'TBB_TIME_HR', 'DATA_LENGTH', 'DATA_LENGTH_TIME', 'STATION_NAME', 'NOF_BEAM_DATASETS', 'BEAM_POINTINGS']
 
         output = '[Beam Data] Summary of object properties'
         if show:

@@ -552,86 +552,86 @@ class ldf(tasks.Task):
 
         if self.Draw3D:
 
-                from mpl_toolkits.mplot3d import Axes3D
-                from matplotlib import cm
+            from mpl_toolkits.mplot3d import Axes3D
+            from matplotlib import cm
 
-                # Polarization 0
+            # Polarization 0
 
-                fig0 = cr.plt.figure()
-                ax0 = Axes3D(fig0)
-                # ax0 = fig0.gca(projection='3d')
+            fig0 = cr.plt.figure()
+            ax0 = Axes3D(fig0)
+            # ax0 = fig0.gca(projection='3d')
 
-                pos0 = cr.hArray(copy=self.positions0)
-                posX0 = cr.hArray_transpose(pos0)[0].vec()
-                posY0 = cr.hArray_transpose(pos0)[1].vec()
+            pos0 = cr.hArray(copy=self.positions0)
+            posX0 = cr.hArray_transpose(pos0)[0].vec()
+            posY0 = cr.hArray_transpose(pos0)[1].vec()
 
-                sig0 = cr.hArray(copy=self.signals0)
+            sig0 = cr.hArray(copy=self.signals0)
 
-                core = cr.hArray(copy=self.loracore)
+            core = cr.hArray(copy=self.loracore)
 
-                posX0 = posX0 - core[0]
-                posY0 = posY0 - core[1]
+            posX0 = posX0 - core[0]
+            posY0 = posY0 - core[1]
 
-                alpha0 = posY0 / posX0
+            alpha0 = posY0 / posX0
 
-                alpha0.atan()
+            alpha0.atan()
 
-                sinalpha0 = cr.hArray(copy=alpha0)
-                sinalpha0.sin()
-                cosalpha0 = cr.hArray(copy=alpha0)
-                cosalpha0.cos()
+            sinalpha0 = cr.hArray(copy=alpha0)
+            sinalpha0.sin()
+            cosalpha0 = cr.hArray(copy=alpha0)
+            cosalpha0.cos()
 
-                Dist0 = cr.hArray(self.Distances0)
+            Dist0 = cr.hArray(self.Distances0)
 
-                cosalpha0.mul(Dist0)
-                sinalpha0.mul(Dist0)
+            cosalpha0.mul(Dist0)
+            sinalpha0.mul(Dist0)
 
-                ax0.scatter(cosalpha0, sinalpha0, sig0, color=self.color_pol0, marker=self.marker_pol0)
-                # ax0.contour(cosalpha0, sinalpha0, sig0)
+            ax0.scatter(cosalpha0, sinalpha0, sig0, color=self.color_pol0, marker=self.marker_pol0)
+            # ax0.contour(cosalpha0, sinalpha0, sig0)
 
-                ax0.set_xlabel('East')
-                ax0.set_ylabel('North')
-                ax0.w_zaxis.set_scale("log")
-                ax0.set_zlabel('Power [a.u.]')
+            ax0.set_xlabel('East')
+            ax0.set_ylabel('North')
+            ax0.w_zaxis.set_scale("log")
+            ax0.set_zlabel('Power [a.u.]')
 
-                # Polarization 1
+            # Polarization 1
 
-                fig1 = cr.plt.figure()
-                ax1 = Axes3D(fig1)
+            fig1 = cr.plt.figure()
+            ax1 = Axes3D(fig1)
 
-                pos1 = cr.hArray(copy=self.positions1)
-                posX1 = cr.hArray_transpose(pos1)[0].vec()
-                posY1 = cr.hArray_transpose(pos1)[1].vec()
+            pos1 = cr.hArray(copy=self.positions1)
+            posX1 = cr.hArray_transpose(pos1)[0].vec()
+            posY1 = cr.hArray_transpose(pos1)[1].vec()
 
-                sig1 = cr.hArray(copy=self.signals1)
+            sig1 = cr.hArray(copy=self.signals1)
 
-                core = cr.hArray(copy=self.loracore)
+            core = cr.hArray(copy=self.loracore)
 
-                posX1 = posX1 - core[0]
-                posY1 = posY1 - core[1]
+            posX1 = posX1 - core[0]
+            posY1 = posY1 - core[1]
 
-                alpha1 = posY1 / posX1
+            alpha1 = posY1 / posX1
 
-                alpha1.atan()
+            alpha1.atan()
 
-                sinalpha1 = cr.hArray(copy=alpha1)
-                sinalpha1.sin()
-                cosalpha1 = cr.hArray(copy=alpha1)
-                cosalpha1.cos()
+            sinalpha1 = cr.hArray(copy=alpha1)
+            sinalpha1.sin()
+            cosalpha1 = cr.hArray(copy=alpha1)
+            cosalpha1.cos()
 
-                Dist1 = cr.hArray(self.Distances1)
+            Dist1 = cr.hArray(self.Distances1)
 
-                cosalpha1.mul(Dist1)
-                sinalpha1.mul(Dist1)
+            cosalpha1.mul(Dist1)
+            sinalpha1.mul(Dist1)
 
-                ax1.scatter(cosalpha1, sinalpha1, sig1, color=self.color_pol1, marker=self.marker_pol1)
+            ax1.scatter(cosalpha1, sinalpha1, sig1, color=self.color_pol1, marker=self.marker_pol1)
 
-                ax1.set_xlabel('East')
-                ax1.set_ylabel('North')
-                ax1.w_zaxis.set_scale("log")
-                ax1.set_zlabel('Power [a.u.]')
+            ax1.set_xlabel('East')
+            ax1.set_ylabel('North')
+            ax1.w_zaxis.set_scale("log")
+            ax1.set_zlabel('Power [a.u.]')
 
-                # Possibly implement errorbars
+            # Possibly implement errorbars
 #
 #                #plot errorbars
 #                for i in np.arange(0, len(fx)):

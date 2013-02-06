@@ -89,13 +89,13 @@ class DirectionFitPlaneWave(tasks.Task):
         self.farfield = True
         c = 299792458.0  # speed of light in m/s
         rad2deg = 180.0 / np.pi
-        
+
         if isinstance(self.positions,np.ndarray):
             positions = self.positions
         else:
             positions = self.positions.toNumpy()
-        if isinstance( self.timelags,np.ndarray): 
-            times = self.timelags 
+        if isinstance( self.timelags,np.ndarray):
+            times = self.timelags
         else:
             times = self.timelags.toNumpy()
 
@@ -147,7 +147,7 @@ class DirectionFitPlaneWave(tasks.Task):
                 if bins < 1:
                     bins = 1
                 hist, edges = np.histogram(self.residual_delays,bins=bins)
-                
+
                 max_time = np.argmax(hist)
                 print "histogram filled", hist
                 print "edges", edges
@@ -160,12 +160,12 @@ class DirectionFitPlaneWave(tasks.Task):
                     print "upper exception"
                 try:
                     lower = edges[max_time]
-                    
+
                 except:
                     print "lower exception"
                     lower = edges[0]
-                    
-                print "selecting between lower ",lower, " and upper", upper 
+
+                print "selecting between lower ",lower, " and upper", upper
                 goodSubset = np.where((self.residual_delays > lower)&(self.residual_delays < upper))
             else:
                 # remove > k-sigma outliers and iterate
@@ -186,7 +186,7 @@ class DirectionFitPlaneWave(tasks.Task):
 
         cartesianDirection = [cos(el) * sin(az), cos(el) * cos(az), sin(el)]
         self.meandirection.copy(cr.hArray(cartesianDirection))
-        
+
         if self.fit_failed != True:
             # NB! Have to update the dependent parameters, or the previous value will come out.
             self.ws.updateParameter("meandirection_spherical", forced=True)

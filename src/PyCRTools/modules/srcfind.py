@@ -482,7 +482,7 @@ def mseWithDistance(az, el, R, pos, times, outlierThreshold=0, allowOutlierCount
     *times*     Times as in the other functions
     =========== =================================================
     """
-    
+
     if allowOutlierCount % 2 == 1:
         print 'Warning: allowOutlierCount should be even! Discarding k/2 lowest and k/2 highest data points'
     N = len(times)
