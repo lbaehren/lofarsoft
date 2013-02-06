@@ -21,6 +21,13 @@ from pycrtools import metadata as md
 from pycrtools import tools
 from pycrtools import lora
 
+from pycrtools.tasks import antennaresponse
+from pycrtools.tasks import findrfi
+from pycrtools.tasks import shower
+from pycrtools.tasks import galaxy
+from pycrtools.tasks import minibeamformer
+from pycrtools.tasks import directionfitplanewave
+
 from optparse import OptionParser
 from contextlib import contextmanager
 
