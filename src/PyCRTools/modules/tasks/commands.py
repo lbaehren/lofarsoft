@@ -39,8 +39,7 @@ def trun(name, *args, **kwargs):
     The task itself will be available via the global variable ``Task`` afterwards.
     """
     if not name in tasks.task_allloaded.keys():
-        print "ERROR: trun - Task name", name, "unknown. See 'tlist' for full list."
-        return
+		raise ValueError("Task name {0} unknown. See 'tlist' for full list.".format(name))
     tasks.task_class = eval(tasks.task_allloaded[name] + "." + name)
     tasks.task_instance = tasks.task_class()
     tasks.set_globals("Task", tasks.task_instance)
@@ -64,8 +63,7 @@ def trerun(name, version, *args, **kwargs):
     All stored tasks can be found in the dict tasks.task_instances.
     """
     if not name in tasks.task_allloaded.keys():
-        print "ERROR: trerun - Task name", name, "unknown. See 'tlist' for full list."
-        return
+		raise ValueError("Task name {0} unknown. See 'tlist' for full list.".format(name))
     taskinstancename = name + str(version)
     if taskinstancename in tasks.task_instances:  # reload existing instance
         tasks.task_class = None
