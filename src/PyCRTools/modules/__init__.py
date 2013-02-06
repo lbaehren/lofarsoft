@@ -6,6 +6,9 @@ import os
 import sys
 import global_space
 
+# Make core functionality available in local namespace
+from core import *
+
 # Import open function from IO module
 from io import open
 
@@ -29,9 +32,6 @@ if "nogui" in global_space.globals and global_space.globals["nogui"]:
     matplotlib.use('Agg')
 else:
     print "PyCRTools: Starting with plotting GUI. To run in batch mode use 'nogui=True' before importing pycrtools."
-
-# Make core functionality available in local namespace
-from core import *
 
 # Initialize tasks
 import tasks
