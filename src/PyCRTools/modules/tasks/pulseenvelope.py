@@ -185,9 +185,15 @@ class PulseEnvelope(Task):
             for i in self.plot_antennas:
                 plt.clf()
 
-                plt.plot(x, s[i], linestyle='-', color='#68C8F7', label="Signal")
-                plt.plot(x, y[i], linestyle='-', color='#B30424', label="Envelope")
-                plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'k--', label="RMS")
+                if i==0:
+                    l_signal = plt.plot(x, s[i], linestyle='-', color='#68C8F7', label="Signal")
+                    l_envelope = plt.plot(x, y[i], linestyle='-', color='#B30424', label="Envelope")
+                    l_rms = plt.plot(x, np.zeros(y.shape[1]) + self.mean[i] + self.rms[i], 'k--', label="RMS")
+                else:
+                    l_sigma.set_ydata(s[i])
+                    l_envelope.set_ydata(y[i])
+                    l_rms.set_ydata(np.zeros(y.shape[1]) + self.mean[i] + self.rms[i])
+
                 plt.annotate("pulse maximum", xy=(x[self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)], self.peak_amplitude[i]), xytext = (0.13, 0.865), textcoords="figure fraction", arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=10"))
 
                 p = self.plot_prefix + "pulse_envelope_envelope-{0:d}.{1}".format(i, self.plot_type)
