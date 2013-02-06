@@ -42,11 +42,6 @@ import shelve
 
 tasks.globals = global_space.globals
 
-# Now importing all modules with tasks
-for mn in tasks.task_modules:
-    m = __import__("pycrtools.tasks", fromlist=[mn])
-    setattr(tasks, mn, getattr(m, mn))
-
 taskdb = shelve.open(tasks.dbfile)
 if "last_taskname" in taskdb:
     print "*** Restoring last task:", taskdb["last_taskname"]

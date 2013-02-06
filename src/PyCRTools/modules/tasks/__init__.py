@@ -196,9 +196,7 @@ The modules to import in a task module are::
 
 If one wants to add a new task then it should either be defined in a
 separate new file in the directory modules/tasks or it should be added
-to one of the files in modules/tasks. In the former case, you have to
-add the modulename to the list 'task_modules' in ``__init__.py`` in
-modules/tasks, in the latter case it will be found automatically.
+to one of the files in modules/tasks.
 
 The four ingredients of a task are the parameters definition (a dict
 stored in ``Task.parameters``), an init function, a call function, and a
@@ -414,35 +412,6 @@ Here is an example of using it::
   Task test1 run.
 
 """
-
-# Include here all the files in modules/tasks that should be imported at start-up containing available tasks.
-task_modules = ["averagespectrum",
-"dynamicspectrum",
-"fitbaseline",
-"imager",
-"imager_dm",
-"crimager",
-"beamformer",
-"beamformer2",
-"pulsecal",
-"ldf",
-"plotfootprint",
-"cabledelays",
-"findrfi",
-"antennaresponse",
-"eventstatistics",
-"stationbeamformer",
-"pulseenvelope",
-"minibeamformer",
-"noise",
-"galaxy",
-"directionfitplanewave",
-"stokesparameters",
-"shower",
-"crosscorrelateantennas",
-"directionfitbf",
-"wavefront"
-]
 
 import os
 import math
@@ -1897,3 +1866,4 @@ class WorkSpace(object):
             s += "#-----------------------Internal Parameters-----------------------------\n" + self.listInternalParameters()
         s += "#-----------------------------------------------------------------------\n"
         return s
+
