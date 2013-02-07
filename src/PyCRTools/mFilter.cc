@@ -457,48 +457,6 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 {
   HInteger N = std::distance(data, data_end);
 
-  if (N % 2 == 0) {
-    throw PyCR::ValueError("[hApplyHilbertTransform] vector size must be odd");
-  }
-
-  Iter it = data;
-
-  // Shift phases of positive frequencies by -pi/2
-  for (HInteger n=0; n<N/2; n++)
-  {
-    *it = HComplex(0, -1) * *it;
-    it++;
-  }
-
-  // Skip center frequency
-  it++;
-
-  // Shift phases of negative frequencies by +pi/2
-  for (HInteger n=0; n<N/2; n++)
-  {
-    *it = HComplex(0, 1) * *it;
-    it++;
-  }
-}
-//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
-
-//-----------------------------------------------------------------------
-//$DOCSTRING: Apply a Hilbert transform on a vector.
-//$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hApplyHilbertTransform2
-//-----------------------------------------------------------------------
-#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
-#define HFPP_PARDEF_0 (HComplex)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-//$COPY_TO END ----------------------------------------------------------
-/*!
-  \brief $DOCSTRING
-  $PARDOCSTRING
-*/
-template <class Iter>
-void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
-{
-  HInteger N = std::distance(data, data_end);
-
   if (N % 2 != 0) {
     throw PyCR::ValueError("[hApplyHilbertTransform] vector size must be even (need full complex FFT)");
   }

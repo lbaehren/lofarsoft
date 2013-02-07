@@ -52,7 +52,7 @@ class StokesParameters(Task):
         cr.hFFTWExecutePlanRC(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
 
         # Apply Hilbert transform
-        cr.hApplyHilbertTransform2(self.fft_data[...])
+        cr.hApplyHilbertTransform(self.fft_data[...])
 
         # Get inverse FFT
         cr.hFFTWExecutePlanCR(self.hilbertt[...], self.fft_data[...], self.ifftwplan)
