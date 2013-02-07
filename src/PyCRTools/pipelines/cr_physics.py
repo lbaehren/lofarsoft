@@ -668,6 +668,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         all_station_rms = []
         all_station_direction = []
         all_station_names = []
+        all_station_antennas_stationnames = []
         all_station_polarization_angle = []
 
         for station in stations:
@@ -680,6 +681,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"]*10**9) #scaling for plotting
                     all_station_rms.append(station.polarization['xyz']["crp_rms"])
                     all_station_names.append(station.stationname)
+                    all_station_antennas_stationnames.extend([station.stationname] * len(station["crp_pulse_delay"]) ) # gives station name for every antenna in the combined array
                     all_station_polarization_angle.append(station.polarization['xyz']["crp_polarization_angle"])
                 except Exception as e:
                     raise EventError("{0} when attempting to obtain parameters for station {1}".format(e.message, station.stationname))
@@ -692,6 +694,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         all_station_rms = np.vstack(all_station_rms)
         all_station_direction = np.asarray(all_station_direction)
         all_station_polarization_angle = np.hstack(all_station_polarization_angle)
+        all_station_antennas_stationnames = np.array(all_station_antennas_stationnames)
 
         # Convert to contiguous array of correct shape
         shape = all_station_antenna_positions.shape
@@ -722,7 +725,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
         # Plot wavefront shape using arrival times (from all_station_pulse_delays)
         try:
-            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, stationnames=all_station_antennas_stationnames, loracore=core, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
         except ValueError:
            print "wavefront returned problem"
 
