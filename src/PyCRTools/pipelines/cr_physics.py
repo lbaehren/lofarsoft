@@ -525,6 +525,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Fit pulse direction
 
                 direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
+                
+                pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
                 print "Hilbert envelope direction:", direction_fit_plane_wave.meandirection_azel_deg
 
