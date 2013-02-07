@@ -136,11 +136,14 @@ if parser.get_prog_name()=="cr_event.py":
         matplotlib.use('Agg')
 
 
+
+import pickle
+
 from pycrtools import *
 from pycrtools import lora
 from pycrtools import xmldict
 from pycrtools import crdatabase as crdb
-import pickle
+from pycrtools.tasks import averagespectrum, beamformer2, fitbaseline, pulsecal, crosscorrelateantennas, directionfitplanewave, crimager
 
 #plt.figure(num=1, figsize=(8*2, 6*2), dpi=300, facecolor='w', edgecolor='k')
 
