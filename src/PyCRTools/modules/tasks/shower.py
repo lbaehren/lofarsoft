@@ -86,7 +86,7 @@ class Shower(Task):
 
         footprint_shower_enable=dict(default=True, doc='Draw shower geometry in footprint'),
         footprint_shower_color=dict(default="#151B8D", doc='Color in which the shower geometry is drawn'),
-        footprint_scale=dict(default=True, doc="Scale footprint to display superterp only."),
+        footprint_scale=dict(default=False, doc="Scale footprint to display superterp only."),
         footprint_scale_box=dict(default=200, doc="Box around coordinate center which will be plotted"),
         footprint_scale_to_max=dict(default="False", doc="Scale circle size of the footprint to subtract minimum occuring value"),
 
@@ -366,11 +366,15 @@ class Shower(Task):
                     bgimname = environ["LOFARSOFT"] + "/src/PyCRTools/extras/LORA_layout_background.{0}".format(self.plot_type)
                     if isfile(bgimname):
                         bgim = cr.plt.imread(bgimname)
+                            bgim = None
                     else:
                         print "WARNING Cannot plot layout"
                 else:
                     print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
-
+                        bgim = None
+            else:
+                bgim = None
+            
             # Shower
             if self.footprint_shower_enable and self.direction is not None and self.core is not None:
 
