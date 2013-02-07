@@ -202,7 +202,7 @@ class BeamFormer(tasks.Task):
         FarField=dict(default=True,
                         doc="Form a beam towards the far field, i.e. no distance."),
 
-        NyquistZone=dict(default=1,
+        NyquistZone=dict(default=lambda self: (2 if 'HBA' in self.antenna_set else 1),
                            doc="In which Nyquist zone was the data taken (e.g. ``NyquistZone = 2`` if data is from 100-200 MHz for 200 MHz sampling rate)."),
 
 #------------------------------------------------------------------------
@@ -408,7 +408,7 @@ class BeamFormer(tasks.Task):
                       doc="Cartesian coordinates of the current antenna relative to the phase center of the array.",
                       unit="m"),
 
-        stationpos = dict(default = lambda self: (md.getStationPositions(self.datafile['STATION_NAME'][0], self.antenna_set, True, coordinatesystem='ITRF') if self.single_station else md.ITRFCS002),
+        stationpos = dict(default = lambda self: (md.getStationPositions(self.datafile['STATION_NAME'][0], self.antenna_set, True, coordinatesystem='ITRF') if self.station_centered else md.ITRFCS002),
                       doc = "ITRF coordinates of the phace center (usually center of current station).",
                       unit = "m"),
 
@@ -487,8 +487,12 @@ class BeamFormer(tasks.Task):
                                doc="Antenna Set",
                                unit=""),
 
-        antenna_list=dict(default={},
+        antenna_list=dict(default=lambda self: {},
                         doc="List of antenna indices used as input from each filename.",
+                        output=True),
+
+        rfi_channels=dict(default=None,
+                        doc="RFI channels detected by previous code.",
                         output=True),
 
 #------------------------------------------------------------------------
@@ -563,7 +567,7 @@ class BeamFormer(tasks.Task):
                         default=True,
                         doc="If **True** plot the beamformed average spectrum at the end, otherwise the time series."),
 
-        single_station = dict(workarray = True,
+        station_centered = dict(workarray = True,
                         default = True,
                         doc = "if True using the 'ANTENNA_POSITONS' (phase center at the center of the station), otherwise 'ANTENNA_POSITION'(phase center at the LOFAR center), info elsewere on their meanings.")
     )
@@ -644,7 +648,7 @@ class BeamFormer(tasks.Task):
                 if self.sample_offset:
                     self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  # Need to calculate this each time after having a new antenna selection.
                 print "# Start antenna =", antenna, "(ID=", str(antennaID) + "):"
-                if self.single_station:
+                if self.station_centered:
                     self.antpos = self.datafile.getRelativeAntennaPositionsNew()
                 else:
                     self.antpos = md.convertITRFToLocal(self.datafile['ITRFANTENNA_POSITIONS'],reflonlat=None)
@@ -769,6 +773,7 @@ class BeamFormer(tasks.Task):
             test_tbeam[...].invfftw(test_beam[...])
             test_tbeam /= self.blocklen
             test_tbeam[...].plot()
+        self.antenna_list = {}
 
     def tplot(self, beams=None, block=0, chunk=0, NyquistZone=1, doabs=True, smooth=0, mosaic=True, plotspec=False, xlim=None, ylim=None, recalc=False):
         """
