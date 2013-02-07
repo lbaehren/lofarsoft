@@ -200,6 +200,124 @@ void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
 //-----------------------------------------------------------------------
 //$DOCSTRING: Executes an FFTW plan.
 //$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFFTWExecutePlanRC
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HComplex)(out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(in)()("Input vector to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (FFTWPlanManyDft)(plan)()("FFTW plan.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Example:
+  >>> # Set up input/output arrays
+  >>> x = cr.hArray(complex, N)
+  >>> y = cr.hArray(complex, N)
+
+  >>> # Create plan
+  >>> p = cr.FFTWPlanManyDft(N, 1, 1, 1, 1, 1, cr.fftw_sign.FORWARD, cr.fftw_flags.ESTIMATE)
+
+  >>> # Execute plan
+  >>> cr.hFFTWExecutePlan(y, x, p)
+*/
+template <class CIter, class NIter>
+void HFPP_FUNC_NAME(const CIter out, const CIter out_end,
+		    const NIter in,  const NIter in_end,
+        FFTWPlanManyDft &plan)
+{
+  // Get array lengths
+  const int Nin =  std::distance(in, in_end);
+  const int Nout = std::distance(out, out_end);
+
+  // Sanity check
+  if (Nin != plan.isize || Nout != plan.osize)
+  {
+    throw PyCR::ValueError("In- and output vectors do not have the required size.");
+    return;
+  };
+
+  // Copy data from input array
+  NIter in_it = in;
+
+  for (int i=0; i<Nin; i++)
+  {
+    plan.in[i][0] = *in_it++;
+    plan.in[i][1] = 0;
+  }
+
+  // Execute plan
+  plan.execute();
+
+  // Copy data to output array
+  memcpy(&(*out), plan.out, Nout * sizeof(fftw_complex));
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Executes an FFTW plan.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hFFTWExecutePlanCR
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_FUNC_MASTER_ARRAY_PARAMETER 0 // Use the first parameter as the master array for looping and history informations
+#define HFPP_PARDEF_0 (HNumber)(out)()("Return vector in which the FFT transformed data is stored.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(in)()("Input vector to make the FFT from.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_2 (FFTWPlanManyDft)(plan)()("FFTW plan.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Example:
+  >>> # Set up input/output arrays
+  >>> x = cr.hArray(complex, N)
+  >>> y = cr.hArray(complex, N)
+
+  >>> # Create plan
+  >>> p = cr.FFTWPlanManyDft(N, 1, 1, 1, 1, 1, cr.fftw_sign.FORWARD, cr.fftw_flags.ESTIMATE)
+
+  >>> # Execute plan
+  >>> cr.hFFTWExecutePlan(y, x, p)
+*/
+template <class CIter, class NIter>
+void HFPP_FUNC_NAME(const NIter out, const NIter out_end,
+		    const CIter in,  const CIter in_end,
+        FFTWPlanManyDft &plan)
+{
+  // Get array lengths
+  const int Nin =  std::distance(in, in_end);
+  const int Nout = std::distance(out, out_end);
+
+  // Sanity check
+  if (Nin != plan.isize || Nout != plan.osize)
+  {
+    throw PyCR::ValueError("In- and output vectors do not have the required size.");
+    return;
+  };
+
+  // Copy data from input array
+  memcpy(plan.in, &(*in), Nin * sizeof(fftw_complex));
+
+  // Execute plan
+  plan.execute();
+
+  // Copy data from output array
+  NIter out_it = out;
+
+  for (int i=0; i<Nout; i++)
+  {
+    *out_it = plan.out[i][0];
+    out_it++;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Executes an FFTW plan.
+//$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hFFTWExecutePlan
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
