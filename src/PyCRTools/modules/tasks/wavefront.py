@@ -29,6 +29,7 @@ from pycrtools import lora
 from pycrtools.tasks import directionfitplanewave
 import os
 import numpy as np
+from numpy import sin, cos, tan, sqrt
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 
@@ -110,7 +111,8 @@ class Wavefront(Task):
 
         arrivaltimes = dict( default = None, doc = "Pulse arrival times per antenna; give as input parameter together with 'positions' if not using 'filefilter' or 'filelist'."),
         positions = dict( default = None, doc = "Antenna positions array in [Nx3] format (2D)."),
-
+        stationnames = dict( default=None, doc="Array of station names for each antenna in 'positions'"),
+        loracore = dict( default=None, doc="LORA shower core position. If not given, (0, 0) will be assumed."),
         interStationDelays = dict( default=None, doc="Inter-station delays as a correction on current LOFAR clock offsets. To be obtained e.g. from the CalibrateFM Task. Assumed to be in alphabetic order in the station name e.g. CS002, CS003, ... If not given, zero correction will be assumed." ),
         stationList = dict( default=None, doc="List of station names present in the positions and arrivaltimes arrays. Only needed if interStationDelays also supplied."),
         stationStartIndex = dict( default=None, doc="List of start indices of a given station. Array should end with an entry n where n = nof antennas. Only needed if interStationDelays given."),
@@ -152,6 +154,9 @@ class Wavefront(Task):
             print 'Warning: arrivaltimes expected as hArray. Converting it now.'
             self.arrivaltimes = cr.hArray(self.arrivaltimes)
 
+        if not hasattr(self.positions, 'toNumpy'):
+            print 'Warning: arrivaltimes expected as hArray. Converting it now.'
+            self.positions = cr.hArray(self.positions)
         # Applying of inter-station delays goes here... if we decide to do that in here.
 
             # Apply calibration delays (per antenna)
@@ -219,6 +224,15 @@ class Wavefront(Task):
         goodTimes = times[goodIndices]
         goodSignals = signals[goodIndices]
         goodResidues -= min(goodResidues)
+        goodStationNames = self.stationnames[goodIndices]
+
+        stationStartIndex = []
+        stationList = []
+        for i in range(len(goodStationNames)):
+            if goodStationNames[i] != goodStationNames[i-1]:
+                stationList.append(goodStationNames[i])
+                stationStartIndex.append(i)
+        stationStartIndex.append(len(goodStationNames)) # last index + 1 for indexing with start:end
 
         # now the good one: difference between measured arrival times and plane wave fit!
         fptask_delta = cr.trerun("Shower", "3", positions=goodPositions2D, signals=goodSignals, timelags=goodResidues, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
@@ -228,6 +242,89 @@ class Wavefront(Task):
             p = self.plot_prefix + "wavefront_vs_planewave.{0}".format(self.plot_type)
             plt.savefig(p)
             self.plotlist.append(p)
+
+        # rotate antenna position axes to a, p coordinates. a = along time gradient, p = perpendicular to that
+        # Make plots for arrival times and second-order curvature:
+        # - along time gradient
+        # - perp to time gradient
+        (az, el) = direction_fit_plane_wave.meandirection_azel
+
+        (x, y) = (goodPositions2D[:, 0], goodPositions2D[:, 1])
+        if self.loracore is None:
+            self.loracore = [0.0, 0.0]
+        a = - sin(az) * (x - self.loracore[0]) - cos(az) * (y - self.loracore[1])
+        pp = cos(az) * (x - self.loracore[0]) - sin(az) * (y - self.loracore[1])
+        z = goodPositions2D[:, 2]
+        nofGoodChannels = len(a)
+        rotatedPositions2D = np.concatenate([a, pp, z]).reshape(3, nofGoodChannels).T
+
+#        expectedDelays = sf.timeDelaysFromDirection(goodPositions, (az, el))
+#        expectedDelays += (goodTimes[0] - expectedDelays[0]) # cheap linear fit
+
+        plt.figure()
+        start = 0
+        colors = ['b', 'g', 'r', 'c', 'm', 'y'] * 4 # don't want to run out of colors array
+        for i in range(len(stationList)):
+            start = stationStartIndex[i]
+            end = stationStartIndex[i+1]
+            plt.scatter(a[start:end], goodTimes[start:end] * 1e9, 20, label=stationList[i], c = colors[i], marker='o')
+        plt.legend()
+        plt.xlabel('Distance along propagation direction [m]')
+        plt.ylabel('Arrival time [ns]')
+        #plt.plot(a, expectedDelays*1e9, c='g')
+        plt.title('Arrival times versus distance along propagation direction')
+        if self.save_plots:
+            p = self.plot_prefix + "wavefront_arrivaltime_along_direction.{0}".format(self.plot_type)
+            plt.savefig(p)
+            self.plotlist.append(p)
+
+        plt.figure()
+
+        for i in range(len(stationList)):
+            start = stationStartIndex[i]
+            end = stationStartIndex[i+1]
+            plt.scatter(pp[start:end], goodTimes[start:end] * 1e9, 20, label=stationList[i], c = colors[i], marker = 'o')
+
+        plt.legend()
+        plt.xlabel('Distance perp. to propagation direction [m]')
+        plt.ylabel('Arrival time [ns]')
+        plt.title('Arrival times versus distance perpendicular to propagation direction')
+        if self.save_plots:
+            p = self.plot_prefix + "wavefront_arrivaltime_perp_direction.{0}".format(self.plot_type)
+            plt.savefig(p)
+            self.plotlist.append(p)
+
+        plt.figure()
+        for i in range(len(stationList)):
+            start = stationStartIndex[i]
+            end = stationStartIndex[i+1]
+            plt.scatter(a[start:end], goodResidues[start:end] * 1e9, 20, label=stationList[i], c = colors[i], marker='o')
+        plt.legend()
+        plt.xlabel('Distance along propagation direction [m]')
+        plt.ylabel('Arrival time minus plane-wave [ns]')
+
+        plt.title('Second-order wavefront, along direction of propagation')
+        if self.save_plots:
+            p = self.plot_prefix + "wavefront_curvature_along_direction.{0}".format(self.plot_type)
+            plt.savefig(p)
+            self.plotlist.append(p)
+
+
+        plt.figure()
+        for i in range(len(stationList)):
+            start = stationStartIndex[i]
+            end = stationStartIndex[i+1]
+            plt.scatter(pp[start:end], goodResidues[start:end] * 1e9, 20, label=stationList[i], c=colors[i], marker='o')
+        plt.legend()
+        plt.xlabel('Distance perp. to propagation direction [m]')
+        plt.ylabel('Arrival time minus plane-wave [ns]')
+
+        plt.title('Second-order wavefront, perpendicular to propagation')
+        if self.save_plots:
+            p = self.plot_prefix + "wavefront_curvature_perp_direction.{0}".format(self.plot_type)
+            plt.savefig(p)
+            self.plotlist.append(p)
+
 
         # Simplex fit point source...
         (az, el) = direction_fit_plane_wave.meandirection_azel  # check
