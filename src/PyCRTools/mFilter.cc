@@ -463,8 +463,11 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 
   Iter it = data;
 
+  // Zero out DC component (required for definition H(c) = 0)
+  *it++ = HComplex(0, 0);
+
   // Shift phases of positive frequencies by -pi/2
-  for (HInteger n=0; n<N/2; n++)
+  for (HInteger n=1; n<N/2; n++)
   {
     *it = HComplex(0, -1) * *it;
     it++;
