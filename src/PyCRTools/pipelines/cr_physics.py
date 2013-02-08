@@ -665,6 +665,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         all_station_pulse_delays = []
         all_station_pulse_peak_amplitude = []
         all_station_integrated_pulse_power = []
+        all_station_integrated_noise_power = []
         all_station_rms = []
         all_station_direction = []
         all_station_names = []
@@ -679,6 +680,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     all_station_antenna_positions.append(station["local_antenna_positions"])
                     all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"]*10**9) #scaling for plotting
+                    all_station_integrated_noise_power.append(station.polarization['xyz']["crp_integrated_noise_power"]*11*10**9) #scaling for plotting and number of integrated samples
                     all_station_rms.append(station.polarization['xyz']["crp_rms"])
                     all_station_names.append(station.stationname)
                     all_station_antennas_stationnames.extend([station.stationname] * len(station["crp_pulse_delay"]) ) # gives station name for every antenna in the combined array
@@ -691,6 +693,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         all_station_pulse_delays -= all_station_pulse_delays.min() # Subtract global offset
         all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
         all_station_integrated_pulse_power = np.vstack(all_station_integrated_pulse_power)
+        all_station_integrated_noise_power = np.vstack(all_station_integrated_noise_power)
         all_station_rms = np.vstack(all_station_rms)
         all_station_direction = np.asarray(all_station_direction)
         all_station_polarization_angle = np.hstack(all_station_polarization_angle)
@@ -715,11 +718,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         lora_signals = event["lora_particle_density__m2"]
         lora_direction = list(event["lora_direction"])
 
-        ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, all_directions=all_station_direction, all_stations=all_station_names, ldf_enable=True, footprint_enable=True, skyplot_of_directions_enable=True, lora_direction=lora_direction, lora_positions=lora_positions, lora_signals=lora_signals, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+        ldf = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, all_directions=all_station_direction, all_stations=all_station_names, ldf_enable=True, footprint_enable=True, footprint_use_background=True, skyplot_of_directions_enable=True, lora_direction=lora_direction, lora_positions=lora_positions, lora_signals=lora_signals, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         ldf_total = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_rms, core=core, direction=average_direction, core_uncertainties=core_uncertainties, signals=all_station_pulse_peak_amplitude, direction_uncertainties=direction_uncertainties, all_directions=all_station_direction, all_stations=all_station_names, ldf_enable=True, ldf_total_signal=True, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
-        ldf_power = cr.trun("Shower", positions=all_station_antenna_positions, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_integrated_pulse_power, direction_uncertainties=direction_uncertainties, ldf_enable=True, ldf_integrated_signal=True, ldf_logplot=False, ldf_remove_outliers=False, footprint_enable=False, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+        ldf_power = cr.trun("Shower", positions=all_station_antenna_positions, signals_uncertainties=all_station_integrated_noise_power, core=core, direction=average_direction, timelags=all_station_pulse_delays, core_uncertainties=core_uncertainties, signals=all_station_integrated_pulse_power, direction_uncertainties=direction_uncertainties, ldf_enable=True, ldf_integrated_signal=True, ldf_logplot=False, ldf_remove_outliers=False, footprint_enable=False, save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         polarization_footprint = cr.trun("Shower",positions=all_station_antenna_positions,signals=all_station_pulse_peak_amplitude,footprint_enable=False,ldf_enable = False ,direction= average_direction,core = core,polarization_angle=all_station_polarization_angle,azimuth_in_distance_bins_enable=False,footprint_polarization_enable=True,save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
