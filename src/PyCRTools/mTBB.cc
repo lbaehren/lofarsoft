@@ -145,6 +145,32 @@ boost::python::list TBBData::python_time()
   return lst;
 }
 
+int sample_number_correction()
+{
+	std::cout<<"Calling sample_number_correction() = ";
+	int correction = 0;
+
+	// Get clock frequency from common attributes
+	DAL1::CommonAttributes c = commonAttributes();
+
+	if (static_cast<int>(c.clockFrequency()) == 200)
+	{
+		switch (time()[0] % 2)
+		{
+			case 0:
+				correction = -512;
+				break;
+			case 1:
+				correction = 512;
+				break;
+		}
+	}
+
+	std::cout<<correction<<" for time="<<time()[0]<<std::endl;
+
+	return correction;
+}
+
 boost::python::list TBBData::python_sample_number()
 {
   boost::python::list lst;
@@ -153,7 +179,7 @@ boost::python::list TBBData::python_sample_number()
 
   for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec[i]);
+    lst.append(vec[i] + sample_number_correction());
   }
 
   return lst;
