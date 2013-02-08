@@ -32,7 +32,7 @@
 class TBBData : public DAL1::TBB_Timeseries {
 
 private:
-  int TBBData::sample_number_correction()
+  int sample_number_correction()
 
 public:
 
