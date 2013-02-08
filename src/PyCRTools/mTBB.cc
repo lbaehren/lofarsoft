@@ -145,7 +145,7 @@ boost::python::list TBBData::python_time()
   return lst;
 }
 
-int sample_number_correction()
+int TBBData::sample_number_correction()
 {
   std::cout<<"Calling sample_number_correction() = ";
   int correction = 0;
