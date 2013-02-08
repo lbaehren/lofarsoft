@@ -147,7 +147,6 @@ boost::python::list TBBData::python_time()
 
 int TBBData::sample_number_correction()
 {
-  std::cout<<"Calling sample_number_correction() = ";
   int correction = 0;
 
   // Get clock frequency from common attributes
@@ -166,20 +165,20 @@ int TBBData::sample_number_correction()
     }
   }
 
-  std::cout<<correction<<" for time="<<time()[0]<<std::endl;
-
   return correction;
 }
 
 boost::python::list TBBData::python_sample_number()
 {
+  const int correction = sample_number_correction();
+
   boost::python::list lst;
 
   std::vector<uint> vec = sample_number();
 
   for(uint i=0; i<vec.size(); ++i)
   {
-    lst.append(vec[i] + sample_number_correction());
+    lst.append(vec[i] + correction);
   }
 
   return lst;
