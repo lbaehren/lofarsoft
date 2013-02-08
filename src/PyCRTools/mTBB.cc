@@ -147,28 +147,28 @@ boost::python::list TBBData::python_time()
 
 int sample_number_correction()
 {
-	std::cout<<"Calling sample_number_correction() = ";
-	int correction = 0;
+  std::cout<<"Calling sample_number_correction() = ";
+  int correction = 0;
 
-	// Get clock frequency from common attributes
-	DAL1::CommonAttributes c = commonAttributes();
+  // Get clock frequency from common attributes
+  DAL1::CommonAttributes c = commonAttributes();
 
-	if (static_cast<int>(c.clockFrequency()) == 200)
-	{
-		switch (time()[0] % 2)
-		{
-			case 0:
-				correction = -512;
-				break;
-			case 1:
-				correction = 512;
-				break;
-		}
-	}
+  if (static_cast<int>(c.clockFrequency()) == 200)
+  {
+    switch (time()[0] % 2)
+    {
+      case 0:
+        correction = -512;
+        break;
+      case 1:
+        correction = 512;
+        break;
+    }
+  }
 
-	std::cout<<correction<<" for time="<<time()[0]<<std::endl;
+  std::cout<<correction<<" for time="<<time()[0]<<std::endl;
 
-	return correction;
+  return correction;
 }
 
 boost::python::list TBBData::python_sample_number()
