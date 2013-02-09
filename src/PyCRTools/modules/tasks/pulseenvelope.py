@@ -186,7 +186,7 @@ class PulseEnvelope(Task):
             
             # Calculate polarization angle
             cr.hAtan2(self.polarization_angle[...], self.stokes[..., 2], self.stokes[..., 1])
-self.polarization_angle /= 2
+            self.polarization_angle /= 2
 
         if self.save_plots:
 
