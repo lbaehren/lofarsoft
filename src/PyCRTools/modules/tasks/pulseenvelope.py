@@ -163,30 +163,30 @@ class PulseEnvelope(Task):
         #self.delays -= self.delays[self.refant]
 
         # Calculate integrated pulse power
-		if self.extra:
+        if self.extra:
 
-			self.maxpos_full[...].copy(self.maxpos[...])
-        	self.maxpos_full /= self.resample_factor
-
-        	start = cr.hArray(int, self.maxpos_full.shape()[0])
-        	start.copy(self.maxpos_full)
-        	start += self.pulse_start - 5
-
-        	end = cr.hArray(int, self.maxpos_full.shape()[0])
-        	end.copy(self.maxpos_full)
-        	end += self.pulse_start + 5
-
-        	cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.integrated_noise_power[...], self.timeseries_data[...], start[...], end[...])
-
-        	self.integrated_pulse_power /= self.sampling_frequency
-        	self.integrated_noise_power /= self.sampling_frequency
-
-        	# Calculate Stokes parameters
-        	cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...], start[...], end[...])
-
-        	# Calculate polarization angle
-        	cr.hAtan2(self.polarization_angle[...], self.stokes[..., 2], self.stokes[..., 1])
-        	self.polarization_angle /= 2
+            self.maxpos_full[...].copy(self.maxpos[...])
+            self.maxpos_full /= self.resample_factor
+            
+            start = cr.hArray(int, self.maxpos_full.shape()[0])
+            start.copy(self.maxpos_full)
+            start += self.pulse_start - 5
+            
+            end = cr.hArray(int, self.maxpos_full.shape()[0])
+            end.copy(self.maxpos_full)
+            end += self.pulse_start + 5
+            
+            cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.integrated_noise_power[...], self.timeseries_data[...], start[...], end[...])
+            
+            self.integrated_pulse_power /= self.sampling_frequency
+            self.integrated_noise_power /= self.sampling_frequency
+            
+            # Calculate Stokes parameters
+            cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...], start[...], end[...])
+            
+            # Calculate polarization angle
+            cr.hAtan2(self.polarization_angle[...], self.stokes[..., 2], self.stokes[..., 1])
+self.polarization_angle /= 2
 
         if self.save_plots:
 
