@@ -255,8 +255,7 @@ class Shower(Task):
                     sig_lower = np.maximum(sig_lower, self.signals - self.signals_uncertainties)
                     sig_uncer = self.signals - sig_lower
                 else:
-                    sig_lower = np.copy(self.signals_uncertainties)
-
+                    sig_uncer = np.copy(self.signals_uncertainties)
 
 
                 cr.plt.figure()
