@@ -365,9 +365,10 @@ class Shower(Task):
                     bgimname = environ["LOFARSOFT"] + "/src/PyCRTools/extras/LORA_layout_background.{0}".format(self.plot_type)
                     if isfile(bgimname):
                         bgim = cr.plt.imread(bgimname)
-                        bgim = None
+                        
                     else:
                         print "WARNING Cannot plot layout"
+                        bgim = None
                 else:
                     print "WARNING Cannot plot layout. Environment variable LOFARSOFT not found."
                     bgim = None
