@@ -405,6 +405,8 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
 #define HFPP_PARDEF_2 (HNumber)(poly)()("Polarization Y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_3 (HNumber)(polxh)()("Hilbert transform of polarization X.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_4 (HNumber)(polyh)()("Hilbert transform of polarization Y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_5 (HInteger)(signal_start)()("Start of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_6 (HInteger)(signal_end)()("End of signal window.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -422,20 +424,23 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
   in which $x_i$ gives the time-dependent electric field in the east-west direction, while $y_i$ corresponds to the north-south direction. The $\hat{x}_i$ and $\hat{y}_i are the complex propagation of the time-series obtained by a Hilbert transformation.
 */
 
-template <class NIter>
+template <class NIter, class Iter>
 void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
     const NIter polx, const NIter polx_end,
     const NIter poly, const NIter poly_end,
     const NIter polxh, const NIter polxh_end,
-    const NIter polyh, const NIter polyh_end)
+    const NIter polyh, const NIter polyh_end,
+    const Iter signal_start, const Iter signal_start_stub,
+    const Iter signal_end, const Iter signal_end_stub)
 {
   double temp = 0;
 
-  // Get length of output vector
+  // Get length of input vector
   const int N = std::distance(polx, polx_end);
+  const int n = *signal_end - *signal_start;
 
   // Sanity checks
-  if (std::distance(S, S_end) != 4 || N != std::distance(poly, poly_end) || N != std::distance(polxh, polxh_end) || N != std::distance(polyh, polyh_end))
+  if (std::distance(S, S_end) != 4 || N != std::distance(poly, poly_end) || N != std::distance(polxh, polxh_end) || N != std::distance(polyh, polyh_end) || n > N)
   {
     throw PyCR::ValueError("[hStokesParameters] input vectors have incompatible sizes.");
   }
@@ -445,15 +450,15 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
   NIter Q = S+1;
   NIter U = S+2;
   NIter V = S+3;
-  NIter polx_it = polx;
-  NIter poly_it = poly;
-  NIter polxh_it = polxh;
-  NIter polyh_it = polyh;
+  NIter polx_it = polx + *signal_start;
+  NIter poly_it = poly + *signal_start;
+  NIter polxh_it = polxh + *signal_start;
+  NIter polyh_it = polyh + *signal_start;
 
   // Calculate Stokes parameters
   *I = 0; *Q = 0; *U = 0; *V = 0;
 
-  for (int i=0; i<N; i++)
+  for (int i=0; i<n; i++)
   {
     *I += *polx_it * *polx_it + *polxh_it * *polxh_it;
     *Q -= *poly_it * *poly_it + *polyh_it * *polyh_it;
@@ -474,10 +479,10 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
   *Q += temp;
 
   // Normalize
-  *I = *I / N;
-  *Q = *Q / N;
-  *U = 2 * *U / N;
-  *Q = 2 * *Q / N;
+  *I = *I / n;
+  *Q = *Q / n;
+  *U = 2 * *U / n;
+  *Q = 2 * *Q / n;
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 

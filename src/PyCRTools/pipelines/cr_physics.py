@@ -28,7 +28,7 @@ from pycrtools.tasks import galaxy
 from pycrtools.tasks import minibeamformer
 from pycrtools.tasks import directionfitplanewave
 from pycrtools.tasks import pulseenvelope
-from pycrtools.tasks import stokesparameters
+#from pycrtools.tasks import stokesparameters
 from pycrtools.tasks import wavefront
 
 from optparse import OptionParser
@@ -626,10 +626,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 cr.hProjectPolarizations(xyz_timeseries_data[0:3 * nantennas:3, ...], xyz_timeseries_data[1:3 * nantennas:3, ...], xyz_timeseries_data[2:3 * nantennas:3, ...], timeseries_data[0:2 * nantennas:2, ...], timeseries_data[1:2 * nantennas:2, ...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
 
                 # Get Stokes parameters
-                stokes_parameters = cr.trun("StokesParameters", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16)
+#                stokes_parameters = cr.trun("StokesParameters", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16)
 
                 # Get pulse strength
-                pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=3, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=polarization['xyz']["crp_plotfiles"])
+                pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=3, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=polarization['xyz']["crp_plotfiles"], extras=True)
 
                 # Do noise characterization
 #                noise = cr.trun("Noise", timeseries_data=xyz_timeseries_data, histrange=(-3 * pulse_envelope_xyz.rms[0], 3 * pulse_envelope_xyz.rms[0]), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=polarization['xyz']["crp_plotfiles"])
@@ -644,8 +644,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 polarization['xyz']["crp_integrated_pulse_power"] = cr.hArray(pulse_envelope_xyz.integrated_pulse_power).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_integrated_noise_power"] = cr.hArray(pulse_envelope_xyz.integrated_noise_power).toNumpy().reshape((nantennas, 3))
                 polarization['xyz']["crp_rms"] = cr.hArray(pulse_envelope_xyz.rms).toNumpy().reshape((nantennas, 3))
-                polarization['xyz']["crp_stokes"] = stokes_parameters.stokes.toNumpy()
-                polarization['xyz']["crp_polarization_angle"] = stokes_parameters.polarization_angle.toNumpy()
+                polarization['xyz']["crp_stokes"] = pulse_envelope_xyz.stokes.toNumpy()
+                polarization['xyz']["crp_polarization_angle"] = pulse_envelope_xyz.polarization_angle.toNumpy()
 
                 # Exclude failed fits and average residuals and set polarization status
                 if  direction_fit_successful == False:

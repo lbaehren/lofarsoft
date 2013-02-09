@@ -62,6 +62,10 @@ class PulseEnvelope(Task):
             doc = "Integrated pulse power."),
         integrated_noise_power=dict(default = lambda self: cr.hArray(float, self.nantennas), output = True,
             doc = "Integrated noise power per sample."),
+        stokes=dict(default = lambda self: cr.hArray(float, dimensions=(self.nantennas, 4)),
+            doc="Stokes parameters I, Q, U and V for each antenna."),
+        polarization_angle=dict(default=lambda self: cr.hArray(float, self.nantennas),
+            doc="Polarization angle ..math::`\phi=0.5 \atan(U/Q)` for each antenna."),
         maxpos=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
             doc = "Position of pulse maximum relative to *pulse_start*."),
         maxpos_full=dict(default = lambda self: cr.hArray(int, self.nantennas), output = True,
@@ -98,6 +102,8 @@ class PulseEnvelope(Task):
             doc = "Antennas to create plots for."),
         fftwplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
         ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDftC2r(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
+		extra=dict(default = False,
+			doc = "Calculate non essential extras (integrated pulse power & stokes parameters)."),
     )
 
     def run(self):
@@ -157,21 +163,30 @@ class PulseEnvelope(Task):
         #self.delays -= self.delays[self.refant]
 
         # Calculate integrated pulse power
-        self.maxpos_full[...].copy(self.maxpos[...])
-        self.maxpos_full /= self.resample_factor
+		if self.extra:
 
-        start = cr.hArray(int, self.maxpos_full.shape()[0])
-        start.copy(self.maxpos_full)
-        start += self.pulse_start - 5
+			self.maxpos_full[...].copy(self.maxpos[...])
+        	self.maxpos_full /= self.resample_factor
 
-        end = cr.hArray(int, self.maxpos_full.shape()[0])
-        end.copy(self.maxpos_full)
-        end += self.pulse_start + 5
+        	start = cr.hArray(int, self.maxpos_full.shape()[0])
+        	start.copy(self.maxpos_full)
+        	start += self.pulse_start - 5
 
-        cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.integrated_noise_power[...], self.timeseries_data[...], start[...], end[...])
+        	end = cr.hArray(int, self.maxpos_full.shape()[0])
+        	end.copy(self.maxpos_full)
+        	end += self.pulse_start + 5
 
-        self.integrated_pulse_power /= self.sampling_frequency
-        self.integrated_noise_power /= self.sampling_frequency
+        	cr.hIntegratedPulsePower(self.integrated_pulse_power[...], self.integrated_noise_power[...], self.timeseries_data[...], start[...], end[...])
+
+        	self.integrated_pulse_power /= self.sampling_frequency
+        	self.integrated_noise_power /= self.sampling_frequency
+
+        	# Calculate Stokes parameters
+        	cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...], start[...], end[...])
+
+        	# Calculate polarization angle
+        	cr.hAtan2(self.polarization_angle[...], self.stokes[..., 2], self.stokes[..., 1])
+        	self.polarization_angle /= 2
 
         if self.save_plots:
 
