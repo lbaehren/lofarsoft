@@ -167,7 +167,7 @@ double interpolate_amplitude_trilinear(const std::complex<double> (&V)[8],
                                        const double x0, const double y0, const double z0,
                                        const double x1, const double y1, const double z1)
 {
-    double c00, c10, c01, c11, c0, c1, rho, theta;
+    double c00, c10, c01, c11, c0, c1;
     double a[8];
     int i;
 
