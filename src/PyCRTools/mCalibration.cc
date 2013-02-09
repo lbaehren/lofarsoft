@@ -403,10 +403,8 @@ void HFPP_FUNC_NAME (const NIter pol0, const NIter pol0_end,
 #define HFPP_PARDEF_0 (HNumber)(S)()("Stokes parameters I, Q, U and V.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(polx)()("Polarization X.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(poly)()("Polarization Y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(polz)()("Polarization Z.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HNumber)(polxh)()("Hilbert transform of polarization X.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_5 (HNumber)(polyh)()("Hilbert transform of polarization Y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_6 (HNumber)(polzh)()("Hilbert transform of polarization Z.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(polxh)()("Hilbert transform of polarization X.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(polyh)()("Hilbert transform of polarization Y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 //$COPY_TO END --------------------------------------------------
 /*!
   \brief $DOCSTRING
@@ -428,10 +426,8 @@ template <class NIter>
 void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
     const NIter polx, const NIter polx_end,
     const NIter poly, const NIter poly_end,
-    const NIter polz, const NIter polz_end,
     const NIter polxh, const NIter polxh_end,
-    const NIter polyh, const NIter polyh_end,
-    const NIter polzh, const NIter polzh_end)
+    const NIter polyh, const NIter polyh_end)
 {
   double temp = 0;
 
@@ -439,8 +435,7 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
   const int N = std::distance(polx, polx_end);
 
   // Sanity checks
-  if (std::distance(S, S_end) != 4 || N != std::distance(poly, poly_end) || N != std::distance(polz, polz_end) ||
-    N != std::distance(polxh, polxh_end) || N != std::distance(polyh, polyh_end) || N != std::distance(polzh, polzh_end))
+  if (std::distance(S, S_end) != 4 || N != std::distance(poly, poly_end) || N != std::distance(polxh, polxh_end) || N != std::distance(polyh, polyh_end))
   {
     throw PyCR::ValueError("[hStokesParameters] input vectors have incompatible sizes.");
   }
@@ -452,10 +447,8 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
   NIter V = S+3;
   NIter polx_it = polx;
   NIter poly_it = poly;
-  NIter polz_it = polz;
   NIter polxh_it = polxh;
   NIter polyh_it = polyh;
-  NIter polzh_it = polzh;
 
   // Calculate Stokes parameters
   *I = 0; *Q = 0; *U = 0; *V = 0;
@@ -469,10 +462,8 @@ void HFPP_FUNC_NAME (const NIter S, const NIter S_end,
 
     ++polx_it;
     ++poly_it;
-    ++polz_it;
     ++polxh_it;
     ++polyh_it;
-    ++polzh_it;
   }
 
   /* I = 1/N \sum x^2 + y^2 + xh^2 + yh^2 and Q = 1/N \sum x^2 + y^2 - xh^2 - yh^2

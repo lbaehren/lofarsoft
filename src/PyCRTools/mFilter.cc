@@ -441,9 +441,9 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //-----------------------------------------------------------------------
-//$DOCSTRING: Apply a Hilbert transform on a vector.
+//$DOCSTRING: Apply a Hilbert transform on a vector of full complex data (e.g. N -> N FFT not N -> N / 2 + 1).
 //$COPY_TO HFILE START --------------------------------------------------
-#define HFPP_FUNC_NAME hApplyHilbertTransform
+#define HFPP_FUNC_NAME hApplyHilbertTransformFC
 //-----------------------------------------------------------------------
 #define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_0 (HComplex)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
@@ -477,6 +477,37 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
   for (HInteger n=0; n<N/2; n++)
   {
     *it = HComplex(0, 1) * *it;
+    it++;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply a Hilbert transform on a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hApplyHilbertTransform
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec)()("Vector.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter data, const Iter data_end)
+{
+  HInteger N = std::distance(data, data_end);
+
+  Iter it = data;
+
+  // Zero out DC component (required for definition H(c) = 0)
+  *it++ = HComplex(0, 0);
+
+  // Shift phases of positive frequencies by -pi/2
+  for (HInteger n=1; n<N; n++)
+  {
+    *it = HComplex(0, -1) * *it;
     it++;
   }
 }

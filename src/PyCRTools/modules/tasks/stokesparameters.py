@@ -29,7 +29,7 @@ class StokesParameters(Task):
             doc="Width of pulse window after resampling."),
         timeseries_data_resampled=dict(default=lambda self: cr.hArray(float, dimensions=(self.nantennas, self.pulse_width_resampled)),
             doc="Resampled timeseries data."),
-        fft_data = dict(default=lambda self: cr.hArray(complex, dimensions=(self.nantennas, self.pulse_width_resampled)),
+        fft_data = dict(default=lambda self: cr.hArray(complex, dimensions=(self.nantennas, self.pulse_width_resampled / 2 + 1)),
             doc = "Fourier transform of timeseries_data_resampled."),
         hilbertt=dict(default = lambda self: self.timeseries_data_resampled.new(), workarray = True,
             doc = "Hilbert transform of *fft_data*."),
@@ -37,8 +37,8 @@ class StokesParameters(Task):
             doc="Stokes parameters I, Q, U and V for each antenna."),
         polarization_angle=dict(default=lambda self: cr.hArray(float, self.nantennas),
             doc="Polarization angle ..math::`\phi=0.5 \atan(U/Q)` for each antenna."),
-        fftwplan=dict(default=lambda self: cr.FFTWPlanManyDft(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_sign.FORWARD, cr.fftw_flags.ESTIMATE)),
-        ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDft(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_sign.BACKWARD, cr.fftw_flags.ESTIMATE)),
+        fftwplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
+        ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDftC2r(self.pulse_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
     )
 
     def run(self):
@@ -49,17 +49,17 @@ class StokesParameters(Task):
         cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.pulse_start:self.pulse_end])
 
         # Compute FFT
-        cr.hFFTWExecutePlanRC(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
+        cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
 
         # Apply Hilbert transform
         cr.hApplyHilbertTransform(self.fft_data[...])
 
         # Get inverse FFT
-        cr.hFFTWExecutePlanCR(self.hilbertt[...], self.fft_data[...], self.ifftwplan)
+        cr.hFFTWExecutePlan(self.hilbertt[...], self.fft_data[...], self.ifftwplan)
         self.hilbertt /= self.pulse_width_resampled
 
         # Calculate Stokes parameters
-        cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.timeseries_data_resampled[2:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...], self.hilbertt[2:3 * self.nantennas:3, ...])
+        cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...])
 
         # Calculate polarization angle
         cr.hAtan2(self.polarization_angle[...], self.stokes[..., 2], self.stokes[..., 1])

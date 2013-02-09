@@ -42,7 +42,7 @@ class PulseEnvelope(Task):
             doc="Width of pulse window after resampling."),
         timeseries_data_resampled=dict(default=lambda self: cr.hArray(float, dimensions=(self.nantennas, self.window_width_resampled)),
             doc="Resampled timeseries data."),
-        fft_data = dict(default=lambda self: cr.hArray(complex, dimensions=(self.nantennas, self.window_width_resampled)),
+        fft_data = dict(default=lambda self: cr.hArray(complex, dimensions=(self.nantennas, self.window_width_resampled / 2 + 1)),
             doc = "Fourier transform of timeseries_data_resampled."),
         sampling_frequency=dict(default = 200.e6,
             doc = "Sampling frequency of timeseries_data."),
@@ -96,8 +96,8 @@ class PulseEnvelope(Task):
             doc = "List of plots"),
         plot_antennas=dict(default = lambda self: range(self.nantennas),
             doc = "Antennas to create plots for."),
-        fftwplan=dict(default=lambda self: cr.FFTWPlanManyDft(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_sign.FORWARD, cr.fftw_flags.ESTIMATE)),
-        ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDft(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_sign.BACKWARD, cr.fftw_flags.ESTIMATE)),
+        fftwplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
+        ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDftC2r(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
     )
 
     def run(self):
@@ -111,13 +111,13 @@ class PulseEnvelope(Task):
         cr.hFFTWResample(self.timeseries_data_resampled[...], self.timeseries_data[..., self.window_start:self.window_end])
 
         # Compute FFT
-        cr.hFFTWExecutePlanRC(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
+        cr.hFFTWExecutePlan(self.fft_data[...], self.timeseries_data_resampled[...], self.fftwplan)
 
         # Apply Hilbert transform
         cr.hApplyHilbertTransform(self.fft_data[...])
 
         # Get inverse FFT
-        cr.hFFTWExecutePlanCR(self.hilbertt[...], self.fft_data[...], self.ifftwplan)
+        cr.hFFTWExecutePlan(self.hilbertt[...], self.fft_data[...], self.ifftwplan)
         self.hilbertt /= self.window_width_resampled
 
         # Get envelope
