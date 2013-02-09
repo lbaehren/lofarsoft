@@ -1184,7 +1184,7 @@ def getTimeseriesPar(directory,DMindex=0,DMvalue=False):
     std=std[DMav]
     return (timeseries,DM,par,trmsg,av,std)
 
-def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationlength=1,centraltime=0,window=0,trmsgoffset=15,offset=30,saveplot=None,legend=False,bTimeInSeconds=False,bMsgAllLengths=False,plotTimeseries=True,plotThreshold=False):
+def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationlength=1,centraltime=0,window=0,trmsgoffset=15,offset=30,saveplot=None,legend=False,bTimeInSeconds=False,bMsgAllLengths=False,plotTimeseries=True,plotThreshold=False,plotDM0line=True):
     """ Plot timeseries within a certain timewindow.
 
     * timeseries *  list of numpy arrays with the dedispersed data for each stream
@@ -1266,6 +1266,9 @@ def plotTimeseries(timeseries,DM,par,trmsg=None,av=None,std=None,integrationleng
         if type(trmsg)==type(np.zeros(1)):
             legendentries=["triggers"]+legendentries
         plt.legend(legendentries,prop={'size':8,},loc=2)
+    if plotDM0line:
+        for num,d in enumerate(par['delays']*-1):
+            plt.vlines(centraltime+d+10,-30+num*30,30+num*30,linestyles='dashdot',color='0.5',lw=3)
     if saveplot:
         plt.savefig(saveplot)
 
@@ -1291,7 +1294,7 @@ def filterUniqueTime(t12):
             print i1,i2
     return t12b[0:i2]
 
-def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ["parsetdir"],datadir=os.environ["FRATS_DATA_DIR"].rstrip("data/"),plotwindow=None,savefig=False,plotdir=False):
+def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ["parsetdir"],datadir=os.environ["FRATS_DATA_DIR"].rstrip("data/"),plotwindow=None,savefig=False,plotdir=False,savefits=False):
     """ Outputs command of openBFdata.py to make dedispersed timeseries for this trigger message.
 
    * msg *   Trigger message
@@ -1327,6 +1330,9 @@ def msgToPlotcommand(msg,mydir,prefix="run",extrablocks=10,parsetdir=os.environ[
             saveoption+=" --plotname="+str(plotdir)+"/"+str(savefig)
         else:
             saveoption+=" --plotname="+plotdir+"/plotstreams_L"+str(msg_obsID)+"_SAP00"+str(msg_beam)+"_DM="+str(msg_DM)+"_time="+str(msg_time)+".png"
+        if savefits:
+            from os.path import splitext
+            saveoption+=" -a --overwritefits --fitsname="+str(plotdir)+"/"+str(splitext(savefig)[0])+".fits"
     else:
         saveoption=""
     command=prefix+" openBFdata.py -o L"+str(msg_obsID)+" -m "+str(msg_beam)+" -s "+str(startblock)+" -n "+str(nblocks)+" -y -R -D "+mydir+" --ts --DM="+str(msg_DM)+" -c "+str(par['ch'])+" --plot --pc="+str(msg_time)+" --pw="+str(plotwindow)+" --il="+str(msg_length)+" --parsetdir "+parsetdir+" --datadir \""+datadir+"\""+saveoption+" --subav "+" -z "+str(par['sa'])+" --resampleT="+str(par['resampleT'])

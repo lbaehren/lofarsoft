@@ -132,8 +132,11 @@ def flagChannels(data,directory,startblock,blocksize,method=1):
     else:
         replacevalue=method
     for block in range(nofblocks):
-        print block,blocksize,fc[block]
-        data[block*blocksize:(block+1)*blocksize,fc[block]==1]=replacevalue
+        try:
+            print block,blocksize,fc[block]
+            data[block*blocksize:(block+1)*blocksize,fc[block]==1]=replacevalue
+        except:
+            print "fc=",fc
 
 def flagSamples(data,directory,startblock,blocksize,method=1):
     par=fa.obsParameters(directory)
