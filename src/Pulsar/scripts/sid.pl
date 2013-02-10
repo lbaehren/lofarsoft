@@ -89,6 +89,7 @@ $ref_gmst = &sidereal($ref_jd, $lambda);
 
 $time = ($lst - $ref_gmst);
 if ($time >= 24.) { $time -= 24; }
+if ($time < 0.) { $time += 24; }
 $time *= $sol_in_sid;
 $time += 12.;
 # checking if $time (UTC) is more than duration of sidereal day. In this case
