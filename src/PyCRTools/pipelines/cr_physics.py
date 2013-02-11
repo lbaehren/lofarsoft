@@ -629,7 +629,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 #                stokes_parameters = cr.trun("StokesParameters", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16)
 
                 # Get pulse strength
-                pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=3, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=polarization['xyz']["crp_plotfiles"], extras=True)
+                pulse_envelope_xyz = cr.trun("PulseEnvelope", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=3, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=polarization['xyz']["crp_plotfiles"], extra=True)
 
                 # Do noise characterization
 #                noise = cr.trun("Noise", timeseries_data=xyz_timeseries_data, histrange=(-3 * pulse_envelope_xyz.rms[0], 3 * pulse_envelope_xyz.rms[0]), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=polarization['xyz']["crp_plotfiles"])
