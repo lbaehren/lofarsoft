@@ -573,9 +573,6 @@ class TBBData(IOInterface):
         =============== =================================================
 
         """
-        if sample_offset > self.__file.maximum_read_length():
-            raise ValueError('Sample offset > MAXIMUM_READ_LENGTH !!')
-
         self.__shift = sample_offset
 
     def getFFTData(self, data, block=-1, hanning=True):
