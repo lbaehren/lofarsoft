@@ -4,7 +4,7 @@ import pycrtools as cr
 import re
 
 
-def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, samplenumber, clockoffset=1e4, blocksize=2 ** 16):
+def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, samplenumber, clockoffset=1e4, blocksize=2 ** 16,samplingfrequency=200):
     """Calculates block number corresponding to LORA timestamp and the
     sample number within that block (i.e. returns a tuple
     (``blocknumber``,``samplenumber``)).
@@ -22,9 +22,9 @@ def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, sample
 
     """
 
-    lora_samplenumber = (lora_nanoseconds - clockoffset) / 5
+    lora_samplenumber = (lora_nanoseconds - clockoffset) * samplingfrequency*1e(-3) #MHz to nanoseconds
 
-    value = (lora_samplenumber - samplenumber) + 2e8 * (lora_seconds - starttime)
+    value = (lora_samplenumber - samplenumber) + (lora_seconds - starttime) * samplingfrequency*1e6
 
     if value < 0:
         raise ValueError("Event not in file.")
