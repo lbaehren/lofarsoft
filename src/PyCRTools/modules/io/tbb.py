@@ -91,7 +91,7 @@ class TBBData(IOInterface):
             "FFTSIZE": lambda: self["BLOCKSIZE"] / 2 + 1,
             "BLOCKSIZE": lambda: self.__blocksize,
             "BLOCK": lambda: self.__block,
-            "MAXIMUM_READ_LENGTH": self.__file.maximum_read_length(self.__refAntenna),
+            "MAXIMUM_READ_LENGTH": lambda: self.__file.maximum_read_length(self.__refAntenna),
             "TIME_HR": lambda: [str(datetime.utcfromtimestamp(t)) for t in self["TIME"]],
             "SELECTED_DIPOLES_INDEX": lambda: [i for i, n in enumerate(self["DIPOLE_NAMES"]) if n in self["SELECTED_DIPOLES"]],
 
