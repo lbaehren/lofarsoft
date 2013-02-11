@@ -22,7 +22,7 @@ def loraTimestampToBlocknumber(lora_seconds, lora_nanoseconds, starttime, sample
 
     """
 
-    lora_samplenumber = (lora_nanoseconds - clockoffset) * samplingfrequency*1e(-3) #MHz to nanoseconds
+    lora_samplenumber = (lora_nanoseconds - clockoffset) * samplingfrequency*1e-3 #MHz to nanoseconds
 
     value = (lora_samplenumber - samplenumber) + (lora_seconds - starttime) * samplingfrequency*1e6
 
