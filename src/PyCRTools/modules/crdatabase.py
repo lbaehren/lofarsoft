@@ -65,7 +65,7 @@ class CRDatabase(object):
         self.db_required_version = 7
 
         if create or self.settings.db_version < self.db_required_version:
-            self.__updateDatabase(db_required_version)
+            self.__updateDatabase(self.db_required_version)
 
         # Throw an error message when opening a non supported db
         if self.settings.db_version > self.db_required_version:
