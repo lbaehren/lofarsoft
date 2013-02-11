@@ -65,7 +65,7 @@ class CRDatabase(object):
         self.db_required_version = 6
 
         if create or self.settings.db_version < self.db_required_version:
-            self.__updateDatabase()
+            self.__updateDatabase(db_required_version)
 
         # Throw an error message when opening a non supported db
         if self.settings.db_version > self.db_required_version:
@@ -162,9 +162,29 @@ class CRDatabase(object):
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
-    def __updateDatabase(self):
-        pass
+    def __updateDatabase(self, version):
+        db_version_pre = version - 1
+        db_version_post = version
 
+        # Set prerequisites for this update
+        if ((self.settings.db_version < db_version_pre) and
+            (self.db_required_version >= db_version_pre)):
+            __updateDatabase(db_version_pre)
+
+        # Apply this update
+        if ((self.settings.db_version < db_version_post) and
+            (self.db_required_version >= db_version_post)):
+            print "Upgrading database to version {0}...".format(db_version_post)
+            sql_list = []
+            # ______________________________________________________________________
+            #                                                              Version 6
+            if (6 == db_version_post):
+                pass
+            # ______________________________________________________________________
+            #                                                         Default update
+            # Upgrade the database version number.
+            sql_list.append("UPDATE settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
+            self.db.executelist(sql_list)
 
     def addParameterName(self, grouptype, parametername):
         """Add a parameter with name *parametername* to the table
@@ -935,7 +955,6 @@ class Settings(object):
         self._datapath = None
         self._resultspath = None
         self._lorapath = None
-        # self._db_version = None
 
     @property
     def datapath(self):
@@ -1053,7 +1072,6 @@ class Settings(object):
         if self._db:
             sql = "SELECT value FROM settings WHERE key='db_version'"
             result = int(self._db.select(sql)[0][0])
-            self._db_version = result   # Not used at the moment.
         else:
             raise ValueError("Unable to read from database: no database was set.")
 
