@@ -52,10 +52,8 @@ class CRDatabase(object):
         # Check for existence
         if not self.db.tableExists("settings"):
             create = True
-            print "creating database"
         else:
             create = False
-            print "not creating database"
 
         if create:
             self.__createDatabase()
@@ -117,6 +115,8 @@ class CRDatabase(object):
         """
 
         if self.db:
+            print "  Creating database..."
+
             sql_list = []
             # Event table
             sql_list.append("CREATE TABLE events (eventID INTEGER PRIMARY KEY, timestamp INTEGER, antennaset TEXT, status TEXT, statusmessage TEXT, alt_status TEXT, alt_statusmessage TEXT);")
