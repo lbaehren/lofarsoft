@@ -1,5 +1,8 @@
 """
-Provide a simple database access interface using sqlite3.
+Provide a simple database interface to access sqlite3 and PostgreSQL databases.
+
+If the database object is initialized with a host variable, the
+database object assumes a PostgreSQL database connection.
 """
 
 import sqlite3
@@ -32,6 +35,9 @@ class Database(object):
         ============ =======================================================
         1) For SQLite database
         2) For PostgreSQL database
+
+        If the database object is initialized with a host variable, the
+        database object assumes a PostgreSQL database connection.
 
         When the filename is ``:memory:`` the database is written to
         and read from memory.
