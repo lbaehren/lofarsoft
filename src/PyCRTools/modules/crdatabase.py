@@ -62,7 +62,7 @@ class CRDatabase(object):
         self.settings = Settings(self.db)
 
         # Database version applied in this module
-        self.db_required_version = 7
+        self.db_required_version = 8
 
         if create or self.settings.db_version < self.db_required_version:
             self.__updateDatabase(self.db_required_version)
@@ -186,6 +186,10 @@ class CRDatabase(object):
                 # Update EventParameters
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_ne TEXT;")
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_neerr TEXT;")
+            # ______________________________________________________________________
+            #                                                              Version 7
+            elif (8 == db_version_post):
+                sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_corcoef_xy TEXT;")
             # ______________________________________________________________________
             #                                                         Default update
             # Upgrade the database version number.
