@@ -14,7 +14,7 @@ CalibrateFM Task by Arthur Corstanje, Nov 2012.
 Second version CalibrateFM, Jan 2013.
 """
 
-from pycrtools.tasks import Task
+from pycrtools.tasks import Task, pulsecal
 from pycrtools.tasks.shortcuts import *  # only needed when using {default: None, ...} parameter style
 # using dict(boe = something) instead is better...
 import numpy as np
