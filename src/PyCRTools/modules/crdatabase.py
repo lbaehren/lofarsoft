@@ -196,55 +196,6 @@ class CRDatabase(object):
             sql_list.append("UPDATE settings SET value='{0}' WHERE key='db_version';".format(db_version_post))
             self.db.executelist(sql_list)
 
-    def addParameterName(self, grouptype, parametername):
-        """Add a parameter with name *parametername* to the table
-        *grouptype*.
-
-        **Properties**
-
-        ===============  =======================================================
-        Parameter        Description
-        ===============  =======================================================
-        *grouptype*      Type of the group to whcih to add the parameter:
-                         'Event', 'Datafile', 'Station', or 'Polarization'.
-        *parametername*  Name of the parameter.
-        ===============  =======================================================
-
-        If a column with the name *parametername* already exists it
-        will be skipped, otherwise it will be created.
-        """
-        if not grouptype in ["event", "datafile", "station", "polarization"]:
-            raise ValueError("Invalid grouptype, should be 'event', 'datafile', 'station' or 'polarization'")
-
-        tablename = grouptype.lower() + "parameters"
-        columnname = parametername.lower()
-
-        if not self.isLocked():
-            # Find list of parameter names
-            parameternames = []
-
-            if self._db._dbtype == "postgresql":
-                sql = "SELECT column_name FROM information_schema.columns WHERE table_name ='{0}';".format(tablename)
-                records = self._db.select(sql)
-                if records:
-                    self._keys = [str(r[0]) for r in records[1:]]
-            else:
-                sql = "pragma table_info({0});".format(tablename)
-                records = self._db.select(sql)
-                if records:
-                    self._keys = [str(r[1]) for r in records[1:]]
-
-            if parameternames:
-                if columnname in parameternames:
-                    return
-
-            # Add parametername to table
-            sql = "ALTER TABLE {0} ADD COLUMN {1} TEXT;".format(tablename, columnname)
-            if debug_mode:
-                print "SQL: Adding column: ", sql
-            self.db.execute(sql)
-        else:
-            raise ValueError("DATABASE IS LOCKED: Unable to add a parametername {0} to the database".format(columnname))
 
     def getEventIDs(self, timestamp=None, timestamp_start=None, timestamp_end=None, status=None, datafile_name=None, antennaset=None, order="e.timestamp"):
         """Return a list of eventIDs satifying the values of this
