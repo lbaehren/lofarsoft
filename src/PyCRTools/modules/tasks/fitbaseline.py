@@ -79,7 +79,7 @@ class FitBaseline(tasks.Task):
     **Description**:
 
     Function to fit a baseline using a polynomial function
-    (``fittype='POLY'``) or a basis spine fit (default: ``fittype='BSPLINE'``)
+    (``fittype='POLY'``) or a basis spline fit (default: ``fittype='BSPLINE'``)
     to a spectrum while trying to ignore positive spikes in the fit
     (e.g., those coming from RFI = Radio Frequency Interference).
 
