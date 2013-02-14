@@ -169,9 +169,6 @@ class TBBData(IOInterface):
         if not hasattr(self, "antenna_set"):
             self.antenna_set = self.__file.antenna_set()
 
-        # Get Nyquist zone for each antenna
-        self.__nyquist_zone = self.__file.nyquist_zone()
-
         # Get Sample frequency value and units for each antenna
         self.__sample_frequency_value = self.__file.sample_frequency_value()
         self.__sample_frequency_unit = self.__file.sample_frequency_unit()
@@ -316,105 +313,6 @@ class TBBData(IOInterface):
                 return self.__keyworddict[key]()
             else:
                 return self.__keyworddict[key]
-
-    def getitem__old(self, key):
-
-        """Implements keyword access.
-        """
-
-        if key not in self.keys():
-            raise KeyError("Invalid keyword")
-
-        elif key is "FILENAME":
-            return self.__file.filename()
-        elif key is "BLOCKSIZE":
-            return self.__blocksize
-        elif key is "ANTENNA_SET":
-            return self.__file.antenna_set()
-        elif key is "NYQUIST_ZONE":
-            return self.__file.nyquist_zone()
-        elif key is "TIME":
-            return self.__file.time()
-        elif key is "SAMPLE_NUMBER":
-            return self.__file.sample_number()
-        elif key is "SAMPLE_FREQUENCY_VALUE":
-            return self.__file.sample_frequency_value()
-        elif key is "SAMPLE_FREQUENCY_UNIT":
-            return self.__file.sample_frequency_unit()
-        elif key is "DATA_LENGTH":
-            return self.__file.data_length()
-        elif key is "NOF_STATION_GROUPS":
-            return self.__file.nofStationGroups()
-        elif key is "NOF_DIPOLE_DATASETS":
-            return self.__file.nofDipoleDatasets()
-        elif key is "NOF_SELECTED_DATASETS":
-            return self.__file.nofSelectedDatasets()
-        elif key is "DIPOLE_NAMES":
-            return self.__file.dipoleNames()
-        elif key is "SELECTED_DIPOLES":
-            return self.__file.selectedDipoles()
-        elif key is "CHANNEL_ID":
-            return self.__file.channelID()
-        elif key is "FILETYPE":
-            return self.__file.filetype()
-        elif key is "FILEDATE":
-            return self.__file.filedate()
-        elif key is "TELESCOPE":
-            return self.__file.telescope()
-        elif key is "OBSERVER":
-            return self.__file.observer()
-        elif key is "CLOCK_FREQUENCY":
-            return self.__file.clockFrequency()
-        elif key is "CLOCK_FREQUENCY_UNIT":
-            return self.__file.clockFrequencyUnit()
-        elif key is "FILTER_SELECTION":
-            return self.__file.filterSelection()
-        elif key is "TARGET":
-            return self.__file.target()
-        elif key is "SYSTEM_VERSION":
-            return self.__file.systemVersion()
-        elif key is "PIPELINE_NAME":
-            return self.__file.pipelineName()
-        elif key is "PIPELINE_VERSION":
-            return self.__file.pipelineVersion()
-        elif key is "NOTES":
-            return self.__file.notes()
-        elif key is "PROJECT_ID":
-            return self.__file.projectID()
-        elif key is "PROJECT_TITLE":
-            return self.__file.projectTitle()
-        elif key is "PROJECT_PI":
-            return self.__file.projectPI()
-        elif key is "PROJECT_CO_I":
-            return self.__file.projectCoI()
-        elif key is "PROJECT_CONTACT":
-            return self.__file.projectContact()
-        elif key is "OBSERVATION_ID":
-            return self.__file.observationID()
-        elif key is "OBSERVATION_START_MJD":
-            return self.__file.startMJD()
-        elif key is "OBSERVATION_START_TAI":
-            return self.__file.startTAI()
-        elif key is "OBSERVATION_START_UTC":
-            return self.__file.startUTC()
-        elif key is "OBSERVATION_END_MJD":
-            return self.__file.endMJD()
-        elif key is "OBSERVATION_END_TAI":
-            return self.__file.endTAI()
-        elif key is "OBSERVATION_END_UTC":
-            return self.__file.endUTC()
-        elif key is "OBSERVATION_NOF_STATIONS":
-            return self.__file.nofStations()
-        elif key is "OBSERVATION_STATION_LIST":
-            return self.__file.stationList()
-        elif key is "OBSERVATION_FREQUENCY_MIN":
-            return self.__file.frequencyMin()
-        elif key is "OBSERVATION_FREQUENCY_MAX":
-            return self.__file.frequencyMax()
-        elif key is "OBSERVATION_FREQUENCY_CENTER":
-            return self.__file.frequencyCenter()
-        elif key is "OBSERVATION_FREQUENCY_UNIT":
-            return self.__file.frequencyUnit()
 
     setable_keywords = set(["BLOCKSIZE", "BLOCK", "SELECTED_DIPOLES", "ANTENNA_SET"])
 
@@ -615,7 +513,7 @@ class TBBData(IOInterface):
         cr.hFFTWExecutePlan(data, self.__scratch, self.__plan)
 
         # Swap Nyquist zone if needed
-        data[...].nyquistswap(self.__nyquist_zone[0])
+        data[...].nyquistswap(self["NYQUIST_ZONE"][0])
 
     def getRelativeAntennaPositions(self):
         """Returns relative antenna positions for selected antennas, or all
