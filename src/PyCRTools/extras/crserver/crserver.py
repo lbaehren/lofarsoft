@@ -274,14 +274,14 @@ def statistics_handler():
         data = SubElement(info, "data")
 
         # Get statistic
-        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where (s.stationname='CS002' or s.stationname='CS003' or s.stationname='CS004' or s.stationname='CS005' or s.stationname='CS006' or s.stationname='CS007') group by e.eventID""");
+        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') group by e.eventID""")
 
         count = []
         for e in c.fetchall():
             count.append(int(e[0]))
 
         fig = plt.figure()
-        fig.add_subplot(111, aspect='equal')
+        fig.add_subplot(111)
 
         plt.hist(count, 7)
 
