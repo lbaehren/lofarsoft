@@ -325,6 +325,7 @@ def events_handler():
             lora.attrib['good_reconstruction'] = "true"
 
         SubElement(lora, "energy").text = str(energy)
+        SubElement(lora, "log_energy").text = str(math.log10(energy))
         SubElement(lora, "core_x").text = str(core_x)
         SubElement(lora, "core_y").text = str(core_y)
         SubElement(lora, "azimuth").text = str(azimuth)
