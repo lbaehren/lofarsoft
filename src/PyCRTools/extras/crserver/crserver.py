@@ -270,7 +270,7 @@ def statistics_handler():
     if True: # only for indent clarity, perhaps later turned into a function
 
         info = SubElement(elements, "info")
-        SubElement(info, "caption").text = "Superterp stations per event"
+        SubElement(info, "caption").text = "Number of superterp stations per event with status CR_FOUND"
         data = SubElement(info, "data")
 
         # Get statistic
