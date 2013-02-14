@@ -202,7 +202,7 @@ class BeamFormer(tasks.Task):
         FarField=dict(default=True,
                         doc="Form a beam towards the far field, i.e. no distance."),
 
-        NyquistZone=dict(default=lambda self: (2 if 'HBA' in self.antenna_set else 1),
+        NyquistZone=dict(default=lambda self: self.datafile['NYQUIST_ZONE'][0],
                            doc="In which Nyquist zone was the data taken (e.g. ``NyquistZone = 2`` if data is from 100-200 MHz for 200 MHz sampling rate)."),
 
 #------------------------------------------------------------------------
@@ -221,8 +221,9 @@ class BeamFormer(tasks.Task):
         doplot=dict(default=False,
                       doc="Plot current spectrum while processing."),
 
-        dohanning=dict(default=False,
+        dohanning=dict(default=True,
                       doc="Apply a hanning filter to the time series data before ffting, to avoid spectral leakage."),
+
         plotlen=dict(default=2 ** 12,
                        doc="How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."),
 
@@ -280,7 +281,7 @@ class BeamFormer(tasks.Task):
         spectrum_file=dict(default=lambda self: os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)), self.output_filename),
                              doc="Complete filename including directory to store the final spectrum."),
 
-        qualitycheck=dict(default=True,
+        qualitycheck=dict(default=False,
                             doc="Perform basic qualitychecking of raw data and flagging of bad data sets."),
 
         quality_db_filename=dict(default="qualitydatabase",
