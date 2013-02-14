@@ -147,7 +147,6 @@ class FindRFI(Task):
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
             self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window)
-            self.fftdata[...].nyquistswap(self.f['NYQUIST_ZONE'][0])
             # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
             # difference!
