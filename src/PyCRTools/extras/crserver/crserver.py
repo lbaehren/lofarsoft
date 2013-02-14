@@ -266,24 +266,24 @@ def statistics_handler():
         graph = SubElement(info, "graph")
         SubElement(graph, "path").text = figname
 
-	# nof stations per event
+    # nof stations per event
     if True: # only for indent clarity, perhaps later turned into a function
 
         info = SubElement(elements, "info")
         SubElement(info, "caption").text = "Superterp stations per event"
         data = SubElement(info, "data")
 
-		# Get statistic
-		c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where (s.stationname='CS002' or s.stationname='CS003' or s.stationname='CS004' or s.stationname='CS005' or s.stationname='CS006' or s.stationname='CS007') group by e.eventID""");
+        # Get statistic
+        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where (s.stationname='CS002' or s.stationname='CS003' or s.stationname='CS004' or s.stationname='CS005' or s.stationname='CS006' or s.stationname='CS007') group by e.eventID""");
 
-		count = []
-		for e in c.fetchall():
-			count.append(int(e[0]))
+        count = []
+        for e in c.fetchall():
+            count.append(int(e[0]))
 
         fig = plt.figure()
         fig.add_subplot(111, aspect='equal')
 
-		plt.hist(count, 7)
+        plt.hist(count, 7)
 
         figname = "statistics/superterp_stations_per_event.png"
         fig.savefig(figname)
