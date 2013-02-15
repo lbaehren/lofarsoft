@@ -283,9 +283,62 @@ def statistics_handler():
         fig = plt.figure()
         fig.add_subplot(111)
 
-        plt.hist(count, 7)
+        plt.hist(count, bins=np.arange(8)-0.5)
+		plt.xlim(-0.5, 6.5)
 
         figname = "statistics/superterp_stations_per_event.png"
+        fig.savefig(figname)
+
+        graph = SubElement(info, "graph")
+        SubElement(graph, "path").text = figname
+
+    # nof stations per event
+    if True: # only for indent clarity, perhaps later turned into a function
+
+        info = SubElement(elements, "info")
+        SubElement(info, "caption").text = "Number of superterp stations per LBA_OUTER event with status CR_FOUND"
+        data = SubElement(info, "data")
+
+        # Get statistic
+        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and e.antennaset='LBA_OUTER' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') group by e.eventID""")
+
+        count = []
+        for e in c.fetchall():
+            count.append(int(e[0]))
+
+        fig = plt.figure()
+        fig.add_subplot(111)
+
+        plt.hist(count, bins=np.arange(8)-0.5)
+		plt.xlim(-0.5, 6.5)
+
+        figname = "statistics/superterp_stations_per_event_lba_outer.png"
+        fig.savefig(figname)
+
+        graph = SubElement(info, "graph")
+        SubElement(graph, "path").text = figname
+
+    # nof stations per event
+    if True: # only for indent clarity, perhaps later turned into a function
+
+        info = SubElement(elements, "info")
+        SubElement(info, "caption").text = "Number of superterp stations per LBA_INNER event with status CR_FOUND"
+        data = SubElement(info, "data")
+
+        # Get statistic
+        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and e.antennaset='LBA_INNER' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') group by e.eventID""")
+
+        count = []
+        for e in c.fetchall():
+            count.append(int(e[0]))
+
+        fig = plt.figure()
+        fig.add_subplot(111)
+
+        plt.hist(count, bins=np.arange(8)-0.5)
+		plt.xlim(-0.5, 6.5)
+
+        figname = "statistics/superterp_stations_per_event_lba_inner.png"
         fig.savefig(figname)
 
         graph = SubElement(info, "graph")
