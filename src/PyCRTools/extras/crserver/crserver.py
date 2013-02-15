@@ -283,7 +283,13 @@ def statistics_handler():
         fig = plt.figure()
         fig.add_subplot(111)
 
-        plt.hist(count, bins=np.arange(8)-0.5)
+        temp = plt.hist(count, bins=np.arange(8)-0.5)
+
+        for i in range(len(temp[0])):
+            record = SubElement(data, "record")
+            SubElement(record, "key").text = str(i + 1)
+            SubElement(record, "value").text = str(temp[0][i])
+
         plt.xlim(-0.5, 6.5)
 
         figname = "statistics/superterp_stations_per_event.png"
@@ -309,7 +315,13 @@ def statistics_handler():
         fig = plt.figure()
         fig.add_subplot(111)
 
-        plt.hist(count, bins=np.arange(8)-0.5)
+        temp = plt.hist(count, bins=np.arange(8)-0.5)
+
+        for i in range(len(temp[0])):
+            record = SubElement(data, "record")
+            SubElement(record, "key").text = str(i + 1)
+            SubElement(record, "value").text = str(temp[0][i])
+
         plt.xlim(-0.5, 6.5)
 
         figname = "statistics/superterp_stations_per_event_lba_outer.png"
@@ -335,7 +347,13 @@ def statistics_handler():
         fig = plt.figure()
         fig.add_subplot(111)
 
-        plt.hist(count, bins=np.arange(8)-0.5)
+        temp = plt.hist(count, bins=np.arange(8)-0.5)
+
+        for i in range(len(temp[0])):
+            record = SubElement(data, "record")
+            SubElement(record, "key").text = str(i + 1)
+            SubElement(record, "value").text = str(temp[0][i])
+
         plt.xlim(-0.5, 6.5)
 
         figname = "statistics/superterp_stations_per_event_lba_inner.png"
