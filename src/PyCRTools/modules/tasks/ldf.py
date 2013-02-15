@@ -9,7 +9,6 @@ Created by Anna Nelles
 
 import pycrtools as cr
 import pycrtools.tasks as tasks
-from pycrtools.tasks import shortcuts as sc
 import pytmf
 import time
 import os

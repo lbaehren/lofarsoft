@@ -10,7 +10,6 @@ from pycrtools import hArray
 from pycrtools import srcfind as sf
 import numpy as np
 import matplotlib.pyplot as plt
-from pycrtools.tasks.shortcuts import *
 import pycrtools.tasks as tasks
 import pytmf
 import datetime
@@ -186,17 +185,16 @@ class rfilines(tasks.Task):
         bestPhaseRMS={default: None, doc: "PhaseRMS for the best frequency", output: True},
         timestamp={default: None, doc: "Unix timestamp of input file(s)", output: True},
         average_spectrum={default: None, doc: "Output median over antennas of averaged spectrum (over blocks)", output: True},
-#        results=p_(lambda self:gatherresults(self.topdir, self.maxspread, self.antennaSet),doc="Results dict containing cabledelays_database, antenna positions and names"),
-#        positions=p_(lambda self:obtainvalue(self.results,"positions"),doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
-#        antid = p_(lambda self:obtainvalue(self.results,"antid"), doc="hArray containing strings of antenna ids"),
-#        names=p_(lambda self:obtainvalue(self.results,"names"),doc="hArray of dimension [NAnt] with the names or IDs of the antennas"),
+#        results={default:lambda self:gatherresults(self.topdir, self.maxspread, self.antennaSet),doc:"Results dict containing cabledelays_database, antenna positions and names"},
+#        positions={default:lambda self:obtainvalue(self.results,"positions"),doc:"hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"},
+#        antid = {default:lambda self:obtainvalue(self.results,"antid"), doc:"hArray containing strings of antenna ids"},
+#        names={default:lambda self:obtainvalue(self.results,"names"),doc:"hArray of dimension [NAnt] with the names or IDs of the antennas"},
         plot_finish={default: lambda self: cr.plotfinish(doplot=True, filename="rfilines", plotpause=False), doc: "Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
         plot_name={default: "rfilines", doc: "Extra name to be added to plot filename."},
         nofantennas=p_(lambda self: self.positions.shape()[-2], "Number of antennas.", output=True),
         filetype={default: "pdf", doc: "extension/type of plot output files"},
         save_images={default: False, doc: "Enable if images should be saved to disk in default folder"},
 #        generate_html = {default:False,doc:"Default output to altair webserver"}
-
         )
 
     def call(self):

@@ -28,7 +28,6 @@ Dynamic spectrum documentation
 # import pdb; pdb.set_trace()
 
 from pycrtools import *
-from pycrtools.tasks import shortcuts as sc
 import pycrtools.tasks as tasks
 import pycrtools.qualitycheck as qualitycheck
 import time
@@ -135,286 +134,286 @@ class DynamicSpectrum(tasks.Task):
     """
     parameters = dict(
 
-        filefilter=sc.p_("$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
-                           "Unix style filter (i.e., with ``*``, ~, ``$VARIABLE``, etc.), to describe all the files to be processed."),
+        filefilter=dict(default="$LOFARSOFT/data/lofar/RS307C-readfullsecondtbb1.h5",
+                        doc="Unix style filter (i.e., with ``*``, ~, ``$VARIABLE``, etc.), to describe all the files to be processed."),
 
         file_start_number=dict(default=0,
-                                 doc="Integer number pointing to the first file in the ``filenames`` list with which to start. Can be changed to restart a calculation."),
+                               doc="Integer number pointing to the first file in the ``filenames`` list with which to start. Can be changed to restart a calculation."),
 
         datafile=dict(default=dynamicspectrum_getfile,
-                        export=False,
-                        doc="Data file object pointing to raw data."),
+                      export=False,
+                      doc="Data file object pointing to raw data."),
 
         doplot=dict(default=False,
-                      doc="Plot current spectrum while processing."),
+                    doc="Plot current spectrum while processing."),
 
         plotlen=dict(default=2 ** 12,
-                       doc="How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."),
+                     doc="How many channels ``+/-`` the center value to plot during the calculation (to allow progress checking)."),
 
         plotskip=dict(default=1,
-                        doc="Plot only every ``plotskip``-th spectrum, skip the rest (should not be smaller than 1)."),
+                      doc="Plot only every ``plotskip``-th spectrum, skip the rest (should not be smaller than 1)."),
 
         plot_center=dict(default=0.5,
-                           doc="Center plot at this relative distance from start of vector (0=left end, 1=right end)."),
+                         doc="Center plot at this relative distance from start of vector (0=left end, 1=right end)."),
 
         plot_start=dict(default=lambda self: max(int(self.speclen * self.plot_center) - self.plotlen, 0),
-                          doc="Start plotting from this sample number."),
+                        doc="Start plotting from this sample number."),
 
         plot_end=dict(default=lambda self: min(int(self.speclen * self.plot_center) + self.plotlen, self.speclen),
-                        doc="End plotting before this sample number."),
+                      doc="End plotting before this sample number."),
 
         plot_finish=dict(default=lambda self: plotfinish(doplot=self.doplot, plotpause=False),
-                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
+                         doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
 
         plot_name=dict(default="",
-                         doc="Extra name to be added to plot filename."),
+                       doc="Extra name to be added to plot filename."),
 
 
         delta_nu=dict(default=10 ** 4,
-                        doc="Desired frequency resolution - will be rounded off to get powers of 2x ``blocklen``",
-                        unit="Hz"),
+                      doc="Desired frequency resolution - will be rounded off to get powers of 2x ``blocklen``",
+                      unit="Hz"),
 
         delta_t=dict(default=10 ** -3,
-                       doc="Desired time resolution - will be rounded off to get integer number of spectral chunks",
-                       unit="s"),
+                     doc="Desired time resolution - will be rounded off to get integer number of spectral chunks",
+                     unit="s"),
 
         maxnantennas=dict(default=1,
-                            doc="Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."),
+                          doc="Maximum number of antennas per file to sum over (also used to allocate some vector sizes)."),
 
         maxnchunks=dict(default=128,
-                          doc="Maximum number of spectral chunks to include in dynamic spectrum."),
+                        doc="Maximum number of spectral chunks to include in dynamic spectrum."),
 
         maxblocksflagged=dict(default=2,
-                                doc="Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."),
+                              doc="Maximum number of blocks that are allowed to be flagged before the entire spectrum of the chunk is discarded."),
 
         stride=dict(default=1,
-                      doc="If ``stride > 1`` skip (``stride - 1``) blocks."),
+                    doc="If ``stride > 1`` skip (``stride - 1``) blocks."),
 
         tmpfileext=dict(default=".pcr",
-                          doc="Extension of ``filename`` for temporary data files (e.g., used if ``stride > 1``.)",
-                          export=False),
+                        doc="Extension of ``filename`` for temporary data files (e.g., used if ``stride > 1``.)",
+                        export=False),
 
         tmpfilename=dict(default="tmp",
-                           doc="Root filename for temporary data files.",
-                           export=False),
+                         doc="Root filename for temporary data files.",
+                         export=False),
 
         filenames=dict(default=lambda self: listFiles(self.filefilter),
-                         doc="List of filenames of data file to read raw data from."),
+                       doc="List of filenames of data file to read raw data from."),
 
         output_dir=dict(default="",
-                          doc="Directory where output file is to be written to."),
+                        doc="Directory where output file is to be written to."),
 
         output_filename=dict(default=lambda self: (os.path.split(self.filenames[0])[1] if len(self.filenames) > 0 else "unknown") + ".dynspec" + self.tmpfileext,
-                               doc="Filename (without directory, see ``output_dir``) to store the final spectrum."),
+                             doc="Filename (without directory, see ``output_dir``) to store the final spectrum."),
 
         spectrum_file=dict(default=lambda self: os.path.join(os.path.expandvars(os.path.expanduser(self.output_dir)), self.output_filename),
-                             doc="Complete filename including directory to store the final spectrum."),
+                           doc="Complete filename including directory to store the final spectrum."),
 
         qualitycheck=dict(default=True,
-                            doc="Perform basic qualitychecking of raw data and flagging of bad data sets."),
+                          doc="Perform basic qualitychecking of raw data and flagging of bad data sets."),
 
         quality_db_filename=dict(default="qualitydatabase",
-                                   doc="Root filename of log file containing the derived antenna quality values (uses '.py' and '.txt' extension)."),
+                                 doc="Root filename of log file containing the derived antenna quality values (uses '.py' and '.txt' extension)."),
 
         quality=dict(default=[],
-                       doc="A list containing quality check information about every large chunk of data that was read in. Use ``Task.qplot(Entry#, flaggedblock=nn)`` to plot blocks in question.",
-                       export=False,
-                       output=True),
+                     doc="A list containing quality check information about every large chunk of data that was read in. Use ``Task.qplot(Entry#, flaggedblock=nn)`` to plot blocks in question.",
+                     export=False,
+                     output=True),
 
         antennacharacteristics=dict(default={},
-                                      doc="A dict with antenna IDs as key, containing quality information about every antenna.",
-                                      export=False,
-                                      output=True),
+                                    doc="A dict with antenna IDs as key, containing quality information about every antenna.",
+                                    export=False,
+                                    output=True),
 
         mean_antenna=dict(default=lambda self: hArray(float, [self.maxnantennas], name="Mean per Antenna"),
-                            doc="Mean value of time series per antenna.",
-                            output=True),
-
-        rms_antenna=dict(default=lambda self: hArray(float, [self.maxnantennas], name="RMS per Antenna"),
-                           doc="RMS value of time series per antenna.",
-                           output=True),
-
-        npeaks_antenna=dict(default=lambda self: hArray(float, [self.maxnantennas], name="Number of Peaks per Antenna"),
-                              doc="Number of peaks of time series per antenna.",
-                              output=True),
-
-        mean=dict(default=0,
-                    doc="Mean of mean time series values of all antennas.",
-                    output=True),
-
-        mean_rms=dict(default=0,
-                        doc="RMS of mean of mean time series values of all antennas.",
-                        output=True),
-
-        npeaks=dict(default=0,
-                      doc="Mean of number of peaks all antennas.",
-                      output=True),
-
-        npeaks_rms=dict(default=0,
-                          doc="RMS of ``npeaks`` over all antennas.",
+                          doc="Mean value of time series per antenna.",
                           output=True),
 
-        rms=dict(default=0,
-                   doc="Mean of rms time series values of all antennas.",
-                   output=True),
+        rms_antenna=dict(default=lambda self: hArray(float, [self.maxnantennas], name="RMS per Antenna"),
+                         doc="RMS value of time series per antenna.",
+                         output=True),
 
-        rms_rms=dict(default=0,
-                       doc="RMS of rms of mean time series values of all antennas.",
-                       output=True),
-
-        homogeneity_factor=dict(default=0,
-                                  doc="``=1-(rms_rms/rms+ npeaks_rms/npeaks)/2`` - this describes the homogeneity of the data processed. A ``homogeneity_factor=1`` means that all antenna data were identical, a low factor should make one wonder if something went wrong.",
-                                  output=True),
-
-        spikeexcess=dict(default=20,
-                           doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
-
-        rmsfactor=dict(default=2,
-                         doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
-
-        meanfactor=dict(default=3,
-                          doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
-
-        randomize_peaks=dict(default=True,
-                               doc="Replace all peaks in time series data which are ``rmsfactor`` above or below the mean with some random number in the same range."),
-
-        peak_rmsfactor=dict(default=5,
-                              doc="At how many sigmas above the mean will a peak be randomized."),
-
-#------------------------------------------------------------------------
-# Derived parameters
-
-        blocklen=dict(default=lambda self: min(2 ** int(round(log(1. / self.delta_nu / self.samplerate, 2))), self.filesize / self.stride),
-                        doc="The size of a block used for the FFT, limited by filesize.",
-                        unit="Sample"),
-
-        block_duration=dict(default=lambda self: self.samplerate * self.blocklen,
-                              doc="The length of a block in time units.",
-                              unit="s"),
-
-        speclen=sc.p_(lambda self: self.blocklen / 2 + 1,
-                        "Length of one spectrum.",
-                        "Channels"),
-
-        samplerate=sc.p_(lambda self: self.datafile["SAMPLE_INTERVAL"][0],
-                           "Length in time of one sample in raw data set.",
-                           "s"),
-
-        filesize=sc.p_(lambda self: self.datafile["DATA_LENGTH"][0],
-                         "Length of file.",
-                         "Samples"),
-
-        fullsize=sc.p_(lambda self: self.nblocks * self.blocklen * self.nchunks,
-                         "The full length of the raw time series data used for the dynamic spectrum.",
-                         "Samples"),
-
-        delta_nu_used=dict(default=lambda self: 1 / (self.samplerate * self.blocklen),
-                             doc="Actual frequency resolution of dynamic spectrum",
-                             unit="Hz"),
-
-        delta_t_used=dict(default=lambda self: self.samplerate * self.blocklen * self.nblocks,
-                            doc="Actual frequency resolution of dynamic spectrum",
-                            unit="s"),
-
-        max_nblocks=dict(default=lambda self: int(floor(self.filesize / self.stride / self.blocklen)),
-                           doc="Maximum number of blocks in file."),
-
-        nblocks=dict(default=lambda self: int(min(max(round(self.delta_t / self.block_duration), 1), self.max_nblocks)),
-                       doc="Number of blocks of length blocklen integrated per spectral chunk. The blocks are also used for quality checking."),
-
-        chunklen=dict(default=lambda self: self.nblocks * self.blocklen,
-                        doc="Length of one chunk of data used to calculate one time step in dynamic spectrum.",
-                        unit="Samples"),
-
-        sectlen=dict(default=lambda self: self.chunklen * self.stride,
-                       doc="Length of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.",
-                       unit="Samples"),
-
-        sectduration=dict(default=lambda self: self.sectlen * self.samplerate,
-                            doc="Length in time units of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.",
-                            unit="s"),
-
-        end_time=dict(default=lambda self: self.sectduration * self.nchunks,
-                        doc="End of time axis.",
-                        unit="s"),
-
-        start_time=dict(default=lambda self: 0,
-                          doc="Start of time axis.",
-                          unit="s"),
-
-        blocks_per_sect=dict(default=lambda self: self.nblocks * self.stride,
-                               doc="Number of blocks per section of data."),
-
-        nchunks=dict(default=lambda self: min(int(floor(self.filesize / self.sectlen)), self.maxnchunks),
-                       doc="Maximum number of spectral chunks to average"),
-
-        start_frequency=dict(default=lambda self: self.freqs[0],
-                               doc="Start frequency of spectrum",
-                               unit="Hz"),
-
-        end_frequency=dict(default=lambda self: self.freqs[-1],
-                             doc="End frequency of spectrum",
-                             unit="Hz"),
-
-        delta_frequency=sc.p_(lambda self: (self.end_frequency - self.start_frequency) / (self.speclen - 1.0),
-                                "Separation of two subsequent channels in final spectrum"),
-
-#------------------------------------------------------------------------
-
-        nantennas=dict(default=lambda self: len(self.antennas),
-                         doc="The actual number of antennas available for calculation in the file (``< maxnantennas``)."),
-
-        nantennas_start=dict(default=0,
-                               doc="Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."),
-
-        antenna_list=dict(default={},
-                            doc="List of antenna indices used as input from each filename.",
+        npeaks_antenna=dict(default=lambda self: hArray(float, [self.maxnantennas], name="Number of Peaks per Antenna"),
+                            doc="Number of peaks of time series per antenna.",
                             output=True),
 
-        nantennas_stride=dict(default=1,
-                                doc="Take only every *n*-th antenna from antennas list (see also ``nantennas_start``). Use 2 to select odd/even."),
+        mean=dict(default=0,
+                  doc="Mean of mean time series values of all antennas.",
+                  output=True),
 
-        nspectraadded=sc.p_(lambda self: hArray(int, [self.nchunks], fill=0, name="Spectra added"),
-                           "Number of spectra added per chunk.",
+        mean_rms=dict(default=0,
+                      doc="RMS of mean of mean time series values of all antennas.",
+                      output=True),
+
+        npeaks=dict(default=0,
+                    doc="Mean of number of peaks all antennas.",
+                    output=True),
+
+        npeaks_rms=dict(default=0,
+                        doc="RMS of ``npeaks`` over all antennas.",
+                        output=True),
+
+        rms=dict(default=0,
+                 doc="Mean of rms time series values of all antennas.",
+                 output=True),
+
+        rms_rms=dict(default=0,
+                     doc="RMS of rms of mean time series values of all antennas.",
+                     output=True),
+
+        homogeneity_factor=dict(default=0,
+                                doc="``=1-(rms_rms/rms+ npeaks_rms/npeaks)/2`` - this describes the homogeneity of the data processed. A ``homogeneity_factor=1`` means that all antenna data were identical, a low factor should make one wonder if something went wrong.",
+                                output=True),
+
+        spikeexcess=dict(default=20,
+                         doc="Set maximum allowed ratio of detected over expected peaks per block to this level (1 is roughly what one expects from Gaussian noise)."),
+
+        rmsfactor=dict(default=2,
+                       doc="Factor by which the RMS is allowed to change within one chunk of time series data before it is flagged."),
+
+        meanfactor=dict(default=3,
+                        doc="Factor by which the mean is allowed to change within one chunk of time series data before it is flagged."),
+
+        randomize_peaks=dict(default=True,
+                             doc="Replace all peaks in time series data which are ``rmsfactor`` above or below the mean with some random number in the same range."),
+
+        peak_rmsfactor=dict(default=5,
+                            doc="At how many sigmas above the mean will a peak be randomized."),
+
+        #------------------------------------------------------------------------
+        # Derived parameters
+
+        blocklen=dict(default=lambda self: min(2 ** int(round(log(1. / self.delta_nu / self.samplerate, 2))), self.filesize / self.stride),
+                      doc="The size of a block used for the FFT, limited by filesize.",
+                      unit="Sample"),
+
+        block_duration=dict(default=lambda self: self.samplerate * self.blocklen,
+                            doc="The length of a block in time units.",
+                            unit="s"),
+
+        speclen=dict(default=lambda self: self.blocklen / 2 + 1,
+                     doc="Length of one spectrum.",
+                     unit="Channels"),
+
+        samplerate=dict(default=lambda self: self.datafile["SAMPLE_INTERVAL"][0],
+                        doc="Length in time of one sample in raw data set.",
+                        unit="s"),
+
+        filesize=dict(default=lambda self: self.datafile["DATA_LENGTH"][0],
+                      doc="Length of file.",
+                      unit="Samples"),
+
+        fullsize=dict(default=lambda self: self.nblocks * self.blocklen * self.nchunks,
+                      doc="The full length of the raw time series data used for the dynamic spectrum.",
+                      unit="Samples"),
+
+        delta_nu_used=dict(default=lambda self: 1 / (self.samplerate * self.blocklen),
+                           doc="Actual frequency resolution of dynamic spectrum",
+                           unit="Hz"),
+
+        delta_t_used=dict(default=lambda self: self.samplerate * self.blocklen * self.nblocks,
+                          doc="Actual frequency resolution of dynamic spectrum",
+                          unit="s"),
+
+        max_nblocks=dict(default=lambda self: int(floor(self.filesize / self.stride / self.blocklen)),
+                         doc="Maximum number of blocks in file."),
+
+        nblocks=dict(default=lambda self: int(min(max(round(self.delta_t / self.block_duration), 1), self.max_nblocks)),
+                     doc="Number of blocks of length blocklen integrated per spectral chunk. The blocks are also used for quality checking."),
+
+        chunklen=dict(default=lambda self: self.nblocks * self.blocklen,
+                      doc="Length of one chunk of data used to calculate one time step in dynamic spectrum.",
+                      unit="Samples"),
+
+        sectlen=dict(default=lambda self: self.chunklen * self.stride,
+                     doc="Length of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.",
+                     unit="Samples"),
+
+        sectduration=dict(default=lambda self: self.sectlen * self.samplerate,
+                          doc="Length in time units of one section of data used to extract one chunk, i.e. on time step in dynamic spectrum.",
+                          unit="s"),
+
+        end_time=dict(default=lambda self: self.sectduration * self.nchunks,
+                      doc="End of time axis.",
+                      unit="s"),
+
+        start_time=dict(default=lambda self: 0,
+                        doc="Start of time axis.",
+                        unit="s"),
+
+        blocks_per_sect=dict(default=lambda self: self.nblocks * self.stride,
+                             doc="Number of blocks per section of data."),
+
+        nchunks=dict(default=lambda self: min(int(floor(self.filesize / self.sectlen)), self.maxnchunks),
+                     doc="Maximum number of spectral chunks to average"),
+
+        start_frequency=dict(default=lambda self: self.freqs[0],
+                             doc="Start frequency of spectrum",
+                             unit="Hz"),
+
+        end_frequency=dict(default=lambda self: self.freqs[-1],
+                           doc="End frequency of spectrum",
+                           unit="Hz"),
+
+        delta_frequency=dict(default=lambda self: (self.end_frequency - self.start_frequency) / (self.speclen - 1.0),
+                             doc="Separation of two subsequent channels in final spectrum"),
+
+        #------------------------------------------------------------------------
+
+        nantennas=dict(default=lambda self: len(self.antennas),
+                       doc="The actual number of antennas available for calculation in the file (``< maxnantennas``)."),
+
+        nantennas_start=dict(default=0,
+                             doc="Start with the *n*-th antenna in each file (see also ``nantennas_stride``). Can be used for selecting odd/even antennas."),
+
+        antenna_list=dict(default={},
+                          doc="List of antenna indices used as input from each filename.",
+                          output=True),
+
+        nantennas_stride=dict(default=1,
+                              doc="Take only every *n*-th antenna from antennas list (see also ``nantennas_start``). Use 2 to select odd/even."),
+
+        nspectraadded=dict(default=lambda self: hArray(int, [self.nchunks], fill=0, name="Spectra added"),
+                           doc="Number of spectra added per chunk.",
                            output=True),
 
-        nspectraflagged=sc.p_(lambda self: hArray(int, [self.nchunks], fill=0, name="Spectra flagged"),
-                                "Number of spectra flagged per chunk.",
-                                output=True),
+        nspectraflagged=dict(default=lambda self: hArray(int, [self.nchunks], fill=0, name="Spectra flagged"),
+                             doc="Number of spectra flagged per chunk.",
+                             output=True),
 
-        antennas=sc.p_(lambda self: hArray(range(min(self.datafile["NOF_DIPOLE_DATASETS"], self.maxnantennas))),
-                         "Antennas from which to select initially for the current file."),
+        antennas=dict(default=lambda self: hArray(range(min(self.datafile["NOF_DIPOLE_DATASETS"], self.maxnantennas))),
+                      doc="Antennas from which to select initially for the current file."),
 
-        antennas_used=sc.p_(lambda self: set(),
-                              "A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
-                              output=True),
+        antennas_used=dict(default=lambda self: set(),
+                           doc="A set of antenna names that were actually included in the average spectrum, excluding the flagged ones.",
+                           output=True),
 
-        antennaIDs=sc.p_(lambda self: ashArray(hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),
-                           "Antenna IDs to be selected from for current file."),
+        antennaIDs=dict(default=lambda self: ashArray(hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]),
+                        doc="Antenna IDs to be selected from for current file."),
 
-        nantennas_total=sc.p_(0,
-                                "Total number of antennas that were processed (flagged or not) in this run.",
-                                output=True),
+        nantennas_total=dict(default=0,
+                             doc="Total number of antennas that were processed (flagged or not) in this run.",
+                             output=True),
 
-        header=sc.p_(lambda self: self.datafile.getHeader(),
-                       "Header of datafile.",
-                       export=False),
+        header=dict(default=lambda self: self.datafile.getHeader(),
+                    doc="Header of datafile.",
+                    export=False),
 
-        freqs=sc.p_(lambda self: self.datafile["FREQUENCY_DATA"],
-                      export=False),
+        freqs=dict(default=lambda self: self.datafile["FREQUENCY_DATA"],
+                   export=False),
 
         # Now define all the work arrays used internally
         data=dict(workarray=True,
-                    doc="Main input array of raw data.",
-                    default=lambda self: hArray(float, [self.nblocks, self.blocklen], name="data", header=self.header)),
+                  doc="Main input array of raw data.",
+                  default=lambda self: hArray(float, [self.nblocks, self.blocklen], name="data", header=self.header)),
 
         fftdata=dict(workarray=True,
-                       doc="Main input array of raw data.",
-                       default=lambda self: hArray(complex, [self.nblocks, self.speclen], name="fftdata", header=self.header)),
+                     doc="Main input array of raw data.",
+                     default=lambda self: hArray(complex, [self.nblocks, self.speclen], name="fftdata", header=self.header)),
 
         frequencies=dict(workarray=True,
-                           doc="Frequency axis for final power spectrum.",
-                           default=lambda self: hArray(float, [self.speclen], name="Frequency", units=("M", "Hz"), header=self.header)),
+                         doc="Frequency axis for final power spectrum.",
+                         default=lambda self: hArray(float, [self.speclen], name="Frequency", units=("M", "Hz"), header=self.header)),
 
         dynspec = dict(workarray=True,
                        doc="Resulting dynamic spectrum.",
@@ -431,7 +430,7 @@ class DynamicSpectrum(tasks.Task):
         npcleanspec = dict(workarray=True,
                            doc="Resulting clean dynamic spectrum in a numpy array for plotting.",
                            default=lambda self: np.zeros([self.nchunks, self.speclen]))
-)
+        )
 
     def run(self):
         """Run the program.

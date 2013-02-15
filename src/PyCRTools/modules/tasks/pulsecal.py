@@ -5,7 +5,6 @@ A number of tools useful in calibrating radio data
 
 import pycrtools as cr
 from pycrtools import tasks
-from pycrtools.tasks import shortcuts as sc
 from pycrtools import rftools as rf
 import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
@@ -276,29 +275,29 @@ class FitMaxima(tasks.Task):
 
     """
     parameters = dict(
-        peak_width=sc.p_(20, "Width of the data over which to fit the peak."),
-        nsubsamples=sc.p_(16, "Divide each original sample into that many finer pixels. Determines maximum resolution of fit."),
-        ncoeffs=sc.p_(lambda self: self.peak_width / 2, "Number of breakpoints to fit spline polynomial around the peak."),
-        splineorder=sc.p_(3, "Order of spline to fit. 3=cubic spline."),
-        refant=sc.p_(None, "Reference antenna who's maximum determines the zero point of the x-axis (e.g., to get relative delays)."),
-        sampleinterval=sc.p_(None, "Separation of two subsequent samples on the x-axis in desired units - used to return lags in proper units."),
-        doplot=sc.p_(False, "Plot results."),
-        newfigure=sc.p_(True, "Create a new figure for plotting for each new instance of the task."),
-        figure=sc.p_(None, "The matplotlib figure containing the plot", output=True),
-        plotend=sc.p_(4, "Stop plotting at this data set."),
-        plotstart=sc.p_(0, "Start plotting at this data set."),
-        legend=sc.p_(None, "List containing labels for each antenna data set for plotting the label"),
-        dim2=sc.p_(lambda self: self.data.shape()[-2]),
-        coeffs=sc.p_(lambda self: cr.hArray(float, [self.dim2, self.ncoeffs], name="Spline Coefficients"), "Coefficients of spline fit.", output=True),
-        fits_xdata=sc.p_(lambda self: cr.hArray(dimensions=[self.dim2, (self.peak_width - 1) * (self.nsubsamples) + 1], properties=self.data, name="x"), workarray=True),
-        fits_ydata=sc.p_(lambda self: cr.hArray(dimensions=[self.dim2, (self.peak_width - 1) * (self.nsubsamples) + 1], properties=self.data, xvalues=self.fits_xdata, name="Fit"), workarray=True),
-        covariance=sc.p_(lambda self: cr.hArray(float, [self.dim2, self.ncoeffs, self.ncoeffs]), workarray=True, name="covariance"),
-        xpowers=sc.p_(lambda self: cr.hArray(float, [self.dim2, self.peak_width, self.ncoeffs]), workarray=True, name="Spline xpowers"),
-        xdata=sc.p_(lambda self: cr.hArray(float, [self.dim2, self.peak_width]), "x-axis value for the fit"),
-        xvalues=sc.p_(lambda self: cr.hArray(float, [self.data.shape()[-1]], fill=range(self.data.shape()[-1])), "Samplenumber for the time series data"),
-        maxy=sc.p_(None, "Y-values of fitted maxima", output=True),
-        maxx=sc.p_(None, "X-values of fitted maxima", output=True, unit="Samplenumber"),
-        lags=sc.p_(None, "X-values of fitted maxima", output=True, unit="User Units")
+        peak_width = dict(default=20, doc="Width of the data over which to fit the peak."),
+        nsubsamples = dict(default=16, doc="Divide each original sample into that many finer pixels. Determines maximum resolution of fit."),
+        ncoeffs = dict(default=lambda self: self.peak_width / 2, doc="Number of breakpoints to fit spline polynomial around the peak."),
+        splineorder = dict(default=3, doc="Order of spline to fit. 3=cubic spline."),
+        refant=dict(default=None, doc="Reference antenna who's maximum determines the zero point of the x-axis (e.g., to get relative delays)."),
+        sampleinterval = dict(default=None, doc="Separation of two subsequent samples on the x-axis in desired units - used to return lags in proper units."),
+        doplot = dict(default=False, doc="Plot results."),
+        newfigure = dict(default=True, doc="Create a new figure for plotting for each new instance of the task."),
+        figure=dict(default=None, doc="The matplotlib figure containing the plot", output=True),
+        plotend = dict(default=4, doc="Stop plotting at this data set."),
+        plotstart = dict(default=0, doc="Start plotting at this data set."),
+        legend = dict(default=None, doc="List containing labels for each antenna data set for plotting the label"),
+        dim2 = dict(default=lambda self: self.data.shape()[-2]),
+        coeffs = dict(default=lambda self: cr.hArray(float, [self.dim2, self.ncoeffs], name="Spline Coefficients"), doc="Coefficients of spline fit.", output=True),
+        fits_xdata = dict(default=lambda self: cr.hArray(dimensions=[self.dim2, (self.peak_width - 1) * (self.nsubsamples) + 1], properties=self.data, name="x"), workarray=True),
+        fits_ydata = dict(default=lambda self: cr.hArray(dimensions=[self.dim2, (self.peak_width - 1) * (self.nsubsamples) + 1], properties=self.data, xvalues=self.fits_xdata, name="Fit"), workarray=True),
+        covariance = dict(default=lambda self: cr.hArray(float, [self.dim2, self.ncoeffs, self.ncoeffs]), workarray=True, name="covariance"),
+        xpowers = dict(default=lambda self: cr.hArray(float, [self.dim2, self.peak_width, self.ncoeffs]), workarray=True, name="Spline xpowers"),
+        xdata = dict(default=lambda self: cr.hArray(float, [self.dim2, self.peak_width]), doc="x-axis value for the fit"),
+        xvalues = dict(default=lambda self: cr.hArray(float, [self.data.shape()[-1]], fill=range(self.data.shape()[-1])), doc="Samplenumber for the time series data"),
+        maxy = dict(default=None, doc="Y-values of fitted maxima", output=True),
+        maxx = dict(default=None, doc="X-values of fitted maxima", output=True, unit="Samplenumber"),
+        lags = dict(default=None, doc="X-values of fitted maxima", output=True, unit="User Units")
         )
 
     def call(self, data):
@@ -477,151 +476,151 @@ class DirectionFitTriangles(tasks.Task):
         good_antennas=dict(doc="List of integer indices pointing to the good antennas in the original list",
                              default=lambda self: range(n_timelags), output=True),
 
-        expected_timelags=sc.p_(lambda self: cr.hArray(float, [self.NAnt], name="Expected Time Lags"),
-                                "Exact time lags expected for each antenna for a given source position",
+        expected_timelags = dict(default=lambda self: cr.hArray(float, [self.NAnt], name="Expected Time Lags"),
+                                doc="Exact time lags expected for each antenna for a given source position",
                                 unit="s"),
 
-        measured_geometric_timelags=sc.p_(lambda self: cr.hArray(float, [self.NAnt], name="Geometric Time Lags"),
-                                          "Time lags minus cable delay = pure geometric delay if no error",
+        measured_geometric_timelags = dict(default=lambda self: cr.hArray(float, [self.NAnt], name="Geometric Time Lags"),
+                                          doc="Time lags minus cable delay = pure geometric delay if no error",
                                           unit="s"),
 
         direction_guess=dict(default=False, doc="If a tuple of two numbers (azimut, elevation) then this is an initial guess for the direction (currently only for plotting).", unit="degree"),
 
         direction_guess_label=dict(default="direction guess", doc="A label for plotting indicating where the direction guess was coming from."),
 
-        cabledelays=sc.p_(lambda self: cr.hArray(float, [self.NAnt], name="Cable Delays", fill=0),
-                          "Know (fixed) cable delays that one needs to correct measured delays for.",
+        cabledelays = dict(default=lambda self: cr.hArray(float, [self.NAnt], name="Cable Delays", fill=0),
+                          doc="Know (fixed) cable delays that one needs to correct measured delays for.",
                           unit="s"),
 
-        total_delays=sc.p_(lambda self: cr.hArray(float, [self.NAnt], name="Total Delays"),
-                           "Total instrumental (residual+cable) delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",
+        total_delays = dict(default=lambda self: cr.hArray(float, [self.NAnt], name="Total Delays"),
+                           doc="Total instrumental (residual+cable) delays needed to calibrate the array. Will be subtracted from the measured lags or added to the expected. The array will be updated during iteration",
                            unit="s"),
 
-        residual_delays=sc.p_(lambda self: cr.hArray(float, [self.NAnt], name="Residual Delays"),
-                              "Residual delays needed to calibrate the array after correction for known cable delays. Will be subtracted from the measured lags (correced for cable delays) or added to the expected. The array will be updated during iteration",
+        residual_delays = dict(default=lambda self: cr.hArray(float, [self.NAnt], name="Residual Delays"),
+                              doc="Residual delays needed to calibrate the array after correction for known cable delays. Will be subtracted from the measured lags (correced for cable delays) or added to the expected. The array will be updated during iteration",
                               unit="s"),
 
-        delta_delays=sc.p_(lambda self: cr.hArray(float, [self.NAnt], name="Delta Delays"),
-                           "Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",
+        delta_delays = dict(default=lambda self: cr.hArray(float, [self.NAnt], name="Delta Delays"),
+                           doc="Additional instrumental delays needed to calibrate array will be added to timelags and will be updated during iteration",
                            unit="s"),
 
-        delta_delays_mean_history=sc.p_([],
-                                        "Mean of the difference between expected and currently calibrated measured delays for each iteration",
+        delta_delays_mean_history = dict(default=[],
+                                        doc="Mean of the difference between expected and currently calibrated measured delays for each iteration",
                                         unit="s",
                                         output=True),
 
-        delta_delays_rms_history=sc.p_([],
-                                       "RMS of the difference between expected and currently calibrated measured delays for each iteration",
+        delta_delays_rms_history = dict(default=[],
+                                       doc="RMS of the difference between expected and currently calibrated measured delays for each iteration",
                                        unit="s",
                                        output=True),
 
-        delays_history=sc.p_(lambda self: cr.hArray(float, [self.maxiter, self.NAnt], name="Delays"),
-                             "Instrumental delays for each iteration (for plotting)",
+        delays_history = dict(default=lambda self: cr.hArray(float, [self.maxiter, self.NAnt], name="Delays"),
+                             doc="Instrumental delays for each iteration (for plotting)",
                              unit="s"),
 
-        delays_historyT=sc.p_(lambda self: cr.hArray(float, [self.NAnt, self.maxiter], name="Delays"),
-                              "Instrumental delays for each iteration (for plotting)",
+        delays_historyT = dict(default=lambda self: cr.hArray(float, [self.NAnt, self.maxiter], name="Delays"),
+                              doc="Instrumental delays for each iteration (for plotting)",
                               unit="s"),
 
-        maxiter=sc.p_(1,
-                      "if >1 iterate (maximally tat many times) position and delays until solution converges."),
+        maxiter = dict(default=1,
+                      doc="if >1 iterate (maximally tat many times) position and delays until solution converges."),
 
-        delay_error=sc.p_(1e-12,
-                          "Target for the RMS of the delta delays where iteration can stop.",
+        delay_error = dict(default=1e-12,
+                          doc="Target for the RMS of the delta delays where iteration can stop.",
                           unit="s"),
 
-        rmsfactor=sc.p_(3.,
-                        "How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until ``minrsmfactor``)."),
+        rmsfactor = dict(default=3.,
+                        doc="How many sigma (times RMS) above the average can a delay deviate from the mean before it is considered bad (will be reduced with every iteration until ``minrsmfactor``)."),
 
-        minrmsfactor=sc.p_(1.,
-                           "Minimum rmsfactor (see ``rmsfactor``) for selecting bad antennas."),
+        minrmsfactor = dict(default=1.,
+                           doc="Minimum rmsfactor (see ``rmsfactor``) for selecting bad antennas."),
 
-        unitscalefactor=sc.p_(1e-9,
-                              "Scale factor to apply for printing and plotting."),
+        unitscalefactor = dict(default=1e-9,
+                              doc="Scale factor to apply for printing and plotting."),
 
-        unitname=sc.p_("ns",
-                       "Unit corresponding to scale factor."),
+        unitname = dict(default="ns",
+                       doc="Unit corresponding to scale factor."),
 
-        doplot=sc.p_(False,
-                     "Plot results."),
+        doplot = dict(default=False,
+                     doc="Plot results."),
 
-        plotant_start=sc.p_(0,
-                            "First antenna to plot."),
+        plotant_start = dict(default=0,
+                            doc="First antenna to plot."),
 
-        plotant_end=sc.p_(lambda self: self.NAnt,
-                          "Last antenna to plot plus one."),
+        plotant_end = dict(default=lambda self: self.NAnt,
+                          doc="Last antenna to plot plus one."),
 
-        verbose=sc.p_(False,
-                      "Print progress information."),
+        verbose = dict(default=False,
+                      doc="Print progress information."),
 
-        refant=sc.p_(0,
-                     "Reference antenna for which geometric delay is zero."),
+        refant = dict(default=0,
+                     doc="Reference antenna for which geometric delay is zero."),
 
-        solution=sc.p_(1,
-                       "Can be ``+/-1``, determine whether to take the upper or the lower ('into the ground') solution."),
+        solution = dict(default=1,
+                       doc="Can be ``+/-1``, determine whether to take the upper or the lower ('into the ground') solution."),
 
-        NAnt=sc.p_(lambda self: self.timelags.shape()[-1],
-                   "Number of antennas and time lags. If set explicitly, take only the first NAnt antennas from ``Task.positions`` and ``Task.timelags``."),
+        NAnt = dict(default=lambda self: self.timelags.shape()[-1],
+                   doc="Number of antennas and time lags. If set explicitly, take only the first NAnt antennas from ``Task.positions`` and ``Task.timelags``."),
 
-        NTriangles=sc.p_(lambda self: self.NAnt * (self.NAnt - 1) * (self.NAnt - 2) / 6,
-                         "Number of Triangles ``= NAnt*(NAnt-1)*(NAnt-2)/6``."),
+        NTriangles = dict(default=lambda self: self.NAnt * (self.NAnt - 1) * (self.NAnt - 2) / 6,
+                         doc="Number of Triangles ``= NAnt*(NAnt-1)*(NAnt-2)/6``."),
 
-        directions=sc.p_(lambda self: cr.hArray(float, [self.NTriangles, 3], name="Directions"),
-                         "Cartesian direction vector for each triangle"),
+        directions = dict(default=lambda self: cr.hArray(float, [self.NTriangles, 3], name="Directions"),
+                         doc="Cartesian direction vector for each triangle"),
 
-        centers=sc.p_(lambda self: cr.hArray(float, [self.NTriangles, 3], name="Centers of Triangles"),
-                      "Cartesian coordinates of center for each triangle.",
+        centers = dict(default=lambda self: cr.hArray(float, [self.NTriangles, 3], name="Centers of Triangles"),
+                      doc="Cartesian coordinates of center for each triangle.",
                       unit="m"),
 
-        errors=sc.p_(lambda self: cr.hArray(float, [self.NTriangles], name="Closure Errors"),
-                     "Closure errors for each triangle (nor error if = 0)."),
+        errors = dict(default=lambda self: cr.hArray(float, [self.NTriangles], name="Closure Errors"),
+                     doc="Closure errors for each triangle (nor error if = 0)."),
 
-        triangles_size=sc.p_(lambda self: cr.hArray(float, [self.NTriangles], name="Triangle Size"),
-                             "Average size for each triangle.",
+        triangles_size = dict(default=lambda self: cr.hArray(float, [self.NTriangles], name="Triangle Size"),
+                             doc="Average size for each triangle.",
                              unit="m"),
 
-        index=sc.p_(lambda self: cr.hArray(int, [self.NTriangles], name="Index"),
-                    "Index array of good triangles.",
+        index = dict(default=lambda self: cr.hArray(int, [self.NTriangles], name="Index"),
+                    doc="Index array of good triangles.",
                     workarray=True),
 
-        error_tolerance=sc.p_(1e-10,
-                              "Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
+        error_tolerance = dict(default=1e-10,
+                              doc="Level above which a closure error is considered to be non-zero (take -1 to ignore closure errors)."),
 
         max_delay=dict(default=15 * 10 ** -9,
                        doc="Maximum allowed delay. If a delay for an antenna is larger than this it will be flagged and igrnored"),
 
-        ngood=sc.p_(0,
-                    "Number of good triangles (i.e., without closure errors)",
+        ngood = dict(default=0,
+                    doc="Number of good triangles (i.e., without closure errors)",
                     output=True),
 
-        ngooddelays=sc.p_(0,
-                          "Number of good delays (i.e., with only minor deviation)",
+        ngooddelays = dict(default=0,
+                          doc="Number of good delays (i.e., with only minor deviation)",
                           output=True),
 
-        delayindex=sc.p_(lambda self: cr.hArray(int, [self.NAnt], name="Delay index"),
-                         "Index array of good delays.",
+        delayindex = dict(default=lambda self: cr.hArray(int, [self.NAnt], name="Delay index"),
+                         doc="Index array of good delays.",
                          workarray=True),
 
-        meandirection=sc.p_(lambda self: cr.hArray(float, [3]),
-                            "Cartesian coordinates of mean direction from all good triangles",
+        meandirection = dict(default=lambda self: cr.hArray(float, [3]),
+                            doc="Cartesian coordinates of mean direction from all good triangles",
                             output=True),
 
-        meancenter=sc.p_(lambda self: cr.hArray(float, [3]),
-                         "Cartesian coordinates of mean central position of all good triangles",
+        meancenter = dict(default=lambda self: cr.hArray(float, [3]),
+                         doc="Cartesian coordinates of mean central position of all good triangles",
                          output=True),
 
-        goodones=sc.p_(lambda self: cr.hArray(float, [self.NTriangles, 3], name="Scratch array"),
-                       "Scratch array to hold good directions.",
+        goodones = dict(default=lambda self: cr.hArray(float, [self.NTriangles, 3], name="Scratch array"),
+                       doc="Scratch array to hold good directions.",
                        unit="m"),
 
-        meandirection_spherical=sc.p_(lambda self: pytmf.cartesian2spherical(self.meandirection[0], self.meandirection[1], self.meandirection[2]),
-                                        "Mean direction in spherical coordinates."),
+        meandirection_spherical = dict(default=lambda self: pytmf.cartesian2spherical(self.meandirection[0], self.meandirection[1], self.meandirection[2]),
+                                        doc="Mean direction in spherical coordinates."),
 
-        meandirection_azel=sc.p_(lambda self: (math.pi - (self.meandirection_spherical[2] + pi2), pi2 - (self.meandirection_spherical[1])),
-                                 "Mean direction as Azimuth (``N->E``), Elevation tuple."),
+        meandirection_azel = dict(default=lambda self: (math.pi - (self.meandirection_spherical[2] + pi2), pi2 - (self.meandirection_spherical[1])),
+                                 doc="Mean direction as Azimuth (``N->E``), Elevation tuple."),
 
-        meandirection_azel_deg=sc.p_(lambda self: (180 - (self.meandirection_spherical[2] + pi2) / deg, 90 - (self.meandirection_spherical[1]) / deg),
-                                       "Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
+        meandirection_azel_deg = dict(default=lambda self: (180 - (self.meandirection_spherical[2] + pi2) / deg, 90 - (self.meandirection_spherical[1]) / deg),
+                                       doc="Mean direction as Azimuth (``N->E``), Elevation tuple in degrees."),
 
         plot_finish=dict(default=lambda self: plotfinish(dopause=False, plotpause=False),
                            doc="Function to be called after each plot to determine whether to pause or not (see :func:`plotfinish`)"),
@@ -822,29 +821,29 @@ class PlotDirectionTriangles(tasks.Task):
         plotlegend=dict(default=False,
                           doc="Plot a legend"),
 
-        newfigure=sc.p_(True,
-                          "Create a new figure for plotting for each new instance of the task."),
+        newfigure = dict(default=True,
+                          doc="Create a new figure for plotting for each new instance of the task."),
 
         direction_arrow_length=dict(default=10.,
                                       doc="Relative length of the direction arrows relative to the maximum size of the array"),
 
-        positionsT=sc.p_(lambda self: cr.hArray_transpose(self.positions),
-                           "hArray with transposed Cartesian coordinates of the antenna positions (x0, x1,..., y0, y1,..., z0, z1,....)",
+        positionsT = dict(default=lambda self: cr.hArray_transpose(self.positions),
+                           doc="hArray with transposed Cartesian coordinates of the antenna positions (x0, x1,..., y0, y1,..., z0, z1,....)",
                            unit="m",
                            workarray=True),
 
-        NAnt=sc.p_(lambda self: self.positions.shape()[-2],
-                     "Number of antennas.",
+        NAnt = dict(default=lambda self: self.positions.shape()[-2],
+                     doc="Number of antennas.",
                      output=True),
 
-        SubArrayFactor=sc.p_(lambda self: 0.5,
-                               "Factor used to determine the number of subarrays for which to average the direction from triangles ``NSubArrays=NAnt*SubArrayFactor``"),
+        SubArrayFactor = dict(default=lambda self: 0.5,
+                               doc="Factor used to determine the number of subarrays for which to average the direction from triangles ``NSubArrays=NAnt*SubArrayFactor``"),
 
-        NSubArrays=sc.p_(lambda self: int(self.NAnt * self.SubArrayFactor),
-                           "Number of subarrays for which to average the direction from triangles"),
+        NSubArrays = dict(default=lambda self: int(self.NAnt * self.SubArrayFactor),
+                           doc="Number of subarrays for which to average the direction from triangles"),
 
-        NTriangles=sc.p_(lambda self: self.NAnt * (self.NAnt - 1) * (self.NAnt - 2) / 6,
-                           "Number of Triangles = ``NAnt*(NAnt-1)*(NAnt-2)/6`` = length of directions.",
+        NTriangles = dict(default=lambda self: self.NAnt * (self.NAnt - 1) * (self.NAnt - 2) / 6,
+                           doc="Number of Triangles = ``NAnt*(NAnt-1)*(NAnt-2)/6`` = length of directions.",
                            output=True)
         )
 
@@ -966,8 +965,8 @@ class PlotAntennaLayout(tasks.Task):
         title=dict(default=False,
                      doc="Title for the plot (e.g., event or filename)"),
 
-        newfigure=sc.p_(True,
-                       "Create a new figure for plotting for each new instance of the task."),
+        newfigure = dict(default=True,
+                       doc="Create a new figure for plotting for each new instance of the task."),
 
         plot_clf=dict(default=True, doc="Clean window before plotting?"),
 
@@ -980,13 +979,13 @@ class PlotAntennaLayout(tasks.Task):
         plotlegend=dict(default=False,
                           doc="Plot a legend"),
 
-        positionsT=sc.p_(lambda self: cr.hArray_transpose(self.positions),
-                           "hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",
+        positionsT = dict(default=lambda self: cr.hArray_transpose(self.positions),
+                           doc="hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",
                            unit="m",
                            workarray=True),
 
-        NAnt=sc.p_(lambda self: self.positions.shape()[-2],
-                     "Number of antennas.",
+        NAnt = dict(default=lambda self: self.positions.shape()[-2],
+                     doc="Number of antennas.",
                      output=True),
         )
 

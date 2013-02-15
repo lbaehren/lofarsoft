@@ -15,8 +15,6 @@ Second version CalibrateFM, Jan 2013.
 """
 
 from pycrtools.tasks import Task, pulsecal
-from pycrtools.tasks.shortcuts import *  # only needed when using {default: None, ...} parameter style
-# using dict(boe = something) instead is better...
 import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
@@ -116,46 +114,127 @@ class CalibrateFM(Task):
         crfootprint=cr.trun("plotfootprint",filefilter=filefilter,pol=polarization)
    """
     parameters = dict(
-        filefilter={default: None, doc: "File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "},
-        filelist={default: None, doc: "List of filenames in one event. "},
-        f=dict(default=None, doc="File object."),
+        filefilter = dict(default=None,
+                          doc="File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "),
 
-        phase_average={default: None, doc: "Average phase spectrum per antenna, as output from FindRFI Task. Optional, if not given 'filefilter' or 'filelist' will be used to (re)run FindRFI."},
-        phase_RMS={default: None, doc: "Phase RMS from FindRFI Task."},
-        median_phase_spreads={default: None, doc: "Output from FindRFI: Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1."},
-        referenceTransmitterGPS={default: None, doc: "GPS [long, lat] in degrees (N, E is positive) for a known transmitter. Typically used when tuning to a known frequency. The Smilde tower is at (6.403565, 52.902671)."},
+        filelist = dict(default=None,
+                        doc="List of filenames in one event. "),
 
-        doplot={default: True, doc: "Produce output plots"},
-        testplots={default: False, doc: "Produce testing plots for calibration on RF lines"},
-        pol={default: 0, doc: "0 or 1 for even or odd polarization. Only used when re-running FindRFI."},
-#        maxlines = {default: 1, doc: "Max number of RF lines to consider"},
-        lines={default: None, doc: "(List of) RF line(s) to use, by frequency channel index"},
-#        antennaselection = {default: None, doc: "Optional: list of antenna numbers (RCU/2) to include"},
-#        minSNR = {default: 50, doc: "Minimum required SNR of the line"},
-        blocksize={default: 8000, doc: "Blocksize of timeseries data, for FFTs. Only used when no phase_average are given. Take e.g. 8000 to match radio station frequencies."},
-        nofblocks={default: 100, doc: "Max. number of blocks to process"},
-        correctOneSampleShifts={default: False, doc: "Automatically correct for +/- 5 ns shifts in the data. Only works correctly if the direction fit / the reference transmitter GPS is good. Output is in oneSampleShifts list."},
-        direction_resolution={default: [1, 5], doc: "Resolution in degrees [az, el] for direction search"},
-        directionFromAllStations={default: False, doc: "Set True if you want to use all stations together to calculate the incoming direction. Otherwise, it is done per station and the results are averaged. "},
-        freq_range={default: [30, 70], doc: "Frequency range in which to search for calibration sources"},
+        f = dict(default=None,
+                 doc="File object."),
+
+        phase_average = dict(default=None,
+                             doc="Average phase spectrum per antenna, as output from FindRFI Task. Optional, if not given 'filefilter' or 'filelist' will be used to (re)run FindRFI."),
+
+        phase_RMS = dict(default=None,
+                         doc="Phase RMS from FindRFI Task."),
+
+        median_phase_spreads = dict(default=None,
+                                    doc="Output from FindRFI: Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1."),
+
+        referenceTransmitterGPS = dict(default=None,
+                                       doc="GPS [long, lat] in degrees (N, E is positive) for a known transmitter. Typically used when tuning to a known frequency. The Smilde tower is at (6.403565, 52.902671)."),
+
+        doplot = dict(default=True,
+                      doc="Produce output plots"),
+
+        testplots = dict(default=False,
+                         doc="Produce testing plots for calibration on RF lines"),
+
+        pol = dict(default=0,
+                   doc="0 or 1 for even or odd polarization. Only used when re-running FindRFI."),
+
+        # maxlines = dict(default=1,
+        #                 doc="Max number of RF lines to consider"),
+
+        lines = dict(default=None,
+                     doc="(List of) RF line(s) to use, by frequency channel index"),
+
+        # antennaselection = dic(default=None,
+        #                        doc="Optional: list of antenna numbers (RCU/2) to include"),
+
+        # minSNR = dict(default=50,
+        #               doc="Minimum required SNR of the line"),
+
+        blocksize = dict(default=8000,
+                         doc="Blocksize of timeseries data, for FFTs. Only used when no phase_average are given. Take e.g. 8000 to match radio station frequencies."),
+
+        nofblocks = dict(default=100,
+                         doc="Max. number of blocks to process"),
+
+        correctOneSampleShifts = dict(default=False,
+                                      doc="Automatically correct for +/- 5 ns shifts in the data. Only works correctly if the direction fit / the reference transmitter GPS is good. Output is in oneSampleShifts list."),
+
+        direction_resolution = dict(default=[1, 5],
+                                    doc="Resolution in degrees [az, el] for direction search"),
+
+        directionFromAllStations = dict(default=False,
+                                        doc="Set True if you want to use all stations together to calculate the incoming direction. Otherwise, it is done per station and the results are averaged. "),
+
+        freq_range = dict(default=[30, 70],
+                          doc="Frequency range in which to search for calibration sources"),
+
         # OUTPUT PARAMETERS:
-        nofchannels={default: -1, doc: "nof channels", output: True},
-        dirtychannels={default: None, doc: "Output array of dirty channels, based on stability of relative phases from consecutive data blocks. Deviations from uniform-randomness are quite small, unless there is an RF transmitter present at a given frequency.", output: True},
-        oneSampleShifts={default: None, doc: "Output array containing the 5 ns-shifts per antenna, if they occur. Output contains integer number of samples the data is shifted. To correct for it, shift data _forward_ by this number of samples.", output: True},
-        interStationDelays={default: None, doc: "Output dict containing station name - delay value pairs.", output: True},
-        maxPhaseError={default: 1.0, doc: "Maximum allowed phase error in ns^2 (added from all antennas) to call it a good fit and set calibrationStatus to 'OK'."},
-        phaseError={default: None, doc: "Phase error for the first station in the list. Used to check if the fit is good, e.g. when using fixed reference transmitter", output: True},
-        calibrationStatus={default: None, doc: "Output status string. ", output: True},
-        fittedDirections = {default: None, doc: "Output dict with for each station [az, el] = the direction of the strongest transmitter. Output in degrees", output: True},
-        strongestFrequency={default: None, doc: "The frequency with the smallest phase_RMS, from the range specified in the freq_range parameter", output: True},
-        bestPhaseRMS={default: None, doc: "PhaseRMS for the best frequency", output: True},
-        timestamp={default: None, doc: "Unix timestamp of input file(s)", output: True},
-        plot_finish={default: lambda self: cr.plotfinish(doplot=True, filename="calibratefm", plotpause=False), doc: "Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
-        plot_name={default: "calibratefm", doc: "Extra name to be added to plot filename."},
-        nofantennas=p_(lambda self: self.positions.shape()[-2], "Number of antennas.", output=True),
-        filetype={default: "pdf", doc: "extension/type of plot output files"},
-        save_images={default: False, doc: "Enable if images should be saved to disk in default folder"},
 
+        nofchannels = dict(default=-1,
+                           doc="nof channels",
+                           output=True),
+
+        dirtychannels = dict(default=None,
+                             doc="Output array of dirty channels, based on stability of relative phases from consecutive data blocks. Deviations from uniform-randomness are quite small, unless there is an RF transmitter present at a given frequency.",
+                             output=True),
+
+
+        oneSampleShifts = dict(default=None,
+                               doc="Output array containing the 5 ns-shifts per antenna, if they occur. Output contains integer number of samples the data is shifted. To correct for it, shift data _forward_ by this number of samples.",
+                               output=True),
+
+        interStationDelays = dict(default=None,
+                                  doc="Output dict containing station name - delay value pairs.",
+                                  output=True),
+
+        maxPhaseError = dict(default=1.0,
+                             doc="Maximum allowed phase error in ns^2 (added from all antennas) to call it a good fit and set calibrationStatus to 'OK'."),
+
+        phaseError = dict(default=None,
+                          doc="Phase error for the first station in the list. Used to check if the fit is good, e.g. when using fixed reference transmitter",
+                          output=True),
+
+        calibrationStatus = dict(default=None,
+                                 doc="Output status string. ",
+                                 output=True),
+
+        fittedDirections = dict(default=None,
+                                doc="Output dict with for each station [az, el] = the direction of the strongest transmitter. Output in degrees",
+                                output=True),
+
+        strongestFrequency = dict(default=None,
+                                  doc="The frequency with the smallest phase_RMS, from the range specified in the freq_range parameter",
+                                  output=True),
+
+        bestPhaseRMS = dict(default=None,
+                            doc="PhaseRMS for the best frequency",
+                            output=True),
+
+        timestamp = dict(default=None,
+                         doc="Unix timestamp of input file(s)",
+                         output=True),
+
+        plot_finish = dict(default=lambda self: cr.plotfinish(doplot=True, filename="calibratefm", plotpause=False),
+                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
+
+        plot_name = dict(default="calibratefm",
+                         doc="Extra name to be added to plot filename."),
+
+        nofantennas=dict(default=lambda self: self.positions.shape()[-2],
+                         doc="Number of antennas.",
+                         output=True),
+
+        filetype = dict(default="pdf",
+                        doc="extension/type of plot output files"),
+
+        save_images = dict(default=False,
+                           doc="Enable if images should be saved to disk in default folder"),
         )
 
     def call(self):

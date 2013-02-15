@@ -10,7 +10,6 @@ Usage::
 
 import pycrtools as cr
 from pycrtools import tasks
-from pycrtools.tasks import shortcuts as sc
 from matplotlib import pyplot as plt
 import matplotlib
 import math

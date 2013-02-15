@@ -232,33 +232,86 @@ class cabledelays(tasks.Task):
         crfootprint=cr.trun("plotfootprint",filefilter=filefilter,pol=polarization)
    """
     parameters = dict(
-        topdir={default: None, doc: "Top-level results directory from which to gather cable delays"},
-#        filefilter={default:None,doc:"Obtains results from subdirectories of these files (from results.py)"},
-        doPlot={default: False, doc: "Produce output plots"},
-        antennaSet={default: "LBA_OUTER", doc: "Antenna set to use. Note: we can use only one antenna set at a time!"},
-        write_database={default: True, doc: "Produce delay calibration output file. It is merged with the original delays as found in 'origdelayfile'."},
-        origdelayfile={default: lambda self: os.environ["LOFARSOFT"].rstrip('/') + '/data/lofar/dipole_calibration_delay/LOFAR_DIPOLE_CALIBRATION_DELAY_' + self.antennaSet, doc: "Location of the original (LOFAR) calibration delay file. Must match with the antennaSet parameter."},
-        delayfile={default: lambda self: os.environ["LOFARSOFT"].rstrip('/') + '/data/lofar/merged_dipole_calibration_delay_' + timeStringNow() + '/LOFAR_DIPOLE_CALIBRATION_DELAY_' + self.antennaSet, doc: "Output file for the new (merged) delay calibration"},
-        maxspread={default: 5.0, doc: "Maximum spread (stddev) [ns] in fitted cable delays to accept as valid. Invalid delays are set to zero, as the value is considered not reliable."},
-#        pol={default:0,doc:"0 or 1 for even or odd polarization"},
-##        excludelist={default:None,doc:"List with stations not to take into account when making the footprint"},
-        results=p_(lambda self: gatherresults(self.topdir, self.maxspread, self.antennaSet), doc="Results dict containing cabledelays_database, antenna positions and names"),
-        cabledelays_database=p_(lambda self: obtainvalue(self.results, "cabledelays_database"), doc="Cable delays database dict as gathered from all good results.py files in the given file filter"),
-        positions=p_(lambda self: obtainvalue(self.results, "positions"), doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
-        antid=p_(lambda self: obtainvalue(self.results, "antid"), doc="hArray containing strings of antenna ids"),
-        names=p_(lambda self: obtainvalue(self.results, "names"), doc="hArray of dimension [NAnt] with the names or IDs of the antennas"),
-#        plotnames={default:False,doc:"plot names of dipoles"},
-#        title=p_(lambda self:obtainvalue(self.results,"title"),doc="Title for the plot (e.g., event or filename)"),
-#        newfigure=p_(True,"Create a new figure for plotting for each new instance of the task."),
-        plot_finish={default: lambda self: cr.plotfinish(doplot=True, filename="cabledelays", plotpause=False), doc: "Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"},
-        plot_name={default: "cabledelays", doc: "Extra name to be added to plot filename."},
-#        plotlegend={default:False,doc:"Plot a legend"},
-#        positionsT=p_(lambda self:cr.hArray_transpose(self.positions),"hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
-        nofantennas=p_(lambda self: self.positions.shape()[-2], "Number of antennas.", output=True),
-#        figure={default:None,doc:"No startplot"},
-        filetype={default: "png", doc: "extension/type of output file"},
-        save_images={default: False, doc: "Enable if images should be saved to disk in default folder"},
-        generate_html={default: False, doc: "Default output to altair webserver"}
+        topdir=dict(default=None,
+                    doc="Top-level results directory from which to gather cable delays"),
+
+        # filefilter=dict(default:None,
+        #                 doc:"Obtains results from subdirectories of these files (from results.py)"),
+
+        doPlot = dict(default=False,
+                      doc="Produce output plots"),
+
+        antennaSet = dict(default="LBA_OUTER",
+                          doc="Antenna set to use. Note: we can use only one antenna set at a time!"),
+
+        write_database = dict(default=True,
+                              doc="Produce delay calibration output file. It is merged with the original delays as found in 'origdelayfile'."),
+
+        origdelayfile = dict(default=lambda self: os.environ["LOFARSOFT"].rstrip('/') + '/data/lofar/dipole_calibration_delay/LOFAR_DIPOLE_CALIBRATION_DELAY_' + self.antennaSet,
+                             doc="Location of the original (LOFAR) calibration delay file. Must match with the antennaSet parameter."),
+
+        delayfile = dict(default=lambda self: os.environ["LOFARSOFT"].rstrip('/') + '/data/lofar/merged_dipole_calibration_delay_' + timeStringNow() + '/LOFAR_DIPOLE_CALIBRATION_DELAY_' + self.antennaSet, doc="Output file for the new (merged) delay calibration"),
+
+        maxspread = dict(default=5.0,
+                         doc="Maximum spread (stddev) [ns] in fitted cable delays to accept as valid. Invalid delays are set to zero, as the value is considered not reliable."),
+
+        # pol = dict(default=0,
+        #            doc="0 or 1 for even or odd polarization"),
+
+        # excludelist = dict(default:None,
+        #                    doc:"List with stations not to take into account when making the footprint"),
+
+        results = dict(default=lambda self: gatherresults(self.topdir, self.maxspread, self.antennaSet),
+                       doc="Results dict containing cabledelays_database, antenna positions and names"),
+
+        cabledelays_database = dict(default=lambda self: obtainvalue(self.results, "cabledelays_database"),
+                                    doc="Cable delays database dict as gathered from all good results.py files in the given file filter"),
+
+        positions = dict(default=lambda self: obtainvalue(self.results, "positions"),
+                         doc="hArray of dimension [NAnt,3] with Cartesian coordinates of the antenna positions (x0,y0,z0,...)"),
+
+        antid = dict(default=lambda self: obtainvalue(self.results, "antid"),
+                     doc="hArray containing strings of antenna ids"),
+
+        names = dict(default=lambda self: obtainvalue(self.results, "names"),
+                     doc="hArray of dimension [NAnt] with the names or IDs of the antennas"),
+
+        # plotnames = dict(default:False,
+        #                  doc:"plot names of dipoles"),
+
+        # title = dict(default=lambda self:obtainvalue(self.results,"title"),
+        #              doc="Title for the plot (e.g., event or filename)"),
+
+        # newfigure = dict(default=True,
+        #                  doc="Create a new figure for plotting for each new instance of the task."),
+
+        plot_finish = dict(default=lambda self: cr.plotfinish(doplot=True, filename="cabledelays", plotpause=False),
+                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
+
+        plot_name = dict(default="cabledelays",
+                         doc="Extra name to be added to plot filename."),
+
+        # plotlegend = dict(default=False,
+        #                   doc="Plot a legend"),
+
+        # positionsT = dict(default=lambda self:cr.hArray_transpose(self.positions),
+        #                   doc="hArray with transposed Cartesian coordinates of the antenna positions (x0,x1,...,y0,y1...,z0,z1,....)",unit="m",workarray=True),
+
+        nofantennas = dict(default=lambda self: self.positions.shape()[-2],
+                           doc="Number of antennas.",
+                           output=True),
+
+        # figure = dict(default=None,
+        #               doc="No startplot"),
+
+        filetype = dict(default="png",
+                        doc="extension/type of output file"),
+
+        save_images = dict(default=False,
+                           doc="Enable if images should be saved to disk in default folder"),
+
+        generate_html = dict(default=False,
+                             doc="Default output to altair webserver")
 
         )
 

@@ -6,7 +6,6 @@ import pycrtools as cr
 import pycrtools.tasks as tasks
 import pycrtools.rftools as rf
 
-from pycrtools.tasks.shortcuts import *
 from pycrtools import lora
 from pycrtools import xmldict
 

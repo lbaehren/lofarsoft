@@ -191,7 +191,6 @@ How to program tasks?
 The modules to import in a task module are::
 
   from pycrtools import *
-  from pycrtools.tasks.shortcuts import *
   import pycrtools.tasks as tasks
 
 If one wants to add a new task then it should either be defined in a
@@ -211,9 +210,9 @@ A simple example is given below::
       Documentation of task - parameters will be added automatically
       \"""
       parameters = {
-          "x":{sc.default:None,doc:"x-value - a positional parameter",sc.positional:1},
-          "y":{sc.default:2, doc:"y-value - a normal keyword parameter"},
-          "xy":{sc.default:lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
+          "x":{"default":None,doc:"x-value - a positional parameter","positional":1},
+          "y":{"default":2, doc:"y-value - a normal keyword parameter"},
+          "xy":{"default":lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
       def init(self):
           print "Calling optional initialization routine - Nothing to do here."
       def run(self):
@@ -262,14 +261,6 @@ positional
   Integer - If > 0, this is a positional parameter at the indicated
   position (``positional=1``, means first positional parameter, 0
   would be ``self`` which cannot be used)
-
-
-To simplify input one can use the helper function sc.p_(default,doc,unit,**kwargs) which will turn
-its arguments into a parameter dict. E.g. the above parameters dict could have been defined as::
-
-    parameters = {"x":sc.p_(None,"x-value - a positional parameter",sc.positional=1),
-                  "y":sc.p_(2,"y-value - a normal keyword parameter"),
-                  "xy":sc.p_(lambda ws:ws.y*ws.x,"Example of a derived parameter.")}
 
 Yet another, and perhaps more recognizable form of defining input
 parameters is to provide a dummy call function will all input
@@ -420,8 +411,6 @@ import types
 import time
 
 import pycrtools as cr
-
-import shortcuts as sc
 from sys import version_info
 import matplotlib.pyplot as plt
 
@@ -524,12 +513,12 @@ class TaskInit(type):
         for p, v in sorted(dct.items()):
             par_doc = newline + "*" + p + "*"
             # Check for default values
-            if (sc.default in v and
-                (not isinstance(v[sc.default], types.FunctionType))):
-                par_doc_default = str(v[sc.default]).strip()
+            if ("default" in v and
+                (not isinstance(v["default"], types.FunctionType))):
+                par_doc_default = str(v["default"]).strip()
                 par_doc += " [default value: "
                 # Print string values in quotes
-                if isinstance(v[sc.default], (str, unicode, basestring)):
+                if isinstance(v["default"], (str, unicode, basestring)):
                     par_doc += "'" + par_doc_default + "'"
                 else:
                     if par_doc_default:
@@ -537,13 +526,13 @@ class TaskInit(type):
                 par_doc += "]"
             par_doc += newline
             # Check for documentation
-            if sc.doc in v:
-                par_doc += "  " + v[sc.doc].strip() + newline * 2
+            if "doc" in v:
+                par_doc += "  " + v["doc"].strip() + newline * 2
             else:
                 par_doc += newline
             # Add parameter documentation to input- or output parameter documentation.
-            if ((sc.default in v and (isinstance(v[sc.default], types.FunctionType))) or
-                (sc.output in v and v[sc.output])):
+            if (("default" in v and (isinstance(v["default"], types.FunctionType))) or
+                ("output" in v and v["output"])):
                 par_doc_output += par_doc
             else:
                 par_doc_input += par_doc
@@ -635,15 +624,15 @@ class Task(object):
                 for p in positional_pars:
                     npos += 1
                     if p in property_dict:
-                        property_dict[p].update({sc.default: None, sc.export: False, sc.positional: npos})
+                        property_dict[p].update({"default": None, "export": False, "positional": npos})
                     else:
-                        property_dict[p] = {sc.default: None, sc.export: False, sc.positional: npos}
+                        property_dict[p] = {"default": None, "export": False, "positional": npos}
                 if n_named_pars > 0:
                     for p, v in zip(named_pars, self.call.im_func.func_defaults):
                         if p in property_dict:
-                            property_dict[p].update({sc.default: v})
+                            property_dict[p].update({"default": v})
                         else:
-                            property_dict[p] = {sc.default: v}
+                            property_dict[p] = {"default": v}
             self.WorkSpace = WorkSpace(self.__taskname__, parameters=property_dict)  # This creates the work space class that is used to create the actual ws instance
 
         if ws == None:
@@ -1190,17 +1179,17 @@ class WorkSpaceType(type):
         obj = type(taskname + cls.__name__, cls.__bases__, cls.__dict__.copy())
 
         for k, v in cr.readParfiles(parfile).items():
-            parameters[k] = {sc.default: v}
+            parameters[k] = {"default": v}
 
         for k, v in kwargs.items():
-            parameters[k] = {sc.default: v}
+            parameters[k] = {"default": v}
         obj.parameters = parameters
         obj.__taskname__ = taskname
 
         return obj
 
 """
-wsc=WorkSpace("MyTask",x={sc.default:1},y={sc.default:2})
+wsc=WorkSpace("MyTask",x={"default":1},y={"default":2})
 wsc=WorkSpace("MyTask",x=1,y=2)
 ws=wsc(x=3)
 """
@@ -1241,8 +1230,8 @@ class WorkSpace(object):
         self._parameterlist = set()
         self._positionals = []
         self._modified_parameters = set()
-        self._default_parameter_definition = {sc.doc: "", sc.unit: "", sc.default: None, sc.workarray: False, sc.export: True}
-        self._default_parameter_order = (sc.default, sc.doc, sc.unit)
+        self._default_parameter_definition = {"doc": "", "unit": "", "default": None, "workarray": False, "export": True}
+        self._default_parameter_order = ("default", "doc", "unit")
         self._known_methods = set()
         self._known_methods.update(set(dir(self)))
         self.addParameters(self.parameter_properties)
@@ -1343,8 +1332,8 @@ class WorkSpace(object):
         if hasattr(self, "_" + par):   # Return locally stored value
             return getattr(self, "_" + par)
         elif par in self.parameter_properties:
-            if sc.default in self.parameter_properties[par]:  # return default value or function
-                f_or_val = self.parameter_properties[par][sc.default]
+            if "default" in self.parameter_properties[par]:  # return default value or function
+                f_or_val = self.parameter_properties[par]["default"]
                 if isinstance(f_or_val, types.FunctionType):
                     setattr(self, "_" + par, f_or_val(self))
                 else:
@@ -1384,7 +1373,7 @@ class WorkSpace(object):
                     return  # don't assign or considered modified if it is the same value
                 delattr(self, "_" + par)  # Delete first in case it contains a large array which blocks memory
             setattr(self, "_" + par, value)
-            self.parameter_properties[par][sc.default] = value
+            self.parameter_properties[par]["default"] = value
         else:
             setattr(self, "_" + par, value)  # create new parameter with default parameters
             self.parameter_properties[par] = self._default_parameter_definition
@@ -1427,8 +1416,8 @@ class WorkSpace(object):
             if name in self.parameters:  # OK that is a pre-defined parameter
                 self.parameter_properties[name] = self._default_parameter_definition.copy()
                 self.parameter_properties[name].update(self.parameters[name])  # restore the properties with original properties
-                if sc.default in self.parameter_properties[name] and isinstance(self.parameter_properties[name][sc.default], types.FunctionType):  # this is a function
-                    self.parameter_properties[name][sc.dependencies] = self.parameterlist.intersection(self.parameter_properties[name][sc.default].func_code.co_names)  # reset dependencies
+                if "default" in self.parameter_properties[name] and isinstance(self.parameter_properties[name]["default"], types.FunctionType):  # this is a function
+                    self.parameter_properties[name]["dependencies"] = self.parameterlist.intersection(self.parameter_properties[name]["default"].func_code.co_names)  # reset dependencies
             else:  # parameter was added later, thus will be removed completely
                 if name in self.parameter_properties:
                     del self.parameter_properties[name]
@@ -1530,10 +1519,10 @@ class WorkSpace(object):
         self.parameterlist.add(par)
         self._parameterlist.add("_" + par)
         self.addProperty(par, lambda ws: ws[par], lambda ws, x: ws.__setitem__(par, x), lambda ws: ws.delx(par), self.getParameterDoc(par))
-        if sc.positional in properties and properties[sc.positional]:
+        if "positional" in properties and properties["positional"]:
             self._positionals.append(par)
-        if sc.default in properties and isinstance(properties[sc.default], types.FunctionType):  # this is a function
-            properties[sc.dependencies] = self.parameterlist.intersection(properties["default"].func_code.co_names)  # check the variables it depends on
+        if "default" in properties and isinstance(properties["default"], types.FunctionType):  # this is a function
+            properties["dependencies"] = self.parameterlist.intersection(properties["default"].func_code.co_names)  # check the variables it depends on
         self.addParameterDefinition(par, properties)
 
     def getDerivedParameters(self, workarrays=True, nonexport=True):
@@ -1552,9 +1541,9 @@ class WorkSpace(object):
         derivedparameters = set()
         for p in self.parameterlist:
             properties = self.parameter_properties[p]
-            if ((sc.default in properties and (isinstance(properties[sc.default], types.FunctionType)))  # default is a function
-                and (not nonexport or not (sc.export in properties and not properties[sc.export]))  # export is true
-                and (not (sc.workarray in properties and properties[sc.workarray]) or workarrays)):  # not a workarray if requested
+            if (("default" in properties and (isinstance(properties["default"], types.FunctionType)))  # default is a function
+                and (not nonexport or not ("export" in properties and not properties["export"]))  # export is true
+                and (not ("workarray" in properties and properties["workarray"]) or workarrays)):  # not a workarray if requested
                 derivedparameters.add(p)  # then it is a derived parameter we want to see
         return derivedparameters
 
@@ -1566,9 +1555,9 @@ class WorkSpace(object):
         """
         l = set(self.getDerivedParameters(workarrays=workarrays, nonexport=nonexport))
         for p, v in self.parameter_properties.items():
-            if (sc.output in v and v[sc.output]):
-                if ((workarrays or not (sc.workarray in v and v[sc.workarray]))
-                    and (not nonexport or not (sc.export in v and not v[sc.export]))):
+            if ("output" in v and v["output"]):
+                if ((workarrays or not ("workarray" in v and v["workarray"]))
+                    and (not nonexport or not ("export" in v and not v["export"]))):
                     l.add(p)
         return l
 
@@ -1591,8 +1580,8 @@ class WorkSpace(object):
         """
         l1 = {}
         for p, v in self.parameter_properties.items():
-            if (sc.positional in v and v[sc.positional]):
-                l1[p] = v[sc.positional]
+            if ("positional" in v and v["positional"]):
+                l1[p] = v["positional"]
         l2 = range(len(l1))
         for p, v in l1.items():
             l2[v - 1] = p
@@ -1608,10 +1597,10 @@ class WorkSpace(object):
         inputparameters = set()
         for p in self.parameterlist:
             properties = self.parameter_properties[p]
-            if ((sc.default in properties and (not isinstance(properties[sc.default], types.FunctionType)))  # is not a function
-            and ((sc.export not in properties) or properties[sc.export])  # export is true
-            and ((sc.workarray not in properties) or (not properties[sc.workarray]))  # not a workarray
-            and ((sc.output not in properties) or (not properties[sc.output]))):  # not explicitly defined as output
+            if (("default" in properties and (not isinstance(properties["default"], types.FunctionType)))  # is not a function
+            and (("export" not in properties) or properties["export"])  # export is true
+            and (("workarray" not in properties) or (not properties["workarray"]))  # not a workarray
+            and (("output" not in properties) or (not properties["output"]))):  # not explicitly defined as output
                 inputparameters.add(p)  # then it is an input parameter
         return inputparameters
 
@@ -1699,9 +1688,9 @@ class WorkSpace(object):
         if par in self.checkedalready:
             return False  # to avoid infinite loops
         self.checkedalready.add(par)
-        if sc.dependencies in self.parameter_properties[par] and len(self.parameter_properties[par][sc.dependencies]) > 0:
+        if "dependencies" in self.parameter_properties[par] and len(self.parameter_properties[par]["dependencies"]) > 0:
 #            print "Modified parameter -> ",par
-            modified = reduce(lambda a, b: a | b, map(lambda p: self.isModified(p, firstcall=False), self.parameter_properties[par][sc.dependencies]))
+            modified = reduce(lambda a, b: a | b, map(lambda p: self.isModified(p, firstcall=False), self.parameter_properties[par]["dependencies"]))
             if modified:
                 self._modified_parameters.add(par)
             return modified
@@ -1725,7 +1714,7 @@ class WorkSpace(object):
         """
         pars = []
         for p in self.getDerivedParameters(workarrays=workarrays, nonexport=nonexport):  # first make sure all modified parameters are identified
-            if (self.isModified(p) or forced) and hasattr(self, "_" + p) and (isinstance(self.parameter_properties[p][sc.default], types.FunctionType)) and (workarrays or ((sc.workarray not in self.parameter_properties[p]) or not self.parameter_properties[p][sc.workarray])):
+            if (self.isModified(p) or forced) and hasattr(self, "_" + p) and (isinstance(self.parameter_properties[p]["default"], types.FunctionType)) and (workarrays or (("workarray" not in self.parameter_properties[p]) or not self.parameter_properties[p]["workarray"])):
                 delattr(self, "_" + p)  # delete buffered value so that it will be recalculated
                 pars.append(p)
         for p in pars:
@@ -1745,7 +1734,7 @@ class WorkSpace(object):
          not.
 
         """
-        if ((p in self.getDerivedParameters()) and (self.isModified(p) or forced) and hasattr(self, "_" + p) and (isinstance(self.parameter_properties[p][sc.default], types.FunctionType))):
+        if ((p in self.getDerivedParameters()) and (self.isModified(p) or forced) and hasattr(self, "_" + p) and (isinstance(self.parameter_properties[p]["default"], types.FunctionType))):
             delattr(self, "_" + p)  # delete buffered value so that it will be recalculated
             self[p]  # recalculate the parameters where the local value was deleted
             self.clearModification(p)
@@ -1754,8 +1743,8 @@ class WorkSpace(object):
         """
         If parameter was defined in parameter_properties return the "doc" keyword, otherwise a default string.
         """
-        if name in self.parameter_properties and sc.doc in self.parameter_properties[name]:
-            return self.parameter_properties[name][sc.doc]
+        if name in self.parameter_properties and "doc" in self.parameter_properties[name]:
+            return self.parameter_properties[name]["doc"]
         else:
             return "This is parameter " + name + "."
 
@@ -1800,8 +1789,8 @@ class WorkSpace(object):
             excludenonexports = False
         plist = []
         for p in self.parameterlist:
-            if ((excludenonexports and sc.export in self.parameter_properties[p] and (not self.parameter_properties[p][sc.export])) or
-                (excludeworkarrays and sc.workarray in self.parameter_properties[p] and self.parameter_properties[p][sc.workarray])):
+            if ((excludenonexports and "export" in self.parameter_properties[p] and (not self.parameter_properties[p]["export"])) or
+                (excludeworkarrays and "workarray" in self.parameter_properties[p] and self.parameter_properties[p]["workarray"])):
                 pass  # do not return parameter since it is a work array or is explicitly excluded
             else:
                 plist.append(p)
@@ -1832,31 +1821,31 @@ class WorkSpace(object):
                 val = "'UNDEFINED'"
             if type(val) in cr.hAllContainerTypes:
                 val = val.__repr__(8)
-            if (sc.positional in v) and (v[sc.positional]):
-                s += "# {0:s} = {1!r} - {2:s}".format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
-            if (sc.export in v) and (not v[sc.export]):
+            if ("positional" in v) and (v["positional"]):
+                s += "# {0:s} = {1!r} - {2:s}".format(p, val, printindent_string(v["doc"], 66, width=120, prefix="# "))
+            if ("export" in v) and (not v["export"]):
                 continue
             if p in self.getInputParameters():
-                if (v[sc.unit] == ""):
-                    s0 += "{0:<22} = {1!r:30} #         {2:s}".format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
+                if (v["unit"] == ""):
+                    s0 += "{0:<22} = {1!r:30} #         {2:s}".format(p, val, printindent_string(v["doc"], 66, width=120, prefix="# "))
                 else:
-                    s0 += "{0:<22} = {1!r:30} # [{2:^5s}] {3:s}".format(p, val, v[sc.unit], printindent_string(v[sc.doc], 66, width=120, prefix="# "))
-            elif (sc.workarray in v) and (v[sc.workarray]):
+                    s0 += "{0:<22} = {1!r:30} # [{2:^5s}] {3:s}".format(p, val, v["unit"], printindent_string(v["doc"], 66, width=120, prefix="# "))
+            elif ("workarray" in v) and (v["workarray"]):
                 if workarrays:
-                    if sc.dependencies in v:
-                        deps = " <- [" + ", ".join(v[sc.dependencies]) + "]"
+                    if "dependencies" in v:
+                        deps = " <- [" + ", ".join(v["dependencies"]) + "]"
                     else:
                         deps = ""
-                    s2 += ("# {2:s}\n# {0:s} = {1!r}" + deps).format(p, val, printindent_string(v[sc.doc], 66, width=120, prefix="# "))
+                    s2 += ("# {2:s}\n# {0:s} = {1!r}" + deps).format(p, val, printindent_string(v["doc"], 66, width=120, prefix="# "))
             elif noninputparameters:
-                if sc.dependencies in v:
-                    deps = " <- [" + ", ".join(v[sc.dependencies]) + "]"
+                if "dependencies" in v:
+                    deps = " <- [" + ", ".join(v["dependencies"]) + "]"
                 else:
                     deps = ""
-                if (v[sc.unit] == ""):
-                    s1 += ("# {0:>20} = {1!r:30} - {2:s}").format(p, val, printindent_string(v[sc.doc] + deps, 58, width=120, prefix="# "))
+                if (v["unit"] == ""):
+                    s1 += ("# {0:>20} = {1!r:30} - {2:s}").format(p, val, printindent_string(v["doc"] + deps, 58, width=120, prefix="# "))
                 else:
-                    s1 += ("# {0:>20} = {1:<30} - {2:s}").format(p, str(val) + " " + v[sc.unit], printindent_string(v[sc.doc] + deps, 58, width=120, prefix="# "))
+                    s1 += ("# {0:>20} = {1:<30} - {2:s}").format(p, str(val) + " " + v["unit"], printindent_string(v["doc"] + deps, 58, width=120, prefix="# "))
         s += s0
         if not s1 == "":
             s += "#------------------------Output Parameters------------------------------\n" + s1
