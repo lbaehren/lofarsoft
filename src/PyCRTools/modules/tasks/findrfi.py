@@ -266,7 +266,7 @@ class FindRFI(Task):
         channel_ids = self.f["SELECTED_DIPOLES"]
         self.good_antennas = [channel_ids[i] for i in range(self.nantennas) if (0.5 * median_power < self.antennas_cleaned_power[i] < 2.0 * median_power)]
         self.bad_antennas = [id for id in channel_ids if id not in self.good_antennas]
-        print 'There are %d bad channels (outliers in cleaned-power): ' % len(self.bad_antennas)
+        print 'There are %d bad antennas (outliers in cleaned-power): ' % len(self.bad_antennas)
         print self.bad_antennas
 
         if self.save_plots:
