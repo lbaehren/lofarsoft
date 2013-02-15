@@ -614,6 +614,8 @@ class BeamFormer(tasks.Task):
         # Quick.n.dirty code here, need to be able to automatically update parameters.
         if self.sample_offset:
             self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  # This resets some parameters, used for now for recalculating self.nchunks
+        if isinstance(self.antenna_list, list):
+            self.datafile["SELECTED_DIPOLES"] = self.antenna_list
         self.filesize = self.datafile["MAXIMUM_READ_LENGTH"]
         self.nchunks = int(math.floor(self.filesize / self.sectlen))
 
