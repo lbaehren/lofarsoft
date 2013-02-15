@@ -2,8 +2,8 @@
 Serve CR events dynamically from database.
 """
 
+import numpy as np
 import re
-import math
 import cPickle as pickle
 import sqlite3
 import SocketServer
@@ -43,7 +43,7 @@ def good_lora_reconstruction(core_x, core_y, moliere, elevation):
     quality = False
 
     try:
-        if math.sqrt(core_x**2 + core_y**2) < 150:
+        if np.sqrt(core_x**2 + core_y**2) < 150:
             if moliere < 100 and moliere > 20:
                 if elevation > 55:
                     quality = True
@@ -403,7 +403,7 @@ def events_handler():
             lora.attrib['good_reconstruction'] = "true"
 
         SubElement(lora, "energy").text = str(energy)
-        SubElement(lora, "log_energy").text = str(math.log10(energy)) if isinstance(energy, float) else ""
+        SubElement(lora, "log_energy").text = str(np.log10(energy)) if isinstance(energy, float) else ""
         SubElement(lora, "core_x").text = str(core_x)
         SubElement(lora, "core_y").text = str(core_y)
         SubElement(lora, "azimuth").text = str(azimuth)
