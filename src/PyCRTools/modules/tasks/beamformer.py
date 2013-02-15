@@ -476,7 +476,7 @@ class BeamFormer(tasks.Task):
                            doc="End frequency of spectrum.",
                            unit="Hz"),
 
-        delta_frequency=dict(defaul=lambda self: (self.end_frequency - self.start_frequency) / (self.speclen - 1.0),
+        delta_frequency=dict(default=lambda self: (self.end_frequency - self.start_frequency) / (self.speclen - 1.0),
                              doc="Separation of two subsequent channels in final spectrum.",
                              unit="Hz"),
 
