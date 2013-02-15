@@ -284,7 +284,7 @@ def statistics_handler():
         fig.add_subplot(111)
 
         plt.hist(count, bins=np.arange(8)-0.5)
-		plt.xlim(-0.5, 6.5)
+        plt.xlim(-0.5, 6.5)
 
         figname = "statistics/superterp_stations_per_event.png"
         fig.savefig(figname)
@@ -310,7 +310,7 @@ def statistics_handler():
         fig.add_subplot(111)
 
         plt.hist(count, bins=np.arange(8)-0.5)
-		plt.xlim(-0.5, 6.5)
+        plt.xlim(-0.5, 6.5)
 
         figname = "statistics/superterp_stations_per_event_lba_outer.png"
         fig.savefig(figname)
@@ -336,7 +336,7 @@ def statistics_handler():
         fig.add_subplot(111)
 
         plt.hist(count, bins=np.arange(8)-0.5)
-		plt.xlim(-0.5, 6.5)
+        plt.xlim(-0.5, 6.5)
 
         figname = "statistics/superterp_stations_per_event_lba_inner.png"
         fig.savefig(figname)
