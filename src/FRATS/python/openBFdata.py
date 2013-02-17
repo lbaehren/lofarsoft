@@ -93,22 +93,22 @@ def subtractBaseline(data,blocksize=None):
             data[b*blocksize:(b+1)*blocksize]-=baseline
 
 
-def dataToFits(data,dr,fitsname,overwrite):
+def dataToFits(data,dr,fitsname,overwrite,resampleT=1):
     import pyfits
     hdu = pyfits.PrimaryHDU(data)
     new_image_hdr=hdu.header
     metadata=dict()
     metadata['NAXIS']=2
-    metadata['CDELT0']=1#dr.par['timeresolution']
-    metadata['CTYPE0']='TIME'
-    metadata['CRVAL0']=startblock*blocksize
-    metadata['CUNIT0']='samples'
-    metadata['CRPIX0']=0
-    metadata['CDELT1']=1#dr.par['timeresolution']
+    metadata['CDELT2']=dr.par['timeresolution']*resampleT
+    metadata['CTYPE2']='TIME'
+    metadata['CRVAL2']=startblock*blocksize*dr.par['timeresolution']*resampleT
+    metadata['CUNIT2']='samples'
+    metadata['CRPIX2']=1
+    metadata['CDELT1']=dr.par['frequencies'][1]-dr.par['frequencies'][0]
     metadata['CTYPE1']='FREQ'
-    metadata['CRVAL1']=0
-    metadata['CRPIX1']=0
-    metadata['CUNIT1']='channels'
+    metadata['CRVAL1']=dr.par['frequencies'][0]
+    metadata['CRPIX1']=1
+    metadata['CUNIT1']='Hz'
     for key in metadata.keys():
         new_image_hdr.update(key,metadata[key])
     print "saving fits file to",fitsname
@@ -519,7 +519,7 @@ if options.bPlot:
 
 
 if options.savefits:
-    dataToFits(data,dr,options.fitsname,options.overwritefits)
+    dataToFits(data,dr,options.fitsname,options.overwritefits,resampleT)
 
 
 
