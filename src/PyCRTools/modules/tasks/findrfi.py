@@ -162,6 +162,7 @@ class FindRFI(Task):
                 refant = np.argsort(channel_power.toNumpy())[self.nantennas / 2]
                 refant = int(refant)  # numpy.int64 causes problems...
                 print 'Taking channel %d as reference antenna' % refant
+                self.refant = refant
                 # the index halfway in the sorted array is the channel with median power
                 magspectrum.sqrt()
 #            magspectrum += 1e-9
@@ -176,6 +177,7 @@ class FindRFI(Task):
             incphasemean += incphase  # accumulate Sum( exp(i phi) ) for all blocks
 
             magspectrum.square()
+#            print 'Power = %f' % (2 * (magspectrum.toNumpy().sum(axis=1))[2])
             avgspectrum += magspectrum  # accumulate average spectrum
 
             if np.isnan(incphase.sum()[0]):  # FIX
