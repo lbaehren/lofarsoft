@@ -95,6 +95,34 @@ def getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays):
 
     return oneSampleShifts
 
+def getMultiFreqDelay(lines, freqs, phase_average, median_phase_spreads, modelTimes):
+    strongestChannels = []
+    f0 = freqs[1]
+    for line in lines: # determine strongest frequency in [line-0.1, line+0.1]
+        startindex = int((line-0.1) * 1.0e6 / f0)
+        stopindex = 1 + int((line+0.1) * 1.0e6 / f0)
+        bestchannel = startindex + median_phase_spreads[startindex:stopindex].argmin()
+        print 'Best channel for freq %3.1f is: %3.3f at phase stability %1.4f' % (line, bestchannel * f0 / 1.0e6, median_phase_spreads[bestchannel])
+        strongestChannels.append(bestchannel)
+
+    t = 0.1e-9 * (-100000 + np.arange(200000)) # in 0.1 ns
+    y = np.zeros(200000)
+    for channel in strongestChannels:
+        freq = f0 * channel
+        phase = phase_average[10, channel] # take antenna 10 to test
+        # subtract model phases from incoming wave
+#        modelphases = sf.timeDelaysFromGPSPoint(self.referenceTransmitterGPS, positions, np.array(self.f["SELECTED_DIPOLES"]), self.f["ANTENNA_SET"][0])
+        modelphases = - twopi * freq * modelTimes # Changes with frequency
+        modelphases = sf.phaseWrap(modelphases)
+        phase -= modelphases[10]
+        #HACK
+        #phase = np.random.rand() * twopi - twopi/2
+        y += np.cos(twopi * freq * t + phase)
+
+    plt.figure()
+    plt.plot(t*1e9, y)
+
+
 
 class CalibrateFM(Task):
     """
@@ -131,6 +159,7 @@ class CalibrateFM(Task):
 
         median_phase_spreads = dict(default=None,
                                     doc="Output from FindRFI: Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1."),
+        refant = dict(default=0, doc="Reference antenna from FindRFI."),
 
         referenceTransmitterGPS = dict(default=None,
                                        doc="GPS [long, lat] in degrees (N, E is positive) for a known transmitter. Typically used when tuning to a known frequency. The Smilde tower is at (6.403565, 52.902671)."),
@@ -285,6 +314,7 @@ class CalibrateFM(Task):
             self.median_phase_spreads = cr.hArray(a)  # they are a median over all antennas, which is OK
             a = findrfi.phase_RMS.toNumpy()  # [thisPolsChannels]
             self.phase_RMS = cr.hArray(a)
+            self.refant = findrfi.refant
             # Numpy for using argmin, argsort etc.
 
         self.blocksize = self.f["BLOCKSIZE"]
@@ -314,20 +344,19 @@ class CalibrateFM(Task):
         self.phase_average = self.phase_average.toNumpy()
         # Find the best line in given frequency range, i.e. with best phase stability [ to function? ]
         self.median_phase_spreads = self.median_phase_spreads.toNumpy()
-        if not self.lines:  # if no value given, take the one overall with best phase stability
-            if not self.freq_range:  # take overall best channel
-                bestchannel = self.median_phase_spreads.argmin()
-            else:  # take the best channel in the given range
-                f0 = 200.0e6 / self.blocksize  # hardcoded sampling rate
-                startindex = int(self.freq_range[0] * 1.0e6 / f0)
-                stopindex = 1 + int(self.freq_range[1] * 1.0e6 / f0)
-                bestchannel = startindex + self.median_phase_spreads[startindex:stopindex].argmin()
+        if not self.freq_range:  # take overall best channel
+            bestchannel = self.median_phase_spreads.argmin()
+        else:  # take the best channel in the given range
+            f0 = 200.0e6 / self.blocksize  # hardcoded sampling rate
+            startindex = int(self.freq_range[0] * 1.0e6 / f0)
+            stopindex = 1 + int(self.freq_range[1] * 1.0e6 / f0)
+            bestchannel = startindex + self.median_phase_spreads[startindex:stopindex].argmin()
 
-            bestchannel = int(bestchannel)  # ! Needed for use in hArray slicing etc. Type numpy.int64 not recognized otherwise
-        elif isinstance(self.lines, type([])):
-            bestchannel = self.lines[0]  # known strong transmitter channel for this event (may vary +/- 5 channels?)
-        else:  # either list or number assumed
-            bestchannel = self.lines
+        bestchannel = int(bestchannel)  # ! Needed for use in hArray slicing etc. Type numpy.int64 not recognized otherwise
+#        elif isinstance(self.lines, type([])):
+#            bestchannel = self.lines[0]  # known strong transmitter channel for this event (may vary +/- 5 channels?)
+#        else:  # either list or number assumed
+#            bestchannel = self.lines
 
         channelsSortedByStability = self.median_phase_spreads.argsort()
         freqsByStability = freqs.toNumpy()[channelsSortedByStability]
@@ -379,9 +408,9 @@ class CalibrateFM(Task):
 
         if self.referenceTransmitterGPS:
         # Get model phases from this GPS point
-            modelphases = sf.timeDelaysFromGPSPoint(self.referenceTransmitterGPS, allpositions, np.array(self.f["SELECTED_DIPOLES"]), self.f["ANTENNA_SET"][0])
-            modelphases -= modelphases[0]
-            modelphases *= - twopi * freq  # !! Minus sign to be compatible with FFT's phase sign
+            modelTimes = sf.timeDelaysFromGPSPoint(self.referenceTransmitterGPS, allpositions, np.array(self.f["SELECTED_DIPOLES"]), self.f["ANTENNA_SET"][0])
+            modelTimes -= modelTimes[self.refant] # Should compare with refant instead of ant 0 ??!
+            modelphases = - twopi * freq * modelTimes # !! Minus sign to be compatible with FFT's phase sign
             modelphases = sf.phaseWrap(modelphases)
         else: # get them from average incoming (fitted) direction
             modelphases = sf.phasesFromDirection(allpositions, averageIncomingDirection, freq)
@@ -460,6 +489,10 @@ class CalibrateFM(Task):
             self.plot_finish(filename=self.plot_name + "-calibration-layout", filetype=self.filetype)
 
         # set output params
+        # TEST
+        if self.lines is not None and self.referenceTransmitterGPS is not None:
+            getMultiFreqDelay(self.lines, freqs, self.phase_average, self.median_phase_spreads, modelTimes)
+
         self.strongestFrequency = freqs[bestchannel]
         self.bestPhaseRMS = self.median_phase_spreads[bestchannel]
         self.timestamp = self.f["TIME"][0]
