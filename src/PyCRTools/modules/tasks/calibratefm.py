@@ -105,22 +105,33 @@ def getMultiFreqDelay(lines, freqs, phase_average, median_phase_spreads, modelTi
         print 'Best channel for freq %3.1f is: %3.3f at phase stability %1.4f' % (line, bestchannel * f0 / 1.0e6, median_phase_spreads[bestchannel])
         strongestChannels.append(bestchannel)
 
-    t = 0.1e-9 * (-100000 + np.arange(200000)) # in 0.1 ns
-    y = np.zeros(200000)
-    for channel in strongestChannels:
-        freq = f0 * channel
-        phase = phase_average[10, channel] # take antenna 10 to test
-        # subtract model phases from incoming wave
-#        modelphases = sf.timeDelaysFromGPSPoint(self.referenceTransmitterGPS, positions, np.array(self.f["SELECTED_DIPOLES"]), self.f["ANTENNA_SET"][0])
-        modelphases = - twopi * freq * modelTimes # Changes with frequency
-        modelphases = sf.phaseWrap(modelphases)
-        phase -= modelphases[10]
-        #HACK
-        #phase = np.random.rand() * twopi - twopi/2
-        y += np.cos(twopi * freq * t + phase)
+    nofchannels = len(modelTimes)
+    bestFitDelay = np.zeros(nofchannels)
+    t = 0.01e-9 * (-800 + np.arange(1600)) # in 0.1 ns
+    #window = np.exp(-np.abs(t) / 100e-9)
+    for i in range(nofchannels): # for all antennas...
+        y = np.zeros(1600)
+        for channel in strongestChannels:
+            freq = f0 * channel
+            phase = phase_average[i, channel] # take antenna 10 to test
+            # subtract model phases from incoming wave
+    #        modelphases = sf.timeDelaysFromGPSPoint(self.referenceTransmitterGPS, positions, np.array(self.f["SELECTED_DIPOLES"]), self.f["ANTENNA_SET"][0])
+            modelphases = - twopi * freq * modelTimes # Changes with frequency
+            modelphases = sf.phaseWrap(modelphases)
+            phase -= modelphases[i]
+            #HACK
+            #phase = np.random.rand() * twopi - twopi/2
+            y += np.cos( - twopi * freq * t + phase)
 
-    plt.figure()
-    plt.plot(t*1e9, y)
+        bestFitIndex = np.argmax(y)
+        bestFitDelay[i] = t[bestFitIndex]
+        if i == 15:
+            print 'Plotting crosscorrelation for antenna %d' % i
+            plt.figure()
+            plt.plot(t*1e9, y)
+            print bestFitDelay[i]
+
+    return bestFitDelay
 
 
 
@@ -428,7 +439,11 @@ class CalibrateFM(Task):
         self.calibrationStatus = "OK" if phaseError < self.maxPhaseError else "BAD"
         print 'Fit is %s as the max allowed phase error is set to %3.3f' % (self.calibrationStatus, self.maxPhaseError)
         nanosecondPhase = twopi * freq * 1.0e-9
-        timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
+
+        if self.lines is not None and self.referenceTransmitterGPS is not None:
+            timeDiff = 1.0e9* getMultiFreqDelay(self.lines, freqs, self.phase_average, self.median_phase_spreads, modelTimes)
+        else:
+            timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
 
         # Do inter-station delays with plot and output param (dict)
         if nofStations > 1:
