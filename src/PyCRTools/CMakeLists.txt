@@ -384,6 +384,19 @@ install (FILES ${PYCRTOOLS_PYTHON_DOCS} DESTINATION ${LUS_SOURCE_DIR}/release/li
 install (CODE "message (STATUS \"Installing Python scripts...\")")
 install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLinks.sh ${CMAKE_CURRENT_SOURCE_DIR}/scripts ${LUS_SOURCE_DIR}/release/bin/python)")
 
+
+## =============================================================================
+##
+##  Testing
+##
+## =============================================================================
+
+if (PYCRTOOLS_ENABLE_TESTING)
+  add_test(NAME tImportPyCRTools
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/tImportPyCRTools.py)
+endif (PYCRTOOLS_ENABLE_TESTING)
+
 ## =============================================================================
 ##
 ##  Configuration summary
