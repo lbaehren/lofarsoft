@@ -169,7 +169,7 @@ class CRDatabase(object):
         # Set prerequisites for this update
         if ((self.settings.db_version < db_version_pre) and
             (self.db_required_version >= db_version_pre)):
-            __updateDatabase(db_version_pre)
+            self.__updateDatabase(db_version_pre)
 
         # Apply this update
         if ((self.settings.db_version < db_version_post) and
@@ -1406,6 +1406,7 @@ class Event(object):
         *parameters*  if *True* write all parameters
         ============  =================================================================
         """
+        #import pdb; pdb.set_trace()
         if self._db:
             # Writing attributes
             if self._inDatabase:        # Update values
