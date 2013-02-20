@@ -43,6 +43,9 @@ class BeamData(IOInterface):
         # Current block number
         self.__block = block
 
+        #Align the stations to the same block since second started.
+        self.__block_alignment = max(self.__block_number()) - self.__block_number()
+
         # Total number of chunks
         self.__nchunks = self.getNchunks()
 
@@ -55,9 +58,6 @@ class BeamData(IOInterface):
 
         # Create keyword dict for easy access
         self.__setKeywordDict()
-
-        #Align the stations to the same block since second started.
-        self.__block_alignment = max(self['BLOCK_NUMBER']) - self['BLOCK_NUMBER']
 
         # Mark file as opened
         self.closed = False
@@ -89,7 +89,7 @@ class BeamData(IOInterface):
         # self.__keyworddict['BEAM_STATIONPOS'] =??
         self.__keyworddict['MAXIMUM_READ_LENGTH'] = self['NCHUNKS'] * self['BEAM_BLOCKLEN'] * self['BEAM_NBLOCKS']
         self.__keyworddict['BLOCKSIZE'] = self['BEAM_BLOCKLEN']
-        self.__keyworddict['TIME'] = lambda: [self.__files[i].par.hdr['TIME'][0] for i in range(self.__nofBeamDataSets)]
+        self.__keyworddict['TIME'] = self.__init_Time()
         self.__keyworddict['FREQUENCY_INTERVAL'] = [self['TBB_FREQUENCY_INTERVAL']]
         self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
         self.__keyworddict['CAL_DELAY'] = lambda: self.__caldelay
@@ -253,6 +253,14 @@ class BeamData(IOInterface):
 
         return self['BEAM_FREQUENCIES']
 
+    def __init_Time(self):
+        ''' Finds the start time of the TBB observation in seconds for each station.
+        '''
+
+        time = [self.__files[i].par.hdr['TIME'][0] for i in range(self.__nofBeamDataSets)]
+
+        return time
+
     def __block_number(self):
         '''Finds the block start number.
             Similar function to SAMPLE_NUMBER in tbb.
@@ -260,11 +268,11 @@ class BeamData(IOInterface):
         '''
 
         block_start = []
-        if min(cr.hArray(self['TIME'])) != max(cr.hArray(self['TIME'])):
+        if min(cr.hArray(self.__init_Time())) != max(cr.hArray(self.__init_Time())):
             raise NotImplementedError('Stations started observing at a different second. Fix not implemented yet.')
 
         for nbeam in range(self.__nofBeamDataSets):
-            block_start.append(int(np.ceil(max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER'])/float(self['BLOCKSIZE']))))
+            block_start.append(int(np.ceil(max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER'])/float(self.__files[0].par.hdr['BeamFormer']['blocklen']))))
 
         return cr.hArray(block_start)
 
