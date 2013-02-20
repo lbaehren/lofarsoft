@@ -527,7 +527,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Fit pulse direction
 
                 direction_fit_plane_wave = cr.trun("DirectionFitPlaneWave", positions=antenna_positions, timelags=delays, good_antennas=pulse_envelope.antennas_with_significant_pulses, reference_antenna=pulse_envelope.refant, verbose=True)
-                
+
                 pulse_direction = direction_fit_plane_wave.meandirection_azel_deg
 
                 print "Hilbert envelope direction:", direction_fit_plane_wave.meandirection_azel_deg
@@ -665,6 +665,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         # Get combined parameters from (cached) database
         all_station_antenna_positions = []
         all_station_pulse_delays = []
+        all_station_fit_residuals = []
         all_station_pulse_peak_amplitude = []
         all_station_integrated_pulse_power = []
         all_station_integrated_noise_power = []
@@ -679,6 +680,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 try:
                     all_station_direction.append(station["crp_pulse_direction"])
                     all_station_pulse_delays.append(station["crp_pulse_delay"])# - station["clock_offset"])
+                    all_station_fit_residuals.append(station["crp_pulse_delay_fit_residual"])
                     all_station_antenna_positions.append(station["local_antenna_positions"])
                     all_station_pulse_peak_amplitude.append(station.polarization['xyz']["crp_pulse_peak_amplitude"])
                     all_station_integrated_pulse_power.append(station.polarization['xyz']["crp_integrated_pulse_power"]*10**9) #scaling for plotting
@@ -693,6 +695,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         all_station_antenna_positions = np.vstack(all_station_antenna_positions)
         all_station_pulse_delays = np.hstack(all_station_pulse_delays)
         all_station_pulse_delays -= all_station_pulse_delays.min() # Subtract global offset
+        all_station_fit_residuals = np.hstack(all_station_fit_residuals)
+        all_station_fit_residuals = all_station_fit_residuals[0::2] # only one delay per antenna, i.e. same for odd/even rcus
         all_station_pulse_peak_amplitude = np.vstack(all_station_pulse_peak_amplitude)
         all_station_integrated_pulse_power = np.vstack(all_station_integrated_pulse_power)
         all_station_integrated_noise_power = np.vstack(all_station_integrated_noise_power)
@@ -729,8 +733,13 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         polarization_footprint = cr.trun("Shower",positions=all_station_antenna_positions,signals=all_station_pulse_peak_amplitude,footprint_enable=False,ldf_enable = False ,direction= average_direction,core = core,polarization_angle=all_station_polarization_angle,azimuth_in_distance_bins_enable=False,footprint_polarization_enable=True,save_plots=True, plot_prefix=event_plot_prefix, plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
 
         # Plot wavefront shape using arrival times (from all_station_pulse_delays)
+        # filter out all channels with > +/- 3 ns fit residual. This removes all 5-ns glitches as well as bad pulse position estimates.
+        # Later we'll try to correct for glitches by collecting database values of fit residuals.
+        noGlitchIndices = np.where( abs(all_station_fit_residuals) < 3e-9 )
+#        print 'no glitch indices arE:'
+#        print noGlitchIndices
         try:
-            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays, positions=all_station_antenna_positions, stationnames=all_station_antennas_stationnames, loracore=core, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays[noGlitchIndices], positions=all_station_antenna_positions[noGlitchIndices], stationnames=all_station_antennas_stationnames[noGlitchIndices], loracore=core, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
         except ValueError:
            print "wavefront returned problem"
 
