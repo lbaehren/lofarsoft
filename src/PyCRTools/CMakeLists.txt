@@ -10,8 +10,8 @@ cmake_minimum_required (VERSION 2.8)
 ##
 ## ==============================================================================
 
-option (PYCRTOOLS_ENABLE_TESTING         "Enable testing for the PyCRTools?"                         YES )
-option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP enabled?"         YES )
+option (PYCRTOOLS_ENABLE_TESTING         "Enable testing for the PyCRTools?"                         NO )
+option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP enabled?"                    YES )
 option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?"         YES )
 option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO )
 option (PYCRTOOLS_WITH_DEBUG_SYMBOLS     "Compile PyCRTools with debug symbols?"                     YES )
