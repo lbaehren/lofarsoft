@@ -3,6 +3,20 @@
 # dedispersion does incoherent dedispersion on arrays or fitsimages
 import FRATSanalysis as fa
 
+def downsample(data,axis,factor):
+    if axis==0 or axis=="time":
+        return np.sum(data.reshape(data.shape[0]/factor,factor,data.shape[1]),1)
+    elif axis==1 or axis=="freq":
+        return np.sum(data.reshape(data.shape[0],data.shape[1]/factor,factor),2)
+
+def rawplot(dr,data,downsamplefactor=4):
+    data2=downsample(data,0,downsamplefactor)
+    data2=downsample(data2,1,downsamplefactor)
+    myextent=(dr.par['frequencies'][0],dr.par['frequencies'][-1],0,data.shape[0])
+    plt.imshow(np.sqrt(data2),aspect='auto',vmin=np.sqrt(0.2*np.median(data2)),vmax=np.sqrt(2.5*np.median(data2)),extent=myextent)
+    plt.xlabel('frequency (Hz)')
+    plt.ylabel('relative sample')
+
 def myplot(data,doSquare=False):
     fig=plt.figure()
     fig.subplots_adjust(wspace=0.3,hspace=0.3)
@@ -269,6 +283,7 @@ parser.add_option("-d","--datadir",type="string",default="/vol/astro/lofar/frats
 parser.add_option("-l","--cutlevel",type="float",default=5.0)
 parser.add_option("-s","--startblock",type="int",default=0)
 parser.add_option("-n","--nofblocks",type="int",default=1)
+parser.add_option("--ds","--downsample","--downsamplefactor",dest="downsamplefactor",type="int",default=4)
 parser.add_option("-z","--blocksize","--sa",type="int",default=512)
 parser.add_option("-y","--dividebaseline",action="store_true",dest="dividebaseline",default=False)
 parser.add_option("-x","--subtractbaseline",action="store_true",dest="subtractbaseline",default=False)
@@ -507,7 +522,9 @@ if options.DM!=None and options.bTimeseries:
 if options.bPlot:
     mycolors=['r','g','b','k','y','m','c','0.5','r','g','b','k','y','m','c','0.5']
     if not options.bTimeseries:
-        myplot(data)
+        #myplot(data)
+        rawplot(dr,data,options.downsamplefactor)
+        plt.title(dr.files[fileindex].name+" block "+str(options.startblock))
     else:
         stb=par['stb']
         par['stb']=options.startblock
