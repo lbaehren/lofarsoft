@@ -284,7 +284,7 @@ class BeamData(IOInterface):
         all_nblocks = []
 
         for nbeam in range(self.__nofBeamDataSets):
-            all_nblocks.append(self.__files[nbeam].par.nblocks - self.__block_alignment[nbeam])
+            all_nblocks.append((self.__files[nbeam].par.nblocks*self.__files[0].par.hdr['BeamFormer']['nblocks'] - self.__block_alignment[nbeam])/self.__files[0].par.hdr['BeamFormer']['nblocks'])
 
         nblocks = min(all_nblocks)
 
