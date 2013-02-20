@@ -260,7 +260,7 @@ class BeamData(IOInterface):
         '''
 
         block_start = []
-        if min(cr.hArray(self['TIME'])) != max(cr.hArray(self['TIME']))
+        if min(cr.hArray(self['TIME'])) != max(cr.hArray(self['TIME'])):
             raise NotImplementedError('Stations started observing at a different second. Fix not implemented yet.')
 
         for nbeam in range(self.__nofBeamDataSets):
