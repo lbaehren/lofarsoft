@@ -56,6 +56,9 @@ class BeamData(IOInterface):
         # Create keyword dict for easy access
         self.__setKeywordDict()
 
+        #Align the stations to the same block since second started.
+        self.__block_alignment = max(self['BLOCK_NUMBER']) - self['BLOCK_NUMBER']
+
         # Mark file as opened
         self.closed = False
 
@@ -66,6 +69,7 @@ class BeamData(IOInterface):
             "CHUNK": lambda: self.__chunk,
             "BLOCK": lambda: self.__block,
             "DM": lambda: self.__dm,
+            "BLOCK_NUMBER": self.__block_number(),
             "NCHUNKS": lambda: self.__nchunks,
             "NOF_BEAM_DATASETS": lambda: self.__nofBeamDataSets
             }
@@ -85,7 +89,7 @@ class BeamData(IOInterface):
         # self.__keyworddict['BEAM_STATIONPOS'] =??
         self.__keyworddict['MAXIMUM_READ_LENGTH'] = self['NCHUNKS'] * self['BEAM_BLOCKLEN'] * self['BEAM_NBLOCKS']
         self.__keyworddict['BLOCKSIZE'] = self['BEAM_BLOCKLEN']
-        self.__keyworddict['TIME'] = self['TBB_TIME']
+        self.__keyworddict['TIME'] = lambda: [self.__files[i].par.hdr['TIME'][0] for i in range(self.__nofBeamDataSets)]
         self.__keyworddict['FREQUENCY_INTERVAL'] = [self['TBB_FREQUENCY_INTERVAL']]
         self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
         self.__keyworddict['CAL_DELAY'] = lambda: self.__caldelay
@@ -249,6 +253,21 @@ class BeamData(IOInterface):
 
         return self['BEAM_FREQUENCIES']
 
+    def __block_number(self):
+        '''Finds the block start number.
+            Similar function to SAMPLE_NUMBER in tbb.
+            WARNING: Assuming sample_numbers are from the same second.
+        '''
+
+        block_start = []
+        if min(cr.hArray(self['TIME'])) != max(cr.hArray(self['TIME']))
+            raise NotImplementedError('Stations started observing at a different second. Fix not implemented yet.')
+
+        for nbeam in range(self.__nofBeamDataSets):
+            block_start.append(int(np.ceil(max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER'])/float(self['BLOCKSIZE']))))
+
+        return cr.hArray(block_start)
+
     def getNchunks(self):
         """Find the maximum number of blocks beetwen the beams. Analogous to MAXIMUM_READ_LENGTH in tbb.py.
         WARNING: Note that NCHUNKS is also used as the modulus (for wrapping) when using DM>0.
@@ -257,7 +276,7 @@ class BeamData(IOInterface):
         all_nblocks = []
 
         for nbeam in range(self.__nofBeamDataSets):
-            all_nblocks.append(self.__files[nbeam].par.nblocks)
+            all_nblocks.append(self.__files[nbeam].par.nblocks - self.__block_alignment[nbeam])
 
         nblocks = min(all_nblocks)
 
@@ -333,7 +352,7 @@ class BeamData(IOInterface):
 
         if not self['DM']:
             for i, file in enumerate(self.__filename):
-                data[i].readfilebinary(os.path.join(file, "data.bin"), self['BLOCK'] * self['BEAM_SPECLEN'])
+                data[i].readfilebinary(os.path.join(file, "data.bin"), self['BLOCK'] * self['BEAM_SPECLEN'] + self.__block_alignment[i])
         else:
 
             spec_len = data.shape()[1]
@@ -354,9 +373,10 @@ class BeamData(IOInterface):
 
             # Note, this following loop could be slow (hOffsetReadFileBinary could maybe be optimized)
             for i, file in enumerate(self.__filename):
-                cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset)
+                cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i])
 
-            # Addding phase correction to DM offsets.
+            pass
+            # Addding phase correction to DM offsets. (coherent dedispersion).
             weights_dm = self.empty('FFT_DATA')
             phases_dm = cr.hArray(float, weights_dm.shape()[1], fill=0)
             cr.hDelayToPhase(phases_dm, self['BEAM_FREQUENCIES'], self['DM_OFFSET'][1])  # Using this form of delay2phase since have delays as func. of freq.
