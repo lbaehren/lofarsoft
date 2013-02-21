@@ -189,6 +189,7 @@ class PulseEnvelope(Task):
             print self.timeseries_data_resampled.shape()
             print self.hilbertt.shape()
             print self.maxpos
+            print self.maxpos_full
             print start
             print end
 
