@@ -274,7 +274,7 @@ def statistics_handler():
         data = SubElement(info, "data")
 
         # Get statistic
-        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') group by e.eventID""")
+        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') and (s.status='GOOD') group by e.eventID""")
 
         count = []
         for e in c.fetchall():
@@ -306,7 +306,7 @@ def statistics_handler():
         data = SubElement(info, "data")
 
         # Get statistic
-        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and e.antennaset='LBA_OUTER' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') group by e.eventID""")
+        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and e.antennaset='LBA_OUTER' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') and (s.status='GOOD') group by e.eventID""")
 
         count = []
         for e in c.fetchall():
@@ -338,7 +338,7 @@ def statistics_handler():
         data = SubElement(info, "data")
 
         # Get statistic
-        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and e.antennaset='LBA_INNER' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') group by e.eventID""")
+        c.execute("""select count(distinct(stationname)) from events as e inner join event_datafile as ed on (e.eventID=ed.eventID) inner join datafile_station as ds on (ed.datafileID=ds.datafileID) inner join stations as s on (s.stationID=ds.stationID) where e.status='CR_FOUND' and e.antennaset='LBA_INNER' and s.stationname in ('CS002','CS003','CS004','CS005','CS006','CS007') and (s.status='GOOD') group by e.eventID""")
 
         count = []
         for e in c.fetchall():
