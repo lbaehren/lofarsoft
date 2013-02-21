@@ -189,14 +189,6 @@ class PulseEnvelope(Task):
             end += (self.pulse_start - self.window_start) * int(self.resample_factor)
             end += 5 * self.resample_factor
 
-            print "Input for stokes"
-            print self.timeseries_data_resampled.shape()
-            print self.hilbertt.shape()
-            print self.maxpos
-            print self.maxpos_full
-            print start
-            print end
-
             cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...], start[...], end[...])
             
             # Calculate polarization angle
