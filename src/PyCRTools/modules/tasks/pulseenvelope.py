@@ -182,6 +182,9 @@ class PulseEnvelope(Task):
             self.integrated_noise_power /= self.sampling_frequency
             
             # Calculate Stokes parameters
+            start *= self.resample_factor
+            end *= self.resample_factor
+
             cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...], start[...], end[...])
             
             # Calculate polarization angle
