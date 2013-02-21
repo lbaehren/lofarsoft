@@ -10,7 +10,7 @@ cmake_minimum_required (VERSION 2.8)
 ##
 ## ==============================================================================
 
-option (PYCRTOOLS_ENABLE_TESTING         "Enable testing for the PyCRTools?"                         NO )
+option (PYCRTOOLS_ENABLE_TESTING         "Enable testing for the PyCRTools?"                         YES )
 option (PYCRTOOLS_WITH_OPENMP            "Compile PyCRTools with OpenMP enabled?"                    YES )
 option (PYCRTOOLS_WITH_COMPILER_WARNINGS "Compile PyCRTools with compiler warnings enabled?"         YES )
 option (PYCRTOOLS_WITH_CPU_OPTIMIZATIONS "Compile PyCRTools with optimization for CPU architecture?" NO )
@@ -392,6 +392,7 @@ install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLin
 ## =============================================================================
 
 if (PYCRTOOLS_ENABLE_TESTING)
+  set (CTEST_BUILD_TARGET "install")
   add_test(NAME tImportPyCRTools
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/tImportPyCRTools.py)
