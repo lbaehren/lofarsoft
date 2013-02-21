@@ -183,8 +183,10 @@ class PulseEnvelope(Task):
             
             # Calculate Stokes parameters
             start.copy(self.maxpos)
+            start += (self.pulse_start - self.window_start) * int(self.resample_factor)
             start -= 5 * self.resample_factor
             end.copy(self.maxpos)
+            end += (self.pulse_start - self.window_start) * int(self.resample_factor)
             end += 5 * self.resample_factor
 
             print "Input for stokes"
