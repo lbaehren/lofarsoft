@@ -102,8 +102,8 @@ class PulseEnvelope(Task):
             doc = "Antennas to create plots for."),
         fftwplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
         ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDftC2r(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
-		extra=dict(default = False,
-			doc = "Calculate non essential extras (integrated pulse power & stokes parameters)."),
+        extra=dict(default = False,
+            doc = "Calculate non essential extras (integrated pulse power & stokes parameters)."),
     )
 
     def run(self):
@@ -185,11 +185,11 @@ class PulseEnvelope(Task):
             start *= self.resample_factor
             end *= self.resample_factor
 
-			print "Input for stokes"
-			print self.timeseries_data.shape()
-			print self.hilbertt.shape()
-			print start
-			print end
+            print "Input for stokes"
+            print self.timeseries_data.shape()
+            print self.hilbertt.shape()
+            print start
+            print end
 
             cr.hStokesParameters(self.stokes[...], self.timeseries_data_resampled[0:3 * self.nantennas:3, ...], self.timeseries_data_resampled[1:3 * self.nantennas:3, ...], self.hilbertt[0:3 * self.nantennas:3, ...], self.hilbertt[1:3 * self.nantennas:3, ...], start[...], end[...])
             
