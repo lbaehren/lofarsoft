@@ -165,12 +165,17 @@ class PulseEnvelope(Task):
         # Calculate integrated pulse power
         if self.extra:
 
+            print "maxpos", self.maxpos
             self.maxpos_full[...].copy(self.maxpos[...])
             self.maxpos_full /= self.resample_factor
             
+            print "maxpos_full", self.maxpos_full
             start = cr.hArray(int, self.maxpos_full.shape()[0])
+            print "start", start
             start.copy(self.maxpos_full)
+            print "start", start
             start += self.pulse_start - 5
+            print "start", start
             
             end = cr.hArray(int, self.maxpos_full.shape()[0])
             end.copy(self.maxpos_full)
