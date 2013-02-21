@@ -186,8 +186,9 @@ class PulseEnvelope(Task):
             end *= self.resample_factor
 
             print "Input for stokes"
-            print self.timeseries_data.shape()
+            print self.timeseries_data_resampled.shape()
             print self.hilbertt.shape()
+            print self.maxpos
             print start
             print end
 
