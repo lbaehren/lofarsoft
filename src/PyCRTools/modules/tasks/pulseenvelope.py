@@ -182,6 +182,8 @@ class PulseEnvelope(Task):
             self.integrated_noise_power /= self.sampling_frequency
             
             # Calculate Stokes parameters
+            print start
+            print end
             start *= self.resample_factor
             end *= self.resample_factor
 
