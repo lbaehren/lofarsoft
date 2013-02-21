@@ -2393,7 +2393,6 @@ if __name__ == "__main__":
 				oi=obsinfo(id)
 
 			if not oi.is_parset():
-				continue # not keeping records of ObsIDs without parset in the table -- too many and are not from pulsar obs - Vlad, Jan 24, 2013
 				comment = "NO PARSET FILE FOUND!"
 				# search for nodeslist and datadir with raw data
 				# we do this search only if ObsID is _NOT_ in obsids_redonly list
@@ -2609,6 +2608,12 @@ if __name__ == "__main__":
 
 	# copying to another list to keep the old one
 	obskeys = np.flipud(np.sort(obstable.keys(), kind='mergesort'))
+
+	# exclude keys (i.e. ObsIDs) that do not have parset files - Vlad, Feb 20, 2013
+	# otherwise, there are too many of them to print on the page, and mostly (if not all) they are not from pulsar obs
+	# also, we do not want to exclude them from the database, because every time we want to add new ObsIDs
+	# those old without parset files will also be considered as new, and this will take a lot of time to run
+	obskeys=[ii for ii in obskeys if obstable[ii].oi.is_parset()]
 
 	if np.size(update_obsids) != 0 and (not is_rebuild) and (not is_update) and (not is_append) and (not is_delete):
 		obskeys = update_obsids
