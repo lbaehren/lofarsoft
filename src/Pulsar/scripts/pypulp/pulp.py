@@ -51,8 +51,8 @@ if __name__ == "__main__":
 		if not cmdline.opts.is_summary:
 			beam=cmdline.opts.beam_str.split(",")[0]
 			logger_name += beam
-                        if re.search(r'[^\:\d]+', beam) is not None:
-                                print "Option --beams can only has digits, colons and commas!\nCan't start local processing. Exiting..."
+                        if re.search(r'[^\:\d\/]+', beam) is not None:
+                                print "Option --beams can only has digits, colons, commas, and in some cases / for parts!\nCan't start local processing. Exiting..."
                                 quit(1)
                         if re.search(r'[\:]+', beam) is None:
                                 print "Option --beams should have at least one colon!\nCan't start local processing. Exiting..."
@@ -63,9 +63,20 @@ if __name__ == "__main__":
                                 quit(1)
 			# getting SAP and TAB ids for local processing
 			sapid = int(sap)
-			tabid = int(tab)
-			# forming finally the name of the local log-file
-			logfile = "%s_sap%03d_beam%04d.log" % (cmdline.opts.obsid, sapid, tabid)
+			tabid = int(tab.split("/")[0])
+			partid = -1
+
+			# if there is no "part" part, then form the name of the log-file in a usual way
+			if re.search(r'[\/]+', tab) is None:
+				# forming finally the name of the local log-file
+				logfile = "%s_sap%03d_beam%04d.log" % (cmdline.opts.obsid, sapid, tabid)
+			else: # if there are several BW splits for one beam, then we also add "part" number in the name of the log-file
+				part = tab.split("/")[-1]
+				if part == "":
+                                	print "Option --beams has empty PART value!\nCan't start local processing. Exiting..."
+                                	quit(1)
+				partid = int(part)
+				logfile = "%s_sap%03d_beam%04d_part%02d.log" % (cmdline.opts.obsid, sapid, tabid, partid)
 		else:   # when --summary then name of the summary locus node should be given in --beams
 			# when run locally
 			logger_name += "_summary_%s" % (cmdline.opts.beam_str)
@@ -208,13 +219,17 @@ if __name__ == "__main__":
 			if not cmdline.opts.is_summary:
 				# running processing for particular beam
 				for unit in psrpipe.units:
-					if unit.sapid == sapid and unit.tabid == tabid:
-						try:
-							unit.run(obs, cep2, cmdline, log)
-						except KeyboardInterrupt:
-							log.exception("User interruption...")
-							unit.kill() # killing all open processes
-							quit(1)
+					try:
+						if partid != -1:
+							if unit.sapid == sapid and unit.tabid == tabid and unit.part == partid:
+								unit.run(obs, cep2, cmdline, log)
+						else:
+							if unit.sapid == sapid and unit.tabid == tabid:
+								unit.run(obs, cep2, cmdline, log)
+					except KeyboardInterrupt:
+						log.exception("User interruption...")
+						unit.kill() # killing all open processes
+						quit(1)
 					
 			else:   # running local pulp to make summary actions
 				try:

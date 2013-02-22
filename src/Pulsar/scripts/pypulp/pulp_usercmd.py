@@ -8,6 +8,7 @@ from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
 import time
 import re
+import logging
 
 # checks if given pulsar is good ones, i.e. either in ATNF catalog
 # or par-file do exis
@@ -159,6 +160,8 @@ class CMDLine:
 	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")
         	self.groupCV.add_option('--nodal', action="store_true", dest='is_nodal',
                            help="use bf2puma2 to read raw data instead of using dspsr to read *.h5 files directly", default=False)
+        	self.groupCV.add_option('--no-hoover', action="store_true", dest='is_nohoover',
+                           help="do not use hoover node locus101 for processing, but instead rsync data to target locus nodes", default=False)
         	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
                            help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
         	self.groupCV.add_option('--maxram', dest='maxram', metavar='MULTIPLE',
@@ -249,8 +252,8 @@ class CMDLine:
 					else: print msg
 					quit(1)
 			else: is_excluded = False
-			if re.search(r'[^\,\:\d]+', self.opts.beam_str) is not None:
-				msg="Option --beams can only has digits, colons and commas!"
+			if re.search(r'[^\,\:\d\/]+', self.opts.beam_str) is not None:
+				msg="Option --beams can only has digits, colons, commas and in some cases / for parts!"
 				if log != None: log.error(msg)
 				else: print msg
 				quit(1)
@@ -436,7 +439,7 @@ class CMDLine:
 					continue
 				if len(tab.location) > 0:
 					# if here, it means node is available for this beam
-                	                if len(tab.location) > 1 and len(avail_hoover_nodes) != len(cep2.hoover_nodes):
+                	                if len(tab.location) > 1 and not self.opts.is_nohoover and len(avail_hoover_nodes) != len(cep2.hoover_nodes):
                         	       	        loc=""
                                 	       	if tab.is_coherent and "locus101" not in avail_hoover_nodes: loc="locus101"
 #						if not tab.is_coherent and "locus102" not in avail_hoover_nodes: loc="locus102"
@@ -551,6 +554,7 @@ class CMDLine:
 				if self.opts.is_plots_only: log.info("Diagnostic plots ONLY")
 				else:
 					if obs.CV: 
+						log.info("USING HOOVER NODES = %s" % (self.opts.is_nohoover and "no" or "yes"))
 						log.info("DSPSR with LOFAR DAL = %s%s" % (self.opts.is_nodal and "no" or "yes", self.opts.is_nodal and "" or " (max RAM = minX%d)" % (self.opts.maxram)))
 					if self.opts.first_freq_split != 0:
 						log.info("FIRST FREQUENCY SPLIT = %d" % (self.opts.first_freq_split))

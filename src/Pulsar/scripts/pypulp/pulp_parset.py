@@ -311,19 +311,20 @@ class TABeam:
 		# So, we try to look for log-file for the particular beam to determine the locus node
 		if len(self.location) == 0:
 #			cmd="%s locus:0-99 hoover:0-1 'ls -1 %s_*/%s_*/%s_sap%03d_beam%04d.log' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, root.id, sapid, self.tabid)
-			cmd="%s locus:0-99 hoover:0 'ls -1 %s_*/%s_*/%s_sap%03d_beam%04d.log' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, root.id, sapid, self.tabid)
+			cmd="%s locus:0-99 hoover:0 'ls -d %s_*/%s_red*/*/SAP%d/BEAM%d' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, self.parent_sapid, self.tabid)
        		        cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 			loc=""
 			for l in range(len(cexec_output)):
 				if re.match("^-----", cexec_output[l]) is not None:
 					loc=cexec_output[l].split(" ")[1]
-				else: # it means that we found the file and loc know has the locus node name where processed data are
+				else: # it means that we found the file and loc now has the locus node name where processed data are
+				      # but we continue loop, as there can be several locus nodes with processed data for 1 beam if there were several splits
 					self.location.append(loc)
-					break
 			if loc=="":
 				msg="Warning: Neither raw or even processed data available for beam %d:%d" % (self.parent_sapid, self.tabid)
 				if log != None: log.warning(msg)
 				else: print msg
+			else: self.location = np.unique(self.location)
 
 
 # Class Observation with info from the parset file
