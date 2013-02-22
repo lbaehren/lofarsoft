@@ -30,4 +30,4 @@ settings. To do this run::
 
 Compile the PyCRTools::
 
-  make pycrtools
+  make hdf5 pycrtools
