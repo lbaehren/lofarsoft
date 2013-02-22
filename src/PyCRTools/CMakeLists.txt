@@ -391,12 +391,12 @@ install (CODE "execute_process(COMMAND ${PYCRTOOLS_PREPROCESSOR_DIR}/hfCreateLin
 ##
 ## =============================================================================
 
-if (PYCRTOOLS_ENABLE_TESTING)
-  set (CTEST_BUILD_TARGET "install")
-  add_test(NAME tImportPyCRTools
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/tImportPyCRTools.py)
-endif (PYCRTOOLS_ENABLE_TESTING)
+# if (PYCRTOOLS_ENABLE_TESTING)
+#   set (CTEST_BUILD_TARGET "install")
+#   add_test(NAME tImportPyCRTools
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+#     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/tImportPyCRTools.py)
+# endif (PYCRTOOLS_ENABLE_TESTING)
 
 ## =============================================================================
 ##
