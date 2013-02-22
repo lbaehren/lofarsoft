@@ -25,10 +25,14 @@ class CRDatabase(object):
         ============= ===================================================================
         Parameter     Description
         ============= ===================================================================
-        *filename*    filename of the database.
+        *filename*    filename of the database [when using SQLite database].
         *datapath*    path where the datafiles are stored.
         *resultspath* path where the results are stored.
         *lorapath*    path where the LORA information is stored.
+        *host*        Hostname [when using PostgreSQL database].
+        *user*        Username [when using PostgreSQL database].
+        *password*    Password [when using PostgreSQL database].
+        *dbname*      Name of the database [when using PostgreSQL database].
         *basepath*    common path prefix where the datafiles, analysis results and LORA
                       information can be found.
         ============= ===================================================================
