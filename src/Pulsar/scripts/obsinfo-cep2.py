@@ -2252,6 +2252,11 @@ if __name__ == "__main__":
 			cmd="%s %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexeclocus, d, "L?????", cexec_egrep_string)
 			indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
 			obsids = np.append(obsids, indlist)
+			# also now (Feb 22, 2013) we start to search in L?????? directories
+			# as we reached the ObsID #=100000
+			cmd="%s %s 'find %s -maxdepth 1 -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexeclocus, d, "L??????", cexec_egrep_string)
+			indlist=[i.split("/")[-1][:-1] for i in os.popen(cmd).readlines()]
+			obsids = np.append(obsids, indlist)
 
 		# getting unique list of ObsIDs based only on raw data dirs
 		obsids=np.unique(obsids)
@@ -2383,7 +2388,7 @@ if __name__ == "__main__":
 		# Main loop for every observation
 		for id in obsids:
 			# i don't know why people make these obsids!!!
-			if id == "L?????": continue
+			if id == "L?????" or id == "L??????": continue
 		
 			# if we do update then we do not need to initialize obsinfo class again, unless
 			# parset file does not exist
