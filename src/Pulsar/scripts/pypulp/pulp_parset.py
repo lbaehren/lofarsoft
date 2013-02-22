@@ -320,6 +320,9 @@ class TABeam:
 				else: # it means that we found the file and loc now has the locus node name where processed data are
 				      # but we continue loop, as there can be several locus nodes with processed data for 1 beam if there were several splits
 					self.location.append(loc)
+			if len(self.location) > 1 and not self.is_coherent: # it means that our beam is Incoherent and in the location list there are likely summary directory is also included
+				if "locus094" in self.location: # if summary node is in the list then remove the first occurrence from the list
+					self.location.remove("locus094")
 			if loc=="":
 				msg="Warning: Neither raw or even processed data available for beam %d:%d" % (self.parent_sapid, self.tabid)
 				if log != None: log.warning(msg)
