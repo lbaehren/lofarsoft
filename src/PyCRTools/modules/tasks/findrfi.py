@@ -108,6 +108,7 @@ class FindRFI(Task):
         plot_antennas = dict(default=lambda self: range(self.nantennas),
             doc="Antennas to create plots for."),
         verbose = dict(default=True, doc="Verbose output."),
+        testplots = dict(default=False, doc="Show test plots."),
         apply_hanning_window = dict(default=True,
             doc="Apply Hanning window to data before FFT."),
     )
@@ -208,7 +209,7 @@ class FindRFI(Task):
         incPhaseRMS *= -1 / float(nblocks)
         incPhaseRMS += 1
         incPhaseRMS.sqrt()
-        incPhaseRMS *= np.sqrt(2.0)  # check...???
+#        incPhaseRMS *= np.sqrt(2.0)  # check...???
         phaseRMS = incPhaseRMS
         self.phase_RMS = phaseRMS
         x = phaseRMS.toNumpy()
@@ -226,7 +227,7 @@ class FindRFI(Task):
         # Get 'dirty channels' for output, and to show in plot
         # Extend dirty channels to both sides, especially when having large blocksizes
         flagwidth = 1 + self.blocksize / 4096
-        dirty_channels = dirtyChannelsFromPhaseSpreads(medians, flagwidth=flagwidth, testplots=False)
+        dirty_channels = dirtyChannelsFromPhaseSpreads(medians, flagwidth=flagwidth, testplots=self.testplots)
         # if a frequency range was given, flag everything outside the range as 'dirty'
 
         if self.freq_range:  # flagged as dirty or outside range
@@ -306,6 +307,20 @@ class FindRFI(Task):
             p = self.plot_prefix + "average_spectrum_flagged.{0}".format(self.plot_type)
             plt.savefig(p)
             self.plotlist.append(p)
+
+            if self.testplots:
+                plt.figure()
+                plt.plot(freqs, logspectrum, c='b')
+                plt.plot(freqs, medians, c='r')
+                if self.plot_title:
+                    plt.title('Median-average spectrum of all antennas versus median phase variance')
+                plt.xlabel('Frequency [MHz]')
+                plt.ylabel('Blue: log-spectral power [adc units]\nRed: phase variance [0-1]')
+
+                # move to testplots?
+                p = self.plot_prefix + "average_spectrum_phasevariance.{0}".format(self.plot_type)
+                plt.savefig(p)
+
 
             # Average spectrum (cleaned)
             plt.figure()
