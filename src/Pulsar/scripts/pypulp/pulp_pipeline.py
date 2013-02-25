@@ -396,7 +396,7 @@ class Pipeline:
 					self.make_summary_CS_IS(obs, cep2, cmdline, log)
 				if data_code == "CV":
 					is_to_combine=False
-					if cmdline.opts.is_nohoover and not cmdline.opts.is_summary: # are not using hoover nodes
+					if cmdline.opts.is_nohoover: # are not using hoover nodes
 						for u in self.units: # checking if we actually have data spread across several nodes
 							if len(u.tab.location) > 1:
 								is_to_combine=True
@@ -455,56 +455,58 @@ class Pipeline:
 				total_chan = nsubs_eff * ref_unit.nrChanPerSub
 
 				# loop on pulsars
-				for psr in ref_unit.psrs:
-					log.info("Combining parts for pulsar %s..." % (psr))
+				if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
+					for psr in ref_unit.psrs:
+						log.info("Combining parts for pulsar %s..." % (psr))
+	
+        	                                # running psradd to add all freq channels together
+                	                        log.info("Adding frequency splits together...")
+                        	                ar_files=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
+                                	        cmd="psradd -R -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
+                                        	self.execute(cmd, log, workdir=curdir)
+	                                        # removing corrupted freq channels
+        	                                if ref_unit.nrChanPerSub > 1: 
+							log.info("Zapping every %d channel..." % (ref_unit.nrChanPerSub))
+                        	                        cmd="paz -z \"%s\" -m %s_%s.ar" % \
+								(" ".join([str(jj) for jj in range(0, total_chan, ref_unit.nrChanPerSub)]), psr, output_prefix)
+							self.execute(cmd, log, workdir=curdir)
 
-                                        # running psradd to add all freq channels together
-                                        log.info("Adding frequency splits together...")
-                                        ar_files=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
-                                        cmd="psradd -R -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
-                                        self.execute(cmd, log, workdir=curdir)
-                                        # removing corrupted freq channels
-                                        if ref_unit.nrChanPerSub > 1: 
-						log.info("Zapping every %d channel..." % (ref_unit.nrChanPerSub))
-                                                cmd="paz -z \"%s\" -m %s_%s.ar" % \
-							(" ".join([str(jj) for jj in range(0, total_chan, ref_unit.nrChanPerSub)]), psr, output_prefix)
-						self.execute(cmd, log, workdir=curdir)
+						# rfi zapping
+						if not cmdline.opts.is_norfi:
+							log.info("Zapping channels using median smoothed difference algorithm...")
+							cmd="paz -r -e paz.ar %s_%s.ar" % (psr, output_prefix)
+							self.execute(cmd, log, workdir=curdir)
 
-					# rfi zapping
-					if not cmdline.opts.is_norfi:
-						log.info("Zapping channels using median smoothed difference algorithm...")
-						cmd="paz -r -e paz.ar %s_%s.ar" % (psr, output_prefix)
-						self.execute(cmd, log, workdir=curdir)
-
-                                                # removing ar-files from dspsr for every frequency split
-                                                if not cmdline.opts.is_debug:
-                                                        remove_list=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
-                                                        cmd="rm -f %s" % (" ".join(remove_list))
-                                                        self.execute(cmd, log, workdir=curdir)
+                                        	        # removing ar-files from dspsr for every frequency split
+                                                	if not cmdline.opts.is_debug:
+                                                        	remove_list=glob.glob("%s/%s_%s_P*.ar" % (curdir, psr, output_prefix))
+	                                                        cmd="rm -f %s" % (" ".join(remove_list))
+        	                                                self.execute(cmd, log, workdir=curdir)
 
 				# scrunching in freq
-				log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (nsubs_eff))
-				if ref_unit.nrChanPerSub > 1: 
-					for psr in ref_unit.psrs:
-						# first, running fscrunch on zapped archive
-						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
-							cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (nsubs_eff, psr, output_prefix)
+				if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:	
+					log.info("Scrunching in frequency to have %d channels in the output AR-file..." % (nsubs_eff))
+					if ref_unit.nrChanPerSub > 1: 
+						for psr in ref_unit.psrs:
+							# first, running fscrunch on zapped archive
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
+								cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (nsubs_eff, psr, output_prefix)
+								self.execute(cmd, log, workdir=curdir)
+								# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
+								cmd="rm -f %s_%s.paz.ar" % (psr, output_prefix)
+								self.execute(cmd, log, workdir=curdir)
+							# running fscrunching on non-zapped archive
+							cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, output_prefix)
 							self.execute(cmd, log, workdir=curdir)
-							# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
-							cmd="rm -f %s_%s.paz.ar" % (psr, output_prefix)
+					else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
+						for psr in ref_unit.psrs:
+							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
+								cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, output_prefix, psr, output_prefix)
+								self.execute(cmd, log, workdir=curdir)
+							cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, output_prefix, psr, output_prefix)
 							self.execute(cmd, log, workdir=curdir)
-						# running fscrunching on non-zapped archive
-						cmd="pam --setnchn %d -e fscr.AR %s_%s.ar" % (nsubs_eff, psr, output_prefix)
-						self.execute(cmd, log, workdir=curdir)
-				else: # if number of chans == number of subs, we will just rename *.ar-file to *.fscr.AR and make a link to it for original *.ar-file
-					for psr in ref_unit.psrs:
-						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
-							cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, output_prefix, psr, output_prefix)
+							cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, output_prefix, psr, output_prefix)
 							self.execute(cmd, log, workdir=curdir)
-						cmd="mv -f %s_%s.ar %s_%s.fscr.AR" % (psr, output_prefix, psr, output_prefix)
-						self.execute(cmd, log, workdir=curdir)
-						cmd="ln -sf %s_%s.fscr.AR %s_%s.ar" % (psr, output_prefix, psr, output_prefix)
-						self.execute(cmd, log, workdir=curdir)
 
 				if not cmdline.opts.is_feedback:
 					# first, calculating the proper min divisir for the number of subbands
