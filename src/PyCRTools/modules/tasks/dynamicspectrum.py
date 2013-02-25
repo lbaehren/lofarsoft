@@ -1,10 +1,10 @@
 """
 Dynamic spectrum documentation
 ==============================
-"""
+
+.. moduleauthor:: Name of the module author <email address of the module author>
 
 
-"""
 # ************************************************************************
 # Replacements for new tbb.py
 # ************************************************************************
@@ -32,6 +32,8 @@ import pycrtools.tasks as tasks
 import pycrtools.qualitycheck as qualitycheck
 import time
 # from pycrtools import IO
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 # Defining the workspace parameters
 

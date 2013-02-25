@@ -1,6 +1,7 @@
 """
 A number of tools useful in calibrating radio data
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 import pycrtools as cr
@@ -11,6 +12,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import pytmf
 import math
 import numpy as np
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 deg = math.pi / 180.
 pi2 = math.pi / 2.

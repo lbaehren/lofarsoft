@@ -2,11 +2,13 @@
 Module documentation
 ====================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 from pycrtools.tasks import Task
 import pycrtools as cr
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class StokesParameters(Task):
     """Calculate Stokes parameters I, Q, U and V and the polarization angle.

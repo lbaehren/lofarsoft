@@ -2,7 +2,7 @@
 Task: Average spectrum
 ======================
 
-
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 # ************************************************************************
@@ -34,6 +34,7 @@ import math
 
 # Defining the workspace parameters
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def make_frequencies(spectrum, offset=-1, frequencies=None, setxvalues=True):
     """Calculates the frequencies for the calculated spectrum (outdated)

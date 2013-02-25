@@ -1,4 +1,6 @@
 """
+.. moduleauthor:: Name of the module author <email address of the module author>
+
 Comands to work with tasks
 
 An example to use tasks is give in tasks/averagespectrum.py

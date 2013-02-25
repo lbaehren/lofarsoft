@@ -2,6 +2,8 @@
 CRImager documentation
 ======================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
+
 """
 
 from pycrtools.tasks import Task
@@ -13,6 +15,7 @@ import time
 import pyfits
 import os
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def savefits(filename, array, overwrite=True, **kwargs):
     """Save image as standard FITS file.

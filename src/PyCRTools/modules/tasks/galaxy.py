@@ -2,6 +2,7 @@
 Galaxy documentation
 ====================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 from pycrtools.tasks import Task
@@ -10,6 +11,7 @@ import numpy as np
 import pytmf
 import datetime
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class GalacticNoise(Task):
     """Task to calculate Galactic noise level.

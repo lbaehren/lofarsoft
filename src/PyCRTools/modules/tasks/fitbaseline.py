@@ -2,6 +2,8 @@
 Spectrum documentation
 ======================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
+
 Usage::
 
   >>> sp=cr.hArrayRead('/Users/falcke/data/Pulses/oneshot_level4_CS017_19okt_no-0.h5.spec.pcr')
@@ -15,6 +17,8 @@ import matplotlib
 import math
 import time
 import os
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 """
 

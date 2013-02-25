@@ -3,7 +3,7 @@
 Task: Event Statistics for LORA/LOFAR
 =================================
 
-
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 
@@ -15,6 +15,7 @@ import numpy as np
 import sys
 from pycrtools import xmldict
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def GetInformationFromFile(topdir, events):
 

@@ -2,6 +2,8 @@
 Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
+.. moduleauthor:: Name of the module author <email address of the module author>
+
 Example::
 
   file=cr.open(LOFARSOFT+"/data/lopes/example.event")
@@ -61,6 +63,8 @@ import pdb
 
 """
 """
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 # Defining the workspace parameters
 deg = math.pi / 180.

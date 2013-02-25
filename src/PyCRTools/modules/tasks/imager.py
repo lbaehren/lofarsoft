@@ -2,6 +2,8 @@
 Imager documentation
 ====================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
+
 "Representations of celestial coordinates in FITS"
 http://adsabs.harvard.edu/abs/2002A%26A...395.1077C
 
@@ -18,6 +20,7 @@ import os
 import pdb
 # pdb.set_trace()
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def savefits(filename, array, overwrite=True, **kwargs):
     """Save image as standard FITS file.

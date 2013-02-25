@@ -2,7 +2,8 @@
 Task: Get locations of RF transmitters present in spectra of data files; get calibration delays from their phases.
 ======================
 
-Created by Arthur Corstanje, June 2012.
+.. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
+
 """
 
 import pycrtools as cr
@@ -13,6 +14,8 @@ import matplotlib.pyplot as plt
 import pycrtools.tasks as tasks
 import pytmf
 import datetime
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 twopi = 2 * np.pi
 deg2rad = twopi / 360.0

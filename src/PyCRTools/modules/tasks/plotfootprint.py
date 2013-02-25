@@ -1,5 +1,6 @@
 """A tool to plot the footprint of a cosmic ray event with the superterp as background.
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 import pycrtools as cr
@@ -13,6 +14,7 @@ import numpy as np
 import os
 import time
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def gatherresults(filefilter, pol, excludelist, plotlora, goodonly, loradir):
     """This function returns a dictionary with selected results from file in the subdirectories (/pol?/*/) of the filedir that are needed for the plotfootprint task."""

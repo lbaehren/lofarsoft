@@ -2,6 +2,7 @@
 Imager documentation
 ====================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 from pycrtools.tasks import Task
@@ -11,6 +12,7 @@ import pytmf
 import numpy as np
 import time
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class ImagerDM(Task):
     """Imager task documentation.

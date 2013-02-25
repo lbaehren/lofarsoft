@@ -2,6 +2,7 @@
 StationBeamformer documentation
 ===============================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 from pycrtools.tasks import Task
@@ -12,6 +13,7 @@ import numpy as np
 import time
 import os
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class StationBeamformer(Task):
     """Beamformer optimized to generate complex spectrum as binary file output for a single station.

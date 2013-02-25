@@ -1856,3 +1856,27 @@ class WorkSpace(object):
         s += "#-----------------------------------------------------------------------\n"
         return s
 
+
+def __raiseTaskDeprecationWarning(taskname):
+    raise DeprecationWarning("""
+    This Task ({0}) is marked as deprecated:
+
+    It will therefore not be loaded or show up in the online documentation.
+
+    In case this module is still actively used and/or developed,
+    notify the developer/maintainer of this module.
+
+    The developer/maintainer of this module should do the following:
+
+    - Add the name and email address of the developer/maintainer of this
+      module at the top of the documentation of this file, e.g.:
+
+      .. moduleauthor:: Name of the module author <email address of the module author>
+
+    - Remove this DeprecationWarning from the module {0},
+      e.g. the line containing:
+
+      cr.tasks.__raiseTaskDeprecationWarning(__name__)
+
+    """.format(taskname))
+

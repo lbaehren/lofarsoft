@@ -2,7 +2,7 @@
 Task: Get cable delays by gathering / averaging from a given pipeline 'results' directory.
 ======================
 
-Created by Arthur Corstanje, Nov. 2011
+.. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 """
 
 import pycrtools as cr
@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def timeStringNow():
     now = datetime.now()

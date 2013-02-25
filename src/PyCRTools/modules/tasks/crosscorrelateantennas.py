@@ -2,12 +2,16 @@
 Module documentation
 ====================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
+
 """
 
 from pycrtools.tasks import Task
 import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class CrossCorrelateAntennas(Task):
     """

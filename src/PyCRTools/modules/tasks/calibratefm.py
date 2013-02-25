@@ -7,11 +7,8 @@ Especially transmitters with a known location are useful, e.g. the FM tower in S
 Uses the phases (average and rms) obtained in the FindRFI Task; or will re-run that task if no phases are given
 as input.
 
-======================
+.. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 
-First version (rfilines Task) by Arthur Corstanje, June 2012.
-CalibrateFM Task by Arthur Corstanje, Nov 2012.
-Second version CalibrateFM, Jan 2013.
 """
 
 from pycrtools.tasks import Task, pulsecal
@@ -23,6 +20,8 @@ from pycrtools import srcfind as sf
 import pytmf
 import datetime
 import os
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 twopi = 2 * np.pi
 deg2rad = twopi / 360.0

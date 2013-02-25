@@ -2,6 +2,8 @@
 Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
+.. moduleauthor:: Name of the module author <email address of the module author>
+
 **Example**::
 
   self=Task
@@ -18,6 +20,8 @@ import time
 import pytmf
 import math
 import os
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 # Defining the workspace parameters
 

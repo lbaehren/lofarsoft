@@ -1,4 +1,7 @@
 """
+Module documentation
+====================
+
 Wavefront Task: produces the shape of the incoming wavefront, using pulse arrival times at each antenna.
 
 Reprocess cross correlation using MultiTBBData datareader, which reads and bundles data from all
@@ -10,17 +13,12 @@ Obtain arrival times; apply calibration delays and inter-station delays.
 Get wavefront shape and fit curvature using point-source approximation.
 
 later?: Reprocess cross correlation over 0/1 polarisation inside each station.
-======================
 
-Created by Arthur Corstanje, Apr. 2012
-Wavefront Task created by Arthur Corstanje, Nov. 2012
-"""
+
+.. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 
 """
-Module documentation
-====================
 
-"""
 
 from pycrtools.tasks import Task
 import pycrtools as cr
@@ -32,6 +30,8 @@ import numpy as np
 from numpy import sin, cos, tan, sqrt
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
+
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 deg2rad = np.pi / 180
 

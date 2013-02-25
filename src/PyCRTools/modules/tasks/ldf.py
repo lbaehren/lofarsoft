@@ -3,7 +3,7 @@
 Task: Lateral Signal Distribution (LDF)
 =======================================
 
-Created by Anna Nelles
+.. moduleauthor:: Anna Nelles <a.nelles@astro.ru.nl>
 
 """
 
@@ -16,6 +16,7 @@ import sys
 import numpy as np
 from pycrtools import xmldict
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def GetInformationFromFile(topdir, events, plot_parameter, goodonly):
 

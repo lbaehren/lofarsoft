@@ -2,6 +2,7 @@
 Module documentation
 ====================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 from pycrtools.tasks import Task
@@ -11,6 +12,7 @@ import pycrtools as cr
 import matplotlib.pyplot as plt
 from scipy.stats import normaltest
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class Noise(Task):
     """Noise characterization.

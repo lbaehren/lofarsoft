@@ -2,6 +2,7 @@
 Module documentation
 ====================
 
+.. moduleauthor:: Name of the module author <email address of the module author>
 """
 
 from pycrtools.tasks import Task
@@ -9,6 +10,7 @@ from pycrtools.grid import CoordinateGrid
 import pycrtools as cr
 import numpy as np
 
+cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class Shower(Task):
     """
@@ -365,7 +367,7 @@ class Shower(Task):
                     bgimname = environ["LOFARSOFT"] + "/src/PyCRTools/extras/LORA_layout_background.{0}".format(self.plot_type)
                     if isfile(bgimname):
                         bgim = cr.plt.imread(bgimname)
-                        
+
                     else:
                         print "WARNING Cannot plot layout"
                         bgim = None
@@ -374,7 +376,7 @@ class Shower(Task):
                     bgim = None
             else:
                 bgim = None
-            
+
             # Shower
             if self.footprint_shower_enable and self.direction is not None and self.core is not None:
 
