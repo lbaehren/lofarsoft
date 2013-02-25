@@ -1,0 +1,21 @@
+to compile on CEP 1 or 2:
+
+I) for ICD3-Rebin.py:
+cd PATH/Dynspec-CEP2/src/ICD3-ICD6-Rebin
+
+and run: 
+ g++ -O3 -s -Wall -o DynspecPart  *cpp -I /opt/cep/dal/current/include -L /opt/cep/dal/current/lib -llofardal -lhdf5
+
+
+II) for ICD3-QuickLook.py:
+cd PATH/Dynspec-CEP2/src/ICD3-ICD6-Quicklook/
+
+and run: 
+ g++ -O3 -s -Wall -o DynspecQuick  *cpp -I /opt/cep/dal/current/include -L /opt/cep/dal/current/lib -llofardal -lhdf5
+
+
+III) for ICD3-Complete.py
+cd PATH/Dynspec-CEP2/src/ICD3-ICD6-Complete/
+
+and run: 
+ g++ -O3 -s -Wall -o DynspecAll  *cpp -I /opt/cep/dal/current/include -L /opt/cep/dal/current/lib -llofardal -lhdf5
