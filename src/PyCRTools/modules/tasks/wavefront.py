@@ -31,7 +31,6 @@ from numpy import sin, cos, tan, sqrt
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 deg2rad = np.pi / 180
 

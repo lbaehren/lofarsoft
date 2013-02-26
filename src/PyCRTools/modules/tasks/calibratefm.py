@@ -21,8 +21,6 @@ import pytmf
 import datetime
 import os
 
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
-
 twopi = 2 * np.pi
 deg2rad = twopi / 360.0
 halfpi = twopi / 4
@@ -109,7 +107,8 @@ def getMultiFreqDelay(lines, freqs, phase_average, median_phase_spreads, modelTi
     t = 0.01e-9 * (-800 + np.arange(1600)) # in 0.1 ns
     #window = np.exp(-np.abs(t) / 100e-9)
     for i in range(nofchannels): # for all antennas...
-        y = np.zeros(1600)
+        ycos = np.zeros(1600)
+        ysin = np.zeros(1600)
         for channel in strongestChannels:
             freq = f0 * channel
             phase = phase_average[i, channel] # take antenna 10 to test
@@ -120,15 +119,21 @@ def getMultiFreqDelay(lines, freqs, phase_average, median_phase_spreads, modelTi
             phase -= modelphases[i]
             #HACK
             #phase = np.random.rand() * twopi - twopi/2
-            y += np.cos( - twopi * freq * t + phase)
+            ycos += np.cos( - twopi * freq * t + phase)
+            ysin += np.sin( - twopi * freq * t + phase)
 
-        bestFitIndex = np.argmax(y)
+        bestFitIndex = np.argmax(ycos) # ycos ** 2 + ysin ** 2 for Hilbert envelope...
         bestFitDelay[i] = t[bestFitIndex]
         if i == 15:
             print 'Plotting crosscorrelation for antenna %d' % i
             plt.figure()
-            plt.plot(t*1e9, y)
+            plt.plot(t*1e9, ycos)
+            plt.plot(t*1e9, ysin)
+            plt.figure()
+            plt.plot(t*1e9, ycos**2 + ysin**2)
+
             print bestFitDelay[i]
+
 
     return bestFitDelay
 
