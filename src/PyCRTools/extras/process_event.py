@@ -57,3 +57,9 @@ else:
         sql = "UPDATE events SET status='{0}' WHERE eventID='{1}'".format(options.status, e[0])
         cur.execute(sql)
 
+con.commit()
+
+cur.close()
+
+con.close()
+
