@@ -2,7 +2,7 @@
 Module documentation
 ====================
 
-.. moduleauthor:: Name of the module author <email address of the module author>
+.. moduleauthor:: Anna Nelles <a.nelles@astro.ru.nl>
 """
 
 from pycrtools.tasks import Task
@@ -10,19 +10,20 @@ from pycrtools.grid import CoordinateGrid
 import pycrtools as cr
 import numpy as np
 
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class Shower(Task):
     """
     Making all sorts of plots to understand the shower.
 
-    Usage:
+    Usage (minimal variables):
 
     LDF = cr.trun("Shower",positions=positions, signals=signals, signals_uncertainties=signals_uncertainties, core=core,direction=direction,core_uncertainties=core_uncertainties,direction_uncertainties=direction_uncertainties, ldf_enable=True)
 
     Task can be run without giving uncertainties. The resulting plot will then also not contain any uncertainties.
 
     FOOTPRINT = cr.trun("Shower", positions=positions, signals=signals, timelags = timelags, direction=direction, core = core, footprint_enable=True)
+    
+    SKYPLOT = cr.trun("Shower",all_directions=all_directions,all_stations=all_stations,lora_direction=lora_direction)
 
     """
 
