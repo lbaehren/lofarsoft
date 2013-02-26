@@ -43,6 +43,7 @@ if options.alt_status:
     
     if options.status != "":
         sql = "UPDATE events SET alt_status='{0}' WHERE eventID='{1}'".format(options.alt_status, e[0])
+        cur.execute(sql)
 else:
     # Get a single event whose status is NEW
     sql = "SELECT eventID FROM events WHERE status='NEW'"
@@ -54,4 +55,5 @@ else:
     
     if options.status != "":
         sql = "UPDATE events SET status='{0}' WHERE eventID='{1}'".format(options.status, e[0])
+        cur.execute(sql)
 
