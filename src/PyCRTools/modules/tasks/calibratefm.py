@@ -263,12 +263,11 @@ class CalibrateFM(Task):
         timestamp = dict(default=None,
                          doc="Unix timestamp of input file(s)",
                          output=True),
-
-        plot_finish = dict(default=lambda self: cr.plotfinish(doplot=True, filename="calibratefm", plotpause=False),
-                           doc="Function to be called after each plot to determine whether to pause or not (see ::func::plotfinish)"),
-
-        plot_name = dict(default="calibratefm",
-                         doc="Extra name to be added to plot filename."),
+        save_plots = dict(default=False, doc="Store plots"),
+        plot_prefix = dict(default="", doc="Prefix for plots"),
+        plot_type = dict(default="png", doc="Plot type (e.g. png, jpeg, pdf)"),
+        plot_title = dict(default=True, doc="Plot with or without title (for publication)"),
+        plotlist = dict(default=[], doc="List of plots"),
 
         nofantennas=dict(default=lambda self: self.positions.shape()[-2],
                          doc="Number of antennas.",
@@ -408,8 +407,8 @@ class CalibrateFM(Task):
             averagePhaseThisStation = self.phase_average[start:end, bestchannel]
             plt.figure()
             (fitaz, fitel, minPhaseError) = sf.directionBruteForcePhases(thesePositions, averagePhaseThisStation, freq, azSteps=azSteps, elSteps=elSteps, allowOutlierCount=4, showImage=(self.doplot and self.testplots), verbose = True)
-            if self.doplot and self.testplots:
-                self.plot_finish(filename=self.plot_name + "-phaseimage", filetype=self.filetype)
+#            if self.doplot and self.testplots:
+                #self.plot_finish(filename=self.plot_name + "-phaseimage", filetype=self.filetype)
 
             self.fittedDirections[stationlist[i]] = (fitaz / deg2rad, fitel / deg2rad)
             print 'Best fit az = %f, el = %f' % self.fittedDirections[stationlist[i]]
@@ -445,9 +444,16 @@ class CalibrateFM(Task):
         nanosecondPhase = twopi * freq * 1.0e-9
 
         if self.lines is not None and self.referenceTransmitterGPS is not None:
-            timeDiff = 1.0e9* getMultiFreqDelay(self.lines, freqs, self.phase_average, self.median_phase_spreads, modelTimes)
+            timeDiff = 1.0e9 * getMultiFreqDelay(self.lines, freqs, self.phase_average, self.median_phase_spreads, modelTimes)
         else:
             timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
+
+        period = 1.0e9 / freq
+        # subtract first station's median time
+        end = stationStartIndex[1]
+        timeDiff -= np.median(timeDiff[0:end])
+        # wrap into correct time interval
+        timeDiff = np.fmod(timeDiff + period/2, period) - period / 2
 
         # Do inter-station delays with plot and output param (dict)
         if nofStations > 1:
@@ -461,6 +467,7 @@ class CalibrateFM(Task):
                 interStationDelays[i] = np.median(timeDiff[start:end])
                 if i == 0:
                     refdelay = interStationDelays[i]
+                    print 'ref delay = %f' % refdelay
 
                 interStationDelays[i] -= refdelay
                 if self.doplot:
@@ -468,7 +475,10 @@ class CalibrateFM(Task):
 
     #                        plt.annotate(stationlist[i])
             # Subtract reference station-delay
-            timeDiff -= refdelay
+            timeDiff -= refdelay # needs to be re-wrapped into time interval corresponding to (-pi, pi) phase...
+            # NB! Two-sample shifts will not be found, as 11.2 ns ~ 10 ns...
+            timeDiff = np.fmod(timeDiff + period/2, period) - period / 2
+
             print '--- Inter-station delays: ---'
             self.interStationDelays = {}
             for i in range(nofStations):
@@ -501,11 +511,16 @@ class CalibrateFM(Task):
             plt.xlabel('Antenna number (RCU/2)')
             plt.legend()
 
-            self.plot_finish(filename=self.plot_name + "-calibration-phases", filetype=self.filetype)
+            if self.save_plots:
+                p = self.plot_prefix + "calibration_phases.{0}".format(self.plot_type)
+                plt.savefig(p)
+                self.plotlist.append(p)
+
+            #self.plot_finish(filename=self.plot_name + "-calibration-phases", filetype=self.filetype)
 
             cr.trerun("PlotAntennaLayout", "0", positions=self.f["ANTENNA_POSITIONS"], colors=cr.hArray(list(timeDiff)), sizes=100, title="Measured - expected time", plotlegend=True)
 
-            self.plot_finish(filename=self.plot_name + "-calibration-layout", filetype=self.filetype)
+            #self.plot_finish(filename=self.plot_name + "-calibration-layout", filetype=self.filetype)
 
         # set output params
         # TEST
