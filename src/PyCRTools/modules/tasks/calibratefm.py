@@ -453,7 +453,7 @@ class CalibrateFM(Task):
         end = stationStartIndex[1]
         timeDiff -= np.median(timeDiff[0:end])
         # wrap into correct time interval
-        timeDiff = np.fmod(timeDiff + period/2, period) - period / 2
+        timeDiff -= period * np.round(timeDiff / period)
 
         # Do inter-station delays with plot and output param (dict)
         if nofStations > 1:
@@ -465,19 +465,19 @@ class CalibrateFM(Task):
                 start = stationStartIndex[i]
                 end = stationStartIndex[i + 1]
                 interStationDelays[i] = np.median(timeDiff[start:end])
-                if i == 0:
-                    refdelay = interStationDelays[i]
-                    print 'ref delay = %f' % refdelay
+#                if i == 0:
+#                    refdelay = interStationDelays[i]
+#                    print 'ref delay = %f' % refdelay
 
-                interStationDelays[i] -= refdelay
+#                interStationDelays[i] -= refdelay
                 if self.doplot:
                     plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3, label='Median station delay' if i == 0 else '')
 
     #                        plt.annotate(stationlist[i])
             # Subtract reference station-delay
-            timeDiff -= refdelay # needs to be re-wrapped into time interval corresponding to (-pi, pi) phase...
+#            timeDiff -= refdelay # needs to be re-wrapped into time interval corresponding to (-pi, pi) phase...
             # NB! Two-sample shifts will not be found, as 11.2 ns ~ 10 ns...
-            timeDiff = np.fmod(timeDiff + period/2, period) - period / 2
+#            timeDiff = np.fmod(timeDiff + period/2, period) - period / 2
 
             print '--- Inter-station delays: ---'
             self.interStationDelays = {}
@@ -509,6 +509,7 @@ class CalibrateFM(Task):
             plt.title(self.filefilter + '\nPhase difference between measured and best-fit modeled phase\nChannel %d,   f = %2.4f MHz,   pi rad = %1.3f ns' % (bestchannel, freq / 1.0e6, 1.0e9 / (2 * freq)))
             plt.ylabel('Time difference from phase [ns]')
             plt.xlabel('Antenna number (RCU/2)')
+            plt.ylim(-period/2, period/2)
             plt.legend()
 
             if self.save_plots:
