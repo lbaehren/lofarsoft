@@ -743,7 +743,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         try:
             wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays[noGlitchIndices], positions=all_station_antenna_positions[noGlitchIndices], stationnames=all_station_antennas_stationnames[noGlitchIndices], loracore=core, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
             # put into database: wavefront.fitPlanar = (az, el, mse) and wavefront.fitPointSource = (az, el, R, mse)
-
+            event["wavefront_fit_planar"] = wavefront.fitPlaneWave
+            event["wavefront_fit_pointsource"] = wavefront.fitPointSource
+            event["wavefront_curvature_radius"] = wavefront.fitPointSource[2]
         except:
            print "wavefront returned problem"
 
