@@ -675,18 +675,6 @@ class obsinfo:
                 	else:
                         	self.IM = "+"
 
-        	# check first if data are filtered
-		if self.FD == "?":
-        		cmd="grep outputFilteredData %s" % (self.parset,)
-        		status=os.popen(cmd).readlines()
-        		if np.size(status) > 0:
-                		# this info exists in parset file
-                		self.FD=status[0][:-1].split(" = ")[-1].lower()[:1]
-                		if self.FD == 'f':
-                        		self.FD = "-"
-                		else:
-                        		self.FD = "+"
-
 	        # check if data are imaging
 		if self.IM == "?":
         		cmd="grep outputCorrelatedData %s" % (self.parset,)
@@ -1183,7 +1171,7 @@ class outputInfo:
 				self.dirsize_string = self.dirsize_string + self.storage[l][0] + "\t"
 		# converting total size to GB
 		self.totsize = "%.1f" % (self.totsize / 1000. / 1000. / 1000.,)
-		processed_dirsize_str = human_readable_size(float(self.processed_dirsize))
+		processed_dirsize_str = "%.1f" % (float(self.processed_dirsize) / 1000. / 1000. / 1000.,)
 		self.dirsize_string_html = "</td>\n <td align=center>".join(self.dirsize_string.split("\t")[:-1])
 
 		# do not keep IMredlocation in the class object
@@ -1422,16 +1410,14 @@ class obsstat:
 		self.subclusters = np.append(np.unique([cexec_nodes[s].split(":")[0] for s in self.storage_nodes]), ["locusA", "locus?"])
 		self.dbinfo = {}
 		for sub in np.append(self.subclusters, ["Total"]):
-			self.dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0, "Ntotal": 0, 
-                                            "Nprocessed": 0, "Narchived": 0, "Narchived_raw": 0, "Narchived_sub": 0, "Narchived_meta": 0,
-                                            "Nistype": 0, "Nistype_only": 0, "Ncstype": 0, "Ncstype_only": 0,
-                                            "Nfetype": 0, "Nfetype_only": 0, "Nimtype": 0, "Nimtype_only": 0,
-                                            "Nbftype": 0, "Nbftype_only": 0, "Nfdtype": 0, "Nfdtype_only": 0,
-                                            "Niscsim": 0, "Nisim": 0, "Niscs": 0, "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, 
-                                            "Nisfe": 0, "Niscsfe": 0, "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, "Nocd" : 0, 
-                                            "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0,
+			self.dbinfo[sub] = {"totDuration": 0.0, "processedDuration": 0.0, "IMonlyDuration": 0.0, "Ntotal": 0, "Nprocessed": 0,
+                                            "Nno_parset": 0, "Narchived": 0, "Narchived_raw": 0, "Narchived_sub": 0, "Narchived_meta": 0,
+                                            "Nistype": 0, "Nistype_only": 0, "Ncstype": 0, "Ncstype_only": 0, "Nfetype": 0, "Nfetype_only": 0, 
+                                            "Nimtype": 0, "Nimtype_only": 0, "Nbftype": 0, "Nbftype_only": 0, "Niscsim": 0, "Nisim": 0, "Niscs": 0, 
+                                            "Ncsim": 0, "Ncsfe": 0, "Nimfe": 0, "Nisfe": 0, "Niscsfe": 0, "Nbfis": 0, "Nbffe": 0, "Nbfisfe": 0, 
+                                            "Nocd" : 0, "totRawsize": 0.0, "IMonlyRawsize": 0.0, "totProcessedsize": 0.0,
                                             "Archivedsize": 0.0, "Archivedsize_raw": 0.0, "Archivedsize_sub": 0.0, 
-                                            "Archivedsize_meta": 0.0 } # sizes in TB
+                                            "Archivedsize_meta": 0.0, "totNoParsetsize_raw": 0.0, "totNoParsetsize_proc": 0.0 } # sizes in TB
 
 		for sub in self.subclusters:
 			if len(self.ids) != 0:
@@ -1459,57 +1445,59 @@ class obsstat:
 					if re.search("meta", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_meta"] += 1
 						self.dbinfo[sub]["Archivedsize_meta"] += obstable[r].archivesize["meta"]
+				# getting the number and sizes of observations without Parset files
+				if not obstable[r].oi.is_parset():
+					self.dbinfo[sub]["Nno_parset"] += 1
+					self.dbinfo[sub]["totNoParsetsize_raw"] += float(obstable[r].totsize)
+					self.dbinfo[sub]["totNoParsetsize_proc"] += float(obstable[r].processed_dirsize)
 
 				# getting the number of obs of different type
 				if obstable[r].comment == "" and obstable[r].oi.IS == "+":
 					self.dbinfo[sub]["Nistype"] += 1
-					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Nistype_only"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.CS == "+":
 					self.dbinfo[sub]["Ncstype"] += 1
-					if obstable[r].oi.IS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.IS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Ncstype_only"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.FE == "+":
 					self.dbinfo[sub]["Nfetype"] += 1
-					if obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Nfetype_only"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.IM == "+":
 					self.dbinfo[sub]["Nimtype"] += 1
-					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-":
 						self.dbinfo[sub]["Nimtype_only"] += 1
 						self.dbinfo[sub]["IMonlyRawsize"] += float(obstable[r].totsize)
 						if obstable[r].oi.duration != "?":
 							self.dbinfo[sub]["IMonlyDuration"] += obstable[r].oi.dur
 				if obstable[r].comment == "" and obstable[r].oi.BF == "+":
 					self.dbinfo[sub]["Nbftype"] += 1
-					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.IM == "-":
 						self.dbinfo[sub]["Nbftype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.FD == "+":
-					self.dbinfo[sub]["Nfdtype"] += 1
-					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IM == "-":
-						self.dbinfo[sub]["Nfdtype_only"] += 1
+
 				# getting the number of some observing types' mixtures
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-":
 					self.dbinfo[sub]["Niscsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.CS == "-":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nisim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Niscs"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IS == "-":
+				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IS == "-":
 					self.dbinfo[sub]["Ncsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IS == "-":
+				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IS == "-":
 					self.dbinfo[sub]["Ncsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.CS == "-":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.CS == "-":
+				if obstable[r].comment == "" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nimfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.FD == "-":
+				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
 					self.dbinfo[sub]["Niscsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.FE == "-":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-":
 					self.dbinfo[sub]["Nbfis"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbffe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "-" and obstable[r].oi.FD == "-" and obstable[r].oi.IM == "-":
+				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbfisfe"] += 1
 				if obstable[r].comment == "" and obstable[r].oi.OCD == "+":
 					self.dbinfo[sub]["Nocd"] += 1
@@ -1524,13 +1512,15 @@ class obsstat:
 			self.dbinfo[sub]["processedDuration"] /= 3600.
 			self.dbinfo[sub]["IMonlyDuration"] /= 3600.
 			self.dbinfo[sub]["totRawsize"] /= 1000.
-			self.dbinfo[sub]["totProcessedsize"] /= 1000.
+			self.dbinfo[sub]["totProcessedsize"] = self.dbinfo[sub]["totProcessedsize"] / 1000. / 1000. / 1000. / 1000.
 			self.dbinfo[sub]["IMonlyRawsize"] /= 1000.
 			self.dbinfo[sub]["Archivedsize"] = self.dbinfo[sub]["Archivedsize_raw"] + self.dbinfo[sub]["Archivedsize_sub"] + self.dbinfo[sub]["Archivedsize_meta"]
 			self.dbinfo[sub]["Archivedsize"] /= 1000.
 			self.dbinfo[sub]["Archivedsize_raw"] /= 1000.
 			self.dbinfo[sub]["Archivedsize_sub"] /= 1000.
 			self.dbinfo[sub]["Archivedsize_meta"] /= 1000.
+			self.dbinfo[sub]["totNoParsetsize_raw"] /= 1000.
+			self.dbinfo[sub]["totNoParsetsize_proc"] = self.dbinfo[sub]["totNoParsetsize_proc"] / 1000. / 1000. / 1000. # we show this in GB
 
 		for sub in self.subclusters:
 			self.dbinfo["Total"]["totDuration"] += self.dbinfo[sub]["totDuration"]
@@ -1541,6 +1531,7 @@ class obsstat:
 			self.dbinfo["Total"]["IMonlyRawsize"] += self.dbinfo[sub]["IMonlyRawsize"]
 			self.dbinfo["Total"]["Ntotal"] += self.dbinfo[sub]["Ntotal"]
 			self.dbinfo["Total"]["Nprocessed"] += self.dbinfo[sub]["Nprocessed"]
+			self.dbinfo["Total"]["Nno_parset"] += self.dbinfo[sub]["Nno_parset"]
 			self.dbinfo["Total"]["Narchived"] += self.dbinfo[sub]["Narchived"]
 			self.dbinfo["Total"]["Narchived_raw"] += self.dbinfo[sub]["Narchived_raw"]
 			self.dbinfo["Total"]["Narchived_sub"] += self.dbinfo[sub]["Narchived_sub"]
@@ -1549,6 +1540,8 @@ class obsstat:
 			self.dbinfo["Total"]["Archivedsize_raw"] += self.dbinfo[sub]["Archivedsize_raw"]
 			self.dbinfo["Total"]["Archivedsize_sub"] += self.dbinfo[sub]["Archivedsize_sub"]
 			self.dbinfo["Total"]["Archivedsize_meta"] += self.dbinfo[sub]["Archivedsize_meta"]
+			self.dbinfo["Total"]["totNoParsetsize_raw"] += self.dbinfo[sub]["totNoParsetsize_raw"]
+			self.dbinfo["Total"]["totNoParsetsize_proc"] += self.dbinfo[sub]["totNoParsetsize_proc"]
 			self.dbinfo["Total"]["Nistype"] += self.dbinfo[sub]["Nistype"]
 			self.dbinfo["Total"]["Nistype_only"] += self.dbinfo[sub]["Nistype_only"]
 			self.dbinfo["Total"]["Ncstype"] += self.dbinfo[sub]["Ncstype"]
@@ -1559,8 +1552,6 @@ class obsstat:
 			self.dbinfo["Total"]["Nimtype_only"] += self.dbinfo[sub]["Nimtype_only"]
 			self.dbinfo["Total"]["Nbftype"] += self.dbinfo[sub]["Nbftype"]
 			self.dbinfo["Total"]["Nbftype_only"] += self.dbinfo[sub]["Nbftype_only"]
-			self.dbinfo["Total"]["Nfdtype"] += self.dbinfo[sub]["Nfdtype"]
-			self.dbinfo["Total"]["Nfdtype_only"] += self.dbinfo[sub]["Nfdtype_only"]
 			self.dbinfo["Total"]["Niscsim"] += self.dbinfo[sub]["Niscsim"]
 			self.dbinfo["Total"]["Nisim"] += self.dbinfo[sub]["Nisim"]
 			self.dbinfo["Total"]["Niscs"] += self.dbinfo[sub]["Niscs"]
@@ -1612,6 +1603,11 @@ class obsstat:
 		line="Number of archived observations [raw / sub / meta]:  "
 		for sub in np.append("Total", self.subclusters):
 			field = "%d [%d / %d / %d]" % (self.dbinfo[sub]["Narchived"], self.dbinfo[sub]["Narchived_raw"], self.dbinfo[sub]["Narchived_sub"], self.dbinfo[sub]["Narchived_meta"])
+			line += "%-23s" % (field)
+		print line
+		line="Number of observations without Parset files:         "
+		for sub in np.append("Total", self.subclusters):
+			field = "%d" % (self.dbinfo[sub]["Nno_parset"])
 			line += "%-23s" % (field)
 		print line
 
@@ -1725,6 +1721,16 @@ class obsstat:
 			field = "%.1f [%.1f / %.1f / %.1f]" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_sub"], self.dbinfo[sub]["Archivedsize_meta"])
 			line += "%-23s" % (field)
 		print line
+		line="Total size of raw data w/o Parset file (TB):         "
+		for sub in np.append("Total", self.subclusters):
+			field = "%.1f" % (self.dbinfo[sub]["totNoParsetsize_raw"])
+			line += "%-23s" % (field)
+		print line
+		line="Total size of processed data w/o Parset file (GB):   "
+		for sub in np.append("Total", self.subclusters):
+			field = "%.1f" % (self.dbinfo[sub]["totNoParsetsize_proc"])
+			line += "%-23s" % (field)
+		print line
 		print
 
 
@@ -1778,6 +1784,10 @@ class obsstat:
 		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font> / <font color=\"darkblue\"><b>%s</b></font>]</td>" % ("Number of archived observations", "raw", "sub", "meta"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%d</b> [<font color=\"brown\"><b>%d</b></font> / <font color=\"green\"><b>%d</b></font> / <font color=\"darkblue\"><b>%d</b></font>]</td>" % (self.dbinfo[sub]["Narchived"], self.dbinfo[sub]["Narchived_raw"], self.dbinfo[sub]["Narchived_sub"], self.dbinfo[sub]["Narchived_meta"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s</td>" % ("Number of observations w/o Parset files"))
+		for sub in np.append("Total", self.subclusters):	
+			self.htmlptr.write ("\n <td align=left><b>%d</b></td>" % (self.dbinfo[sub]["Nno_parset"]))
 		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n<tr align=left height=25>\n <td align=left></td>")
@@ -1874,6 +1884,14 @@ class obsstat:
 		self.htmlptr.write ("\n<tr class='d0' align=left>\n <td align=left>%s [<font color=\"brown\"><b>%s</b></font> / <font color=\"green\"><b>%s</b></font> / <font color=\"darkblue\"><b>%s</b></font>]</td>" % ("Total size of archived data (TB)", "raw", "sub", "meta"))
 		for sub in np.append("Total", self.subclusters):
 			self.htmlptr.write ("\n <td align=left><b>%.1f</b> [<font color=\"brown\"><b>%.1f</b></font> / <font color=\"green\"><b>%.1f</b></font> / <font color=\"darkblue\"><b>%.1f</b></font>]</td>" % (self.dbinfo[sub]["Archivedsize"], self.dbinfo[sub]["Archivedsize_raw"], self.dbinfo[sub]["Archivedsize_sub"], self.dbinfo[sub]["Archivedsize_meta"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Total size of raw data w/o Parset file (TB)"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totNoParsetsize_raw"]))
+		self.htmlptr.write ("\n</tr>")
+		self.htmlptr.write ("\n<tr class='d1' align=left>\n <td align=left>%s</td>" % ("Total size of processed data w/o Parset file (GB)"))
+		for sub in np.append("Total", self.subclusters):
+			self.htmlptr.write ("\n <td align=left><b>%.1f</b></td>" % (self.dbinfo[sub]["totNoParsetsize_proc"]))
 		self.htmlptr.write ("\n</tr>")
 
 		self.htmlptr.write ("\n</table>")
@@ -2455,12 +2473,9 @@ if __name__ == "__main__":
 			statusline="x"
 			CSredlocation="x"
 			ISredlocation="x"
-			processed_dirsize=0.0
 			# Collecting info about combined png plots
 			profiles_array=["", "", ""]   # 0 - CS, 1 - IS, 2 - FE
 
-			# On CEPII we only checking the archive area on 'hoover' nodes. Thus, the processed_dirsize does not include
-			# the size of CS data on other locus nodes
 			# Also getting "combined.png" plot for CS data. Also we have to rename it, because the name for IS is the same
 			# CS and BF can't be recorded together, thus in the future I have to check if BF is turned on and then look for BF plot summary correspondingly
 			if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_CSplots or _redIS or both) in the Archive area
@@ -2495,8 +2510,9 @@ if __name__ == "__main__":
 								if search_dirs_number > 0:
 									statusline=statusline[:-1] + ",+search[%d])" % (search_dirs_number)
 
-						if cmdout[2].isdigit() == True:
-							processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
+						# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
+						#if cmdout[2].isdigit() == True:
+						#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
 						if cmdout[3] == "yes":  # combined plot exists
 							# copying combined plots and renaming them
 							profiles_array[0]="CScombined"
@@ -2526,8 +2542,9 @@ if __name__ == "__main__":
 					if cmdout[0] != "":
 						CSredlocation=cmdout[0]
 						statusline=cmdout[1]
-						if cmdout[2].isdigit() == True:
-							processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
+						# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
+						#if cmdout[2].isdigit() == True:
+						#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
 						if cmdout[4] == "yes":  # status DSPSR plots exist
 							# copying combined plots and renaming them
 							profiles_array[0]="CScombined"
@@ -2547,8 +2564,9 @@ if __name__ == "__main__":
 							statusline=cmdout[1]
 						else:
 							statusline=statusline+" "+cmdout[1]
-						if cmdout[2].isdigit() == True:
-							processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
+						# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
+						#if cmdout[2].isdigit() == True:
+						#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
 						if cmdout[3] == "yes":  # combined plot exists
 							# copying combined plots and renaming them
 							profiles_array[1]="IScombined"
@@ -2562,6 +2580,26 @@ if __name__ == "__main__":
 								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, ISredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[1], plotsdir, id, thcombined, plotsdir, id, profiles_array[1])
 							os.system(cmd)
 
+			# Getting the total size of processed data in _all_ locus nodes
+			processed_dirsize = 0.0
+			use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
+			hoover_summary_nodes=["locus092", "locus093", "locus094", "locus101"]
+			use_nodes.extend(hoover_summary_nodes)
+			use_nodes=list(np.unique(use_nodes))
+			# forming string with all locus nodes to check in one cexec command
+			if len(use_nodes) > 0:
+				cexeclocus=cexec_nodes[use_nodes[0]]
+				if len(use_nodes) > 1:
+					for s in use_nodes[1:]:
+						cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
+				cmd="%s %s 'du -sc -B 1 %s*/%s_red %s*/%s_CSplots %s*/%s_redIS %s*/%s_CVplots 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id)
+				cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+				# finding all locus nodes that have the dir with raw data
+				for l in np.arange(len(cexec_output)):
+					if re.match("^-----", cexec_output[l]) is None:
+						if cexec_output[l] == "0": continue
+						if cexec_output[l].isdigit() == True:
+							processed_dirsize += float(cexec_output[l])
 
 			# getting the grid links for the current ObsID and putting them to separate ascii file
 			# and making the archive status line for the table
@@ -2620,6 +2658,8 @@ if __name__ == "__main__":
 	# also, we do not want to exclude them from the database, because every time we want to add new ObsIDs
 	# those old without parset files will also be considered as new, and this will take a lot of time to run
 	obskeys=[ii for ii in obskeys if obstable[ii].oi.is_parset()]
+        # list of ObsIDs without parset files
+        noparset_obskeys=list(set(obstable.keys())-set(obstable.keys()).intersection(set(obskeys)))
 
 	if np.size(update_obsids) != 0 and (not is_rebuild) and (not is_update) and (not is_append) and (not is_delete):
 		obskeys = update_obsids
@@ -2791,7 +2831,8 @@ if __name__ == "__main__":
 			sf[key] = "%s%s" % (linkedhtmlstem, sf[key])
 		# create html-file with statistics
 		htmlstatfile = "%s-stat.html" % (linkedhtmlstem) 
-		stat = obsstat(obskeys, fromdate, todate, storage_nodes)
+                # for statistics we specifically also add ObsIDs without parset files
+                stat = obsstat(np.append(obskeys, noparset_obskeys), fromdate, todate, storage_nodes)
 		stat.printhtml(htmlstatfile)
 
 		htmlrep=writeHtmlList(sf["obsid"], linkedhtmlstem, fromdate, todate)
