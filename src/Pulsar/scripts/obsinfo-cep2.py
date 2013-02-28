@@ -1564,7 +1564,13 @@ class obsstat:
 			self.dbinfo["Total"]["Nbffe"] += self.dbinfo[sub]["Nbffe"]
 			self.dbinfo["Total"]["Nbfisfe"] += self.dbinfo[sub]["Nbfisfe"]
 			self.dbinfo["Total"]["Nocd"] += self.dbinfo[sub]["Nocd"]
-			
+
+		for sub in np.append(self.subclusters, ["Total"]):
+			# excluding number of observations without Parsets from the Total number
+			self.dbinfo[sub]["Ntotal"] -= self.dbinfo[sub]["Nno_parset"]
+			# same for data sizes
+			self.dbinfo[sub]["totRawsize"] -= self.dbinfo[sub]["totNoParsetsize_raw"]
+			self.dbinfo[sub]["totProcessedsize"] -= (self.dbinfo[sub]["totNoParsetsize_proc"] / 1000.) # we divide by 1000. here to be it in TB
 
 	def printstat (self):
 		print
