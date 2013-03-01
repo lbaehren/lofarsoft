@@ -1,5 +1,5 @@
 """
-Interface classes to communicate with the Cosmic Ray Pipeline Database.
+Interface class to communicate with the Cosmic Ray Pipeline Database.
 
 :Author: Martin van den Akker <m.vandenakker@astro.ru.nl>
 """
