@@ -1,4 +1,6 @@
 """
+Beamformer documentation
+====================
 Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
