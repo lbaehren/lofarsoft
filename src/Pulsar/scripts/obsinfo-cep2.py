@@ -2589,7 +2589,7 @@ if __name__ == "__main__":
 			# Getting the total size of processed data in _all_ locus nodes
 			processed_dirsize = 0.0
 			use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
-			hoover_summary_nodes=["locus092", "locus093", "locus094", "locus101"]
+			hoover_summary_nodes=["locus092", "locus093", "locus094"]
 			use_nodes.extend(hoover_summary_nodes)
 			use_nodes=list(np.unique(use_nodes))
 			# forming string with all locus nodes to check in one cexec command
@@ -2598,7 +2598,8 @@ if __name__ == "__main__":
 				if len(use_nodes) > 1:
 					for s in use_nodes[1:]:
 						cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-				cmd="%s %s 'du -sc -B 1 %s*/%s_red %s*/%s_CSplots %s*/%s_redIS %s*/%s_CVplots 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id)
+				# also adding locus101 (hoover:0) to the cexec command line
+				cmd="%s %s hoover:0 'du -sc -B 1 %s*/%s_red %s*/%s_CSplots %s*/%s_redIS %s*/%s_CVplots 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id)
 				cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 				# finding all locus nodes that have the dir with raw data
 				for l in np.arange(len(cexec_output)):
