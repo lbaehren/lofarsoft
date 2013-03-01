@@ -1857,7 +1857,7 @@ class WorkSpace(object):
         return s
 
 
-def __raiseTaskDeprecationWarning(taskname):
+def __raiseTaskDeprecationWarning(taskname=""):
     import warnings
     warnings.simplefilter("always")
     warnings.warn("""
