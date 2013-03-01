@@ -1,7 +1,8 @@
 """
+Eventstatistics
+===============
 
 Task: Event Statistics for LORA/LOFAR
-=================================
 
 .. moduleauthor:: Name of the module author <email address of the module author>
 """

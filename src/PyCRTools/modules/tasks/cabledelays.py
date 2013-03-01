@@ -1,6 +1,8 @@
 """
+Cabledelays
+===========
+
 Task: Get cable delays by gathering / averaging from a given pipeline 'results' directory.
-======================
 
 .. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 """
