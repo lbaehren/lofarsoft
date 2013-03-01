@@ -330,7 +330,8 @@ add_dependencies (psrdada_install psrdada_build psrdada_configure psrdada_bootst
 
 #if (NOT TARGET dspsr)
 
-  set (dspsr_version   "20120501")  
+  set (dspsr_version   "20130301")  
+#  set (dspsr_version   "20120501")  
 #  set (dspsr_version   "nodal-20120501")  
 #  set (dspsr_version   "20120327")  
 #  set (dspsr_version   "20120322")  
