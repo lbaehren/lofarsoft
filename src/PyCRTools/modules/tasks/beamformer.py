@@ -2,7 +2,8 @@
 Calculate complex beams towards multiple directions. Also calculates
 the average spectrum in each beam and for an incoherent beam.
 
-.. moduleauthor:: Name of the module author <email address of the module author>
+.. moduleauthor:: Heino Falcke
+.. codeauthor:: J. Emilio Enriquez <e.enriquez 'at' astro.ru.nl>
 
 Example::
 
@@ -183,8 +184,6 @@ class BeamFormer(tasks.Task):
     If the chunks are too long to be entirely plotted, use::
 
         >>> Task.qplot(186,all=False).
-
-    CurrentModuleDeveloper:: Emilio Enriquez <e.enriquez 'at' astro.ru.nl>
 
     """
 
@@ -1439,8 +1438,7 @@ class BeamFormer(tasks.Task):
           >>> Task.qplot(186,all=False).
         """
 
-        print 'WARNING: Out of Order. Need to be debuged.'
-        stop
+        raise NotImplementedError('WARNING: Out of Order. Need to be debuged.')
 
         quality_entry = self.quality[entry]
         filename = quality_entry["filename"]
@@ -1468,73 +1466,3 @@ class BeamFormer(tasks.Task):
         y.par.xvalues.setUnit("mu", "")
         y.plot(clf=not all)
 
-
-"""
-Replacements for new tbb.py (deprecated)
-========================================
-
-Text will disappear soon. Just reminder for myself ...
-
-::
-
-   (query-replace "nofAntennas" "NOF_DIPOLE_DATASETS" nil (point-min) (point-max))
-   (query-replace "AntennaIDs" "DIPOLE_NAMES" nil (point-min) (point-max))
-   (query-replace "sampleInterval" "SAMPLE_INTERVAL" nil (point-min) (point-max))
-   (query-replace "datafile.hdr" "datafile.getHeader()" nil (point-min) (point-max))
-   (query-replace "fftLength" "FFTSIZE" nil (point-min) (point-max))
-   (query-replace "blocksize" "BLOCKSIZE" nil (point-min) (point-max))
-   (query-replace "block" "BLOCK" 1 (point-min) (point-max))
-   (query-replace "Fx" "TIMESERIES_DATA" nil (point-min) (point-max))
-   (query-replace "Time" "TIME_DATA" nil (point-min) (point-max))
-   (query-replace "selectedAntennasID" "SELECTED_DIPOLES" nil (point-min) (point-max))
-
-   del-> freqs
-
-           start_frequency = dict(default=lambda self:self.datafile["FREQUENCY_RANGE"][0][0],
-                                  doc="Start frequency of spectrum",unit="Hz"),
-           end_frequency = dict(default=lambda self:self.datafile["FREQUENCY_RANGE"][0][1],
-                                doc="End frequency of spectrum",unit="Hz"),
-           filesize = dict(default=lambda self:self.datafile["DATA_LENGTH"][0],
-                           doc="Length of file for one antenna.",
-                           unit="Samples"),
-
-           self.beams.setHeader("FREQUENCY_INTERVAL"=self.delta_frequency)
-           self.datafile["SELECTED_DIPOLES"]=[antennaID]
-
-   getfile:
-
-   ************************************************************************
-   Example:
-   file=cr.open(LOFARSOFT+"/data/lopes/example.event")
-   tpar antenna_positions=dict(zip(file["antennaIDs"],file.getCalData("Position")))
-   tpar pointings=[dict(az=178.9*deg,el=28*deg),dict(az=0*deg,el=90*deg,r=1)]
-   tpar cal_delays=dict(zip(file["antennaIDs"],file.getCalData("Delay")))
-   tpar phase_center=[-84.5346,36.1096,0]
-   tpar FarField=True
-   tpar NyquistZone=2
-   tpar randomize_peaks=False
-
-   #file=cr.open(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
-   #file["SelectedAntennasID"]=[0]
-   #fx0=file["TIMESERIES_DATA"]
-
-
-   ------------------------------------------------------------------------
-   tload "BeamFormer"
-   file=cr.open(LOFARSOFT+"/data/lopes/2004.01.12.00:28:11.577.event")
-   tpar filefilter="$LOFARSOFT/data/lopes/2004.01.12.00:28:11.577.event"
-   tpar antenna_positions=dict(map(lambda x: (x[0],x[1].array()),zip(file["antennaIDs"],file.getCalData("Position"))))
-   tpar pointings=[dict(az=41.9898208*deg, el=64.70544*deg,r=1750),dict(az=0*deg,el=90*deg,r=100000)]
-   tpar cal_delays=dict(zip(file["antennaIDs"],[0,-2.3375e-08,-2.75e-09,-3.75e-09,-2.525e-08,-2.575e-08,1.3125e-08,-1.6875e-08]))
-   tpar phase_center=[-22.1927,15.3167,0]
-   tpar FarField=False
-   tpar NyquistZone=2
-   tpar randomize_peaks=False
-   ------------------------------------------------------------------------
-   antenna pos: cr.hArray(float, [8, 3], fill=[-84.5346,36.1096,0,-52.6146,54.4736,-0.0619965,-34.3396,22.5366,-0.131996,-2.3706,40.6976,-0.00299835,41.0804,1.97557,-0.0769958,22.7764,34.1686,-0.0549927,-20.8546,72.5436,-0.154999,11.1824,90.8196,-0.221992]) # len=24 slice=[0:24])
-
-   self=Task
-   self.beams[...,0].nyquistswap(self.NyquistZone)
-   fxb=cr.hArray(float,[2,self.blocklen],name="TIMESERIES_DATA"); fxb[...].saveinvfftw(self.beams[...,0],1);  fxb.abs()
-   fxb[...].plot(clf=True); cr.plt.show()
-"""

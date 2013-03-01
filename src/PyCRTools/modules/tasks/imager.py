@@ -1,8 +1,11 @@
 """
 Imager documentation
 ====================
+Calculates an image with multiple or integrated time and frequency steps.
 
-.. moduleauthor:: Name of the module author <email address of the module author>
+.. moduleauthor:: Pim Schellart <P.Schellart@astro.ru.nl>
+
+.. codeauthor:: J.Emilio Enriquez <e.enriquez@astro.ru.nl>
 
 "Representations of celestial coordinates in FITS"
 http://adsabs.harvard.edu/abs/2002A%26A...395.1077C
@@ -19,8 +22,6 @@ import pyfits
 import os
 import pdb
 # pdb.set_trace()
-
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 def savefits(filename, array, overwrite=True, **kwargs):
     """Save image as standard FITS file.
@@ -59,27 +60,27 @@ def savefits(filename, array, overwrite=True, **kwargs):
 
 class Imager(Task):
     """Imager task documentation.
+
+    This function calculates the total power for a given pixel (direction) by beamforming and adding the selected antennas/time steps/frequency range.
+    It does not calculate the visibities from the multiple baselines, thus, it is not as suitable for all sky imaging.
     """
 
     parameters = dict(
         data=dict(default=None,
                      positional=1),
         image=dict(default=None),
-        output=dict(default="out.fits"),
-        startblock=dict(default=0),
-        nblocks=dict(default=1),
-        ntimesteps=dict(default=lambda self: self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"])),
-        intgrfreq=dict(default=False,
-                          doc="Output frequency integrated image."),
-        inversefft=dict(default=False),
+        output=dict(default="out.fits", doc='Output filename.'),
+        startblock=dict(default=0, doc='Block start number.'),
+        nblocks=dict(default=1, doc='Number of blocks.'),
+        ntimesteps=dict(default=lambda self: self.data["MAXIMUM_READ_LENGTH"] / (self.nblocks * self.data["BLOCKSIZE"]), doc='Number of time steps.'),
+        intgrfreq=dict(default=False, doc="Output frequency integrated image."),
+        inversefft=dict(default=False, doc='Used for a time series image.'),
         rfi_remove=dict(default=None, doc='List of frequency indices to remove.'),
-        FREQMIN=dict(default=None),
-        FREQMAX=dict(default=None),
-        OBSTIME=dict(default=lambda self: self.data["TIME"][0]),
-        OBSLON=dict(default=pytmf.deg2rad(6.869837540),
-                       doc="Observer longitude in radians"),
-        OBSLAT=dict(default=pytmf.deg2rad(52.915122495),
-                       doc="Observer latitude in radians"),
+        FREQMIN=dict(default=None, doc='Minimum frequency to use.'),
+        FREQMAX=dict(default=None, doc='Maximum frequency to use.'),
+        OBSTIME=dict(default=lambda self: self.data["TIME"][0], doc='Observation time in sec.'),
+        OBSLON=dict(default=pytmf.deg2rad(6.869837540), doc="Observer longitude in radians"),
+        OBSLAT=dict(default=pytmf.deg2rad(52.915122495), doc="Observer latitude in radians"),
         NAXIS=dict(default=4),
         NAXIS1=dict(default=90),
         NAXIS2=dict(default=90),
