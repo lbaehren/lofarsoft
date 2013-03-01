@@ -67,8 +67,6 @@ import pdb
 """
 """
 
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
-
 # Defining the workspace parameters
 deg = math.pi / 180.
 pi2 = math.pi / 2.
