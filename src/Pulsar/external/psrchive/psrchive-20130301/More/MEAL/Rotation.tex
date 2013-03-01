@@ -1,0 +1,61 @@
+\documentclass[12pt]{article}
+
+% bold math italic font
+\newcommand{\mbf}[1]{\mbox{\boldmath $#1$}}
+\newcommand{\mbfs}[1]{\mbox{\scriptsize\boldmath $#1$}}
+
+% equations
+\newcommand{\Eqn}[1]{Equation~(\ref{eqn:#1})}
+\newcommand{\Eqns}[1]{Equations~(\ref{eqn:#1})}
+\newcommand{\eqn}[1]{equation~(\ref{eqn:#1})}
+\newcommand{\eqns}[1]{equations~(\ref{eqn:#1})}
+
+% symbol used for sqrt(-1)
+\newcommand{\Ci}{\ensuremath{i}}
+
+\newcommand{\var}{{\rm var}}
+\newcommand{\trace}{{\rm tr}}
+\newcommand{\sinc}{\,{\rm sinc}\,}
+
+\newcommand{\Rotation}{{\bf R}}
+\newcommand{\Boost}{{\bf B}}
+
+\newcommand{\vRotation}[1][n]{\ensuremath{\Rotation_{\mbfs{\hat #1}}}}
+\newcommand{\vBoost}[1][m]{\ensuremath{\Boost_{\mbfs{\hat #1}}}}
+
+\newcommand{\rotat}{\ensuremath{\vRotation(\phi)}}
+\newcommand{\boost}{\ensuremath{\vBoost(\beta)}}
+
+\newcommand{\pauli}[1]{\mbf{\sigma_{#1}}}
+\newcommand{\selection}[1]{\mbf{\delta_{#1}}}
+
+\begin{document}
+
+\noindent
+The {\tt MEAL::Rotation} class represents the unitary matrices,
+\begin{equation}
+\label{eqn:Rotation}
+\rotat = \exp (\Ci\mbf{\sigma\cdot\hat{n}}\phi)
+       = \pauli{0}\cos\phi + \Ci\mbf{\sigma\cdot\hat{n}}\sin\phi\,
+\end{equation}
+which rotate the Stokes polarization vector about the axis
+\mbf{\hat{n}} by an angle $2\phi$.  The rotation is parameterized by a
+3-vector,
+\begin{equation}
+\mbf{r}=\mbf{\hat{n}}\phi = \sum_{j=1}^3 r_j \mbf{\hat{s}_j}
+\end{equation}
+such that $\phi=|\mbf{r}|$,
+\begin{equation}
+\rotat = \pauli{0}\cos\phi + \Ci\mbf{\sigma\cdot r}\sinc\phi,
+\end{equation}
+
+\begin{equation}
+{\partial\phi\over\partial r_j} = {r_j\over\phi},
+\end{equation}
+and
+\begin{equation}
+{\partial\rotat\over\partial r_j} = -\pauli{0}r_j\sinc\phi 
++ \Ci \mbf{\sigma\cdot}\left[ \mbf{\hat{s}_j}\sinc\phi + \mbf{r} {r_j\over\phi^2} (\cos\phi -\sinc\phi)\right].
+\end{equation}
+
+\end{document}

@@ -1,0 +1,43 @@
+
+EXTRA_DIST = config/install-intermediate
+
+libs:
+	$(MAKE) RECURSIVE_TARGETS="all-recursive libs-recursive" libs-recursive
+
+libs-am:
+	@echo
+	@echo
+	@echo "${PACKAGE_STRING} libraries have been installed in ${prefix}/lib"
+	@echo
+	@echo
+
+include: install-data
+
+all-am:
+	@echo
+	@echo
+	@echo "${PACKAGE_STRING} successfully compiled.  Remember to \"make install\""
+	@echo
+	@echo
+
+install-am:
+	@echo
+	@echo
+	@echo "${PACKAGE_STRING} has been installed in ${prefix}"
+	@echo
+	@if test -f $(top_srcdir)/CITATION; then cat $(top_srcdir)/CITATION; fi
+	@echo
+
+where:
+	@echo
+	@echo "${PACKAGE_STRING} will be installed in ${prefix}"
+	@echo
+
+
+# ###############################################
+#
+# Persist after an autoconf macro file is removed
+#
+$(top_srcdir)/config/%.m4:
+	@echo Ignoring dependency on $@
+

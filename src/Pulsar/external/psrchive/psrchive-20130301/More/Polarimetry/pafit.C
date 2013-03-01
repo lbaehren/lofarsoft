@@ -1,0 +1,283 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
+#include "Pulsar/MeanCoherency.h"
+#include "Pulsar/Instrument.h"
+#include "Pulsar/Parallactic.h"
+#include "MEAL/Coherency.h"
+#include "MEAL/Axis.h"
+
+#include "Pulsar/ReceptionModelAxisPlotter.h"
+
+#include <cpgplot.h>
+
+#include <unistd.h>
+#include <stdio.h>
+
+using namespace std;
+
+static const char* args = "DhvV";
+
+void usage ()
+{
+  cerr << 
+    "pafit - given Stokes parameters observed at different parallacticn"
+    "        angles, fits for the instrumental response\n"
+    "\n"
+    "Usage: pafit [" << args << "] filename\n"
+    "Where:\n"
+    "  -D   plot Stokes parameters vs. parallactic angle\n"
+    "  -h   help\n"
+    "  -v   verbose\n"
+    "  -V   very verbose\n"
+    "\n"
+    "The input file must contain a row of text for each observation.\n"
+    "The columns of this file are defined as follows:\n"
+    "\n"
+    "P.A.  StokesI sigmaI  StokesQ sigmaQ  StokesU sigmaU  StokesV sigmaV\n"
+       << endl;
+}
+
+class ParallacticAbscissa : public Calibration::ReceptionModelPlotter::Abscissa
+{
+public:
+
+  ParallacticAbscissa (Calibration::Parallactic* para) { parallactic = para; }
+
+  void push_back ()
+  { degrees.push_back ( parallactic->get_param(0) * 180.0/M_PI ); }
+
+  void get_values (std::vector<double>& values) const { values = degrees; }
+
+  std::string get_label () const { return "Parallactic Angle (degrees)"; }
+
+protected:
+  Reference::To< Calibration::Parallactic > parallactic;
+  std::vector<double> degrees;
+};
+
+
+int main (int argc, char** argv)
+{
+  bool verbose = false;
+  bool plot = false;
+
+  int c = 0;
+
+  while ((c = getopt(argc, argv, args)) != -1)
+    switch (c) {
+
+    case 'D':
+      plot = true;
+      break;
+
+    case 'h':
+      usage ();
+      return 0;
+
+    case 'V':
+      Calibration::ReceptionModel::verbose = true;
+      MEAL::Argument::verbose = true;
+    case 'v':
+      verbose = true;
+      break;
+
+    }
+
+  if (optind >= argc) {
+    cerr << "pafit requires a filename (pafit -h for help)" << endl;
+    return -1;
+  }
+
+  char* filename = argv[optind];
+
+  FILE* fptr = fopen (filename, "r");
+  if (!fptr) {
+    cerr << "Could not fopen(" << filename << ")";
+    perror ("");
+    return -1;
+  }
+
+  // the complete set of observations to be read from file
+  vector<Calibration::CoherencyMeasurementSet> observations;
+
+  // the parallactic angle rotation transformation
+  Calibration::Parallactic parallactic;
+
+  // the parallactic angle axis
+  MEAL::Axis<double> pa_axis;
+
+  // the best guess of the input (source) Stokes parameters
+  Calibration::MeanCoherency source_guess;
+
+  // the model of the input (source) Stokes parameters
+  MEAL::Coherency source;
+
+  // the output (observed) Stokes parameters read from each line of the file
+  Estimate<double> I,Q,U,V;
+
+  // the parallactic angle read from each line of the file
+  double pa;
+  double pa_min = 0;
+  double pa_max = 0;
+  bool pa_set = false;
+
+  while (fscanf (fptr, "%lf %lf %lf %lf %lf %lf %lf %lf %lf", 
+		 &pa,
+		 &I.val, &I.var,
+		 &Q.val, &Q.var,
+		 &U.val, &U.var, 
+		 &V.val, &V.var) == 9) {
+
+    pa *= M_PI/180.0;
+
+    if (!pa_set || pa < pa_min)
+      pa_min = pa;
+
+    if (!pa_set || pa > pa_max)
+      pa_max = pa;
+
+    pa_set = true;
+
+    //
+    // First, format the observation Stokes parameters and add them to the list
+    //
+
+    // a Stokes object
+    Stokes< Estimate<double> > stokes (I,Q,U,V);
+
+    // only one source for now
+    unsigned source_index = 0;
+
+    // a Stokes object with a source index
+    Calibration::CoherencyMeasurement state (source_index);
+    state.set_stokes (stokes);
+
+    // only one path for now
+    unsigned path_index = 0;
+
+    // a vector of CoherencyMeasurement instances with an abscissa value
+    Calibration::CoherencyMeasurementSet measurement (path_index);
+
+    // add the independent parallactic angle 
+    measurement.add_coordinate (pa_axis.new_Value(pa));
+
+    // add the newly loaded state
+    measurement.push_back (state);
+
+    // add the new CoherencyMeasurementSet to the vector of observations
+    observations.push_back (measurement);
+
+    //
+    // Second, compute the contribution to the first guess
+    //
+
+    // calculate the parallactic angle transformation
+    parallactic.set_phi (pa);
+    Jones< Estimate<double> > para = parallactic.evaluate ();
+
+    // deparallactify
+    stokes = transform( stokes, herm (para) );
+
+    // add to the observed average
+    source_guess.integrate (stokes);
+
+  }
+
+  fclose (fptr);
+
+  cerr << "Read " << observations.size() << " lines from " << filename << endl;
+
+  // connect the transformation to abscissa events generated by the P.A. axis
+  pa_axis.signal.connect (&parallactic, &MEAL::Rotation1::set_phi);
+
+  cerr << "Using Phenomenological Decomposition (Britton)" << endl;
+  // construct the instrumental response transformation
+  Calibration::Instrument system;
+
+  // construct the total signal path transformation
+  MEAL::ProductRule<MEAL::Complex2> path;
+  path *= &system;
+  path *= &parallactic;
+
+  // the complete model of the polarimetric experiment
+  Calibration::ReceptionModel model;
+
+  // add the model of the source Stokes parameters
+  source_guess.update (&source);
+  model.add_input (&source);
+
+  // add the model of the instrumental transformation
+  model.add_transformation (&path);
+
+  // add the observations
+  for (unsigned iobs=0; iobs < observations.size(); iobs++)
+    model.add_data (observations[iobs]);
+  
+  // solve the system
+  try {
+
+    // compensate for degeneracy of the system
+
+    // do not fit for absolute gain
+    system.set_infit (0, false);
+
+    // do not fit for rotation of receptor 0
+    system.set_infit (4, false);
+
+    // do not allow mixing of Stokes I and V
+    system.equal_ellipticities ();
+
+    cerr << "Solving the sytem" << endl;
+    model.solve ();
+
+    cerr << "\nResults:" <<
+      "\n\nStokes parameters of source:" <<
+      "\nStokes I: " << source.get_Estimate(0) << 
+      "\nStokes Q: " << source.get_Estimate(1) << 
+      "\nStokes U: " << source.get_Estimate(2) << 
+      "\nStokes V: " << source.get_Estimate(3) << 
+      "\n\nReceiver parameters:"
+      "\nDifferential gain:        " << system.get_diff_gain () <<
+      "\nDifferential phase:       " << system.get_diff_phase () <<
+      "\nDifferential orientation: " << system.get_orientation (1) <<
+      "\nReceptor ellipticities:   " << system.get_ellipticity (0) <<
+      "\n" << endl;
+
+
+
+  }
+  catch (Error& error) {
+    cerr << error << endl;
+    return -1;
+  }
+
+  if (!plot)
+    return 0;
+
+  cpgbeg (0, "?", 0, 0);
+  cpgsvp (.25,.75,.15,.95);
+  
+  Calibration::ReceptionModelAxisPlotter<double> plotter;
+
+  plotter.set_model( &model );
+  plotter.set_model_solved( true );
+  plotter.set_abscissa( new ParallacticAbscissa(&parallactic) );
+
+  plotter.set_axis( &pa_axis );
+  plotter.set_min ( pa_min );
+  plotter.set_max ( pa_max );
+  plotter.set_npt ( 100 );
+
+  plotter.plot_observations ();
+
+  cpgend ();
+
+  return 0;
+
+}

@@ -1,0 +1,14 @@
+#! /bin/sh
+
+# This script copies $1 to $2 creating the path to $2 if needed
+#
+# Willem van Straten
+# 1 October 2006
+
+# This sed command emulates the dirname command.
+dstdir=`echo "$2" | sed -e 's,/*$,,;s,[^/]*$,,;s,/*$,,;s,^$,.,'`
+
+if test ! -d $dstdir; then mkdir -p $dstdir; fi
+
+cp $1 $2
+

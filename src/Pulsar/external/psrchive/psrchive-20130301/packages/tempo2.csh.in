@@ -1,0 +1,43 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+if ( ! $?TEMPO2 ) setenv TEMPO2 @prefix@/tempo2
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -d tempo2 ) then
+
+  echo "Downloading TEMPO2 source code"
+
+  touch $HOME/.cvspass
+  setenv TEMPO2_CVS anonymous@tempo2.cvs.sourceforge.net:/cvsroot/tempo2
+
+  echo "When prompted for CVS password: <ENTER>"
+
+  cvs -d :pserver:$TEMPO2_CVS login
+  cvs -z3 -d:pserver:$TEMPO2_CVS co -P tempo2
+
+endif
+
+cd tempo2
+
+mkdir -p $TEMPO2
+rsync -at T2runtime/* $TEMPO2
+
+./bootstrap
+./configure
+make
+make install
+
+echo
+echo
+echo "TEMPO2 library installation completed"
+echo
+echo "To use the library, please set the environment variable"
+echo
+echo 'setenv TEMPO2 @prefix@/tempo2'
+echo
+echo "and then re-run the PSRCHIVE configure script"
+echo

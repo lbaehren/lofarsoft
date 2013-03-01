@@ -1,0 +1,226 @@
+\documentclass[12pt]{article}
+\usepackage{amsfonts}
+\usepackage{bm}
+
+% bold math italic font
+\newcommand{\mbf}[1]{\mbox{\boldmath $#1$}}
+
+% symbol used for sqrt(-1)
+\newcommand{\Ci}{{\rm i}}
+
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\R}{\mathbb{R}}
+
+\newcommand{\var}{\rm Var}
+\newcommand{\trace}{\rm Tr}
+
+\newcommand{\code}[1]{{\tt{#1}}}
+
+\newcommand{\rotation}[3]{{\ensuremath{ {\bf R}^{#3}_{#1}({#2}) }}}
+\newcommand{\rotat}[1][\bm{\hat{n}}]{\rotation{#1}{\phi}{ }}
+
+\newcommand{\boost}[1][m]{{\ensuremath{ {\bf B}_{\bm{\hat {#1}}}(\beta) }}}
+
+\newcommand{\pauli}[1]{\ensuremath{ {\bm\sigma}_{\rm #1} }}
+\newcommand{\para}[1][ ]{\ensuremath{ {\Phi}_{{\rm PA}{#1}} }}
+
+\newcommand{\model}[1][ ]{\ensuremath{{\bm\rho}_j({{\bf T}_{#1}};{\mbf{a}}) }}
+\newcommand{\obs}{\ensuremath{ {\bm\rho}_{j,i} }}
+
+\begin{document}
+
+\section{Introduction}
+
+The document discusses the general problem of determining the
+polarimetric response of a system using a number of unknown input
+polarization states.  In the case of pulsar observations, the unknown
+input states are any number of the on-pulse phase bins of the
+polarimetric pulse profile.
+
+Let $M$ be the number of polarization states under consideration.  The
+unknown input states, $\{\bm\rho_j; 1\le j\le M\}$, are transformed by
+both a known transformation, {\bf T}, and the unknown transformation
+of the system response, {\bf J}.  In the case of pulsar observations
+at multiple parallactic angles, the known transformation, {\bf T}, is
+equal to a rotation about the Stokes V axis by the parallactic angle,
+\para.
+
+Let $N$ be the number of observations made, each at a different epoch.
+For each observation, there exists a known transformation, ${\bf
+T}_i$, and a set of measured output states, $\{\obs; 1\le j\le M\}$.
+
+The model to be fitted must predict the value for each of the measured
+output states, given the known transformation, {\bf T}.  Let this model
+be represented by
+\begin{equation}
+\model; \;\; 1\le j\le M
+\end{equation}
+where $\bm{a}$ is a vector of scalar model parameters describing both
+the system response and the set of $M$ input states.  This
+parameterization will be discussed in the next section.  The best-fit
+model will minimize the $\chi^2$ merit function
+\begin{equation}
+\chi^2(\bm{a}) = \sum_{i=1}^N {1\over\sigma_i^2} \sum_{j=1}^M
+	{\var[\obs - \model[i])]}
+\end{equation}
+where \obs\ is the $i$th observation of the $j$th
+polarization state, and $\var({\bf M})$ is the square of the Frobenius
+norm, given by
+\begin{equation}
+\var({\bf M})=\trace({\bf M}{\bf M}^\dagger).
+\end{equation}
+Here, $\trace({\bf M})$ is the matrix trace and ${\bf M}^\dagger$ is the
+Hermitian transpose.  The gradient of $\chi^2$ with respect to the
+parameters $\bm{a}$ has components
+\begin{equation}
+{\partial\chi^2\over\partial a_k} = -2 \sum_{i=1}^N {1\over\sigma_i^2}
+	\sum_{j=1}^M \trace\left( [\obs - \model[i]]
+	{\partial\model[i]\over\partial a_k} \right)
+\end{equation}
+(Note that $\bm\rho=\bm\rho^\dagger$, $\trace({\bf A}+{\bf B})=\trace({\bf
+A})+\trace({\bf B})$, and $\trace({\bf AB})=\trace({\bf BA})$.)
+Taking an additional partial derivative gives
+\begin{equation}
+{\partial^2\chi^2\over\partial a_l\partial a_k} = 
+	2 \sum_{i=1}^N {1\over\sigma_i^2} \sum_{j=1}^M \trace({\bf D}_{i,j})
+\end{equation}
+where
+\begin{equation}
+{\bf D}_{i,j} = 
+{\partial\model[i]\over\partial a_l} {\partial\model[i]\over\partial a_k}
+	- [\obs - \model[i]] {\partial^2\model[i]\over\partial a_l\partial a_k}
+\end{equation}
+Referring to the discussion in Numerical Recipes, $\S 15.5$
+(hereafter, NR), it is conventional to ignore the second derivatives
+of \model[i].  Furthermore, by adopting the NR notation, wherein
+\begin{equation}
+\beta_k = \sum_{i=1}^N {1\over\sigma_i^2}\sum_{j=1}^M \trace\left(
+	[\obs - \model[i]] {\partial{\bm\rho}\over\partial a_k}\right)
+\end{equation}
+and
+\begin{equation}
+\alpha_{lk} = \sum_{i=1}^N {1\over\sigma_i^2}\sum_{j=1}^M
+	\trace\left( {\partial\model[i]\over\partial a_l}
+		{\partial\model[i]\over\partial a_k} \right) = \alpha_{kl}
+\end{equation}
+the least-squares minimization problem may be reduced to that of
+finding the partial derivatives of the matrix function, \model, with
+respect to its scalar parameters $a_k$.
+
+
+
+\section{Parameterization of the Model}
+
+Let the model of the system response be represented by the $2\times2$
+complex Jones matrix, ${\bf J}$, and the model of each of the input states
+be represented by the set of coherency matrices, $\{\bm\rho_j; 1\le j\le M\}$,
+so that
+\begin{equation}\label{eqn:model}
+\model = {\bf JT}{\bm\rho}_j{\bf T}^\dagger{\bf J}^\dagger
+\end{equation}
+An arbitrary matrix, ${\bf J}$, may be represented by its polar decomposition,
+\begin{equation}
+{\bf J} = J \; \boost \rotat
+\end{equation}
+where $J=(\det{\bf J})^{1/2}$, \boost\ is a Hermitian matrix (or boost
+transformation) and \rotat\ is a unitary matrix (or rotation
+transformation).  As shown by Euler, any rotation about an arbitrary
+axis may be decomposed into a series of rotations about three
+perpendicular axis.  Furthermore, it can be trivially shown that if
+{\bf J} satisfies Equation~\ref{eqn:model}, then so does
+${\bf J}^\prime = e^{i\phi}{\bf J}$.  Therefore, the phase information of the
+complex-valued $J$ may be arbitrarily chosen, and $J$ may be replaced by the
+real-valued gain, $G=|J|$, so that the system response may be
+parameterized by
+\begin{equation}
+{\bf J} = G \; \boost \prod_{i=1}^3 \rotation{i}{\phi_i}{ }.
+\label{eqn:polar_decomposition}
+\end{equation}
+Referring to Britton (2000) or Hamaker (2000):
+\begin{eqnarray}\label{eqn:boost}
+\boost &=& \bm{\sigma}_0\cosh\beta + \bm{\hat{m}\cdot\sigma}\sinh\beta, \\
+\rotation{i}{\phi_i}{ } &=& \bm{\sigma}_0\cos\phi_i + i\bm{\sigma}_i\sin\phi_i.
+\label{eqn:rotation}
+\end{eqnarray}
+The coherency matrix of each input polarization state is given by
+\begin{equation}\label{eqn:stokes}
+{\bm\rho}_j = {1\over2}\sum_{i=0}^3 S_{i,j}\bm{\sigma}_i
+\end{equation}
+where $S_i$ are the Stokes parameters.
+By defining $\bm{b}=(b_1,b_2,b_3)=\bm{\hat{m}}\sinh\beta$, the model of
+the receiver and source polarization states is completely specified by $G$,
+$b_{1-3}$, $\phi_{1-3}$, and $\{S_{0-3}\}_j$.
+
+
+\subsection{Partial Derivatives}
+Referring to Equations~\ref{eqn:boost} to~\ref{eqn:stokes} and the definition
+of $\bm{b}$, the partial derivatives of the model may be derived without
+any ``small value'' approximations:
+\begin{equation}
+{\partial\boost\over\partial b_i} =
+	\bm{\sigma}_0{b_i\over\sqrt{1+|\bm{b}|}} + \bm{\sigma}_i
+\end{equation}
+
+\begin{equation}
+{\partial\rotation{i}{\phi_i}{ }\over\partial \phi_i} = 
+	-\bm{\sigma}_0\sin\phi_i + i\bm{\sigma}_i\cos\phi_i.
+\end{equation}
+
+\begin{equation}
+{\partial{\bm\rho}_j\over\partial S_{i,j}} = {\bm{\sigma}_i\over2}
+\end{equation}
+
+
+\section{Degeneracy under Commutation}
+
+Using the multiplication rule
+\begin{equation}
+\bm{AB}=(a\bm{\sigma}_0+\bm{a\cdot\sigma})(b\bm{\sigma}_0 + \bm{b\cdot\sigma})
+= ab + \bm{a\cdot b} + (a\bm{b} + b\bm{a} + \Ci \bm{a\times b})\bm{\cdot\sigma}
+\end{equation}
+it can be seen that $\bm{A}$ and $\bm{B}$ commute
+(ie. $\bm{AB}=\bm{BA}$) when $\bm{a}$ and $\bm{b}$ are parallel (so
+that $\bm{a\times b}=0$).  This observation enables simple statements to
+be made regarding the uniqueness of any solution.
+
+Consider the observation of source polarization states at multiple
+parallactic angles.  In this case, the transformation, {\bf T}, is
+given by a rotation about the V-axis:
+\begin{equation}
+{\bf T}=\rotation{3}{\Phi_{\rm PA}}{ } = \bm{\sigma}_0\cos\Phi_{\rm PA}
+	 + i\bm{\sigma}_3\sin\Phi_{\rm PA}.
+\end{equation}
+An arbitrary matrix of the form, ${\bf U}_3= u_0\bm{\sigma}_0 +
+u_3\bm{\sigma}_3$ commutes freely with $\rotation{3}{\Phi_{\rm PA}}{
+}$.  If ${\bf U}_3$ has unit determinant, and if {\bf J} and
+${\bm\rho}_j$ satisfy Equation~\ref{eqn:model}, namely
+\begin{equation}
+{\bm\rho}^\prime_j = {\bf J}\rotation{3}{\Phi_{{\rm PA},i}}{ }{\bm\rho}_j{\rotation{3}{\Phi_{{\rm PA},i}}{ }}^\dagger{\bf J}^\dagger
+\end{equation}
+then 
+\begin{equation}
+{\bf J}_u = {\bf JU}_3 \hspace{1cm} {\rm and} \hspace{1cm}
+{\bm\rho}_{j,u} = {\bf U}^{-1}_3{\bm\rho}_j{\bf U}^{\dagger-1}_3
+\end{equation}
+are also solutions to this equation.  This degeneracy exists
+regardless of the parameterization of {\bf J} or ${\bm\rho}_j$,
+proving that there is no unique solution to the pulsar
+self-calibration problem based solely on observations of the pulsar at
+multiple parallactic angles.
+
+\subsection{Additional Constraints}
+
+The arbitrary matrix, ${\bf U}_3$, may also be decomposed into a boost
+along the Stokes V axis and a rotation about this axis.  As shown by
+Hamaker, an observation of an unpolarized source may be used to
+completely constrain the boost component of the system response.  In
+addition to constraining the boost along Stokes V, such additional
+information may also be used to allow the system gain (and
+differential gain) to vary from observation to observation.
+
+The rotation about the Stokes V axis will remain unconstrained unless
+a source with a well-known position angle (and rotation measure) can
+be observed.
+
+\end{document}
+
