@@ -1,0 +1,25 @@
+#!/bin/csh -fe
+
+if ( "$1" == "-h" || "$1" == "--help" ) then
+  echo
+  echo "developer: updates Git administration files with developer name"
+  echo
+  echo "usage:"
+  echo "  Management/developer USER"
+  echo
+  echo "where:"
+  echo "  USER is a sourceforge user name"
+  echo
+  exit
+endif
+
+set root = "dspsr.git.sourceforge.net/gitroot/dspsr/dspsr"
+
+if ( "$1" == "" ) then
+  echo "Git repository access changed to anonymous"
+  git config remote.origin.url git://$root
+else
+  echo "Git repository developer name changed to $1"
+  git config remote.origin.url ssh://$1@$root
+endif
+

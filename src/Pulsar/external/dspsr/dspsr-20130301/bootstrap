@@ -1,0 +1,64 @@
+#! /bin/sh
+
+hash -r
+echo dspsr bootstrap with the following PATH: $PATH
+echo dspsr bootstrap with the following LD_LIBRARY_PATH: $LD_LIBRARY_PATH
+echo changing paths:
+export PATH=${PATH}:$LOFARSOFT/release/share/pulsar/bin:.
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$LOFARSOFT/release/share/pulsar/lib:$LOFARSOFT/release/lib:.
+echo dspsr bootstrap with the new following PATH: $PATH
+echo dspsr bootstrap with the new following LD_LIBRARY_PATH: $LD_LIBRARY_PATH
+
+echo Location of psrchive using which: `which psrchive`
+ls -ltr $LOFARSOFT/release/share/pulsar/bin/
+
+psrchive=$LOFARSOFT/release/share/pulsar/bin/psrchive
+
+if test x"$1" != x ; then
+	psrchive_cmd=$1
+else
+	psrchive_cmd=psrchive
+fi
+
+#psrchive=`which $psrchive_cmd 2> /dev/null`
+
+echo "Using $psrchive"
+
+if test -z $psrchive; then
+
+  echo
+  echo "PSRCHIVE installation not found."
+  echo "If installed, please ensure that psrchive executable is in PATH"
+  echo "If not installed, please see http://psrchive.sourceforge.net"
+  echo
+  exit -1
+
+fi
+
+echo "Copying autoconf and automake tools from PSRCHIVE ..."
+
+cp `$psrchive --aclocal`/* config/
+
+sh config/formats.sh
+
+echo "Running the GNU autotools.  Please be patient ..."
+
+if autoreconf --install --force; then
+
+  echo
+  echo "Bootstrap complete.  You can now run the configure script."
+  echo
+  exit 0
+
+else
+
+  echo
+  echo "An error occured while running the GNU autotools."
+  echo "Please see http://psrchive.sourceforge.net/third/autotools"
+  echo
+  exit -1
+
+fi
+
+
+
