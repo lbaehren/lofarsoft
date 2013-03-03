@@ -3,19 +3,54 @@
 # dedispersion does incoherent dedispersion on arrays or fitsimages
 import FRATSanalysis as fa
 
+
 def downsample(data,axis,factor):
     if axis==0 or axis=="time":
         return np.sum(data.reshape(data.shape[0]/factor,factor,data.shape[1]),1)
     elif axis==1 or axis=="freq":
         return np.sum(data.reshape(data.shape[0],data.shape[1]/factor,factor),2)
 
-def rawplot(dr,data,downsamplefactor=4):
+def rawplot(dr,data,par,downsamplefactor=4,vlines=[],triggertime=None):
     data2=downsample(data,0,downsamplefactor)
     data2=downsample(data2,1,downsamplefactor)
-    myextent=(dr.par['frequencies'][0],dr.par['frequencies'][-1],0,data.shape[0])
-    plt.imshow(np.sqrt(data2),aspect='auto',vmin=np.sqrt(0.2*np.median(data2)),vmax=np.sqrt(2.5*np.median(data2)),extent=myextent)
-    plt.xlabel('frequency (Hz)')
-    plt.ylabel('relative sample')
+    fstart=dr.par['frequencies'][0]
+    fend=dr.par['frequencies'][-1]
+    tstart=(dr.par['timeresolution']*dr.samples*(par['stb'])+par['obsstart'])%10000
+    tend=(dr.par['timeresolution']*dr.samples*(par['stb']+par['n'])+par['obsstart'])%10000
+    toffset=10000*(int(dr.par['timeresolution']*dr.samples*(par['stb'])+par['obsstart'])/10000)
+    if tend<tstart:
+        tend+=10000
+
+    if triggertime:
+        delays=dedispersion.freq_to_delay(par['DM'][-1],par['freq'])
+        delays-=delays[0]
+        if triggertime>tend:
+            triggertime-=toffset
+        plt.plot(delays+triggertime-0.2,par['freq'],color='b')    
+        plt.plot(delays+triggertime+0.2,par['freq'],color='b')    
+    myextent=(tstart,tend,dr.par['frequencies'][0],dr.par['frequencies'][-1])
+
+    if len(vlines)>1:
+        if vlines[0]>tend:
+            vlines=[v-toffset for v in vlines]
+        plt.vlines(vlines,myextent[2],myextent[3])
+        delay190=dedispersion.freq_to_delay(par['DM'][-1],[par['freq'][-1],190e6])[0]
+        delay110=dedispersion.freq_to_delay(par['DM'][-1],[110e6,par['freq'][0]])[0]
+        plt.vlines(vlines[0]-delay110,myextent[2],myextent[2]+(myextent[3]-myextent[2])/6)
+        plt.vlines(vlines[1]+delay190,myextent[3]-(myextent[3]-myextent[2])/6,myextent[3])
+    #plt.xlabel('time in seconds since '+str(10000*(int(dr.par['timeresolution']*dr.samples*(par['stb'])+par['obsstart'])/10000)))
+
+    if data2.min()>0:
+        plt.imshow(np.sqrt(data2.T),aspect='auto',vmin=np.sqrt(0.2*np.median(data2)),vmax=np.sqrt(2.5*np.median(data2)),extent=myextent,cmap=plt.get_cmap('hot'),origin='lower')
+    else:
+#        plt.imshow(np.sqrt(data2+5*np.std(data2)),aspect='auto',vmin=np.sqrt(np.median(data2)+3*np.std(data2)),vmax=np.sqrt(np.median(data2)+7*np.std(data2)),extent=myextent,cmap=plt.get_cmap('hot'))
+        plt.imshow(data2.T,aspect='auto',vmin=np.median(data2)-2*np.std(data2),vmax=np.median(data2)+2*np.std(data2),extent=myextent,cmap=plt.get_cmap('hot'),origin='lower')
+
+    plt.xlabel('time in seconds since '+str(toffset))
+    plt.ylabel('frequency (Hz)')
+    plt.colorbar()
+    return myextent
+
 
 def myplot(data,doSquare=False):
     fig=plt.figure()
@@ -283,7 +318,7 @@ parser.add_option("-d","--datadir",type="string",default="/vol/astro/lofar/frats
 parser.add_option("-l","--cutlevel",type="float",default=5.0)
 parser.add_option("-s","--startblock",type="int",default=0)
 parser.add_option("-n","--nofblocks",type="int",default=1)
-parser.add_option("--ds","--downsample","--downsamplefactor",dest="downsamplefactor",type="int",default=4)
+parser.add_option("--ds","--downsample","--downsamplefactor",dest="downsamplefactor",type="int",default=8)
 parser.add_option("-z","--blocksize","--sa",type="int",default=512)
 parser.add_option("-y","--dividebaseline",action="store_true",dest="dividebaseline",default=False)
 parser.add_option("-x","--subtractbaseline",action="store_true",dest="subtractbaseline",default=False)
@@ -302,6 +337,9 @@ parser.add_option("--ts","--timeseries",action="store_true",default=False,dest="
 parser.add_option("--pd","--plotdistance",type=float,dest="plotdistance",default=30)
 parser.add_option("--pw","--plotwindow",type=float,dest="plotwindow",default=0)
 parser.add_option("--pc","--plotcenter",type=float,dest="plotcentertime",default=0)
+parser.add_option("--TBBstop","--TBBstoptime",type=float,dest="TBBstoptime",default=None)
+parser.add_option("--TBBstart","--TBBstarttime",type=float,dest="TBBstarttime",default=None)
+parser.add_option("--triggertime",type=float,default=None)
 parser.add_option("--il","--integrationlength",type=int,dest="integrationlength",default=1)
 parser.add_option("--resampleT",type=int,dest="resampleT",default=1)
 parser.add_option("--subav","--subtractaverage",action="store_true",default=False,dest="subtractaverage")
@@ -329,6 +367,12 @@ plotwindow=options.plotwindow
 plotcentertime=options.plotcentertime
 integrationlength=options.integrationlength
 resampleT=options.resampleT
+if not options.TBBstoptime:
+    if options.TBBstarttime:
+        options.TBBstoptime=options.TBBstarttime+1.28
+else:
+    if not options.TBBstarttime:
+        options.TBBstarttime=options.TBBstoptime-1.28
 if not options.saveplot:
     plotname=False
 else:
@@ -471,8 +515,8 @@ if False:
 
 
 
-if options.DM!=None and not options.bTimeseries:
-    dedispersionShift(data,dr,options.DM,markboundary=True)
+#if options.DM!=None and not options.bTimeseries:
+#    dedispersionShift(data,dr,options.DM,markboundary=True)
 
 if options.DM!=None and options.bTimeseries:
     print "Making dedispersed timeseries"
@@ -523,8 +567,14 @@ if options.bPlot:
     mycolors=['r','g','b','k','y','m','c','0.5','r','g','b','k','y','m','c','0.5']
     if not options.bTimeseries:
         #myplot(data)
-        rawplot(dr,data,options.downsamplefactor)
-        plt.title(dr.files[fileindex].name+" block "+str(options.startblock))
+        if 'par' not in dir():
+            par=fa.obsParameters(rfidir)
+        if options.TBBstarttime and options.TBBstoptime:
+            TBBvlines=[options.TBBstarttime,options.TBBstoptime]
+        else:
+            TBBvlines=[]
+        rawplot(dr,data,par,options.downsamplefactor,TBBvlines,options.triggertime)
+        plt.title(dr.files[fileindex].name.split('/')[-1]+"\n block "+str(options.startblock)+" DM "+str(par['DM'][-1]))
     else:
         stb=par['stb']
         par['stb']=options.startblock
