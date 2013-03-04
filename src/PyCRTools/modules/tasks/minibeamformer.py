@@ -2,7 +2,7 @@
 Module documentation
 ====================
 
-.. moduleauthor:: Name of the module author <email address of the module author>
+.. moduleauthor:: Pim Schellart <p.schellart@astro.ru.nl>
 """
 
 from pycrtools.tasks import Task
@@ -12,10 +12,9 @@ import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
 
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class MiniBeamformer(Task):
-    """Beamformer deliberately designed to be fast, lightweight and simple.
+    """Beamformer is deliberately designed to be fast, lightweight and simple.
 
     Forms a beam in one given direction from a set of input antennas.
     """
