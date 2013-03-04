@@ -2,7 +2,7 @@
 Module documentation
 ====================
 
-.. moduleauthor:: Name of the module author <email address of the module author>
+.. moduleauthor:: Pim Schellart <p.schellart@astro.ru.nl>
 """
 
 from pycrtools.tasks import Task
@@ -11,7 +11,6 @@ import numpy as np
 import pycrtools as cr
 import matplotlib.pyplot as plt
 
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class PulseEnvelope(Task):
     """Calculate pulse envelope using Hilbert transform.
@@ -19,6 +18,8 @@ class PulseEnvelope(Task):
     Optionally the envelope will be (up/down)sampled using the *resample_factor* and the *delays* between the
     peak_amplitude will be computed with respect to a reference antenna that is either given or taken to be the one
     with the highest signal to noise.
+    
+    Main pulse characterization tool of the current pipeline.
     """
 
     parameters = dict(
