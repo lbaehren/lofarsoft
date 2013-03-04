@@ -338,7 +338,7 @@ class Wavefront(Task):
         simplexDirection[2] = 1000.0 / simplexDirection[2]  # invert again to get R
         (simplexAz, simplexEl, simplexR) = simplexDirection
 
-        self.fitPointSource = (simplexAz, simplexEl, simplexR, simplexMSE)
+        self.fitPointSource = (simplexAz / deg2rad, simplexEl / deg2rad, simplexR, simplexMSE)
 
         print '-----'
         print 'Simplex search: '
@@ -346,7 +346,7 @@ class Wavefront(Task):
         msePlanar = sf.mseWithDistance(simplexAz, simplexEl, 1.0e7, goodPositions, goodTimes, allowOutlierCount=4)
         print 'Best MSE for R = 10^7 (approx. planar): %f' % msePlanar
         print '-----'
-        self.fitPlaneWave = (az, el, msePlanar)
+        self.fitPlaneWave = (az / deg2rad, el / deg2rad, msePlanar)
 
         # get the calculated delays according to this plane wave
         # simplexDirection[2] = 4000.0
