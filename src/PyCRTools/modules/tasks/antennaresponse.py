@@ -2,7 +2,7 @@
 AntennaResponse documentation
 =============================
 
-.. moduleauthor:: Name of the module author <email address of the module author>
+.. moduleauthor:: Pim Schellart <p.schellart@astro.ru.nl>
 """
 
 from pycrtools.tasks import Task
@@ -10,7 +10,6 @@ import pycrtools as cr
 import numpy as np
 import os
 
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 class AntennaResponse(Task):
     """Calculates and unfolds the LOFAR (LBA or HBA) antenna response.
