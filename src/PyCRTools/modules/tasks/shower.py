@@ -51,6 +51,8 @@ class Shower(Task):
 
         save_plots=dict(default=False,
             doc="Saving plost instead of showing them."),
+        save_resolution=dict(default=None, 
+            doc='Make high resolution png images of the footprint possible, None is matplotlib default.'),    
         plot_prefix=dict(default="",
             doc="Prefix for stored plots"),
         plot_type=dict(default="png",
@@ -365,7 +367,7 @@ class Shower(Task):
                 from os import environ
                 from os.path import isfile
                 if "LOFARSOFT" in environ.keys():
-                    bgimname = environ["LOFARSOFT"] + "/src/PyCRTools/extras/LORA_layout_background.{0}".format(self.plot_type)
+                    bgimname = environ["LOFARSOFT"] + "/src/PyCRTools/extras/LORA_layout_background.png"
                     if isfile(bgimname):
                         bgim = cr.plt.imread(bgimname)
 
@@ -464,7 +466,7 @@ class Shower(Task):
 
                     if self.save_plots:
                         plotname = self.plot_prefix + "shower_footprint_polX.{0}".format(self.plot_type)
-                        cr.plt.savefig(plotname)
+                        cr.plt.savefig(plotname,dpi=self.save_resolution)
                         self.plotlist.append(plotname)
 
                     # ----------- POL 1
@@ -518,7 +520,7 @@ class Shower(Task):
 
                                 if self.save_plots:
                                     plotname = self.plot_prefix + "shower_footprint_polY.{0}".format(self.plot_type)
-                                    cr.plt.savefig(plotname)
+                                    cr.plt.savefig(plotname,dpi=self.save_resolution)
                                     self.plotlist.append(plotname)
 
                         # -------- POL 2
@@ -570,7 +572,7 @@ class Shower(Task):
 
                                 if self.save_plots:
                                     plotname = self.plot_prefix + "shower_footprint_polZ.{0}".format(self.plot_type)
-                                    cr.plt.savefig(plotname)
+                                    cr.plt.savefig(plotname,dpi=self.save_resolution)
                                     self.plotlist.append(plotname)
 
                     if not self.save_plots:
