@@ -454,10 +454,11 @@ class CalibrateFM(Task):
         timeDiff -= np.median(timeDiff[0:end])
         # wrap into correct time interval
         timeDiff -= period * np.round(timeDiff / period)
+        timeDiff -= np.median(timeDiff[0:end]) # can change a bit by the wrapping... have to repeat.
 
+        interStationDelays = np.zeros(nofStations)
         # Do inter-station delays with plot and output param (dict)
         if nofStations > 1:
-            interStationDelays = np.zeros(nofStations)
             refdelay = 0.0
             if self.doplot:
                 plt.figure()
