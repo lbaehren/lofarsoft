@@ -59,20 +59,20 @@ class CMDLine:
                            help="specify the Observation ID (i.e. L30251). This option is required", default="", type='str')
         	self.cmd.add_option('-p', '-P', '--pulsar', dest='psr', metavar='PSRS|word',
                            help="specify the Pulsar Name or comma-separated list of Pulsars for folding (w/o spaces) or \
-                                 give one of the 5 special words: \"parset\" - to take pulsar name from the source field for each SAP \
-                                 separately from the parset file, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV \
-                                 of the particular SAP, or \"tabfind\" to find the brightest pulsar for each TAB individually, or \
-                                 \"tabfind+\" to first get pulsar from the parset if pulsar name their is legitimate, then get the brightest \
-                                 one in the SAP (same as \"sapfind\"), and get another pulsar from the TAB (same as \"tabfind\"). \
-                                 If no pulsars are given and no special words used, then pipeline will try to take source names from \
-                                 parset file first, and then look for the best pulsars in SAP's FOV (same as \"sapfind\"). \
-                                 Word 'NONE' as a pulsar name is ignored", default="", type='str')
+give one of the 5 special words: \"parset\" - to take pulsar name from the source field for each SAP \
+separately from the parset file, or \"sapfind\", \"sapfind3\" to find the best (3 best) pulsars in FOV \
+of the particular SAP, or \"tabfind\" to find the brightest pulsar for each TAB individually, or \
+\"tabfind+\" to first get pulsar from the parset if pulsar name their is legitimate, then get the brightest \
+one in the SAP (same as \"sapfind\"), and get another pulsar from the TAB (same as \"tabfind\"). \
+If no pulsars are given and no special words used, then pipeline will try to take source names from \
+parset file first, and then look for the best pulsars in SAP's FOV (same as \"sapfind\"). \
+Word 'NONE' as a pulsar name is ignored", default="", type='str')
         	self.cmd.add_option('-o', '-O', '--output', dest='outdir', metavar='DIR',
                            help="specify the Output Processing Location relative to /data/LOFAR_PULSAR_ARCHIVE_locus*. \
-                                 Default is corresponding *_red or *_redIS directory", default="", type='str')
+Default is corresponding *_red or *_redIS directory", default="", type='str')
         	self.cmd.add_option('--par', '--parfile', '--eph', dest='parfile', metavar='PARFILE',
                            help="specify the parfile for one pulsar to fold. Pulsar name should be given explicitely using --pulsar option \
-                                 and only one pulsar name should be given for --par option to work", default="", type='str')
+and only one pulsar name should be given for --par option to work", default="", type='str')
         	self.cmd.add_option('--nodecode', action="store_true", dest='is_nodecode',
                            help="optional parameter to skip decoding the data (2bf2fits/bf2puma2)", default=False)
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
@@ -89,11 +89,11 @@ class CMDLine:
                            help="creating diagnostic plots only on processing nodes assuming the data required for plots is there already", default=False)
         	self.cmd.add_option('--single-pulse', action="store_true", dest='is_single_pulse', 
                            help="running single-pulse analysis in addition to folding a profile (implemented only \
-                                 for IS/CS data, for CV data only filterbank file will be created on the processing node)", default=False)
+for IS/CS data (PRESTO part of the pipeline only), for CV data only filterbank file will be created on the processing node)", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
-                                 TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
-                                 specified beams are to be excluded from processing", default="", type='str')
+TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
+specified beams are to be excluded from processing", default="", type='str')
         	self.cmd.add_option('--noIS', action="store_true", dest='is_noIS',
                            help="optional parameter to turn off processing of Incoherent sum (IS) data", default=False)
         	self.cmd.add_option('--noCS', action="store_true", dest='is_noCS',
@@ -104,10 +104,9 @@ class CMDLine:
                            help="optional parameter to turn off processing of Fly's Eye (FE) data", default=False)
         	self.cmd.add_option('--del', '--delete', action="store_true", dest='is_delete',
                            help="optional parameter to delete the previous entire output processing location if it exists. \
-                                 Otherwise, the new results will be overwritten/added to existing directory", default=False)
+Otherwise, the new results will be overwritten/added to existing directory", default=False)
         	self.cmd.add_option('--parset', dest='parset', metavar='FILE',
-                           help="specify explicitely the input parameter file (parset file). By default, it will be looked for \
-                                 in standard system directory", default="", type='str')
+                           help="specify explicitely the input parameter file (parset file). By default, it will be looked for in standard system directory", default="", type='str')
         	self.cmd.add_option('--raw', dest='rawdir', metavar='RAWDIR',
                            help="specify the location of input raw data. Directory structure is assumed as RAWDIR/<ObsID>.", default="/data", type='str')
         	self.cmd.add_option('--locate-rawdata', action="store_true", dest='is_locate_rawdata',
@@ -123,28 +122,27 @@ class CMDLine:
         	self.cmd.add_option('--prepfold-extra-opts', dest='prepfold_extra_opts', metavar='STRING',
                            help="specify extra additional options for Prepfold command", default="", type='str')
         	self.cmd.add_option('--first-frequency-split', dest='first_freq_split', metavar='SPLIT#',
-                           help="start processing from this frequency split. For CS/IS it works only for processing with DAL support. \
-                                 Default: %default", default=0, type='int')
+                           help="start processing from this frequency split. For CS/IS it works only for processing with DAL support. Default: %default", default=0, type='int')
         	self.cmd.add_option('--nsplits', dest='nsplits', metavar='#SPLITS',
                            help="only process the #SPLITS splits starting from SPLIT# determined by --first-frequency-split. \
-                                 For CS/IS it works only for processing with DAL support. Default: all splits", default=-1, type='int')
+For CS/IS it works only for processing with DAL support. Default: all splits", default=-1, type='int')
         	self.cmd.add_option('--fwhm-CS', dest='fwhm_CS', metavar='FWHM (deg)',
                            help="set the full-width at half maximum (in degrees) for CS beams. Default is 1 deg for HBA and 2 deg for LBA that \
-                                 corresponds roughly to the beam sizes of Superterp at 120 and 60 MHz", default=-1., type='float')
+corresponds roughly to the beam sizes of Superterp at 120 and 60 MHz", default=-1., type='float')
         	self.cmd.add_option('--fwhm-IS', dest='fwhm_IS', metavar='FWHM (deg)',
                            help="set the full-width at half maximum (in degrees) for IS beams. Default is 6 deg for HBA and 12 deg for LBA that \
-                                 corresponds roughly to the beam sizes of Superterp at 120 and 60 MHz", default=-1., type='float')
+corresponds roughly to the beam sizes of Superterp at 120 and 60 MHz", default=-1., type='float')
         	self.cmd.add_option('--debug', action="store_true", dest='is_debug',
                            help="optional for testing: turns on debug level logging in Python and intermediate data files are not deleted", default=False)
         	self.cmd.add_option('-q', '--quiet', action="store_true", dest='is_quiet',
                            help="optional parameter to turn off user's warnings and waiting time of 10 seconds in the beginning", default=False)
         	self.cmd.add_option('--noinit', action="store_true", dest='is_noinit',
                            help="do not check for down nodes and available input raw data. Observation config is read from saved file \
-                                 rather then is initialized using parset file (mostly for _internal_ use only)", default=False)
+rather then is initialized using parset file (mostly for _internal_ use only)", default=False)
         	self.cmd.add_option('--local', action="store_true", dest='is_local', 
                            help="to process the data locally on current locus node for one beam only. Should only be used together \
-                                 with --beams option and only the first beam will be used if there are several specified in --beams \
-                                 (mostly for _internal_ use only)", default=False)
+with --beams option and only the first beam will be used if there are several specified in --beams \
+(mostly for _internal_ use only)", default=False)
 		# adding CS/IS/FE extra options
 	        self.groupCS = opt.OptionGroup(self.cmd, "CS/IS/FE extra options")
         	self.groupCS.add_option('--skip-subdyn', action="store_true", dest='is_skip_subdyn',
@@ -168,7 +166,7 @@ class CMDLine:
                            help="set the upper limit on RAM usage for dspsr as the multiple of the minimum possible block size. Default is %default", default=2, type='int')
         	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
-                                 clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
+clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
         	self.groupCV.add_option('--nblocks', dest='nblocks', metavar='#BLOCKS',
                            help="only read the first #BLOCKS blocks. Default: all blocks", default=-1, type='int')
         	self.groupCV.add_option('--all-for-scaling', action="store_true", dest='is_all_times',
