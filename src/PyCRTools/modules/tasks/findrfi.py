@@ -117,6 +117,8 @@ class FindRFI(Task):
     def run(self):
         """Run the task.
         """
+        np_error_convention = np.geterr()['divide']
+        np.seterr(divide='ignore') # ignore divide by zero when doing logarithms etc.
 
         if self.filename:
             self.f = cr.open(self.filename, blocksize=self.blocksize)  # assume blocksize has been set as well
@@ -336,3 +338,6 @@ class FindRFI(Task):
             plt.savefig(p)
 
             self.plotlist.append(p)
+
+        np.seterr(divide=np_error_convention)
+
