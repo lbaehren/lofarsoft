@@ -86,8 +86,12 @@ if __name__ == '__main__':
 	Beams_good = RAs[:,0][indices]
 
 	# determine the size of FoV to plot
-	fov_size=np.max([np.abs(np.min(RAs_good)), np.abs(np.max(RAs_good)), np.abs(np.min(DECs_good)), np.abs(np.max(DECs_good))])
-	fov_size=fov_size+0.2*fov_size # increase it by 20% for better viewing
+#	fov_size=np.max([np.abs(np.min(RAs_good)), np.abs(np.max(RAs_good)), np.abs(np.min(DECs_good)), np.abs(np.max(DECs_good))])
+#	fov_size=fov_size+0.2*fov_size # increase it by 20% for better viewing
+	RA_size=np.max([np.abs(np.min(RAs_good)), np.abs(np.max(RAs_good))])
+	RA_size=RA_size+0.2*RA_size # increase it by 20% for better viewing
+	DEC_size=np.max([np.abs(np.min(DECs_good)), np.abs(np.max(DECs_good))])
+	DEC_size=DEC_size+0.2*DEC_size # increase it by 20% for better viewing
 
 	#s = np.ones(len(RAs))*300
 	#c = np.zeros(len(RAs))+0.01
@@ -99,10 +103,10 @@ if __name__ == '__main__':
 	s = np.ones(len(RAs_good))*300
 	c = Chisqs[:,1]
 
-	xmin=-fov_size * RAD2DEG
-	xmax=fov_size * RAD2DEG
-	ymin=-fov_size * RAD2DEG
-	ymax=fov_size * RAD2DEG
+	xmin=-RA_size * RAD2DEG
+	xmax=RA_size * RAD2DEG
+	ymin=-DEC_size * RAD2DEG
+	ymax=DEC_size * RAD2DEG
 
 	### LINEAR plot ###
 
