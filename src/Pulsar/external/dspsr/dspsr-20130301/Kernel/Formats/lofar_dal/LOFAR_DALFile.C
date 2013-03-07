@@ -69,7 +69,8 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
     cerr << "LOFAR_DALFile::open_file observation frequency=" << setprecision(20) << freq.get() << endl;
 
   // getting number of SAPs
-  Attribute<unsigned> nsap = bf_file->nofSubArrayPointings();
+//  Attribute<unsigned> nsap = bf_file->nofSubArrayPointings();
+  Attribute<unsigned> nsap = bf_file->observationNofSubArrayPointings();
   if (nsap.exists())
     cerr << "LOFAR_DALFile::open_file number of SAPs=" << nsap.get() << endl;
   else
@@ -87,7 +88,8 @@ void dsp::LOFAR_DALFile::open_file (const char* filename)
   }
   BF_SubArrayPointing sap = bf_file->subArrayPointing(sap_index);
 
-  Attribute<unsigned> nbeam = sap.nofBeams();
+//  Attribute<unsigned> nbeam = sap.nofBeams();
+  Attribute<unsigned> nbeam = sap.observationNofBeams();
   if (nbeam.exists())
     cerr << "LOFAR_DALFile::open_file number of beams=" << nbeam.get() << endl;
   else
