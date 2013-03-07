@@ -176,6 +176,8 @@ class CalibrateFM(Task):
                                     doc="Output from FindRFI: Median (over all antennas) standard-deviation, per frequency channel. 1-D array with length blocksize/2 + 1."),
         refant = dict(default=0, doc="Reference antenna from FindRFI."),
 
+        flagged_antennas = dict(default=None, doc="Antenna indices flagged as BAD (e.g. power outliers, zero power etc.)"),
+
         referenceTransmitterGPS = dict(default=None,
                                        doc="GPS [long, lat] in degrees (N, E is positive) for a known transmitter. Typically used when tuning to a known frequency. The Smilde tower is at (6.403565, 52.902671)."),
 
@@ -448,6 +450,8 @@ class CalibrateFM(Task):
         else:
             timeDiff = sf.phaseWrap(phaseDiff) / nanosecondPhase
 
+        # Remove flagged antennnas by putting NaN in there
+        timeDiff[np.array(self.flagged_antennas)] = np.float('nan')
         period = 1.0e9 / freq
         # subtract first station's median time
         end = stationStartIndex[1]
@@ -457,11 +461,11 @@ class CalibrateFM(Task):
         timeDiff -= np.median(timeDiff[0:end]) # can change a bit by the wrapping... have to repeat.
 
         interStationDelays = np.zeros(nofStations)
+        if self.doplot:
+            fig, ax = plt.subplots(1)
         # Do inter-station delays with plot and output param (dict)
         if nofStations > 1:
             refdelay = 0.0
-            if self.doplot:
-                plt.figure()
             for i in range(nofStations):
                 start = stationStartIndex[i]
                 end = stationStartIndex[i + 1]
@@ -472,7 +476,7 @@ class CalibrateFM(Task):
 
 #                interStationDelays[i] -= refdelay
                 if self.doplot:
-                    plt.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3, label='Median station delay' if i == 0 else '')
+                    ax.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3, label='Median station delay' if i == 0 else '')
 
     #                        plt.annotate(stationlist[i])
             # Subtract reference station-delay
@@ -500,18 +504,19 @@ class CalibrateFM(Task):
 
         # Make plots
         if self.doplot:
-            plt.plot(timeDiff_fixed, 'o-', c='b', label='Measured - expected phase')
+            ax.plot(timeDiff_fixed, 'o-', c='b', label='Measured - expected phase')
             if self.correctOneSampleShifts:
-                plt.plot(timeDiff_glitches, 'o-', c='r', label='5 ns shifts found')
+                ax.plot(timeDiff_glitches, 'o-', c='r', label='5 ns shifts found')
             # plt.figure()
             rms_phase = self.phase_RMS.toNumpy()[:, bestchannel]
-            plt.plot(rms_phase, 'r', label='RMS phase noise')
-            plt.plot(- rms_phase, 'r')
+            ax.plot(rms_phase, 'r', label='RMS phase noise')
+            ax.plot(- rms_phase, 'r')
             plt.title(self.filefilter + '\nPhase difference between measured and best-fit modeled phase\nChannel %d,   f = %2.4f MHz,   pi rad = %1.3f ns' % (bestchannel, freq / 1.0e6, 1.0e9 / (2 * freq)))
             plt.ylabel('Time difference from phase [ns]')
             plt.xlabel('Antenna number (RCU/2)')
             plt.ylim(-period/2, period/2)
-            plt.legend()
+            leg = ax.legend(loc='best')
+            leg.get_frame().set_alpha(0.5)
 
             if self.save_plots:
                 p = self.plot_prefix + "calibration_phases.{0}".format(self.plot_type)
