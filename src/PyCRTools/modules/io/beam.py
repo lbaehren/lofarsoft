@@ -108,7 +108,7 @@ class BeamData(IOInterface):
             self.__block = value
         elif key is "DM":
             self.__dm = value
-            self.__dm_offset = self.calcDedispersionIndex(self.__dm, Ref_Freq=1.69e8)
+            self.__dm_offset = self.calcDedispersionIndex(self.__dm)
         elif key is "NCHUNKS":
             self.__nchunks = value
         elif key is "CAL_DELAY":
@@ -329,7 +329,7 @@ class BeamData(IOInterface):
 
         return pos
 
-    def getFFTData(self, data, block):
+    def getFFTData(self, data, block=-1):
         """Writes FFT data for selected stations to data array.
 
         Required Arguments:
@@ -354,16 +354,17 @@ class BeamData(IOInterface):
         block = cr.asval(block)
 
         if block < 0:
-            block = self.block
+            block = self.__block
         else:
             self.__block = block
 
+        spec_len = data.shape()[1]
+
         if not self['DM']:
             for i, file in enumerate(self.__filename):
-                data[i].readfilebinary(os.path.join(file, "data.bin"), self['BLOCK'] * self['BEAM_SPECLEN'] + self.__block_alignment[i])
+                data[i].readfilebinary(os.path.join(file, "data.bin"), (block + self.__block_alignment[i])*spec_len)
         else:
 
-            spec_len = data.shape()[1]
             if len(self['DM_OFFSET'][0]) != spec_len:
                 raise ValueError('Variable offset need correct lenght.')
 
@@ -381,7 +382,7 @@ class BeamData(IOInterface):
 
             # Note, this following loop could be slow (hOffsetReadFileBinary could maybe be optimized)
             for i, file in enumerate(self.__filename):
-                cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i])
+                cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i]*spec_len)
 
             pass
             # Addding phase correction to DM offsets. (coherent dedispersion).
