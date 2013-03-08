@@ -285,7 +285,7 @@ class FindRFI(Task):
             if self.plot_title:
                 plt.title('Median-average spectrum of all antennas')
             plt.xlabel('Frequency [MHz]')
-            plt.ylabel('log-spectral power [adc units]')
+            plt.ylabel('Log-Spectral Power [ADU]')
 #            self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
 
             p = self.plot_prefix + "average_spectrum.{0}".format(self.plot_type)
@@ -304,7 +304,7 @@ class FindRFI(Task):
             if self.plot_title:
                 plt.title('Median-average spectrum of all antennas, with flagging')
             plt.xlabel('Frequency [MHz]')
-            plt.ylabel('log-spectral power [adc units]')
+            plt.ylabel('Log-Spectral Power [ADU]')
 #            self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
 
             p = self.plot_prefix + "average_spectrum_flagged.{0}".format(self.plot_type)
@@ -332,7 +332,7 @@ class FindRFI(Task):
             if self.plot_title:
                 plt.title('Median-average spectrum of all antennas, cleaned')
             plt.xlabel('Frequency [MHz]')
-            plt.ylabel('log-spectral power [adc units]')
+            plt.ylabel('Log-Spectral Power [ADU]')
             p = self.plot_prefix + "average_spectrum_cleaned.{0}".format(self.plot_type)
 
             plt.savefig(p)
