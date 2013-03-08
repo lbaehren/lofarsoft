@@ -312,13 +312,16 @@ class FindRFI(Task):
             self.plotlist.append(p)
 
             if self.testplots:
-                plt.figure()
-                plt.plot(freqs, logspectrum, c='b')
-                plt.plot(freqs, medians, c='r')
-                if self.plot_title:
-                    plt.title('Median-average spectrum of all antennas versus median phase variance')
-                plt.xlabel('Frequency [MHz]')
-                plt.ylabel('Blue: log-spectral power [adc units]\nRed: phase variance [0-1]')
+                fig = plt.figure()
+                ax1 = fig.add_subplot(111)
+                ax1.plot(freqs, logspectrum, c='b')
+                ax1.set_xlabel('Frequency [MHz]')
+                # Make the y-axis label and tick labels match the line color.
+                ax1.set_ylabel('Log-Spectral Power [ADU]')
+
+                ax2 = ax1.twinx()
+                ax2.plot(freqs, medians, c='r'  )
+                ax2.set_ylabel('Phase Variance')
 
                 # move to testplots?
                 p = self.plot_prefix + "average_spectrum_phasevariance.{0}".format(self.plot_type)
