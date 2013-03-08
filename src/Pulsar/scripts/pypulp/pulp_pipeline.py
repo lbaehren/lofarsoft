@@ -870,7 +870,7 @@ class Pipeline:
 
 		# removing old version of all status png files (if exist)
 		log.info("Removing previous status png files (if any) ...")
-		cmd="rm -f status.png status.th.png TAheatmap_status.png TAheatmap_status.th.png FE_status.png FE_status.th.png dspsr_status.png dspsr_status.th.png"
+		cmd="rm -f status.png status.th.png ta_heatmap_sap*.png TAheatmap_status.png TAheatmap_status.th.png FE_status.png FE_status.th.png dspsr_status.png dspsr_status.th.png"
 		self.execute(cmd, log, workdir=sumdir)
 
 		# creating TA heatmaps 
