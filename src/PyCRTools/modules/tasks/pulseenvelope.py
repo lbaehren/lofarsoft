@@ -103,6 +103,8 @@ class PulseEnvelope(Task):
             doc = "List of plots"),
         plot_antennas=dict(default = lambda self: range(self.nantennas),
             doc = "Antennas to create plots for."),
+        plot_title=dict(default=True,
+            doc = "Plot title, turn off for publication ready figures."),    
         fftwplan=dict(default=lambda self: cr.FFTWPlanManyDftR2c(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
         ifftwplan=dict(default=lambda self: cr.FFTWPlanManyDftC2r(self.window_width_resampled, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)),
         extra=dict(default = False,
@@ -218,7 +220,8 @@ class PulseEnvelope(Task):
                 plt.xlabel(r"Time ($\mu s$)")
                 plt.ylabel("Amplitude (ADU)")
                 plt.legend()
-                plt.title("Pulse envelope for antenna {0:d} {1:f} {2:f}".format(i, self.mean[i], self.rms[i]))
+                if self.plot_title:
+                    plt.title("Pulse envelope for antenna {0:d} {1:f} {2:f}".format(i, self.mean[i], self.rms[i]))
                 plt.savefig(p)
 
                 self.plotlist.append(p)
@@ -240,7 +243,8 @@ class PulseEnvelope(Task):
             plt.gca().autoscale_view(tight=True)
             plt.xlabel(r"Time ($\mu s$)")
             plt.ylabel("Amplitude with offset (ADU)")
-            plt.title("All pulse envelopes")
+            if self.plot_title:
+                plt.title("All pulse envelopes")
             plt.savefig(p)
 
             self.plotlist.append(p)
