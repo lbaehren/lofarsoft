@@ -870,7 +870,7 @@ class Pipeline:
 
 		# removing old version of all status png files (if exist)
 		log.info("Removing previous status png files (if any) ...")
-		cmd="rm -f status.png status.th.png ta_heatmap_sap*.png TAheatmap_status.png TAheatmap_status.th.png FE_status.png FE_status.th.png dspsr_status.png dspsr_status.th.png"
+		cmd="rm -f %s/*status*.png %s/ta_heatmap_sap*.png" % (sumdir, sumdir)
 		self.execute(cmd, log, workdir=sumdir)
 
 		# creating TA heatmaps 
@@ -911,8 +911,9 @@ class Pipeline:
 						else: cmd="mv %s ta_heatmap_sap%d.png" % (heatmaps[0], sap.sapid)
 						self.execute(cmd, log, workdir=sumdir)
 						# remove temporary png files
-						cmd="rm -f ta_heatmap_sap%d_*.png" % (sap.sapid)
+						cmd="rm -f %s/ta_heatmap_sap%d_*.png" % (sumdir, sap.sapid)
 						self.execute(cmd, log, workdir=sumdir)
+
 			# combining TA heatmaps for different SAPs
 			heatmaps=glob.glob("%s/ta_heatmap_sap*.png" % (sumdir))
 			if len(heatmaps) > 0:
@@ -920,7 +921,7 @@ class Pipeline:
 				else: cmd="mv %s TAheatmap_status.png" % (heatmaps[0])
 				self.execute(cmd, log, workdir=sumdir)
 				# remove temporary png files
-				cmd="rm -f ta_heatmap_sap*.png"
+				cmd="rm -f %s/ta_heatmap_sap*.png" % (sumdir)
 				self.execute(cmd, log, workdir=sumdir)
 				# making a thumbnail version of TA heatmap combined plot
 				cmd="convert -scale 200x140-0-0 TAheatmap_status.png TAheatmap_status.th.png"
