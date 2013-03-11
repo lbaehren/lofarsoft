@@ -3,7 +3,7 @@
 **Usage:**
 execfile(PYP+"pipelines/frats_event.py")
 
-This is the basic LOFAR FRATS event processing script, including RFI excision adn beamforming.
+This is the basic LOFAR FRATS event processing script, including RFI excision and beamforming.
 To be added: gain calibration, pulse finding?
 
 **Parameters:**
@@ -30,7 +30,6 @@ Example::
 
 python frats_event.py filename_tbb.h5
 
-
 Note:
 It needs environment variables: $BF_PARSETS, $FRATS_ANALYSIS, and $FRATS_ANALYSIS/trigger_info/
     In Coma:
@@ -39,6 +38,8 @@ It needs environment variables: $BF_PARSETS, $FRATS_ANALYSIS, and $FRATS_ANALYSI
     In CEP1:
         $BF_PARSETS   = /globalhome/lofarsystem/log/
         $FRATS_ANALYSIS = /staging1/frats/tbb/analysis/
+
+.. moduleauthor:: J. Emilio Enriquez <e.enriquez 'at' astro.ru.nl>
 
 Revision History:
 V1.0 created by E. Enriquez, Feb 2013
@@ -111,11 +112,9 @@ triggger_info = np.load(Trigger_info_file[0])
 
 outdir = FRATS_ANALYSIS+Obs_ID
 
-if not os.path.isdir(outdir):      #Create folder if not there.
-    os.mkdir(outdir)
-    os.mkdir(outdir+'/beam.results/')
-elif not os.path.isdir(outdir+'/beam.results/'):
-    os.mkdir(outdir+'/beam.results/')
+# Create output directory, if not already present.
+if not os.path.isdir(outdir) or not os.path.isdir(outdir+'/beam.results/'):
+    os.mkdirs(outdir+'/beam.results/')
 
 outdir = FRATS_ANALYSIS+Obs_ID+'/beam.results/'
 
@@ -143,8 +142,8 @@ if flag_antenna:
         file['SELECTED_DIPOLES'] = list(antenna_list)
 
 if substation:
-    detail_name = '.pol%ia%s'%(polarization,extra)  #HBA0
-    detail_name2 = '.pol%ib%s'%(polarization,extra)   #HBA1
+    detail_name = '.pol%i_HBA0%s'%(polarization,extra)  #HBA0
+    detail_name2 = '.pol%i_HBA1%s'%(polarization,extra)   #HBA1
 else:
     detail_name = '.pol%i%s'%(polarization,extra)
     antenna_list = cr.hArray(int,file['NOF_DIPOLE_DATASETS'],file['SELECTED_DIPOLES_INDEX'])
@@ -177,9 +176,9 @@ if substation:
     antenna_list2 = file['SELECTED_DIPOLES_INDEX'][index:]
 
 #----------------------------------------------------
-#Calibrate station times.
+#Calibrate station times. First step: Rounding the sample_number used to the nearest whole block since second start, including CLOCK_OFFSET.
 
-sample_offset = cr.hArray(int,1,max(file['SAMPLE_NUMBER']))
+sample_offset = cr.hArray(int,1,max(file['SAMPLE_NUMBER'])+int(file['CLOCK_OFFSET'][0]/file['SAMPLE_INTERVAL'][0]))
 cr.hModulus(sample_offset, blocklen)
 
 sample_offset = cr.asval(blocklen - sample_offset + int(file['CLOCK_OFFSET'][0]/file['SAMPLE_INTERVAL'][0]))
