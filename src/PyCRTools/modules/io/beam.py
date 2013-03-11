@@ -43,6 +43,9 @@ class BeamData(IOInterface):
         # Current block number
         self.__block = block
 
+        # Residual delay from CLOCK_OFFSET calibration (between stations)
+        self.__cloffdelay = self.__clock_offsets()
+
         #Align the stations to the same block since second started.
         self.__block_alignment = max(self.__block_number()) - self.__block_number()
 
@@ -272,10 +275,26 @@ class BeamData(IOInterface):
             raise NotImplementedError('Stations started observing at a different second. Fix not implemented yet.')
 
         for nbeam in range(self.__nofBeamDataSets):
-            offset = max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER']) + int(self.__files[nbeam].par.hdr['CLOCK_OFFSET'][0]/self.__files[nbeam].par.hdr['SAMPLE_INTERVAL'][0])
+            offset = max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER']) + self.__cloffdelay[0]
             block_start.append(int(np.ceil(offset/float(self.__files[0].par.hdr['BeamFormer']['blocklen']))))
 
         return cr.hArray(block_start)
+
+    def __clock_offsets(self):
+        '''Gathers the clock offsets from the stations, and calculates in number of samples and the residual.
+        '''
+
+        offsets = cr.hArray([self.__files[i].par.hdr['CLOCK_OFFSET'][0]/self.__files[i].par.hdr['SAMPLE_INTERVAL'][0] for i in range(self.__nofBeamDataSets)])
+
+        # Residual offsets to reference frequency
+        residual = cr.hArray(float, len(offsets), fill=offsets)
+        cr.hFmod(residual, 1)
+
+        # Integer offsets to reference frequency
+        offset = offsets - residual
+        residual *= self.__files[0].par.hdr['SAMPLE_INTERVAL'][0]
+
+        return [offset, residual]
 
     def getNchunks(self):
         """Find the maximum number of blocks beetwen the beams. Analogous to MAXIMUM_READ_LENGTH in tbb.py.
@@ -393,6 +412,14 @@ class BeamData(IOInterface):
             weights_dm[0].phasetocomplex(phases_dm)
             weights_dm[1:] = weights_dm[0]
             #data[...].mul(weights_dm[...])
+
+        # Adding calibration delay between stations, subsample residual from CLOCK_OFFSET.
+
+        weights_cloff = self.empty('FFT_DATA')
+        phases_cloff = cr.hArray(float, weights_cloff, fill=0)
+        phases_cloff.delaytophase(self['BEAM_FREQUENCIES'],self.__cloffdelay[1])
+        weights_cloff.phasetocomplex(phases_cloff)
+        data[...].mul(weights_cloff[...])
 
         # Adding extra calibration delay between stations.
         if np.any(self['CAL_DELAY']):
