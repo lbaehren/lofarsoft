@@ -244,9 +244,13 @@ def getStationPhaseCalibration(station, antennaset, return_as_hArray=False, calt
                          "HBA0": "5",
                          "HBA1": "5",
                          "HBA_ZERO": "5",
+                         "HBA_ZERO_INNER": "5",
                          "HBA_ONE": "5",
+                         "HBA_ONE_INNER": "5",
                          "HBA_DUAL": "5",
-                         "HBA_JOINED": "5"}
+                         "HBA_DUAL_INNER": "5",
+                         "HBA_JOINED": "5",
+                         "HBA_JOINED_INNER": "5"}
 
     if antennaset not in antennasetToMode.keys():
         raise KeyError("Not a valid antennaset " + antennaset)
@@ -1216,17 +1220,30 @@ def getClockCorrection(station, antennaset="LBA", time=1278480000):
 
     clockcorrection = {}
     # Entering values as of April 26, 2012; for HBA and for LBA. HBA0 and HBA1 are available separately in LOFAR parsets.
+    # Changed to values as of Nov 5, 2012 (parset L73455), as for the parsets around this date the outer core stations are available.
     if "LBA" in antennaset:
-#        clockcorrection["CS003"] = 6.936566e-06
-#        clockcorrection["CS004"] = 7.905512e-06
-#        clockcorrection["CS005"] = 8.556805e-06
-#        clockcorrection["CS006"] = 7.905282e-06
-        clockcorrection["CS002"] = 8.291395e-06
-        clockcorrection["CS003"] = 6.890990e-06
-        clockcorrection["CS004"] = 7.855759e-06
-        clockcorrection["CS005"] = 8.507690e-06
-        clockcorrection["CS006"] = 7.850904e-06
-        clockcorrection["CS007"] = 7.885136e-06
+        clockcorrection["CS002"] = 8.339918e-06
+        clockcorrection["CS003"] = 6.936566e-06
+        clockcorrection["CS004"] = 7.905512e-06
+        clockcorrection["CS005"] = 8.556805e-06
+        clockcorrection["CS006"] = 7.905282e-06
+        clockcorrection["CS007"] = 7.928823e-06
+        clockcorrection["CS011"] = 7.55795e-06
+        clockcorrection["CS013"] = 1.639118e-05
+        clockcorrection["CS017"] = 1.541095e-05
+        clockcorrection["CS021"] = 6.04963e-06
+        clockcorrection["CS024"] = 4.65818e-06
+        clockcorrection["CS026"] = 1.619876e-05
+        clockcorrection["CS028"] = 1.6962571e-05
+        clockcorrection["CS030"] = 9.7160576e-06
+        clockcorrection["CS031"] = 6.370090e-06
+        clockcorrection["CS032"] = 8.546815e-06
+#        clockcorrection["CS002"] = 8.291395e-06
+#        clockcorrection["CS003"] = 6.890990e-06
+#        clockcorrection["CS004"] = 7.855759e-06
+#        clockcorrection["CS005"] = 8.507690e-06
+#        clockcorrection["CS006"] = 7.850904e-06
+#        clockcorrection["CS007"] = 7.885136e-06
     elif "HBA" in antennaset:
         clockcorrection["CS002"] = 8.291395e-06  # is the same as LBA for CS002 and CS007
         clockcorrection["CS003"] = 6.889990e-06
