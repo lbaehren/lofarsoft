@@ -288,7 +288,7 @@ class TABeam:
 					tmp_assigned_files.extend([el for el in self.assigned_files if re.search("_P%03d" % (sp), el)])
 				self.assigned_files=tmp_assigned_files
 		# Now checking that the number of available files is the same as assigned number
-		if self.numfiles != np.size(self.assigned_files):
+		if self.numfiles < np.size(self.assigned_files):
 			self.is_data_available = False
 			missing_files=self.assigned_files[:]
 			# checking first what files are missing
