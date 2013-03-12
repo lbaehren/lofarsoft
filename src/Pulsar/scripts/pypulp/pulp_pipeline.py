@@ -3034,6 +3034,7 @@ class CVUnitPart(CVUnit):
 				p.communicate()
 
 				# rsync'ing the ar-files and h5-files to the summary node to be combined and further processed
+				# also copy par-file(s) to have it/them in the summary directory
 				verbose=""
 				if cmdline.opts.is_debug: verbose="-v"
 				self.log.info("Rsync'ing *.ar files and *.h5 files to %s:%s" % (self.summary_node, target_summary_dir))
@@ -3042,7 +3043,10 @@ class CVUnitPart(CVUnit):
 					ar_list.append("%s/%s_%s.ar" % (self.curdir, psr, self.output_prefix))
 				# making list of h5 files
 				h5_list = glob.glob("%s/*.h5" % (self.curdir))
-				cmd="rsync %s -axP %s %s %s:%s" % (verbose, " ".join(ar_list), " ".join(h5_list), self.summary_node, target_summary_dir)
+				# also making list of par-files
+				par_list = glob.glob("%s_%s/%s%s/*.par" % (cep2.processed_dir_prefix, self.summary_node, \
+					cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix))
+				cmd="rsync %s -axP %s %s %s %s:%s" % (verbose, " ".join(ar_list), " ".join(h5_list), " ".join(par_list), self.summary_node, target_summary_dir)
 				self.execute(cmd, workdir=self.curdir)
 
 			# finish
@@ -3252,6 +3256,7 @@ class CVUnitPart(CVUnit):
 				p.communicate()
 
 				# rsync'ing the ar-files and h5-files to the summary node to be combined and further processed
+				# also copy par-file(s) to have it/them in the summary directory
 				verbose=""
 				if cmdline.opts.is_debug: verbose="-v"
 				self.log.info("Rsync'ing *.ar files and *.h5 files to %s:%s" % (self.summary_node, target_summary_dir))
@@ -3260,7 +3265,10 @@ class CVUnitPart(CVUnit):
 					ar_list.append("%s/%s_%s.ar" % (self.curdir, psr, self.output_prefix))
 				# making list of h5 files
 				h5_list = glob.glob("%s/*.h5" % (self.curdir))
-				cmd="rsync %s -axP %s %s %s:%s" % (verbose, " ".join(ar_list), " ".join(h5_list), self.summary_node, target_summary_dir)
+				# also making list of par-files
+				par_list = glob.glob("%s_%s/%s%s/*.par" % (cep2.processed_dir_prefix, self.summary_node, \
+					cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix))
+				cmd="rsync %s -axP %s %s %s %s:%s" % (verbose, " ".join(ar_list), " ".join(h5_list), " ".join(par_list), self.summary_node, target_summary_dir)
 				self.execute(cmd, workdir=self.curdir)
 
 			# finish
