@@ -3044,8 +3044,7 @@ class CVUnitPart(CVUnit):
 				# making list of h5 files
 				h5_list = glob.glob("%s/*.h5" % (self.curdir))
 				# also making list of par-files
-				par_list = glob.glob("%s_%s/%s%s/*.par" % (cep2.processed_dir_prefix, self.summary_node, \
-					cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix))
+				par_list = glob.glob("%s/*.par" % (self.outdir)
 				cmd="rsync %s -axP %s %s %s %s:%s" % (verbose, " ".join(ar_list), " ".join(h5_list), " ".join(par_list), self.summary_node, target_summary_dir)
 				self.execute(cmd, workdir=self.curdir)
 
@@ -3266,8 +3265,7 @@ class CVUnitPart(CVUnit):
 				# making list of h5 files
 				h5_list = glob.glob("%s/*.h5" % (self.curdir))
 				# also making list of par-files
-				par_list = glob.glob("%s_%s/%s%s/*.par" % (cep2.processed_dir_prefix, self.summary_node, \
-					cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix))
+				par_list = glob.glob("%s/*.par" % (self.outdir)
 				cmd="rsync %s -axP %s %s %s %s:%s" % (verbose, " ".join(ar_list), " ".join(h5_list), " ".join(par_list), self.summary_node, target_summary_dir)
 				self.execute(cmd, workdir=self.curdir)
 
