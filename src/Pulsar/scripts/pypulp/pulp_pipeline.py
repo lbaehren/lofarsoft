@@ -651,7 +651,8 @@ class Pipeline:
 					cmd="rm -f %s" % (result_archive)
 					self.execute(cmd, log, workdir=sumdir)
 				# moving log-file to corresponding SAP/BEAM directory
-				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
+				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)) and \
+					os.path.exists("%s/%s/SAP%d/%s" % (sumdir, unit.beams_root_dir, unit.sapid, unit.procdir)):
 					if not cmdline.opts.is_log_append:	
 						cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
 							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
@@ -779,7 +780,8 @@ class Pipeline:
 				cmd="rm -f %s" % (result_archive)
 				self.execute(cmd, log, workdir=sumdir)
 				# moving log-file to corresponding SAP/BEAM directory
-				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)):
+				if os.path.exists("%s/%s_sap%03d_beam%04d.log" % (sumdir, obs.id, unit.sapid, unit.tabid)) and \
+					os.path.exists("%s/%s/SAP%d/%s" % (sumdir, unit.beams_root_dir, unit.sapid, unit.procdir)):
 					if not cmdline.opts.is_log_append:	
 						cmd="mv -f %s_sap%03d_beam%04d.log %s/SAP%d/%s" % \
 							(obs.id, unit.sapid, unit.tabid, unit.beams_root_dir, unit.sapid, unit.procdir)
