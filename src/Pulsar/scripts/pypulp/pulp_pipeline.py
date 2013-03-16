@@ -3002,6 +3002,9 @@ class CVUnitPart(CVUnit):
 			else: nsubs_eff = self.nrSubsPerFile
 			total_chan = nsubs_eff * self.nrChanPerSub
 
+			target_summary_dir="%s_%s/%s%s/%s/SAP%d/%s" % (cep2.processed_dir_prefix, self.summary_node, \
+				cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix, self.beams_root_dir, self.sapid, self.procdir)
+
 			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_nofold and not cmdline.opts.is_nodecode:
 					# getting the list of "_S0_" files, the number of which is how many freq splits we have
@@ -3028,8 +3031,6 @@ class CVUnitPart(CVUnit):
 						self.execute(cmd, workdir=self.curdir)
 
 				# creating beam directory on summary node (where to copy ar-files)
-				target_summary_dir="%s_%s/%s%s/%s/SAP%d/%s" % (cep2.processed_dir_prefix, self.summary_node, \
-					cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix, self.beams_root_dir, self.sapid, self.procdir)
 				self.log.info("Creating directory %s on summary node %s..." % (target_summary_dir, self.summary_node))
 				cmd="ssh -t %s 'mkdir -m 775 -p %s'" % (self.summary_node, target_summary_dir)
 				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
@@ -3152,6 +3153,9 @@ class CVUnitPart(CVUnit):
 			else: nsubs_eff = self.nrSubsPerFile
 			total_chan = nsubs_eff * self.nrChanPerSub
 
+			target_summary_dir="%s_%s/%s%s/%s/SAP%d/%s" % (cep2.processed_dir_prefix, self.summary_node, 
+				cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix, self.beams_root_dir, self.sapid, self.procdir)
+
 			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
 				if not cmdline.opts.is_nodecode:
 					# getting the list of "_S0_" files, the number of which is how many freq splits we have
@@ -3251,8 +3255,6 @@ class CVUnitPart(CVUnit):
 						self.execute(cmd, workdir=self.curdir)
 
 				# creating beam directory on summary node (where to copy ar-files)
-				target_summary_dir="%s_%s/%s%s/%s/SAP%d/%s" % (cep2.processed_dir_prefix, self.summary_node, \
-					cmdline.opts.outdir == "" and cmdline.opts.obsid or cmdline.opts.outdir, self.summary_node_dir_suffix, self.beams_root_dir, self.sapid, self.procdir)
 				self.log.info("Creating directory %s on summary node %s..." % (target_summary_dir, self.summary_node))
 				cmd="ssh -t %s 'mkdir -m 775 -p %s'" % (self.summary_node, target_summary_dir)
 				p = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT)
