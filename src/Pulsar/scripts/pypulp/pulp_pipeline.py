@@ -3061,6 +3061,8 @@ class CVUnitPart(CVUnit):
 			if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
 			else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
 			os.system(cmd)
+			verbose=""
+			if cmdline.opts.is_debug: verbose="-v"
 			cmd="rsync %s -axP %s %s:%s" % (verbose, cep2.get_logfile(), self.summary_node, target_summary_dir)
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
 			proc.communicate()
@@ -3282,6 +3284,8 @@ class CVUnitPart(CVUnit):
 			if not cmdline.opts.is_log_append: cmd="cp -f %s %s" % (cep2.get_logfile(), self.outdir)
 			else: cmd="cat %s >> %s/%s" % (cep2.get_logfile(), self.outdir, cep2.get_logfile().split("/")[-1])
 			os.system(cmd)
+			verbose=""
+			if cmdline.opts.is_debug: verbose="-v"
 			cmd="rsync %s -axP %s %s:%s" % (verbose, cep2.get_logfile(), self.summary_node, target_summary_dir)
 			proc = Popen(shlex.split(cmd), stdout=PIPE, stderr=STDOUT, cwd=self.outdir)
 			proc.communicate()
