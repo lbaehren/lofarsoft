@@ -476,7 +476,7 @@ class CalibrateFM(Task):
 
 #                interStationDelays[i] -= refdelay
                 if self.doplot:
-                    ax.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=3, label='Median station delay' if i == 0 else '')
+                    ax.plot(np.array([start, end]), np.array([interStationDelays[i], interStationDelays[i]]), c='g', lw=6, label='Median station delay' if i == 0 else '')
 
     #                        plt.annotate(stationlist[i])
             # Subtract reference station-delay
@@ -504,9 +504,9 @@ class CalibrateFM(Task):
 
         # Make plots
         if self.doplot:
-            ax.plot(timeDiff_fixed, 'o-', c='b', label='Measured - expected phase')
+            ax.plot(timeDiff_fixed, 'o', c='b', label='Measured - expected phase')
             if self.correctOneSampleShifts:
-                ax.plot(timeDiff_glitches, 'o-', c='r', label='5 ns shifts found')
+                ax.plot(timeDiff_glitches, 'o', c='r', label='5 ns shifts found')
             # plt.figure()
             rms_phase = self.phase_RMS.toNumpy()[:, bestchannel]
             ax.plot(rms_phase, 'r', label='RMS phase noise')
@@ -517,6 +517,7 @@ class CalibrateFM(Task):
             plt.ylim(-period/2, period/2)
             leg = ax.legend(loc='best')
             leg.get_frame().set_alpha(0.5)
+            plt.subplots_adjust(top=0.85) # make room for big title
 
             if self.save_plots:
                 p = self.plot_prefix + "calibration_phases.{0}".format(self.plot_type)
