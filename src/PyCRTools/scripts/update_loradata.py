@@ -43,7 +43,7 @@ def pickle_parameter(value):
 # Check whether one or all keys need to be updated
 # -------------------------------------------
 if options.key == "all":
-    keys = ['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)', 'CoreE(X)', 'CoreE(Y)', 'Moliere_rad(m)', 'ElevaErr', 'AziErr', 'EnergyErr(eV)', 'Ne', 'NeErr','CorCoef_XY']
+    keys = ['UTC_Time_secs', 'nsecs', 'Core_X', 'Core_Y', 'Elevation', 'Azimuth', 'Energy_eV', 'CoreE_X', 'CoreE_Y', 'Moliere_rad_m', 'ElevaErr', 'AziErr', 'EnergyErr_eV', 'Ne', 'NeErr','CorCoef_XY',"detectorid", "posX", "posY", "posZ", "time", "10_nsec", "particle_density__m2","moliere","coreuncertainties","core","direction","energy"]
 else:
     keys = [options.key] 
        
@@ -57,31 +57,32 @@ conn = psycopg2.connect(host=options.host, user=options.user, password=options.p
 cur = conn.cursor()
 
 if options.every_event:
-    cur.execute("""SELECT ep.lora_utc_time_secs, e.eventID FROM
+    cur.execute("""SELECT e.timestamp, e.eventID FROM
             events AS e
             INNER JOIN eventparameters AS ep ON (e.eventID=ep.eventID)
             """)
 
     for i in cur.fetchall():
         if i[0] != None: 
-           f = unpickle_parameter(i[0])
+           f = i[0]
            e = i[1]
            times.append(int(f))
            eventids.append(e)
 else:
-    cur.execute("""SELECT ep.lora_utc_time_secs, e.eventID FROM
+    print "Updating one event", str(options.event_id)
+    if options.event_id == '':
+        print "Specifiy event ID"
+    cur.execute("""SELECT e.timestamp, e.eventID FROM
             events AS e
             INNER JOIN eventparameters AS ep ON (e.eventID=ep.eventID)
-             WHERE ((e.eventID='{0}'))""".format(str(options.event_id)))
-            """)
+            WHERE (e.eventID='{0}')""".format(str(options.event_id)))
     for i in cur.fetchall():
         if i[0] != None: 
-           f = unpickle_parameter(i[0])
+           f = i[0]
            e = i[1]
            times.append(int(f))
            eventids.append(e)    
-    
-    
+ 
 
 for i in xrange(len(times)):
     loradata = lora.loraInfo(times[i], options.lorapath)
