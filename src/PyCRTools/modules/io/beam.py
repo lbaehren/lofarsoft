@@ -275,7 +275,7 @@ class BeamData(IOInterface):
             raise NotImplementedError('Stations started observing at a different second. Fix not implemented yet.')
 
         for nbeam in range(self.__nofBeamDataSets):
-            offset = max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER']) + self.__cloffdelay[0]
+            offset = max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER']) + self.__cloffdelay[0][nbeam]
             block_start.append(int(np.ceil(offset/float(self.__files[0].par.hdr['BeamFormer']['blocklen']))))
 
         return cr.hArray(block_start)
