@@ -403,6 +403,8 @@ class BeamData(IOInterface):
             # Note, this following loop could be slow (hOffsetReadFileBinary could maybe be optimized)
             for i, file in enumerate(self.__filename):
                 cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i]*spec_len)
+                #RFI excision
+                data[i,self['BEAM_RFI_CHANNELS']] /= 10000
 
             pass
             # Addding phase correction to DM offsets. (coherent dedispersion).
@@ -414,7 +416,6 @@ class BeamData(IOInterface):
             #data[...].mul(weights_dm[...])
 
         # Adding calibration delay between stations, subsample residual from CLOCK_OFFSET.
-
         weights_cloff = self.empty('FFT_DATA')
         phases_cloff = cr.hArray(float, weights_cloff, fill=0)
         phases_cloff.delaytophase(self['BEAM_FREQUENCIES'],self.__cloffdelay[1])
