@@ -513,7 +513,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Run beamforming direction finder once
                 # not to find the direction but to at least have one point for outer stations
                 if n==0:
-                    dbf = cr.trun("DirectionFitBF", fftdata=antenna_response.on_sky_polarization, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
+                    dbf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
                 
                     pulse_envelope_dbf = cr.trun("PulseEnvelope", timeseries_data=dbf.beamformed_timeseries, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, extra=True)
 
