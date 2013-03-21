@@ -513,9 +513,17 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Run beamforming direction finder once
                 # not to find the direction but to at least have one point for outer stations
                 if n==0:
-                    dbf = cr.trun("DirectionFitBF", fft_data=antenna_response.on_sky_polarization, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
+                    fft_data_0[...].copy(antenna_response.on_sky_polarization[0:nantennas:2, ...])
+                    fft_data_1[...].copy(antenna_response.on_sky_polarization[1:nantennas:2, ...])
+
+                    dbf_theta = cr.trun("DirectionFitBF", fft_data=fft_data_0, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
+                    dbf_phi = cr.trun("DirectionFitBF", fft_data=fft_data_1, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
+
+                    timeseries_data_dbf = cr.hArray(float, dimensions=(2,dbf_theta.beamformed_timeseries.shape()[0]))
+                    timeseries_data_dbf[0].copy(dbf_theta.beamformed_timeseries)
+                    timeseries_data_dbf[1].copy(dbf_phi.beamformed_timeseries)
                 
-                    pulse_envelope_dbf = cr.trun("PulseEnvelope", timeseries_data=dbf.beamformed_timeseries, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, extra=True)
+                    pulse_envelope_dbf = cr.trun("PulseEnvelope", timeseries_data=timeseries_data_dbf, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, extra=True)
 
                     station["crp_integrated_pulse_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_pulse_power).toNumpy()
                     station["crp_integrated_noise_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_noise_power).toNumpy()
