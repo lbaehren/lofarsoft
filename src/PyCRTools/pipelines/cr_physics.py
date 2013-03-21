@@ -30,6 +30,7 @@ from pycrtools.tasks import directionfitplanewave
 from pycrtools.tasks import pulseenvelope
 #from pycrtools.tasks import stokesparameters
 from pycrtools.tasks import wavefront
+from pycrtools.tasks import directionfitbf
 
 from optparse import OptionParser
 from contextlib import contextmanager
@@ -508,6 +509,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                     # Get timeseries data
                     cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], ifftwplan)
+
+				# Run beamforming direction finder once
+				# not to find the direction but to at least have one point for outer stations
+				if n==0:
+					dbf = cr.trun("DirectionFitBF", fftdata=antenna_response.on_sky_polarization, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
+                
+					pulse_envelope_dbf = cr.trun("PulseEnvelope", timeseries_data=dbf.beamformed_timeseries, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, extra=True)
+
+                	station["crp_integrated_pulse_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_pulse_power).toNumpy()
+                	station["crp_integrated_noise_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_noise_power).toNumpy()
 
                 # Calculate delays using Hilbert transform
                 pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2)
