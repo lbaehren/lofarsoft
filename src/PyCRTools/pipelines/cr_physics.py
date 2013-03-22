@@ -523,7 +523,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     timeseries_data_dbf[0].copy(dbf_theta.beamformed_timeseries)
                     timeseries_data_dbf[1].copy(dbf_phi.beamformed_timeseries)
                 
-                    pulse_envelope_dbf = cr.trun("PulseEnvelope", timeseries_data=timeseries_data_dbf, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, extra=True)
+                    pulse_envelope_dbf = cr.trun("PulseEnvelope", timeseries_data=timeseries_data_dbf, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=station["crp_plotfiles"], extra=True)
 
                     station["crp_integrated_pulse_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_pulse_power).toNumpy()
                     station["crp_integrated_noise_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_noise_power).toNumpy()
