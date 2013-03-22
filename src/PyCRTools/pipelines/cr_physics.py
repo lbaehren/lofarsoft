@@ -512,7 +512,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Run beamforming direction finder once
                 # not to find the direction but to at least have one point for outer stations
-                if n==0:
+                if n==0 and not hba:
                     fft_data_0[...].copy(antenna_response.on_sky_polarization[0:nantennas:2, ...])
                     fft_data_1[...].copy(antenna_response.on_sky_polarization[1:nantennas:2, ...])
 
