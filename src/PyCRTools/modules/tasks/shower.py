@@ -94,6 +94,9 @@ class Shower(Task):
         footprint_scale=dict(default=False, doc="Scale footprint to display superterp only."),
         footprint_scale_box=dict(default=200, doc="Box around coordinate center which will be plotted"),
         footprint_scale_to_max=dict(default="False", doc="Scale circle size of the footprint to subtract minimum occuring value"),
+        
+        footprint_movie=dict(default=False, doc='Make individual pictures to make a footprint movie'),
+        footprint_number_frames=dict(default=30, doc='How many images should the movie be split up into'), 
 
         footprint_lora_enable=dict(default=True,
             doc="Draw Information from LORA"),
@@ -439,7 +442,28 @@ class Shower(Task):
                         cr.plt.imshow(bgim, origin='upper', extent=[-375 / 2, 375 / 2, -375 / 2 - 6 * 120 / 227, 375 / 2 - 6 * 120 / 227], alpha=1.0)
 
                     if Data_available:
-                        cr.plt.scatter(self.positions[:, 0], self.positions[:, 1], s=self.sizes0, c=self.scolors, marker=self.footprint_marker_lofar, cmap=self.footprint_colormap)
+                        if self.footprint_movie:
+                            maximum_color = self.scolors.max()
+                            for frames in xrange(self.footprint_number_frames):
+                                cut = np.where(self.scolors>=self.scolors.max()*((float(frames)+1)/self.footprint_number_frames))
+                                new_size = np.copy(self.sizes0)
+                                new_size[cut[0]]=0
+                                cr.plt.figure()
+                                cr.plt.imshow(bgim, origin='upper', extent=[-375 / 2, 375 / 2, -375 / 2 - 6 * 120 / 227, 375 / 2 - 6 * 120 / 227], alpha=1.0)
+                                cr.plt.scatter(self.positions[:, 0], self.positions[:, 1], s=new_size, c=self.scolors, marker=self.footprint_marker_lofar, cmap=self.footprint_colormap)
+                                self.cbar = cr.plt.colorbar()
+                                self.cbar.set_label("Time of arrival (ns)")
+                                cr.plt.xlabel("LOFAR East [meters] ")
+                                cr.plt.ylabel("LOFAR North [meters] ")
+                                if frames < 10:
+                                    name = "movie0"+str(frames)+".png"
+                                else:
+                                    name = "movie"+str(frames)+".png"
+                                cr.plt.savefig(name)
+                                cr.plt.close()
+                                
+                        else:    
+                            cr.plt.scatter(self.positions[:, 0], self.positions[:, 1], s=self.sizes0, c=self.scolors, marker=self.footprint_marker_lofar, cmap=self.footprint_colormap)
                         if self.timelags is not None:
                             self.cbar = cr.plt.colorbar()
                             self.cbar.set_label("Time of arrival (ns)")
