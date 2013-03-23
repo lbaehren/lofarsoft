@@ -2222,11 +2222,11 @@ if __name__ == "__main__":
 	if os.path.exists(archivefile):
 		gridfiles, griddates, gridtimes, gridsizes, gridlinks = np.loadtxt(archivefile, usecols=(0,1,2,3,4), dtype=str, unpack=True, comments='#')
 		lotfiles, lotdates, lottimes, lotsizes, lotlinks = np.loadtxt(lotaasfile, usecols=(0,1,2,3,4), dtype=str, unpack=True, comments='#')
-		gridfiles.extend(lotfiles)
-		griddates.extend(lotdates)
-		gridtimes.extend(lottimes)
-		gridsizes.extend(lotsizes)
-		gridlinks.extend(lotlinks)
+		gridfiles = np.append(gridfiles, lotfiles)
+		griddates = np.append(griddates, lotdates)
+		gridtimes = np.append(gridtimes, lottimes)
+		gridsizes = np.append(gridsizes, lotsizes)
+		gridlinks = np.append(gridlinks, lotlinks)
 		# converting sizes to float and checking those also that are not yet determined, i.e. have '-'
 		gridsizes = [r != '-' and float(r) or 0.0 for r in gridsizes]
 
