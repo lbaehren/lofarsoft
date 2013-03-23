@@ -115,6 +115,8 @@ dumpfile="/home/%s/%s/dump.b" % (username, hostdir)
 
 # common large file with archive links in the GRID
 archivefile="/home/leeuwen/grid/archived-at-sara.txt"
+# separate archive file with links for LOTAAS
+lotaasfile="/home/leeuwen/grid/archived-at-sara-lotaas.txt"
 gridfiles = ()  # list of archive files
 
 # file used in debug mode to write iteration number in main loop
@@ -2219,6 +2221,12 @@ if __name__ == "__main__":
 	# reading the grid links from common file to the list
 	if os.path.exists(archivefile):
 		gridfiles, griddates, gridtimes, gridsizes, gridlinks = np.loadtxt(archivefile, usecols=(0,1,2,3,4), dtype=str, unpack=True, comments='#')
+		lotfiles, lotdates, lottimes, lotsizes, lotlinks = np.loadtxt(lotaasfile, usecols=(0,1,2,3,4), dtype=str, unpack=True, comments='#')
+		gridfiles.extend(lotfiles)
+		griddates.extend(lotdates)
+		gridtimes.extend(lottimes)
+		gridsizes.extend(lotsizes)
+		gridlinks.extend(lotlinks)
 		# converting sizes to float and checking those also that are not yet determined, i.e. have '-'
 		gridsizes = [r != '-' and float(r) or 0.0 for r in gridsizes]
 
@@ -2627,10 +2635,10 @@ if __name__ == "__main__":
 					if len(rawfiles) != 0: 
 						archivestatus = archivestatus+" raw"
 						archivesize["raw"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("raw", grid_obsid_files[i])])
-					subbandfiles = [file for file in grid_obsid_files if re.search("sub", file)]
+					subbandfiles = [file for file in grid_obsid_files if re.search("sub", file) or re.search("fits", file)]
 					if len(subbandfiles) != 0: 
-						archivestatus = archivestatus+" sub"
-						archivesize["sub"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("sub", grid_obsid_files[i])])
+						archivestatus = archivestatus+" sub[fits]"
+						archivesize["sub"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("sub", grid_obsid_files[i]) or re.search("fits", grid_obsid_files[i])])
 					metafiles = [file for file in grid_obsid_files if re.search("meta", file)]
 					if len(metafiles) != 0: 
 						archivestatus = archivestatus+" meta"
