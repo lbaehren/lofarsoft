@@ -874,12 +874,6 @@ def getRelativeAntennaPositions(station, antennaset, return_as_hArray=False):
 
     """
 
-    # Known antennasets
-    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE0', 'LBA_SPARSE1', 'HBA_0', 'HBA_1', 'HBA','HBA0','HBA1']
-
-    # Check if requested antennaset is known
-    assert antennaset in names
-
     # Check station id type
     if isinstance(station, int):
         # Convert a station id to a station name
@@ -989,12 +983,6 @@ def getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=False):
                [  8.53000000e-01,   1.37240000e+01,  -3.00000000e-03]])
 
     """
-
-    # Known antennasets
-    names = ['LBA_INNER', 'LBA_OUTER', 'LBA_X', 'LBA_Y', 'LBA_SPARSE_EVEN', 'LBA_SPARSE_ODD', 'HBA0', 'HBA1', 'HBA','HBA_DUAL']
-
-    # Check if requested antennaset is known
-    assert antennaset in names
 
     if "LBA" in antennaset:
         antennatype = "LBA"
