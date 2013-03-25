@@ -12,6 +12,7 @@ matplotlib.use("Agg")
 import os
 import sys
 import time
+import datetime
 import pytmf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -112,6 +113,7 @@ def process_event(event):
     finally:
         event.write()
         print "-- event {0} completed in {1:.3f} s".format(event._id, time.clock() - start)
+        event["last_processed"] = datetime.utcnow()
 
 @contextmanager
 def process_station(station):

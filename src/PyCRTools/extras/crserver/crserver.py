@@ -424,7 +424,7 @@ def events_handler():
     c = conn.cursor()
 
     # Fetch all event IDs
-    c.execute("""SELECT e.eventID, e.timestamp, e.antennaset, e.status, e.alt_status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere FROM
+    c.execute("""SELECT e.eventID, e.timestamp, e.antennaset, e.status, e.alt_status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere, last_processed FROM
     events AS e LEFT JOIN eventparameters AS ep ON (e.eventID=ep.eventID)""")
 
     # Generate empty XML
@@ -439,6 +439,7 @@ def events_handler():
         SubElement(event, "antennaset").text = str(e[2])
         SubElement(event, "status").text = str(e[3])
         SubElement(event, "alt_status").text = str(e[4])
+        SubElement(event, "last_processed").text = str(unpickle_parameter(e[11]))
 
         lora = SubElement(event, "lora")
 
