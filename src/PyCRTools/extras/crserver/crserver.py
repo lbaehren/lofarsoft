@@ -450,7 +450,7 @@ def events_handler():
         SubElement(event, "alt_status").text = str(e[4])
         SubElement(event, "last_processed").text = str(unpickle_parameter(e[11]))
         if str(e[3]) == "CR_FOUND":
-            SubElement(event, "nof_good_stations").text = good_station_count[e[0]]
+            SubElement(event, "nof_good_stations").text = good_station_count[str(e[0])]
 
         lora = SubElement(event, "lora")
 
