@@ -211,7 +211,7 @@ class CRDatabase(object):
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN obsid TEXT;")
                 sql_list.append("ALTER TABLE stationparameters ADD COLUMN beam_direction TEXT;")
             # ______________________________________________________________________
-            #                                                              Version 11 
+            #                                                              Version 12 
             elif (12 == db_version_post):
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN last_processed TEXT;")
             # ______________________________________________________________________
