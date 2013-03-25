@@ -145,8 +145,8 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
       <th>Antennaset</th>
       <th>Event status</th>
       <th>Event alt_status</th>
-      <th>Energy (eV)</th>
       <th>Last processed</th>
+      <th>Energy (eV)</th>
       <th>Energy (log10(eV))</th>
       <th>Core x (m)</th>
       <th>Core y (m)</th>
