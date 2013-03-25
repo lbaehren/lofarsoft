@@ -135,7 +135,8 @@ class FindPulseDelay(Task):
     def run(self):
 
         # Take absolute value
-        temp = np.abs(self.trace.toNumpy())
+#        temp = np.abs(self.trace.toNumpy())
+        temp = self.trace.toNumpy() # NB! Take positive maximum of cross-correlation for delays! Not abs.
 
         # Calculate position
         self.maxpos = cr.hArray(np.argmax(temp, axis=1))
