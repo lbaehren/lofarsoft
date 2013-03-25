@@ -427,10 +427,19 @@ def events_handler():
     c.execute("""SELECT e.eventID, e.timestamp, e.antennaset, e.status, e.alt_status, lora_energy, lora_core_x, lora_core_y, lora_azimuth, lora_elevation, lora_moliere, last_processed FROM
     events AS e LEFT JOIN eventparameters AS ep ON (e.eventID=ep.eventID)""")
 
+    all_events = c.fetchall()
+
+    # For all good events fetch the number of good antennas
+    c.execute("""SELECT e.eventID, COUNT(s.status) FROM events AS e LEFT JOIN event_datafile AS ed ON (e.eventID=ed.eventID) INNER JOIN datafile_station AS ds ON (ed.datafileID=ds.datafileID) INNER JOIN stations AS s ON (ds.stationID=s.stationID) WHERE (s.status='GOOD') GROUP BY (e.eventID)""")
+
+    good_station_count = {}
+    for row in c.fetchall():
+        good_station_count[str(row[0])] = str(row[1])
+
     # Generate empty XML
     elements = Element("elements")
 
-    for e in c.fetchall():
+    for e in all_events:
 
         event = SubElement(elements, "event")
 
@@ -440,6 +449,7 @@ def events_handler():
         SubElement(event, "status").text = str(e[3])
         SubElement(event, "alt_status").text = str(e[4])
         SubElement(event, "last_processed").text = str(unpickle_parameter(e[11]))
+        SubElement(event, "nof_good_stations").text = good_station_count[e[0]]
 
         lora = SubElement(event, "lora")
 
