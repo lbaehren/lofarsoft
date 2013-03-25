@@ -66,7 +66,7 @@ class CRDatabase(object):
         self.settings = Settings(self.db)
 
         # Database version applied in this module
-        self.db_required_version = 10
+        self.db_required_version = 11
 
         if create or self.settings.db_version < self.db_required_version:
             self.__updateDatabase(self.db_required_version)
@@ -205,6 +205,11 @@ class CRDatabase(object):
             elif (10 == db_version_post):
                 sql_list.append("ALTER TABLE stationparameters ADD COLUMN crp_integrated_pulse_power_dbf TEXT;")
                 sql_list.append("ALTER TABLE stationparameters ADD COLUMN crp_integrated_noise_power_dbf TEXT;")
+            # ______________________________________________________________________
+            #                                                              Version 11 
+            elif (11 == db_version_post):
+                sql_list.append("ALTER TABLE eventparameters ADD COLUMN obsid TEXT;")
+                sql_list.append("ALTER TABLE stationparameters ADD COLUMN beam_direction TEXT;")
             # ______________________________________________________________________
             #                                                         Default update
             # Upgrade the database version number.
