@@ -29,7 +29,11 @@ def mapAntennasetKeyword(antennaset):
                   'HBA_ZERO': 'HBA_0',
                   'HBA_ONE': 'HBA_1',
                   'HBA_DUAL': 'HBA',
-                  'HBA_JOINED': 'HBA'}
+                  'HBA_JOINED': 'HBA',
+				  'HBA_ZERO_INNER': 'HBA_0', # Only true for core stations
+				  'HBA_ONE_INNER': 'HBA_1',  # Only true for core stations
+				  'HBA_DUAL_INNER': 'HBA',   # Only true for core stations
+				  'HBA_JOINED_INNER': 'HBA'} # Only true for core stations
 
     if antennaset in incorrect:
         antennaset = incorrect[antennaset]
