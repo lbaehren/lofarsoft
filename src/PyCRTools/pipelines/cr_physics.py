@@ -283,13 +283,13 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # Open file
             f = cr.open(station.datafile.settings.datapath + '/' + station.datafile.filename)
 
-            # Check if antenna_set is supported this pipeline
-            if f["ANTENNA_SET"] == "HBA_DUAL" or f["ANTENNA_SET"] == "HBA_JOINED":
+            # Check if we are dealing with LBA or HBA observations
+			if "HBA" in f["ANTENNA_SET"]:
                 hba = True
             elif "LBA" in f["ANTENNA_SET"]:
                 hba = False
             else:
-                raise EventSkipped("unsupported antennaset")
+                raise EventSkipped("unsupported antennaset {0}".format(f["ANTENNA_SET"]))
 
             # Read LORA information
             tbb_time = f["TIME"][0]
