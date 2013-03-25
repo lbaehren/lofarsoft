@@ -284,7 +284,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             f = cr.open(station.datafile.settings.datapath + '/' + station.datafile.filename)
 
             # Check if we are dealing with LBA or HBA observations
-			if "HBA" in f["ANTENNA_SET"]:
+            if "HBA" in f["ANTENNA_SET"]:
                 hba = True
             elif "LBA" in f["ANTENNA_SET"]:
                 hba = False
