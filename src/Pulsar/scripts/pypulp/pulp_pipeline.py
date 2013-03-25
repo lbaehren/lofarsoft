@@ -895,7 +895,7 @@ class Pipeline:
 						try:
 							cmd="cat %s/chi-squared.txt | grep _SAP%d | grep %s > %s/%s-chi-squared.txt" % (sumdir, sap.sapid, psr, sumdir, psr)
 							self.execute(cmd, log, is_os=True)
-							cmd="plot_LOFAR_TA_multibeam2.py --sap %d --chi %s-chi-squared.txt --parset %s.parset --out_logscale %s_SAP%d_%s_TA_heatmap_log.png --out_linscale %s_SAP%d_%s_TA_heatmap_linear.png --target %s" % (sap.sapid, psr, obs.id, obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, psr)
+							cmd="plot_LOFAR_TA_multibeam3.py --sap %d --chi %s-chi-squared.txt --parset %s.parset --out_logscale %s_SAP%d_%s_TA_heatmap_log.png --out_linscale %s_SAP%d_%s_TA_heatmap_linear.png --target %s" % (sap.sapid, psr, obs.id, obs.id, sap.sapid, psr, obs.id, sap.sapid, psr, psr)
 							self.execute(cmd, log, workdir=sumdir)
 							cmd="rm -f %s-chi-squared.txt" % (psr)
 							self.execute(cmd, log, workdir=sumdir)
@@ -1575,6 +1575,9 @@ CLK line will be removed from the parfile!" % (parfile,))
 					verbose=""
 					if cmdline.opts.is_debug: verbose="-v"
 					cmd="2bf2fits %s %s -parset %s -append -nbits 8 -A 100 -sigma 3 -nsubs %d -o %s %s" % (verbose, self.raw2fits_extra_options, obs.parset, self.tab.nrSubbands, self.output_prefix, input_file)
+					self.execute(cmd, workdir=self.curdir)
+					# fixing the coordinates
+					cmd="fix_fits_coordinates.py %s.fits" % (self.output_prefix)
 					self.execute(cmd, workdir=self.curdir)
 
 				# running RFI excision, checking
