@@ -32,6 +32,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
         <th>Antennaset</th>
         <th>Event status</th>
         <th>Event alt_status</th>
+        <th>Last processed</th>
         <th>Energy (eV)</th>
         <th>Energy (log10(eV))</th>
         <th>Core x (m)</th>
@@ -56,6 +57,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
+             <td><xsl:value-of select="last_processed"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
              <td><xsl:value-of select="lora/log_energy"/></td>
              <td><xsl:value-of select="lora/core_x"/></td>
@@ -77,6 +79,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
+             <td><xsl:value-of select="last_processed"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
              <td><xsl:value-of select="lora/log_energy"/></td>
              <td><xsl:value-of select="lora/core_x"/></td>
@@ -98,6 +101,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
+             <td><xsl:value-of select="last_processed"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
              <td><xsl:value-of select="lora/log_energy"/></td>
              <td><xsl:value-of select="lora/core_x"/></td>
@@ -119,6 +123,7 @@ xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
              <td><xsl:value-of select="antennaset"/></td>
              <td><xsl:value-of select="status"/></td>
              <td><xsl:value-of select="alt_status"/></td>
+             <td><xsl:value-of select="last_processed"/></td>
              <td><xsl:value-of select="lora/energy"/></td>
              <td><xsl:value-of select="lora/log_energy"/></td>
              <td><xsl:value-of select="lora/core_x"/></td>
