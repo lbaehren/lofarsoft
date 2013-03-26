@@ -311,7 +311,13 @@ class TABeam:
 		# So, we try to look for log-file for the particular beam to determine the locus node
 		if len(self.location) == 0:
 #			cmd="%s locus:0-99 hoover:0-1 'ls -1 %s_*/%s_*/%s_sap%03d_beam%04d.log' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, root.id, sapid, self.tabid)
-			cmd="%s locus:0-99 hoover:0 'ls -d %s_*/%s_red*/*/SAP%d/BEAM%d' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, self.parent_sapid, self.tabid)
+			if self.specificationType == "flyseye":
+				if len(self.stationList) != 0 and self.stationList[0] != "":
+					beamdir = self.stationList[0]
+				else: beamdir = "BEAM%d" % (self.tabid)
+				cmd="%s locus:0-99 hoover:0 'ls -d %s_*/%s_red*/*/SAP%d/%s' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, self.parent_sapid, beamdir)
+			else:
+				cmd="%s locus:0-99 hoover:0 'ls -d %s_*/%s_red*/*/SAP%d/BEAM%d' | grep -v such | grep -v match | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (si.cexeccmd, si.processed_dir_prefix, root.id, self.parent_sapid, self.tabid)
        		        cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 			loc=""
 			for l in range(len(cexec_output)):
