@@ -87,7 +87,13 @@ def wmom(arrin, weights_in, inputmean=None, calcerr=False, sdev=False):
     else:
         return wmean,werr
 
-
+# formatted string output
+def str_f(val):
+    string = str(val)
+    # if the : is on the 2nd spot, add a zero
+    if (str(val).find(':')==1):
+        string = '0' + str(val)
+    return string
 
 if __name__ == '__main__':
 
@@ -235,6 +241,7 @@ if __name__ == '__main__':
 #	print "RA_err : %f arcmin" % (xerr*60)
 #	print "DEC_err: %f arcmin" % (yerr*60)
 
+        print "Best-fit position: (RAJ, DECJ) = ( %s +/- %s , %s +/- %s )" % (str_f(src._ra), str_f(err._ra), str_f(src._dec), str_f(err._dec))
 
 	# Estimate the beam shape, only for HBA data
 	if stationlist.find("HBA") >= 0:
@@ -306,7 +313,8 @@ if __name__ == '__main__':
 		# plus a label with the value, top left
 		plt.errorbar(xmin+(xmax-xmin)/20, ymax-(ymax-ymin)/20, yerr=yerr, xerr=xerr, fmt='black')
 	#	plt.text(xmin+(xmax-xmin)/20+2*xerr, ymax-(ymax-ymin)/20, " dx = %f +/- %f \n dy = %f +/- %f" % (xmean, xerr, ymean, yerr),
-		plt.text(xmin+(xmax-xmin)/20+2*xerr, ymax-(ymax-ymin)/20, " %s +/- %s \n %s +/- %s " % (str(src._ra), str(err._ra), str(src._dec), str(err._dec)),
+		plt.text(xmin+(xmax-xmin)/20+2*xerr, ymax-(ymax-ymin)/20, " %s +/- %s \n %s +/- %s " % 
+                         (str_f(src._ra), str_f(err._ra), str_f(src._dec), str_f(err._dec)),
 			 color='black', fontsize=6, ha="left", va="center")
 	
 		# plot the beam shape

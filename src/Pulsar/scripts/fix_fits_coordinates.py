@@ -77,7 +77,12 @@ def main():
     filename=os.path.basename(fullfilename)
     p = re.compile('(L\d\d\d\d*)_SAP(\d*)_BEAM(\d*)') # find OBSID, SAP, BEAM
     m = p.search(filename)
-    (obsid,sap,beam)=m.groups()
+    try:
+        (obsid,sap,beam)=m.groups()
+    except:
+        print "WARNING: Could not parse the file name as OBSID_SAP_BEAM. Perhaps this is a Fly's Eye observation, which as no beam number in the file name. Not updating coordinates as Fly's Eye always points in same direction anyway."
+        sys.exit(0)
+
     if (options.verbose):
         print "Working on file %s:" % fullfilename
 
