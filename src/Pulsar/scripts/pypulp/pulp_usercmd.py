@@ -357,12 +357,11 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
 							msg="Copying parfile '%s' to %s..." % (self.opts.parfile, cep2.get_logdir())
 							if log != None: log.info(msg)
 							else: print msg
-							cmd="cp -n %s %s" % (self.opts.parfile, cep2.get_logdir())
+							cmd="cp -f %s %s" % (self.opts.parfile, cep2.get_logdir())
 							os.system(cmd)
 							# we should also change the parfile name in self.options in order to pass correct file to processing nodes
 							newpar="%s/%s" % (cep2.get_logdir(), self.opts.parfile.split("/")[-1])
-							self.options = [re.search(self.opts.parfile, opt) is None and opt or re.sub(self.opts.parfile, newpar, opt) \
-								for opt in self.options]
+							self.options = [opt != self.opts.parfile and opt or newpar for opt in self.options]
 							self.opts.parfile=newpar
 					else:
 						msg="Checking if given parfile '%s' exists in %s directory..." % (self.opts.parfile.split("/")[-1], cep2.parfile_dir)

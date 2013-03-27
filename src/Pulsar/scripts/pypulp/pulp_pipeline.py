@@ -590,7 +590,7 @@ class Pipeline:
 				if not cmdline.opts.is_feedback:
 					# copying parset file to output directory
 					log.info("Copying original parset file to output directory...")
-					cmd="cp -n %s %s" % (obs.parset, sumdir)
+					cmd="cp -f %s %s" % (obs.parset, sumdir)
 					self.execute(cmd, log, workdir=sumdir)
 					# Make a tarball of all the plots for this beam
 					log.info("Making a full archive tarball of all the files with extensions: %s" % (", ".join(ref_unit.full_archive_exts)))
@@ -1204,7 +1204,7 @@ class PipeUnit:
 				if os.path.exists(cmdline.opts.parfile): 
 					self.log.info("Copying user-specified parfile '%s' to %s/%s.par" % \
 						(cmdline.opts.parfile, self.outdir, psr2))
-					cmd="cp -n %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
+					cmd="cp -f %s %s/%s.par" % (cmdline.opts.parfile, self.outdir, psr2)
 					self.execute(cmd)
 					continue
 				else: 
@@ -1213,12 +1213,12 @@ class PipeUnit:
 					sys.exit(1)
 			parfile="%s/%s.par" % (cep2.parfile_dir, psr2)
 			if os.path.exists(parfile):
-				cmd="cp -n %s %s" % (parfile, self.outdir)
+				cmd="cp -f %s %s" % (parfile, self.outdir)
 				self.execute(cmd)
 				continue
 			parfile="%s/%s.par" % (cep2.parfile_dir, psr)
 			if os.path.exists(parfile):
-				cmd="cp -n %s %s/%s.par" % (parfile, self.outdir, psr2)
+				cmd="cp -f %s %s/%s.par" % (parfile, self.outdir, psr2)
 				self.execute(cmd)
 				continue
 			self.log.info("Parfile does not exist. Creating parfile base on pulsar ephemeris from ATNF catalog...")
@@ -1424,7 +1424,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 		if not cmdline.opts.is_feedback:
 			# copying parset file to output directory
 			self.log.info("Copying original parset file to output directory...")
-			cmd="cp -n %s %s" % (obs.parset, self.outdir)
+			cmd="cp -f %s %s" % (obs.parset, self.outdir)
 			self.execute(cmd, workdir=self.outdir)
 			# Make a tarball of all the plots for this beam
 			self.log.info("Making a tarball of all the files with extensions: %s" % (", ".join(self.extensions)))
