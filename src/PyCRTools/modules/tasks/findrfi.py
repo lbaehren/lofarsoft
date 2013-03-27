@@ -112,6 +112,8 @@ class FindRFI(Task):
         testplots = dict(default=False, doc="Show test plots."),
         apply_hanning_window = dict(default=True,
             doc="Apply Hanning window to data before FFT."),
+        dataloss_threshhold = dict(default=10, doc="NOF consecutive zeros in timeseries to be considered due to dataloss."),
+        blocks_with_dataloss = dict(default=0, doc="Blocks that have been found to contain dataloss.", output=True),
     )
 
     def run(self):
@@ -139,6 +141,7 @@ class FindRFI(Task):
         n = 0
         skippedblocks = 0
         refant = self.refant  # determine reference antenna from median power; do not rely on antenna 0 being alive...
+        self.blocks_with_dataloss = []
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
         # have to cut out the block with the pulse... autodetect is best?
@@ -150,7 +153,7 @@ class FindRFI(Task):
 #            x = f["TIMESERIES_DATA"]
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
-            self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window)
+            self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window, datacheck=True)
             # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
             # difference!
@@ -183,6 +186,12 @@ class FindRFI(Task):
             magspectrum.square()
 #            print 'Power = %f' % (2 * (magspectrum.toNumpy().sum(axis=1))[2])
             avgspectrum += magspectrum  # accumulate average spectrum
+
+            if cr.cr.hCountGreaterThan(f.nof_consecutive_zeros, self.dataloss_threshhold).val() > 0:
+                print "Warning: Found possible data loss in block {0}, excluding block".format(i)
+                skippedblocks += 1
+                self.blocks_with_dataloss.append([i])
+                continue
 
             if np.isnan(incphase.sum()[0]):  # FIX
                 print 'Warning: NaN found! Skipping block (should not happen anymore...!)'

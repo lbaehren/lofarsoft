@@ -49,7 +49,7 @@ class CRDatabasePopulator(object):
         return result
 
 
-    def getDiskFileList(self):
+    def getDiskFileList(self, from_date=None, until_date=None):
         """Get a list of filenames that need to be added to the CR database."""
         datapath = self.settings.datapath
 
@@ -103,7 +103,20 @@ class CRDatabasePopulator(object):
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
+            # Exclude files after a certain date
+            if from_date is not None or until_date is not None:
+                pattern = re.compile('D([0-9]{4})([0-9]{2})([0-9]{2})T')
 
+                for i in reversed(range(len(self.filename_list))):
+                    res = pattern.search(self.filename_list[i])
+
+                    current = datetime.datetime(int(res.group(1)), int(res.group(2)), int(res.group(3)))
+
+                    if from_date is not None and current < from_date:
+                        del self.filename_list[i]
+
+                    if until_date is not None and current > until_date:
+                        del self.filename_list[i]
 
 def parseOptions():
     """Parse options from the command line."""
@@ -128,6 +141,8 @@ def parseOptions():
     parser.add_option("--user", default=None, help="PostgreSQL user.")
     parser.add_option("--password", default=None, help="PostgreSQL password.")
     parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
+    parser.add_option("--from-date", default=None, help="Only include files from this date.")
+    parser.add_option("--until-date", default=None, help="Only include files until this date.")
 
     (options, args) = parser.parse_args()
 

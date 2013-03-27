@@ -364,6 +364,7 @@ class TBBData(IOInterface):
         # Create scratch array
         self.__scratch = cr.hArray(float, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize))
         self.__scratchFFT = cr.hArray(complex, dimensions=(self.__file.nofSelectedDatasets(), self.__blocksize / 2 + 1))
+        self.nof_consecutive_zeros = cr.hArray(int, self.__file.nofSelectedDatasets())
 
     def setAntennaSelection(self, selection):
         """Sets the antenna selection used in subsequent calls to
@@ -473,7 +474,7 @@ class TBBData(IOInterface):
         """
         self.__shift = sample_offset
 
-    def getFFTData(self, data, block=-1, hanning=True):
+    def getFFTData(self, data, block=-1, hanning=True, datacheck=False):
         """Writes FFT data for selected antennas to data array.
 
         Required Arguments:
@@ -485,6 +486,8 @@ class TBBData(IOInterface):
         *block*       index of block to return data from.
         *hanning*     apply Hannnig filter to timeseries data before
                       the FFT.
+        *datacheck*   check for blocks of consecutive zeros indicating
+                      data loss
         ============= =================================================
 
         Output:
@@ -504,6 +507,9 @@ class TBBData(IOInterface):
 
         # Get timeseries data
         self.getTimeseriesData(self.__scratch, block)
+
+        if datacheck:
+            cr.hNumberOfConsecutiveZeros(self.nof_consecutive_zeros[...], self.__scratch[...])
 
         # Apply Hanning filter
         if hanning:
