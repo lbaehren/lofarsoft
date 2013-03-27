@@ -1071,8 +1071,8 @@ void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
 
 */
 
-template <class NIter>
-void HFPP_FUNC_NAME (const NIter nof, const NIter nof_end,
+template <class Iter, class NIter>
+void HFPP_FUNC_NAME (const Iter nof, const Iter nof_end,
     const NIter signal, const NIter signal_end)
 {
 	HNumber n = 0;
