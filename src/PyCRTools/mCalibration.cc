@@ -50,6 +50,8 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
+#define SMALL_NUMBER 1.e-10
+
 // ========================================================================
 //
 //  Implementation
@@ -1052,4 +1054,52 @@ void HFPP_FUNC_NAME (const CIter Minv, const CIter Minv_end,
 }
 
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
+//$DOCSTRING: Data validation check
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hNumberOfConsecutiveZeros
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HNumber)(nof)()("Number of consectutive zeros.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HNumber)(signal)()("Signal")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+  Counts the largest block of consecutive zeros in the signal.
+
+*/
+
+template <class NIter>
+void HFPP_FUNC_NAME (const NIter nof, const NIter nof_end,
+    const NIter signal, const NIter signal_end)
+{
+	HNumber n = 0;
+
+	NIter signal_it = signal;
+
+	*nof = 0;
+	while (signal_it != signal_end)
+	{
+		if (abs(*signal_it) < SMALL_NUMBER)
+		{
+			n=-1;
+			while (signal_it != signal_end && abs(*signal_it) < SMALL_NUMBER)
+			{
+				n++;
+				signal_it++;
+			}
+
+			if (n > *nof)
+			{
+				*nof = n;
+			}
+		}
+		else
+		{
+			signal_it++;
+		}
+	}
+}
 
