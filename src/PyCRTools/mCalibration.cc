@@ -1103,3 +1103,5 @@ void HFPP_FUNC_NAME (const NIter nof, const NIter nof_end,
 	}
 }
 
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
