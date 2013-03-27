@@ -402,3 +402,15 @@ class CVUnitPart(CVUnit):
 		self.log = None
 		# remove references to Popen processes
 		self.parent = None
+
+# class for processing of part of BW for CV data in case of FE observation
+class FE_CVUnitPart(CVUnit):
+	def __init__(self, obs, cep2, cmdline, tab, log, node, part):
+		self.location = node  # processing target node of this bandwidth part
+		self.part = part      # bandwidth part index
+		CVUnit.__init__(self, obs, cep2, cmdline, tab, log)
+                # re-assigning procdir from BEAMN to station name
+                if obs.FE and self.tab.stationList[0] != "":
+                        self.procdir = self.tab.stationList[0]
+                # setting outdir and curdir directories
+                self.set_outdir(obs, cep2, cmdline)

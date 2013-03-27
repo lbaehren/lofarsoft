@@ -647,19 +647,3 @@ class FE_CVUnit(CVUnit):
 			self.procdir = self.tab.stationList[0]
 		# setting outdir and curdir directories
 		self.set_outdir(obs, cep2, cmdline)
-
-	def run(self, obs, cep2, cmdline, log):
-		CVUnit.run(self, obs, cep2, cmdline, log)
-		"""
-		self.log = log
-		self.start_time=time.time()	
-
-		# start logging
-		self.log.info("%s SAP=%d TAB=%d (FE/%s Stokes: %s)    UTC start time is: %s  @node: %s" % (obs.id, self.sapid, self.tabid, self.code, self.stokes, time.asctime(time.gmtime()), cep2.current_node))
-
-		# finish
-		self.end_time=time.time()
-		self.total_time= self.end_time- self.start_time
-		self.log.info("UTC stop time is: %s" % (time.asctime(time.gmtime())))
-		self.log.info("Total runnung time: %.1f s (%.2f hrs)" % (self.total_time, self.total_time/3600.))
-		"""
