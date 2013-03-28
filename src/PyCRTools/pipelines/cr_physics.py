@@ -349,7 +349,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
-                print "blocks_with_dataloss", blocks_with_dataloss
+                print "blocks_with_dataloss", findrfi.blocks_with_dataloss
 
                 for plot in findrfi.plotlist:
                     station["crp_plotfiles"].append(plot)
