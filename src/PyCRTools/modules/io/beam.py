@@ -43,7 +43,7 @@ class BeamData(IOInterface):
         # Current block number
         self.__block = block
 
-        # Residual delay from CLOCK_OFFSET calibration (between stations)
+        # Residual delay from CLOCK_OFFSET calibration (between stations) from parsets.
         self.__cloffdelay = self.__clock_offsets()
 
         #Align the stations to the same block since second started.
@@ -254,7 +254,20 @@ class BeamData(IOInterface):
            This method returns a FloatVector with the selected frequencies in Hz.
         """
 
-        return self['BEAM_FREQUENCIES']
+        return cr.hArray(self['BEAM_FREQUENCIES'])
+
+    def getTimes(self):
+        """Returns the time vector.
+
+        Output:
+           This method returns a FloatVector with the selected time in sec.
+        """
+
+        #Create a time vector
+        times = cr.hArray(float,self['NCHUNKS']*self['BEAM_NBLOCKS'],name="Time",units=("","s"))
+        times.fillrange(0,self['BLOCKSIZE']*self['SAMPLE_INTERVAL'][0])
+
+        return times
 
     def __init_Time(self):
         ''' Finds the start time of the TBB observation in seconds for each station.
@@ -281,10 +294,17 @@ class BeamData(IOInterface):
         return cr.hArray(block_start)
 
     def __clock_offsets(self):
-        '''Gathers the clock offsets from the stations, and calculates in number of samples and the residual.
+        '''Gathers the clock offsets of the stations from the parsets, and calculates in number of samples and the residual.
         '''
 
-        offsets = cr.hArray([self.__files[i].par.hdr['CLOCK_OFFSET'][0]/self.__files[i].par.hdr['SAMPLE_INTERVAL'][0] for i in range(self.__nofBeamDataSets)])
+        BF_PARSETS=os.environ["BF_PARSETS"].rstrip('/')+'/'
+        Obs_ID = self.__filename[0].split('/')[-1].split('_')[0]
+        fullparsetname=BF_PARSETS+Obs_ID+'.parset'
+
+        offsets = cr.hArray(float,self.__nofBeamDataSets)
+        for i in range(self.__nofBeamDataSets):
+            f_clock_offset = float(md.getClockCorrectionParset(fullparsetname,self.__files[i].par.hdr['STATION_NAME'][0], antennaset=self.__files[i].par.hdr['BeamFormer']['antenna_set']))
+            offsets[i] = f_clock_offset/self.__files[i].par.hdr['SAMPLE_INTERVAL'][0] ])
 
         # Residual offsets to reference frequency
         residual = cr.hArray(float, len(offsets), fill=offsets)
@@ -403,8 +423,11 @@ class BeamData(IOInterface):
             # Note, this following loop could be slow (hOffsetReadFileBinary could maybe be optimized)
             for i, file in enumerate(self.__filename):
                 cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i]*spec_len)
-                #RFI excision
-                data[i,self['BEAM_RFI_CHANNELS']] /= 10000
+
+            #RFI excision
+            if self['BEAM_RFI_CHANNELS']:
+                for i in range(len(self.__filename)):
+                    data[i,self['BEAM_RFI_CHANNELS']] /= 10000
 
             pass
             # Addding phase correction to DM offsets. (coherent dedispersion).
@@ -415,7 +438,7 @@ class BeamData(IOInterface):
             weights_dm[1:] = weights_dm[0]
             #data[...].mul(weights_dm[...])
 
-        # Adding calibration delay between stations, subsample residual from CLOCK_OFFSET.
+        # Adding calibration delay between stations, subsample residual from parset-CLOCK_OFFSET.
         weights_cloff = self.empty('FFT_DATA')
         phases_cloff = cr.hArray(float, weights_cloff, fill=0)
         phases_cloff.delaytophase(self['BEAM_FREQUENCIES'],self.__cloffdelay[1])
