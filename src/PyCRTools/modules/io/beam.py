@@ -425,10 +425,11 @@ class BeamData(IOInterface):
                 cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i]*spec_len)
 
             #RFI excision
-            if self['BEAM_RFI_CHANNELS']:
+            try:
                 for i in range(len(self.__filename)):
                     data[i,self['BEAM_RFI_CHANNELS']] /= 10000
-
+            except:
+                pass
             pass
             # Addding phase correction to DM offsets. (coherent dedispersion).
             weights_dm = self.empty('FFT_DATA')
