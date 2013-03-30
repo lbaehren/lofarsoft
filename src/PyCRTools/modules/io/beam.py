@@ -304,7 +304,7 @@ class BeamData(IOInterface):
         offsets = cr.hArray(float,self.__nofBeamDataSets)
         for i in range(self.__nofBeamDataSets):
             f_clock_offset = float(md.getClockCorrectionParset(fullparsetname,self.__files[i].par.hdr['STATION_NAME'][0], antennaset=self.__files[i].par.hdr['BeamFormer']['antenna_set']))
-            offsets[i] = f_clock_offset/self.__files[i].par.hdr['SAMPLE_INTERVAL'][0] ])
+            offsets[i] = f_clock_offset/self.__files[i].par.hdr['SAMPLE_INTERVAL'][0]
 
         # Residual offsets to reference frequency
         residual = cr.hArray(float, len(offsets), fill=offsets)
