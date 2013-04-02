@@ -112,7 +112,11 @@ if __name__ == '__main__':
         	          help="Give number of SAP (subarray pointing)")
 	parser.add_option("-d", "--diameter",action="store",type="float", dest="diameter",
         	          help="Provide here the size of the element (in m) to get a subplot of the beam shape")
-		  
+	parser.add_option("-r", "--nrings",action="store",type="int", dest="nrings", default=2,
+        	          help="The number of rings around the maximum-snr point, to use for weighted fit (default: 2)")
+	parser.add_option("-l", "--linedash",action="store_true", dest="dash", default=False,
+        	          help="Dash the beams not used for localisation")
+
 	(options, args) = parser.parse_args()
 	if len(sys.argv) < 2:
 		parser.print_help()
@@ -213,15 +217,19 @@ if __name__ == '__main__':
 #		if val < 0.1*max(weights):
 #			weights[i] = 0.0
 
-        # only use the two circles (18 points) around the maximum value at index j
+        # only use the points that are in options.nrings rings
+        npoints = (options.nrings+1)**3-(options.nrings)**3 
         j=np.argsort(c)[-1]
         dsq=np.zeros(len(RAs_good))
+        linestyle=[ 'solid' for i in RAs_good ]
         for i,val in enumerate(weights):
             dsq[i] = (x[j]-x[i])**2 + (y[j]-y[i])**2
         # set the weights of the farther-out beams to zero
         for i,val in enumerate(weights):
-            if dsq[i] > np.sort(dsq)[18]:
+            if dsq[i] > np.sort(dsq)[npoints-2]:
                 weights[i] = 0.0
+                if options.dash:
+                    linestyle[i] = 'dotted' # 'dashed'
 
 	# calculate the weighted mean:
 	xmean,xerr = wmom(x, weights, inputmean=None, calcerr=True, sdev=False)
@@ -303,10 +311,10 @@ if __name__ == '__main__':
         for (label, filename, c) in plots:
 		ax = fig.add_subplot(111)
 		#add the beam numbers per beam onto the plot as text
-		plt.scatter(x,y,s=s, marker='o', c=c, hold='on')
+		plt.scatter(x,y,s=s, marker='o', c=c, hold='on', linestyle=linestyle)
 		for i in np.arange(np.size(x)):
 			plt.text(x[i], y[i], str(int(Beams_good[i])), color='black', fontsize=6, ha="center", va="center")
-	
+
 		# plot the best position
 		plt.errorbar(xmean, ymean, yerr=yerr, xerr=xerr, fmt='w', linewidth=3)
 		plt.errorbar(xmean, ymean, yerr=yerr, xerr=xerr, fmt='black')
