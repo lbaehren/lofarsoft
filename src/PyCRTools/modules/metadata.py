@@ -8,13 +8,9 @@ import numpy as np
 import struct
 import os
 import pycrtools as cr
-import pdb
-# pdb.set_trace()
-
 
 lonlatCS002 = cr.hArray([6.869837540 * np.pi / 180., 52.91512249 * np.pi / 180.])  # 49.344  #($LOFARSOFT/data/lofar/StaticMetaData/AntennaArrays/CS002-AntennaArrays.conf
 ITRFCS002 = cr.hArray([3826577.109500000, 461022.900196000, 5064892.758])  # ($LOFARSOFT/data/lofar/StaticMetaData/AntennaFields/CS002-AntennaField.conf)
-
 
 def mapAntennasetKeyword(antennaset):
     """Ugly fix to map correct antenna names in input to wrong antenna names
@@ -45,7 +41,6 @@ def mapAntennasetKeyword(antennaset):
         pass
 
     return antennaset
-
 
 def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
     """Return metadata values, given the antennaIDs and the antennaset.
@@ -182,7 +177,6 @@ def get(keyword, antennaIDs, antennaset, return_as_hArray=False):
                     if check:
                         mdata[num] = allValues[st]
     return mdata
-
 
 def getStationPhaseCalibration(station, antennaset, return_as_hArray=False, caltable_location=None):
     """Read phase calibration data for a station.
@@ -329,7 +323,6 @@ def getStationPhaseCalibration(station, antennaset, return_as_hArray=False, calt
         complexdata.imag = data[:, :, 1]
 
         return complexdata.transpose()
-
 
 def getCableDelays(station, antennaset, return_as_hArray=False):
     """ Get cable delays in seconds.
@@ -779,7 +772,6 @@ def idToStationName(station_id):
     else:
         return "ST{0:03d}".format(station_id)
 
-
 def stationNameToID(station_name):
     """Returns the station id from a station name
     """
@@ -798,7 +790,6 @@ def stationNameToID(station_name):
 
     return station_id
 
-
 def stationNameToNR(station_name):
     """Returns the station id from a station name
     """
@@ -816,7 +807,6 @@ def stationNameToNR(station_name):
     station_nr = str(digit1) + str(digit2) + str(digit3)
 
     return station_nr
-
 
 def getRelativeAntennaPositions(station, antennaset, return_as_hArray=False):
     """Returns the antenna positions of all the antennas in the station
@@ -934,7 +924,6 @@ def getRelativeAntennaPositions(station, antennaset, return_as_hArray=False):
         antpos = np.asarray(antpos).reshape(2 * int(nrantennas), int(nrdir))
 
     return antpos
-
 
 def getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=False):
     """Returns the antenna positions of all the antennas in the station
@@ -1105,12 +1094,11 @@ def getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=False):
 
     return antpos
 
-
-def getRelativeAntennaPositionsNew(station, antennaset, return_as_hArray=True):
+def getRelativeAntennaPositionsNew(station, antennaset, LOFAR_centered=True ,return_as_hArray=True,refpos=None):
     """Returns the antenna positions of all the antennas in the station
     relative to the center of the station for the specified antennaset.
-    station can be the name or id of the station. Default returns as hArray, option to return as numpy
-    array.
+    station can be the name or id of the station.
+    It is returned as hArray by default, option to return as numpy array.
 
     Required arguments:
 
@@ -1119,21 +1107,27 @@ def getRelativeAntennaPositionsNew(station, antennaset, return_as_hArray=True):
     ================== ==============================================
     *station*          Name or id of the station. e.g. "CS302" or 142
     *antennaset*       Antennaset used for this station.
-
     ================== ==============================================
 
     Optional arguments:
 
-    ================== ==============================================
-    Parameter          Description
-    ================== ==============================================
-    *return_as_hArray* Return as hArray.
-    ================== ==============================================
+    ================== ======= ===================================================================
+    Parameter          Default Description
+    ================== ======= ===================================================================
+    *LOFAR_centered*   True    Get the relative positions to the center of LOFAR, or to the station if False.
+    *return_as_hArray* True    Return as hArray.
+    *refpos*           None    Reference position in ITRF.
+    ================== ======= ===================================================================
 
     """
 
     itrfpos = getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=True)
-    refpos = getStationPositions(station, antennaset, return_as_hArray=True,coordinatesystem='ITRF')
+
+    if LOFAR_centered and not refpos:
+        refpos = ITRFCS002
+    else:
+        if not refpos:
+            refpos = getStationPositions(station, antennaset, return_as_hArray=True,coordinatesystem='ITRF')
     reflonlat = None
     returnpos = convertITRFToLocal(itrfpos, refpos=refpos, reflonlat=reflonlat)
 
@@ -1186,7 +1180,6 @@ def getAntennaPositions(station, antennaset, return_as_hArray=False):
 
     return returnpos
 
-
 def getClockCorrectionParset(parsetfilename, station, antennaset="LBA"):
     if antennaset in ['HBA_ZERO', 'HBA0']:
         antennaset = 'HBA0'
@@ -1210,7 +1203,6 @@ def getClockCorrectionParset(parsetfilename, station, antennaset="LBA"):
         return allparameters[keyname]
     elif keyname[0:-1] in allparameters.keys():
         return allparameters[keyname[0:-1]]
-
 
 def getClockCorrection(station, antennaset="LBA", time=1278480000):
     """Get clock correction for superterp stations in seconds. Currently static values.
@@ -1272,7 +1264,6 @@ def getClockCorrection(station, antennaset="LBA", time=1278480000):
     else:
         print "ERROR: no clock offsets available for this station: ", station
         return 0
-
 
 def getStationPositions(station, antennaset, return_as_hArray=False, coordinatesystem="WGS84",):
     """Returns the antenna positions of all the antennas in the station
@@ -1396,7 +1387,6 @@ def getStationPositions(station, antennaset, return_as_hArray=False, coordinates
 
     return stationpos
 
-
 def getRotationMatrix(station,antennaset):
     '''Returns the rotation matrix of a given station.
 
@@ -1405,7 +1395,6 @@ def getRotationMatrix(station,antennaset):
     '''
 
     raise NotImplementedError
-
 
 def convertITRFToLocal(itrfpos, refpos=ITRFCS002, reflonlat=lonlatCS002):
     """.. todo:: Document :func:`~metadata.convertITRFToLocal`.
