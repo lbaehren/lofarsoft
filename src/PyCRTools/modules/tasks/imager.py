@@ -76,6 +76,7 @@ class Imager(Task):
         intgrfreq=dict(default=False, doc="Output frequency integrated image."),
         inversefft=dict(default=False, doc='Used for a time series image.'),
         rfi_remove=dict(default=None, doc='List of frequency indices to remove.'),
+        phase_calibrate=dict(default=False, doc="Use DIPOLE_CALIBRATION_DELAY to phase calibrate FFT data before imaging."),
         FREQMIN=dict(default=None, doc='Minimum frequency to use.'),
         FREQMAX=dict(default=None, doc='Maximum frequency to use.'),
         OBSTIME=dict(default=lambda self: self.data["TIME"][0], doc='Observation time in sec.'),
@@ -188,6 +189,14 @@ class Imager(Task):
             else:
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
 
+        if self.phase_calibrate:
+            self.cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
+            self.calibration_phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
+            self.calibration_weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
+
+            cr.hDelayToPhase(self.calibration_phases, self.frequencies, self.calibration_cabledelays)
+            cr.hPhaseToComplex(self.calibration_weights, self.calibration_phases)
+
     def run(self):
         """Run the imager.
         """
@@ -200,6 +209,9 @@ class Imager(Task):
 
                 if self.frequency_slice != None:
                     self.data.getFFTData(self.scratchfft, block)
+
+                    if self.phase_calibrate:
+                        self.scratchfft.mul(self.calibration_weights)
 
                     self.fftdata[...].copy(self.scratchfft[..., self.frequency_slice[0]:self.frequency_slice[1]])
                 else:
