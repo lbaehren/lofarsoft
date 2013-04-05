@@ -25,12 +25,12 @@ def parse_parset(obsid):
         # Observation.startTime
         m = re.search('Observation\.startTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
-            parset['OBSERVATION_START_UTC'] = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)))
+            parset['startUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4) m.group(5) m.group(6))
         
         # Observation.stopTime
         m = re.search('Observation\.stopTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
-            parset['OBSERVATION_END_UTC'] = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)))
+            parset['endUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4) m.group(5) m.group(6))
 
         # Observation.antennaSet
         m = re.search('Observation.antennaSet = ([A-Z_]+)', line)
@@ -54,9 +54,9 @@ def parse_parset(obsid):
 
     return parset
         
-def write_metadata(filename, attributes={}):
+def write_metadata(filename, parset):
 
-    subprocess.call([os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd'), ['--{0} {1}'.format(a[0], a[1]) for a in attributes.items()]])
+    subprocess.call([os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd'), ['--{0} {1}'.format(a[0], a[1]) for a in parset.items()]])
 
 def timestamp_in_observation(filename, parset):
 
@@ -66,7 +66,12 @@ def timestamp_in_observation(filename, parset):
 
     timestamp = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)), int(m.group(7)) * 1000)
 
-    return (timestamp >= parset['OBSERVATION_START_UTC'] and timestamp <= parset['OBSERVATION_END_UTC'])
+    temp = parset['startUTC']
+    startUTC = datetime.datetime(int(temp[0:4]), int(temp[5:7]), int(temp[8:10]), int(temp[11:13]), int(temp[14:16]), int(temp[17:19]))
+    temp = parset['endUTC']
+    endUTC = datetime.datetime(int(temp[0:4]), int(temp[5:7]), int(temp[8:10]), int(temp[11:13]), int(temp[14:16]), int(temp[17:19]))
+
+    return (timestamp >= startUTC and timestamp <= endUTC)
 
 if __name__ == '__main__':
 
