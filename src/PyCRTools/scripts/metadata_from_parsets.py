@@ -133,7 +133,5 @@ if __name__ == '__main__':
 
         if filename.endswith('.h5'):
 
-            parset = parse_parset(get_obsid(filename))
-
             print filename, parset_from_filename(filename, obstimes)
 
