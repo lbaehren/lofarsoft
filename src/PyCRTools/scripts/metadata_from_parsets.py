@@ -25,12 +25,12 @@ def parse_parset(obsid):
         # Observation.startTime
         m = re.search('Observation\.startTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
-            parset['startUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4) m.group(5) m.group(6))
+            parset['startUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
         
         # Observation.stopTime
         m = re.search('Observation\.stopTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
-            parset['endUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4) m.group(5) m.group(6))
+            parset['endUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
 
         # Observation.antennaSet
         m = re.search('Observation.antennaSet = ([A-Z_]+)', line)
