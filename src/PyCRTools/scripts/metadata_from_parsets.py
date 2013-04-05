@@ -36,21 +36,23 @@ def parse_parset(obsid):
         m = re.search('Observation.antennaSet = ([A-Z_]+)', line)
 
         if m is not None:
-            parset['ANTENNA_SET'] = m.group(1)
+            parset['antennaSet'] = m.group(1)
 
         # Observation.bandFilter
         m = re.search('Observation.bandFilter = ([A-Z0-9_]+)', line)
 
         if m is not None:
-            parset['FILTER_SELECTION'] = m.group(1)
-            parset['NYQUIST_ZONE'] = nyquist_zone_map[m.group(1)]
+            parset['filterSelection'] = m.group(1)
 
         # Observation.clockMode
         m = re.search('Observation.clockMode = <<Clock([0-9]{3})', line)
 
         if m is not None:
-            parset['CLOCK_FREQUENCY'] = int(m.group(1))
-            parset['CLOCK_FREQUENCY_UNIT'] = 'MHz'
+            parset['clockFrequency'] = int(m.group(1))
+            parset['clockFrequencyUnit'] = 'MHz'
+
+        parset['antennaPositionDir'] = os.path.join(os.environ['LOFARSOFT'], 'data/lofar/antennapositions/')
+        parset['dipoleCalibrationDelayDir'] = os.path.join(os.environ['LOFARSOFT'], 'dipole_calibration_delay/')
 
     return parset
         
@@ -66,6 +68,7 @@ def timestamp_in_observation(filename, parset):
 
     timestamp = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)), int(m.group(7)) * 1000)
 
+    # Parse ISO timestamp
     temp = parset['startUTC']
     startUTC = datetime.datetime(int(temp[0:4]), int(temp[5:7]), int(temp[8:10]), int(temp[11:13]), int(temp[14:16]), int(temp[17:19]))
     temp = parset['endUTC']
