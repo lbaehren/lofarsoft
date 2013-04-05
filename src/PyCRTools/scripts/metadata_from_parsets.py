@@ -15,7 +15,7 @@ def get_obstimes():
         if files.endswith(".parset"):
             f = open(os.path.join(os.environ['LOFAR_PARSET_PATH'], files), 'r')
 
-            observation_time = [None, None]
+            observation_time = {}
             for line in f:
                 # Observation.startTime
                 m = re.search('Observation\.startTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
