@@ -129,9 +129,9 @@ if __name__ == '__main__':
 
     obstimes = get_obstimes()
 
-    for a in os.listdir(args[0]):
+    for filename in os.listdir(args[0]):
 
-        if a.endswith('.h5'):
+        if filename.endswith('.h5'):
 
             parset = parse_parset(get_obsid(filename))
 
