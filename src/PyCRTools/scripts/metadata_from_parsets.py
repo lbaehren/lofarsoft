@@ -36,7 +36,7 @@ def write_metadata(filename, attributes={}):
 
 def timestamp_in_observation(filename, parset):
 
-    m = re.search('D([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})\.([0-9]{3}))', filename)
+    m = re.search('D([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})\.([0-9]{3})', filename)
 
     assert m is not None
 
