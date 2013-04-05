@@ -121,4 +121,4 @@ if __name__ == '__main__':
 #        if not timestamp_in_observation(filename, parset):
 #            print filename, parset
 
-    print get_obstimes(filename)
+    print get_obstimes()
