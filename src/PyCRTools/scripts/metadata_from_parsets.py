@@ -129,13 +129,13 @@ if __name__ == '__main__':
 
     obstimes = get_obstimes()
 
-    for a in args:
+    for a in os.listdir(args[0]):
 
-        filename = a.split('/')[-1]
+        if a.endswith('.h5'):
 
-        print filename, parset_from_filename(filename, obstimes)
+        parset = parse_parset(get_obsid(filename))
 
-#        parset = parse_parset(get_obsid(filename))
-#
-#        if not timestamp_in_observation(filename, parset):
-#            print filename, parset
+        if not timestamp_in_observation(filename, parset):
+
+            print filename, parset_from_filename(filename, obstimes)
+
