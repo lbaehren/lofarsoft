@@ -268,8 +268,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     combined_pulse_peak_amplitude = []
     combined_rms = []
 
-    flagged_channels = range(0, 9830) + [12942, 12943, 12944, 12945, 12972, 12973, 12974, 12975, 12976, 12977, 12978, 12979, 12980, 12991, 12994, 13325, 13335, 16302, 24652, 24653, 24654, 24655, 24656, 24657, 24658, 24659, 24660, 24661, 24662, 24663] + range(26214, 32769)
-
     # Process only given stations if explicitly requested
     for station in stations:
 
@@ -388,7 +386,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 fft_data[..., 1] = 0.0
 
                 # Flag dirty channels (from RFI excission)
-#                fft_data[..., flagged_channels] = 0 # Flag default channels
                 fft_data[..., cr.hArray(findrfi.dirty_channels)] = 0
                 station["crp_dirty_channels"] = findrfi.dirty_channels
 
