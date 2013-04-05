@@ -32,7 +32,7 @@ def parse_parset(obsid):
         
 def write_metadata(filename, attributes={}):
 
-    subprocess.call([os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd'), ['--{0} {1}'.format(a[0], a[1]) for a in attributes.items()])
+    subprocess.call([os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd'), ['--{0} {1}'.format(a[0], a[1]) for a in attributes.items()]])
 
 def timestamp_in_observation(filename, parset):
 
