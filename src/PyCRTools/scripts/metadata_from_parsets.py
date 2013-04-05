@@ -7,6 +7,33 @@ import datetime
 
 nyquist_zone_map = {'LBA_10_80' : 1, 'LBA_30_90' : 1, 'HBA_110_190' : 2, 'HBA_170_230' : 3, 'HBA_210_250' : 3}
 
+def get_obstimes(filename):
+
+    for files in os.listdir(os.environ['LOFAR_PARSET_PATH']):
+        obstimes = {}
+        if files.endswith(".parset"):
+            f = open(os.path.join(os.environ['LOFAR_PARSET_PATH'], files), 'r')
+
+            observation_time = {}
+            for line in f:
+                # Observation.startTime
+                m = re.search('Observation\.startTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
+                if m is not None:
+                    observation_time['startUTC'] = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)))
+                
+                # Observation.stopTime
+                m = re.search('Observation\.stopTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
+                if m is not None:
+                    observation_time['endUTC'] = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)))
+
+                if len(observation_time) == 2:
+                    # No need to read rest of the file
+                    break
+
+        obstimes[files] = observation_time
+
+    return obstimes
+
 def get_obsid(filename):
 
     m = re.search('(L[0-9]+)_D', filename)
@@ -85,12 +112,13 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()
 
-    for a in args:
+#    for a in args:
+#
+#        filename = a.split('/')[-1]
+#
+#        parset = parse_parset(get_obsid(filename))
+#
+#        if not timestamp_in_observation(filename, parset):
+#            print filename, parset
 
-        filename = a.split('/')[-1]
-
-        parset = parse_parset(get_obsid(filename))
-
-        if not timestamp_in_observation(filename, parset):
-            print filename, parset
-    
+    print get_obstimes(filename)
