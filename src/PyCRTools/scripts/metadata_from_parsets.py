@@ -45,7 +45,7 @@ def parset_from_filename(filename, obstimes):
 
     for obst in sorted(obstimes.items()):
         
-        if timestamp >= obst[1]['startUTC'] and timestamp <= obst[1]['startUTC']:
+        if timestamp >= obst[1]['startUTC'] and timestamp <= obst[1]['endUTC']:
 
             return obst[0]
 
