@@ -9,8 +9,9 @@ nyquist_zone_map = {'LBA_10_80' : 1, 'LBA_30_90' : 1, 'HBA_110_190' : 2, 'HBA_17
 
 def get_obstimes(filename):
 
+    obstimes = {}
+
     for files in os.listdir(os.environ['LOFAR_PARSET_PATH']):
-        obstimes = {}
         if files.endswith(".parset"):
             f = open(os.path.join(os.environ['LOFAR_PARSET_PATH'], files), 'r')
 
@@ -29,8 +30,6 @@ def get_obstimes(filename):
                 if len(observation_time) == 2:
                     # No need to read rest of the file
                     break
-
-            print observation_time
 
             obstimes[files] = observation_time
 
