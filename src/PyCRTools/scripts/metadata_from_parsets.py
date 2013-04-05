@@ -29,6 +29,8 @@ def parse_parset(obsid):
         m = re.search('Observation\.stopTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
             parset['OBSERVATION_END_UTC'] = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)))
+
+    return parset
         
 def write_metadata(filename, attributes={}):
 
