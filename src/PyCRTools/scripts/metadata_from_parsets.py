@@ -135,7 +135,5 @@ if __name__ == '__main__':
 
             parset = parse_parset(get_obsid(filename))
 
-            if not timestamp_in_observation(filename, parset):
-
-                print filename, parset_from_filename(filename, obstimes)
+            print filename, parset_from_filename(filename, obstimes)
 
