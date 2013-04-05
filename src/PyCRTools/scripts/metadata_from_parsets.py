@@ -5,6 +5,8 @@ import os
 import subprocess
 import datetime
 
+nyquist_zone_map = {'LBA_10-80' : 1, 'LBA_30-80' : 1, 'HBA_110_190' : 2, 'HBA_170-230' : 3, 'HBA_210-250' : 3}
+
 def get_obsid(filename):
 
     m = re.search('(L[0-9]+)_D', filename)
@@ -29,6 +31,26 @@ def parse_parset(obsid):
         m = re.search('Observation\.stopTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
             parset['OBSERVATION_END_UTC'] = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)))
+
+        # Observation.antennaSet
+        m = re.search('Observation.antennaSet = ([A-Z_]+)', line)
+
+        if m is not None:
+            parset['ANTENNA_SET'] = m.group(1)
+
+        # Observation.bandFilter
+        m = re.search('Observation.bandFilter = ([A-Z0-9_]+)', line)
+
+        if m is not None:
+            parset['FILTER_SELECTION'] = m.group(1)
+            parset['NYQUIST_ZONE'] = nyquist_zone_map[m.group(1)]
+
+        # Observation.clockMode
+        m = re.search('Observation.clockMode = <<Clock([0-9]{3})', line)
+
+        if m is not None:
+            parset['CLOCK_FREQUENCY'] = int(m.group(1))
+            parset['CLOCK_FREQUENCY_UNIT'] = 'MHz'
 
     return parset
         
@@ -62,5 +84,5 @@ if __name__ == '__main__':
         parset = parse_parset(get_obsid(filename))
 
         if not timestamp_in_observation(filename, parset):
-            print filename
+            print filename, parset
     
