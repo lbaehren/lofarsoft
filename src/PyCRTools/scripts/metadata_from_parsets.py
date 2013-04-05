@@ -7,7 +7,7 @@ import datetime
 
 nyquist_zone_map = {'LBA_10_80' : 1, 'LBA_30_90' : 1, 'HBA_110_190' : 2, 'HBA_170_230' : 3, 'HBA_210_250' : 3}
 
-def get_obstimes(filename):
+def get_obstimes():
 
     obstimes = {}
 
@@ -15,7 +15,7 @@ def get_obstimes(filename):
         if files.endswith(".parset"):
             f = open(os.path.join(os.environ['LOFAR_PARSET_PATH'], files), 'r')
 
-            observation_time = {}
+            observation_time = [None, None]
             for line in f:
                 # Observation.startTime
                 m = re.search('Observation\.startTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
@@ -34,6 +34,20 @@ def get_obstimes(filename):
             obstimes[files] = observation_time
 
     return obstimes
+
+def parset_from_filename(filename, obstimes):
+
+    m = re.search('D([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})([0-9]{2})\.([0-9]{3})', filename)
+
+    assert m is not None
+
+    timestamp = datetime.datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), int(m.group(5)), int(m.group(6)), int(m.group(7)) * 1000)
+
+    for obst in sorted(obstimes.items()):
+        
+        if timestamp >= obst[1]['startUTC'] and timestamp <= obst[1]['startUTC']:
+
+            return obst[0]
 
 def get_obsid(filename):
 
@@ -113,13 +127,15 @@ if __name__ == '__main__':
     
     (options, args) = parser.parse_args()
 
-#    for a in args:
-#
-#        filename = a.split('/')[-1]
-#
+    obstimes = get_obstimes()
+
+    for a in args:
+
+        filename = a.split('/')[-1]
+
+        parset_from_filename(filename, obstimes)
+
 #        parset = parse_parset(get_obsid(filename))
 #
 #        if not timestamp_in_observation(filename, parset):
 #            print filename, parset
-
-    print get_obstimes('bla')
