@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
         filename = a.split('/')[-1]
 
-        parset_from_filename(filename, obstimes)
+        print filename, parset_from_filename(filename, obstimes)
 
 #        parset = parse_parset(get_obsid(filename))
 #
