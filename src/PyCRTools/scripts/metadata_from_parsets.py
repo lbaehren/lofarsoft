@@ -30,7 +30,9 @@ def get_obstimes(filename):
                     # No need to read rest of the file
                     break
 
-        obstimes[files] = observation_time
+            print observation_time
+
+            obstimes[files] = observation_time
 
     return obstimes
 
