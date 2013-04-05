@@ -5,7 +5,7 @@ import os
 import subprocess
 import datetime
 
-nyquist_zone_map = {'LBA_10-80' : 1, 'LBA_30-80' : 1, 'HBA_110_190' : 2, 'HBA_170-230' : 3, 'HBA_210-250' : 3}
+nyquist_zone_map = {'LBA_10-80' : 1, 'LBA_30-90' : 1, 'HBA_110_190' : 2, 'HBA_170-230' : 3, 'HBA_210-250' : 3}
 
 def get_obsid(filename):
 
