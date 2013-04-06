@@ -131,7 +131,8 @@ def fixfile(filename, parset):
     
     new_filename = re.sub("L[0-9]", parset.rstrip(".parset"), filename)
 
-    print filename, new_filename, parset
+    print filename, new_filename, parset,
+    write_metadata(new_filename, parse_parset(parset))
 
 if __name__ == '__main__':
 
