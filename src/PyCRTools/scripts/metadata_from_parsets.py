@@ -57,9 +57,9 @@ def get_obsid(filename):
 
     return m.group(1)
 
-def parse_parset(obsid):
+def parse_parset(parset):
 
-    f = open(os.path.join(os.environ['LOFAR_PARSET_PATH'], obsid + '.parset'), 'r')
+    f = open(os.path.join(os.environ['LOFAR_PARSET_PATH'], parset), 'r')
 
     parset = {}
     for line in f:
@@ -100,7 +100,9 @@ def parse_parset(obsid):
         
 def write_metadata(filename, parset):
 
-    subprocess.call([os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd'), ['--{0} {1}'.format(a[0], a[1]) for a in parset.items()]])
+    print ['--{0} {1}'.format(a[0], a[1]) for a in parset.items()]
+
+#    subprocess.call([os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd'), ['--{0} {1}'.format(a[0], a[1]) for a in parset.items()]])
 
 def timestamp_in_observation(filename, parset):
 
@@ -133,5 +135,15 @@ if __name__ == '__main__':
 
         if filename.endswith('.h5'):
 
-            print filename, parset_from_filename(filename, obstimes)
+            parset = parset_from_filename(filename, obstimes)
+
+            m = re.search('(L[0-9]+)D', filename)
+
+            if m is None:
+                print "error, cannot parset", filename
+                continue
+
+            if m.group(1) + '.parset' != parset:
+
+                print filename, parset
 
