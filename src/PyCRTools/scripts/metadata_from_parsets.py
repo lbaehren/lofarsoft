@@ -113,7 +113,7 @@ def write_metadata(filename, parset):
 
     print command
 
-#    subprocess.call(command, shell=True)
+    subprocess.call(command, shell=True)
 
 def timestamp_in_observation(filename, parset):
 
