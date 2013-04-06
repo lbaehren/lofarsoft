@@ -129,7 +129,7 @@ def fixfile(filename, parset):
         print "Error cannot find parset for file", filename
         return
     
-    new_filename = re.sub("L[0-9]", parset.rstrip(".parset"), filename)
+    new_filename = re.sub("L[0-9]+", parset.rstrip(".parset"), filename)
 
     print filename, new_filename, parset,
     write_metadata(new_filename, parse_parset(parset))
