@@ -140,5 +140,13 @@ if __name__ == '__main__':
 
             parset = parset_from_filename(filename, obstimes)
 
-            print filename, parset
+            m = re.search('(L[0-9]+)', filename)
+
+            if m is None:
+                print "error, cannot parset", filename
+                continue
+
+            if m.group(1) + '.parset' != parset:
+
+                print filename, parset
 
