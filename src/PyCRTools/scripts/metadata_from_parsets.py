@@ -148,7 +148,9 @@ if __name__ == '__main__':
 
     obstimes = get_obstimes()
 
-    for filename in os.listdir(args[0]):
+    path = args[0]
+
+    for filename in os.listdir(path):
 
         if filename.endswith('.h5'):
 
@@ -162,5 +164,5 @@ if __name__ == '__main__':
 
             if m.group(1) + '.parset' != parset:
 
-                fixfile(filename, parset)
+                fixfile(filename, parset, path)
 
