@@ -113,7 +113,11 @@ def write_metadata(filename, parset):
 
     print command
 
+    os.chmod(filename, 0777)
+
     subprocess.call(command, shell=True)
+
+    os.chmod(filename, 0220)
 
 def timestamp_in_observation(filename, parset):
 
