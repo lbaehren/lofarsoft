@@ -135,7 +135,10 @@ if __name__ == '__main__':
 
         if filename.endswith('.h5'):
 
-            parset = parset_from_filename(filename, obstimes)
+            try:
+                parset = parset_from_filename(filename, obstimes)
+            except KeyError:
+                print "error, cannot parse all keywords for", filename
 
             m = re.search('(L[0-9]+)D', filename)
 
