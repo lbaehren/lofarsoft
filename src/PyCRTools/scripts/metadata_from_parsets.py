@@ -104,9 +104,16 @@ def parse_parset(parset):
         
 def write_metadata(filename, parset):
 
-    print ['--{0} {1}'.format(a[0], a[1]) for a in parset.items()]
+    command = os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd')
 
-#    subprocess.call([os.path.join(os.environ['LOFARSOFT'], 'release/bin/tbbmd'), ['--{0} {1}'.format(a[0], a[1]) for a in parset.items()]])
+    for a in parset.items():
+        command += " --{0} {1}".format(a[0], a[1])
+
+    command += " {0}".format(filename)
+
+    print command
+
+#    subprocess.call(command, shell=True)
 
 def timestamp_in_observation(filename, parset):
 
@@ -134,8 +141,10 @@ def fixfile(filename, parset, path):
 
     shutil.copy(os.path.join(path, filename), os.path.join(path, 'backup', new_filename))
 
-    print filename, new_filename, parset,
-    write_metadata(new_filename, parse_parset(parset))
+#    shutil.move(os.path.join(path, filename), os.path.join(path, new_filename))
+
+    print filename, new_filename,
+    write_metadata(os.path.join(path, 'backup', new_filename), parse_parset(parset))
 
 if __name__ == '__main__':
 
@@ -159,7 +168,7 @@ if __name__ == '__main__':
             m = re.search('(L[0-9]+)', filename)
 
             if m is None:
-                print "error, cannot parset", filename
+                print "error, cannot find parset for", filename
                 continue
 
             if m.group(1) + '.parset' != parset:
