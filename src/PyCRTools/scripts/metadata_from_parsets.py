@@ -31,7 +31,10 @@ def get_obstimes():
                     # No need to read rest of the file
                     break
 
-            obstimes[files] = observation_time
+            if len(observation_time) != 2:
+                print "error parsing parset", files
+            else:
+                obstimes[files] = observation_time
 
     return obstimes
 
@@ -135,10 +138,7 @@ if __name__ == '__main__':
 
         if filename.endswith('.h5'):
 
-            try:
-                parset = parset_from_filename(filename, obstimes)
-            except KeyError:
-                print "error, cannot parse all keywords for", filename
+            parset = parset_from_filename(filename, obstimes)
 
             m = re.search('(L[0-9]+)D', filename)
 
