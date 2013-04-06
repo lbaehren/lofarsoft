@@ -123,6 +123,16 @@ def timestamp_in_observation(filename, parset):
 
     return (timestamp >= startUTC and timestamp <= endUTC)
 
+def fixfile(filename, parset):
+
+    if parset is None:
+        print "Error cannot find parset for file", filename
+        return
+    
+    new_filename = re.sub("L[0-9]", parset.rstrip(".parset"), filename)
+
+    print filename, new_filename, parset
+
 if __name__ == '__main__':
 
     from optparse import OptionParser
@@ -148,5 +158,5 @@ if __name__ == '__main__':
 
             if m.group(1) + '.parset' != parset:
 
-                print filename, parset
+                fixfile(filename, parset)
 
