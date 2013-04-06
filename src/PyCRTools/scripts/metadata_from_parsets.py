@@ -2,6 +2,7 @@
 
 import re
 import os
+import shutil
 import subprocess
 import datetime
 
@@ -123,13 +124,15 @@ def timestamp_in_observation(filename, parset):
 
     return (timestamp >= startUTC and timestamp <= endUTC)
 
-def fixfile(filename, parset):
+def fixfile(filename, parset, path):
 
     if parset is None:
         print "Error cannot find parset for file", filename
         return
     
     new_filename = re.sub("L[0-9]+", parset.rstrip(".parset"), filename)
+
+    shutil.copy(os.path.join(path, filename), os.path.join(path, 'backup', new_filename))
 
     print filename, new_filename, parset,
     write_metadata(new_filename, parse_parset(parset))
