@@ -6,10 +6,14 @@ import ephem
 import psrchive
 import pyfits
 import numpy as np
-import matplotlib.pyplot as plt
 import sys
 import string
 import os
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 
 def factors(n, m):
     a=[]
