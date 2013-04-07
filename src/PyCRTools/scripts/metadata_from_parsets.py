@@ -115,7 +115,7 @@ def write_metadata(filename, parset):
 
     os.chmod(filename, 0777)
 
-    subprocess.call(command, shell=True)
+    subprocess.check_call(command, shell=True)
 
     os.chmod(filename, 0220)
 
