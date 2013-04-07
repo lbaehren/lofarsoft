@@ -148,7 +148,7 @@ def fixfile(filename, parset, path, backup=True):
 
     write_metadata(os.path.join(path, new_filename), parse_parset(parset))
 
-    os.chmod(os.path.join(path, filename), 0220)
+    os.chmod(os.path.join(path, new_filename), 0220)
 
     print "fixed", filename, "->", new_filename
 
