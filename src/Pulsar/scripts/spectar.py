@@ -50,7 +50,7 @@ for line in open(opts.parset, 'r').readlines():
         az = float( string.split(line, "= ")[1].strip() )
     if "Observation.Beam[%d].TiedArrayBeam[%d].angle2" % (opts.sapid, opts.tabid) in line:
         dec_offset = float( string.split(line, "= ")[1].strip() )
-    if ra_offset > tabrad or dec_offset > tabrad:
+    if abs(ra_offset) > tabrad or abs(dec_offset) > tabrad:
         print "The offset of the beam %d is too large from the SAP%d center" % (tabid, sapid)
 	sys.exit(1)    
     else:
