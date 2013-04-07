@@ -61,6 +61,11 @@ for line in open(opts.parset, 'r').readlines():
         if is_coherent == 'f':
             print "The given beam is incoherent. Exiting."
             sys.exit(1)
+    if "OLAP.PencilInfo.flysEye" in line:
+        is_fe = string.split(line, "= ")[1].strip().lower()[:1]
+	if is_fe == 't':
+            print "The given observation is FlysEye. Exiting."
+            sys.exit(1)
     if "Observation.ObservationControl.OnlineControl.OLAP.storageStationNames = AllStations" in line:
         continue
     elif "OLAP.storageStationNames" in line:
