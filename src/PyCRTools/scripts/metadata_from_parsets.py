@@ -98,7 +98,7 @@ def parse_parset(parset):
             parset['clockFrequencyUnit'] = 'MHz'
 
         parset['antennaPositionDir'] = os.path.join(os.environ['LOFARSOFT'], 'data/lofar/antennapositions/')
-        parset['dipoleCalibrationDelayDir'] = os.path.join(os.environ['LOFARSOFT'], 'dipole_calibration_delay/')
+        parset['dipoleCalibrationDelayDir'] = os.path.join(os.environ['LOFARSOFT'], 'data/lofar/dipole_calibration_delay/')
 
     return parset
         
