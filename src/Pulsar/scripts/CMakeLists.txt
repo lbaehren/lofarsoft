@@ -30,5 +30,7 @@ add_custom_target (scripts_install
   COMMENT "Install extra processing scripts and LOFAR inf file into ${CMAKE_INSTALL_PREFIX}/bin and ${CMAKE_INSTALL_PREFIX}/data..."
   COMMENT "Copying parfiles to ${CMAKE_INSTALL_PREFIX}/data/parfile..."
   COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/parfiles/*.par ${CMAKE_INSTALL_PREFIX}/data/parfile/
+  COMMENT "Copying Haslam 408 MHz skymap to ${CMAKE_INSTALL_PREFIX}/data..."
+  COMMAND cp ${PULSAR_SOURCE_DIR}/scripts/lambda_mollweide_haslam408_dsds.fits ${CMAKE_INSTALL_PREFIX}/data/
   )
 
