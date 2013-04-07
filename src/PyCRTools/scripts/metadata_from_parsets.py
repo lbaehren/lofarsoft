@@ -71,12 +71,12 @@ def parse_parset(parset):
         # Observation.startTime
         m = re.search('Observation\.startTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
-            parset['startUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
+            parset['startUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}".format(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
         
         # Observation.stopTime
         m = re.search('Observation\.stopTime = \'([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})\'', line)
         if m is not None:
-            parset['endUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}Z".format(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
+            parset['endUTC'] = "{0}-{1}-{2}T{3}:{4}:{5}".format(m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
 
         # Observation.antennaSet
         m = re.search('Observation.antennaSet = ([A-Z_]+)', line)
@@ -113,11 +113,7 @@ def write_metadata(filename, parset):
 
     print command
 
-    os.chmod(filename, 0777)
-
     subprocess.check_call(command, shell=True)
-
-    os.chmod(filename, 0220)
 
 def timestamp_in_observation(filename, parset):
 
@@ -135,7 +131,7 @@ def timestamp_in_observation(filename, parset):
 
     return (timestamp >= startUTC and timestamp <= endUTC)
 
-def fixfile(filename, parset, path):
+def fixfile(filename, parset, path, backup=True):
 
     if parset is None:
         print "Error cannot find parset for file", filename
@@ -143,12 +139,18 @@ def fixfile(filename, parset, path):
     
     new_filename = re.sub("L[0-9]+", parset.rstrip(".parset"), filename)
 
-    shutil.copy(os.path.join(path, filename), os.path.join(path, 'backup', new_filename))
+    os.chmod(filename, 0770)
 
-#    shutil.move(os.path.join(path, filename), os.path.join(path, new_filename))
+    if backup:
+        shutil.copy(os.path.join(path, filename), os.path.join(path, 'backup', filename))
 
-    print filename, new_filename,
-    write_metadata(os.path.join(path, 'backup', new_filename), parse_parset(parset))
+    shutil.move(os.path.join(path, filename), os.path.join(path, new_filename))
+
+    write_metadata(os.path.join(path, new_filename), parse_parset(parset))
+
+    os.chmod(filename, 0220)
+
+    print "fixed", filename, "->", new_filename
 
 if __name__ == '__main__':
 
@@ -165,17 +167,20 @@ if __name__ == '__main__':
 
     for filename in os.listdir(path):
 
-        if filename.endswith('.h5'):
+        try:
+            if filename.endswith('.h5'):
 
-            parset = parset_from_filename(filename, obstimes)
+                parset = parset_from_filename(filename, obstimes)
 
-            m = re.search('(L[0-9]+)', filename)
+                m = re.search('(L[0-9]+)', filename)
 
-            if m is None:
-                print "error, cannot find parset for", filename
-                continue
+                if m is None:
+                    print "error, cannot find parset for", filename
+                    continue
 
-            if m.group(1) + '.parset' != parset:
+                if m.group(1) + '.parset' != parset:
 
-                fixfile(filename, parset, path)
+                    fixfile(filename, parset, path)
+        except Exception as e:
+            print "error", e, "cannot process file", filename
 
