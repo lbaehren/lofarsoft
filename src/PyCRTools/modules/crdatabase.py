@@ -255,7 +255,7 @@ class CRDatabase(object):
             sql_fields = "e.eventID"
             sql_table_e = "events AS e"
             sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_e + " ON (ed.eventID=e.eventID)"
-            sql_table_d = "datafiles AS d INNER JOIN " + sql_table_ed + "AND (d.datafileID=ed.datafileID)"
+            sql_table_d = "datafiles AS d INNER JOIN " + sql_table_ed + " AND (d.datafileID=ed.datafileID)"
             sql_table = sql_table_e
             sql_order = order
             sql_selection_list = []
