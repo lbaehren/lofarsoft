@@ -139,16 +139,12 @@ def fixfile(filename, parset, path, backup=True):
     
     new_filename = re.sub("L[0-9]+", parset.rstrip(".parset"), filename)
 
-    os.chmod(os.path.join(path, filename), 0770)
-
     if backup:
         shutil.copy(os.path.join(path, filename), os.path.join(path, 'backup', filename))
 
     shutil.move(os.path.join(path, filename), os.path.join(path, new_filename))
 
     write_metadata(os.path.join(path, new_filename), parse_parset(parset))
-
-    os.chmod(os.path.join(path, new_filename), 0220)
 
     with open("fixed_files.txt", "a") as f:
         f.write("fixed {0} -> {1}\n".format(filename, new_filename)
