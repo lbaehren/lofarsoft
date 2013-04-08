@@ -147,7 +147,8 @@ def fixfile(filename, parset, path, backup=True):
     write_metadata(os.path.join(path, new_filename), parse_parset(parset))
 
     with open("fixed_files.txt", "a") as f:
-        f.write("fixed {0} -> {1}\n".format(filename, new_filename)
+
+        f.write("fixed {0} -> {1}\n".format(filename, new_filename))
 
 if __name__ == '__main__':
 
