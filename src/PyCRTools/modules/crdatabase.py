@@ -201,17 +201,17 @@ class CRDatabase(object):
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN wavefront_fit_pointsource TEXT;")
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN wavefront_curvature_radius TEXT;")
             # ______________________________________________________________________
-            #                                                              Version 10 
+            #                                                              Version 10
             elif (10 == db_version_post):
                 sql_list.append("ALTER TABLE stationparameters ADD COLUMN crp_integrated_pulse_power_dbf TEXT;")
                 sql_list.append("ALTER TABLE stationparameters ADD COLUMN crp_integrated_noise_power_dbf TEXT;")
             # ______________________________________________________________________
-            #                                                              Version 11 
+            #                                                              Version 11
             elif (11 == db_version_post):
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN obsid TEXT;")
                 sql_list.append("ALTER TABLE stationparameters ADD COLUMN beam_direction TEXT;")
             # ______________________________________________________________________
-            #                                                              Version 12 
+            #                                                              Version 12
             elif (12 == db_version_post):
                 sql_list.append("ALTER TABLE eventparameters ADD COLUMN last_processed TEXT;")
             # ______________________________________________________________________
@@ -290,6 +290,8 @@ class CRDatabase(object):
                 sql += " WHERE {0}".format(sql_selection)
             if len(sql_order) > 0:
                 sql += " ORDER BY {0}".format(sql_order)
+
+            print "SQL: {0}".format(sql)
 
             # Extracting eventIDs
             result = [record[0] for record in self.db.select(sql)]
