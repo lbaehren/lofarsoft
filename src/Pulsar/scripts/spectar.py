@@ -54,12 +54,6 @@ for line in open(opts.parset, 'r').readlines():
         az = float( string.split(line, "= ")[1].strip() )
     if "Observation.Beam[%d].TiedArrayBeam[%d].angle2" % (opts.sapid, opts.tabid) in line:
         dec_offset = float( string.split(line, "= ")[1].strip() )
-    if abs(ra_offset) > tabrad or abs(dec_offset) > tabrad:
-        print "The offset of the beam %d is too large from the SAP%d center" % (tabid, sapid)
-	sys.exit(1)    
-    else:
-        alt += ra_offset
-        az += dec_offset 
     if "Observation.Beam[%d].TiedArrayBeam[%d].coherent" % (opts.sapid, opts.tabid) in line:
         is_coherent = string.split(line, "= ")[1].strip().lower()[:1]
         if is_coherent == 'f':
@@ -82,6 +76,13 @@ for line in open(opts.parset, 'r').readlines():
         start = start.replace('-','/')
     if "Observation.Scheduler.taskDuration" in line:
         deltat = float(string.split(line, "= ")[1].strip())/2
+
+if abs(ra_offset) > tabrad or abs(dec_offset) > tabrad:
+    print "The offset of the beam %d is too large from the SAP%d center" % (tabid, sapid)
+    sys.exit(1)    
+else:
+    alt += ra_offset
+    az += dec_offset 
 
 arch = psrchive.Archive_load(opts.filenm)
 psr = arch.get_source()
