@@ -150,7 +150,8 @@ def fixfile(filename, parset, path, backup=True):
 
     os.chmod(os.path.join(path, new_filename), 0220)
 
-    print "fixed", filename, "->", new_filename
+    with open("fixed_files.txt", "a") as f:
+        f.write("fixed {0} -> {1}\n".format(filename, new_filename)
 
 if __name__ == '__main__':
 
