@@ -117,10 +117,14 @@ Otherwise, the new results will be overwritten/added to existing directory", def
                            help="optional parameter to append log output to already existent log files. Default is overwrite", default=False)
         	self.cmd.add_option('--nthreads', dest='nthreads', metavar='#THREADS',
                            help="number of threads for all dspsr calls. Default: %default", default=2, type='int')
+        	self.cmd.add_option('--tsubint', dest='tsubint', metavar='SECS',
+                           help="set the length of each subintegration to SECS. Default is 60 secs for CS/IS and 5 secs for CV mode", default=-1, type='int')
         	self.cmd.add_option('--dspsr-extra-opts', dest='dspsr_extra_opts', metavar='STRING',
                            help="specify extra additional options for Dspsr command", default="", type='str')
         	self.cmd.add_option('--prepfold-extra-opts', dest='prepfold_extra_opts', metavar='STRING',
                            help="specify extra additional options for Prepfold command", default="", type='str')
+        	self.cmd.add_option('--no-hoover', action="store_true", dest='is_nohoover',
+                           help="do not use hoover node locus101 for processing, but instead rsync data to target locus nodes", default=False)
         	self.cmd.add_option('--first-frequency-split', dest='first_freq_split', metavar='SPLIT#',
                            help="start processing from this frequency split. For CS/IS it works only for processing with DAL support. Default: %default", default=0, type='int')
         	self.cmd.add_option('--nsplits', dest='nsplits', metavar='#SPLITS',
@@ -148,7 +152,7 @@ with --beams option and only the first beam will be used if there are several sp
         	self.groupCS.add_option('--skip-subdyn', action="store_true", dest='is_skip_subdyn',
                            help="optional parameter to skip subdyn.py only", default=False)
         	self.groupCS.add_option('--skip-dspsr', action="store_true", dest='is_skip_dspsr',
-                           help="optional parameter to turn off running dspsr part of the pipeline (including pdmp and creation of corresponding plots)", default=False)
+                           help="optional parameter to turn off running dspsr part of the pipeline when running without DAL support (including pdmp and creation of corresponding plots)", default=False)
         	self.groupCS.add_option('--skip-prepfold', action="store_true", dest='is_skip_prepfold',
                            help="optional parameter to turn off running prepfold part of the pipeline", default=False)
         	self.groupCS.add_option('--with-dal', action="store_true", dest='is_with_dal',
@@ -158,12 +162,8 @@ with --beams option and only the first beam will be used if there are several sp
 	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")
         	self.groupCV.add_option('--nodal', action="store_true", dest='is_nodal',
                            help="use bf2puma2 to read raw data instead of using dspsr to read *.h5 files directly", default=False)
-        	self.groupCV.add_option('--no-hoover', action="store_true", dest='is_nohoover',
-                           help="do not use hoover node locus101 for processing, but instead rsync data to target locus nodes", default=False)
-        	self.groupCV.add_option('--tsubint', dest='tsubint', metavar='SECS',
-                           help="set the length of each subintegration to SECS. Default is %default secs", default=5, type='int')
-        	self.groupCV.add_option('--maxram', dest='maxram', metavar='MULTIPLE',
-                           help="set the upper limit on RAM usage for dspsr as the multiple of the minimum possible block size. Default is %default", default=2, type='int')
+        	self.groupCV.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
+                           help="skip running rmfit program", default=False)
         	self.groupCV.add_option('--hist-cutoff', dest='hist_cutoff', metavar='FRACTION',
                            help="clip FRACTION off the edges of the samples histogram. Be noted, it eliminates spiky RFI, but may also \
 clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type='float')
@@ -173,8 +173,6 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
                            help="normalize the data based on entire data set. Otherwise, the scaling is updated after every data block", default=False)
         	self.groupCV.add_option('--write-ascii', action="store_true", dest='is_write_ascii',
                            help="write out also ascii files (.rv) containing complex values", default=False)
-        	self.groupCV.add_option('--skip-rmfit', action="store_true", dest='is_skip_rmfit',
-                           help="skip running rmfit program", default=False)
 		self.cmd.add_option_group(self.groupCV)
         
 		# reading cmd options
@@ -482,6 +480,10 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
 		if self.opts.fwhm_IS < 0.0:
 			if obs.antenna == "HBA": self.opts.fwhm_IS = cep2.fov_hba
 			if obs.antenna == "LBA": self.opts.fwhm_IS = cep2.fov_lba
+		# updating subintegration time
+		if self.opts.tsubint == 0 or self.opts.tsubint <= -1:
+			if obs.CV: self.opts.tsubint = 5
+			else: self.opts.tsubint = 60  # CS/IS
 
 	# print summary of all set input parameters
 	def print_summary(self, cep2, obs, log=None):
@@ -552,7 +554,7 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
 				else:
 					if obs.CV: 
 						log.info("USING HOOVER NODES = %s" % (self.opts.is_nohoover and "no" or "yes"))
-						log.info("DSPSR with LOFAR DAL = %s%s" % (self.opts.is_nodal and "no" or "yes", self.opts.is_nodal and "" or " (max RAM = minX%d)" % (self.opts.maxram)))
+						log.info("DSPSR with LOFAR DAL = %s" % (self.opts.is_nodal and "no" or "yes"))
 					if self.opts.first_freq_split != 0:
 						log.info("FIRST FREQUENCY SPLIT = %d" % (self.opts.first_freq_split))
 					if self.opts.nsplits != -1:

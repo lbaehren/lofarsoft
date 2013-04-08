@@ -18,7 +18,6 @@ from pulp_sysinfo import CEP2Info
 from pulp_logging import PulpLogger
 from pulp_feedback import FeedbackUnit
 
-### define a global function - recursive glob ####
 
 # return list of dirs in the current base directory
 def getDirs(base):
@@ -34,6 +33,171 @@ def rglob(base, pattern, maxdepth=0):
                 for d in dirs:
                         flist.extend(rglob(os.path.join(base, d), pattern, maxdepth-1))
         return flist
+
+# common postprocessing routines after DSPSR calls for different Units and both DAL and non_DAL parts
+# root - class instance to execute
+# ref - class instance to get values of chans, etc.
+def dspsr_postproc(root, ref, cmdline, obs, psr, total_chan, nsubs_eff, curdir, output_prefix):
+
+	# removing corrupted freq channels
+        if ref.nrChanPerSub > 1:
+		root.log.info("Zapping every %d channel..." % (ref.nrChanPerSub))
+		cmd="paz -z \"%s\" -m %s_%s.ar" % \
+			(" ".join([str(jj) for jj in range(0, total_chan, ref.nrChanPerSub)]), psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
+
+	# rfi zapping
+	if not cmdline.opts.is_norfi:
+		root.log.info("Zapping channels using median smoothed difference algorithm...")
+		cmd="paz -r -e paz.ar %s_%s.ar" % (psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
+
+	# dedispersing
+	root.log.info("Dedispersing...")
+	if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
+		cmd="pam -D -m %s_%s.paz.ar" % (psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
+		cmd="pam -D -e dd %s_%s.ar" % (psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
+
+	# scrunching in frequency
+	root.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (nsubs_eff))
+	if ref.nrChanPerSub > 1:
+		# first, running fscrunch on zapped archive
+		if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
+			cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (nsubs_eff, psr, output_prefix)
+			root.execute(cmd, workdir=curdir)
+			# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
+			cmd="rm -f %s_%s.paz.ar" % (psr, output_prefix)
+			root.execute(cmd, workdir=curdir)
+		# running fscrunching on non-zapped archive
+		cmd="pam --setnchn %d -e fscr.AR %s_%s.dd" % (nsubs_eff, psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
+		# remove non-scrunched dedispersed archive (we will always have unzapped non-dedispersed non-scrunched version)
+		cmd="rm -f %s_%s.dd" % (psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
+	else: # if number of chans == number of subs, we will just rename .paz.ar to .paz.fscr.AR and .dd to .fscr.AR
+		if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (curdir, psr, output_prefix)):
+			cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, output_prefix, psr, output_prefix)
+			root.execute(cmd, workdir=curdir)
+		cmd="mv -f %s_%s.dd %s_%s.fscr.AR" % (psr, output_prefix, psr, output_prefix)
+		root.execute(cmd, workdir=curdir)
+
+# running pav's to make DSPSR diagnostic plots
+# root - class instance to execute
+# ref - class instance to get values of chans, etc.
+def make_dspsr_plots(root, ref, cmdline, obs, nsubs_eff, curdir, output_prefix):
+
+	# first, calculating the proper max divisor for the number of subbands
+	root.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
+	# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
+	pav_nchans = ref.hcd(1, min(nsubs_eff, 63), nsubs_eff)
+	root.log.info("Creating diagnostic plots...")
+	for psr in ref.psrs:  # pulsar list is empty if --nofold is used
+		if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (curdir, psr, output_prefix)):
+			output_stem=".paz.fscr.AR"
+		else: output_stem=".fscr.AR"
+
+		# creating DSPSR diagnostic plots
+		if obs.CV: plot_type = "SFTd"
+		else: plot_type = "DFTpd"
+
+		cmd="pav -%s -g %s_%s_%s.ps/cps %s_%s%s" % (plot_type, psr, output_prefix, plot_type, psr, output_prefix, output_stem)
+		root.execute(cmd, workdir=curdir)
+		cmd="pav -GTpdf%d -g %s_%s_GTpdf%d.ps/cps %s_%s%s" % (pav_nchans, psr, output_prefix, pav_nchans, psr, output_prefix, output_stem)
+		root.execute(cmd, workdir=curdir)
+		cmd="pav -YFpd -g %s_%s_YFpd.ps/cps %s_%s%s" % (psr, output_prefix, psr, output_prefix, output_stem)
+		root.execute(cmd, workdir=curdir)
+		cmd="pav -J -g %s_%s_J.ps/cps %s_%s%s" % (psr, output_prefix, psr, output_prefix, output_stem)
+		root.execute(cmd, workdir=curdir)
+		if not cmdline.opts.is_skip_rmfit and obs.CV:
+			try:
+				# running rmfit for negative and positive RMs
+				cmd="rmfit -m -100,0,100 -D -K %s_%s.negRM.ps/cps %s_%s%s" % (psr, output_prefix, psr, output_prefix, output_stem)
+				root.execute(cmd, workdir=curdir)
+				cmd="rmfit -m 0,100,100 -D -K %s_%s.posRM.ps/cps %s_%s%s" % (psr, output_prefix, psr, output_prefix, output_stem)
+				root.execute(cmd, workdir=curdir)
+				cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps %s_%s.posRM.ps +append \) \( %s_%s_%s.ps %s_%s_YFpd.ps %s_%s.negRM.ps +append \) \
+					-append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+					(psr, output_prefix, pav_nchans, psr, output_prefix, psr, output_prefix, psr, output_prefix, plot_type, \
+					psr, output_prefix, psr, output_prefix, psr, output_prefix)
+				root.execute(cmd, workdir=curdir)
+			except Exception:
+				root.log.warning("***** Warning! Rmfit has failed. Diagnostic plots will be made without rmfit plots. *****")
+				cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_%s.ps %s_%s_YFpd.ps +append \) \
+					-append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+					(psr, output_prefix, pav_nchans, psr, output_prefix, psr, output_prefix, plot_type, \
+					psr, output_prefix, psr, output_prefix)
+				root.execute(cmd, workdir=curdir)
+		else:
+			cmd="convert \( %s_%s_GTpdf%d.ps %s_%s_J.ps +append \) \( %s_%s_%s.ps %s_%s_YFpd.ps +append \) \
+				-append -rotate 90 -background white -flatten %s_%s_diag.png" % \
+				(psr, output_prefix, pav_nchans, psr, output_prefix, psr, output_prefix, plot_type, \
+				psr, output_prefix, psr, output_prefix)
+			root.execute(cmd, workdir=curdir)
+
+# start pdmp calls
+# root - class instance to execute
+# ref - class instance to get values of chans, etc.
+def start_pdmp(root, ref, cmdline, obs, nsubs_eff, curdir, output_prefix):
+
+	# now running pdmp without waiting...
+	root.log.info("Running pdmp...")
+	pdmp_popens=[]  # list of pdmp Popen objects	
+	for psr in ref.psrs:
+		if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (curdir, psr, output_prefix)):
+			output_stem=".paz.fscr.AR"
+		else: output_stem=".fscr.AR"
+		# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
+		# we still provide our own number of bins in --dspsr-extra-opts
+		try:
+			cmd="psredit -q -Q -c nbin %s/%s_%s%s" % (curdir, psr, output_prefix, output_stem)
+			binsline=os.popen(cmd).readlines()
+			if np.size(binsline) > 0:
+				best_nbins=int(binsline[0][:-1])
+				cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
+					(nsubs_eff, min(128, best_nbins), psr, output_prefix, psr, output_prefix, output_stem)
+				pdmp_popen = root.start_and_go(cmd, workdir=curdir)
+				pdmp_popens.append(pdmp_popen)
+		except Exception: pass
+	return pdmp_popens
+
+# finish pdmps
+# root - class instance to execute
+# ref - class instance to get values of chans, etc.
+def finish_pdmp(root, ref, pdmp_popens, cmdline, obs, curdir, output_prefix):
+	# waiting for pdmp to finish
+	root.waiting_list("pdmp", pdmp_popens)
+	# when pdmp is finished do extra actions with files...
+	for psr in ref.psrs:
+		if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (curdir, psr, output_prefix)):
+			output_stem=".paz.fscr.AR"
+		else: output_stem=".fscr.AR"
+		cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, curdir, curdir, psr, output_prefix)
+		root.execute(cmd, is_os=True)
+		cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, curdir, curdir, psr, output_prefix)
+		root.execute(cmd, is_os=True)
+		# reading new DM from the *.per file
+		newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (curdir, psr, output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
+		if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm[-1], psr, output_prefix, output_stem)
+		else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm, psr, output_prefix, output_stem)
+		root.execute(cmd, workdir=curdir)
+
+# Running spectar.py to calculate pulsar spectra
+def calc_psr_spectra(root, ref, cmdline, obs, sapid, tabid, curdir, output_prefix):
+	root.log.info("Calculating pulsar(s) spectra...")
+	try:
+		for psr in ref.psrs:
+			psrar=glob.glob("%s/%s_%s.paz.fscr.pdmp.AR" % (curdir, psr, output_prefix))
+			if len(psrar) == 0:
+				psrar=glob.glob("%s/%s_%s.paz.fscr.AR" % (curdir, psr, output_prefix))
+				if len(psrar) == 0:
+					psrar=glob.glob("%s/%s_%s.fscr.AR" % (curdir, psr, output_prefix))
+			if len(psrar) == 0: continue
+			cmd="spectar.py -f %s -p %s -o %s/%s_%s_%s --sap %d --tab %d" % (psrar[0], obs.parset, curdir, psr, output_prefix, "spectra.txt", sapid, tabid)
+			root.execute(cmd, workdir=curdir)
+	except: pass
+
 
 # base class for the single processing (a-ka beam)
 class PipeUnit:
@@ -333,7 +497,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			nbins=self.power_of_two(int(math.ceil(ephem.P0*1000.0/self.sampling)))
 			if nbins > 1024: return 1024
 			else: return nbins
-		except: return 256
+		except: return 1024
 
 	def get_psr_dm(self, parf):
 		"""
@@ -371,6 +535,150 @@ CLK line will be removed from the parfile!" % (parfile,))
 				if proc != None: proc.communicate()
 				if proc != None: proc.poll()
 		self.procs = []
+
+        # refresh NFS mounting of locus node (loc) on hoover node
+        # by doing 'ls' command
+        def hoover_mounting(self, cep2, firstfile, loc):
+                uniqdir="/".join(firstfile.split("/")[0:-1]).split("/data/")[-1]
+                input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
+                process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
+                process.communicate()
+                return input_dir
+
+	# running prepfold(s) for all specified pulsars
+	# returning the Popen instances of prepfold calls
+	def start_prepfold(self, cmdline, total_chan):
+		if total_chan >= 256 and total_chan <= 6000:
+			prepfold_nsubs = 256
+		elif total_chan > 6000:
+			prepfold_nsubs = 512
+		else: prepfold_nsubs = total_chan
+		self.log.info("Getting proper value of nsubs in prepfold between %d and %d..." % (prepfold_nsubs, total_chan))
+		# calculating the least common denominator of total_chan starting from prepfold_nsubs
+		prepfold_nsubs = self.lcd(prepfold_nsubs, total_chan)
+		self.log.info("Number of subbands, -nsubs, for prepfold is %d" % (prepfold_nsubs))
+		self.log.info("Running prepfolds...")
+		prepfold_popens=[]  # list of prepfold Popen objects
+		for psr in self.psrs:   # pulsar list is empty if --nofold is used
+			psr2=re.sub(r'[BJ]', '', psr)
+			prepfold_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
+			# first running prepfold with mask (if --norfi was not set)
+			if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
+				# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
+				# I suppose it happens because name of the file is TOO long for Tempo
+				cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s %s.fits" % \
+					(psr, psr2, prepfold_nbins, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, cmdline.opts.prepfold_extra_opts, self.output_prefix)
+				try: # if prepfold fails right away (sometimes happens with error like this:
+					# Read 0 set(s) of polycos for PSR 1022+1001 at 56282.138888888891 (DM = 3.6186e-317)
+					# MJD 56282.139 out of range (    0.000 to     0.000)
+					# isets = 0
+					# I guess something to do with how Tempo treats parfile. When this happens, we try to rerun prepfold with the same
+					# command but without using -par option
+					prepfold_popen = self.start_and_go(cmd, workdir=self.curdir, immediate_status_check=True)
+				except Exception:
+					self.log.warning("***** Prepfold failed when using par-file. Will try the same command but without using -par option *****")
+					cmd="prepfold -noscales -nooffsets -noxwin -psr %s -n %d -nsub %d -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s %s.fits" % \
+						(psr, prepfold_nbins, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, cmdline.opts.prepfold_extra_opts, self.output_prefix)
+					prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
+				prepfold_popens.append(prepfold_popen)
+				time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish 
+						# with temporary files lile resid2.tmp otherwise it can interfere with next prepfold call
+
+			# running prepfold without mask
+			if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)): 
+				output_stem="_nomask"
+			else: output_stem=""
+			# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
+			# I suppose it happens because name of the file is TOO long for Tempo
+			cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -o %s_%s%s %s %s.fits" % \
+				(psr, psr2, prepfold_nbins, prepfold_nsubs, psr, self.output_prefix, output_stem, cmdline.opts.prepfold_extra_opts, self.output_prefix)
+			try: # same reasoning as above
+				prepfold_popen = self.start_and_go(cmd, workdir=self.curdir, immediate_status_check=True)
+			except Exception:
+				self.log.warning("***** Prepfold failed when using par-file. Will try the same command but without using -par option *****")
+				cmd="prepfold -noscales -nooffsets -noxwin -psr %s -n %d -nsub %d -fine -nopdsearch -o %s_%s%s %s %s.fits" % \
+					(psr, prepfold_nbins, prepfold_nsubs, psr, self.output_prefix, output_stem, cmdline.opts.prepfold_extra_opts, self.output_prefix)
+				prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
+			prepfold_popens.append(prepfold_popen)
+			time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish 
+					# with temporary files like resid2.tmp otherwise it can interfere with next prepfold call
+		return prepfold_popens
+
+	# making prepfold diagnostic plots	
+	def make_prepfold_plots(self, obs):
+
+		# running convert on prepfold ps to pdf and png
+		self.log.info("Running convert on ps to pdf and png of the plots...")
+		prepfold_ps=glob.glob("%s/*.pfd.ps" % (self.curdir))
+		for psfile in prepfold_ps:
+			base=psfile.split("/")[-1].split(".ps")[0]
+			cmd="convert %s.ps %s.pdf" % (base, base)
+			# have separate try/except blocks for each convert command to allow to continue processing
+			# in case something is wrong with ps-file
+			try:
+				self.execute(cmd, workdir=self.curdir)
+			except: pass
+			cmd="convert -rotate 90 %s.ps %s.png" % (base, base)
+			try:
+				self.execute(cmd, workdir=self.curdir)
+			except : pass
+			cmd="convert -rotate 90 -crop 200x140-0 %s.ps %s.th.png" % (base, base)
+			try:
+				self.execute(cmd, workdir=self.curdir)
+			except: pass
+
+		# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
+		psr_bestprofs=rglob(self.outdir, "*.pfd.bestprof", 3)
+		if len(psr_bestprofs) > 0:
+			self.log.info("Reading chi-squared values and adding to chi-squared.txt...")
+			# also preparing montage command to create combined plot
+			montage_cmd="montage -background none -pointsize 10.2 "
+			chif=open("%s/%s_sap%03d_tab%04d_chi-squared.txt" % (self.outdir, obs.id, self.sapid, self.tabid), 'w')
+			thumbs=[] # list of thumbnail files
+			# check first if all available *bestprof files are those created without mask. If so, then allow to make
+			# a diagnostic combined plot using prepfold plots without a mask
+			good_bestprofs=[file for file in psr_bestprofs if re.search("_nomask_", file) is None]
+			if len(good_bestprofs) == 0:
+				good_bestprofs=[file for file in psr_bestprofs]
+			for bp in good_bestprofs:
+				psr=bp.split("/")[-1].split("_")[0]
+				thumbfile=bp.split(self.outdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
+				# getting current number for SAP and TA beam
+				try: # we need this try block in case User manually creates sub-directories with some test bestprof files there
+				     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
+				     # on a wrong-formed string applying int()
+					cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
+				except: continue
+				curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
+				chi_val = 0.0
+				thumbs.append(thumbfile)
+				cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
+				chiline=os.popen(cmd).readlines()
+				if np.size(chiline) > 0:
+					chi_val = float(chiline[0].rstrip())
+				else:
+					if self.sapid == cursapid and self.procdir == curprocdir:
+						self.log.warning("Warning: can't read chi-sq value from %s" % (bp))
+				chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, self.code, cursapid, curprocdir, psr, chi_val))
+				montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (self.code, cursapid, curprocdir, psr, chi_val, thumbfile)
+			chif.close()
+			cmd="mv %s_sap%03d_tab%04d_chi-squared.txt chi-squared.txt" % (obs.id, self.sapid, self.tabid)
+			self.execute(cmd, workdir=self.outdir)
+
+			# creating combined plots
+			# only creating combined plots when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on
+			# the same node, that bestprof files do exist, but thumbnails were not created yet at the time when chi-squared.txt is
+			# getting created for another beam. And this will cause "montage" command to fail
+			# At the end combined plot will eventually be created for this node during the procesing of the last beam of this node
+			if len(thumbs) > 0 and len([ff for ff in thumbs if os.path.exists(ff)]) == len(thumbs):
+				# creating combined plots
+				self.log.info("Combining all pfd.th.png files in a single combined plot...")
+				montage_cmd += "combined.png"
+				self.execute(montage_cmd, workdir=self.outdir)
+				# making thumbnail version of the combined plot
+				cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
+				self.execute(cmd, workdir=self.outdir)
+
 
 	# function that does last steps in processing, creating tarball, copyting it, changing ownership, etc...
 	def finish_off(self, obs, cep2, cmdline):
@@ -517,12 +825,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 					for loc in self.tab.location:
 						if loc in self.tab.rawfiles:
 							# first "mounting" corresponding locus node
-							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
-							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-							process.communicate()
-#							input_file="%s/%s_SAP%03d_B%03d_S*_bf.raw" % (input_dir, obs.id, self.sapid, self.tabid)
-#							input_files.extend(glob.glob(input_file))
+							input_dir = self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 							input_file=["%s/%s" % (input_dir, f.split("/" + obs.id + "/")[-1]) for f in self.tab.rawfiles[loc]]
 							input_files.extend(input_file)
 							# copy *.h5 files (want to keep them)
@@ -554,11 +857,11 @@ CLK line will be removed from the parfile!" % (parfile,))
 				if not cmdline.opts.is_nodecode:
 					verbose=""
 					if cmdline.opts.is_debug: verbose="-v"
-					cmd="2bf2fits %s %s -parset %s -append -nbits 8 -A 100 -sigma 3 -nsubs %d -o %s %s" % (verbose, self.raw2fits_extra_options, obs.parset, self.tab.nrSubbands, self.output_prefix, input_file)
+					cmd="2bf2fits %s %s -parset %s -append -nbits 8 -A 100 -sigma 3 -nsubs %d -sap %d -tab %d -o %s %s" % (verbose, self.raw2fits_extra_options, obs.parset, self.tab.nrSubbands, self.sapid, self.tabid, self.output_prefix, input_file)
 					self.execute(cmd, workdir=self.curdir)
 					# fixing the coordinates
-					cmd="fix_fits_coordinates.py %s.fits" % (self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
+					#cmd="fix_fits_coordinates.py %s.fits" % (self.output_prefix)
+					#self.execute(cmd, workdir=self.curdir)
 
 				# running RFI excision, checking
 				if not cmdline.opts.is_norfi:
@@ -569,6 +872,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 					self.log.info("Creating RFI mask...")
 					cmd="rfifind -o %s -psrfits -noclip -blocks 16 %s %s.fits" % (self.output_prefix, zapstr, self.output_prefix)
 					rfifind_popen = self.start_and_go(cmd, workdir=self.curdir)
+
+					# start subdyn.py
 					if not cmdline.opts.is_skip_subdyn:
 						self.log.info("Producing RFI report...")
 						samples_to_average=int(10000. / self.sampling) # 10 s worth of data
@@ -581,322 +886,85 @@ CLK line will be removed from the parfile!" % (parfile,))
 				if not cmdline.opts.is_nofold:	
 					# running prepfold with and without mask
 					if not cmdline.opts.is_skip_prepfold:
-						if total_chan >= 256 and total_chan <= 6000:
-							prepfold_nsubs = 256
-						elif total_chan > 6000:
-							prepfold_nsubs = 512
-						else: prepfold_nsubs = total_chan
-						self.log.info("Getting proper value of nsubs in prepfold between %d and %d..." % (prepfold_nsubs, total_chan))
-						# calculating the least common denominator of total_chan starting from prepfold_nsubs
-						prepfold_nsubs = self.lcd(prepfold_nsubs, total_chan)
-						self.log.info("Number of subbands, -nsubs, for prepfold is %d" % (prepfold_nsubs))
-						prepfold_popens=[]  # list of prepfold Popen objects
-						for psr in self.psrs:   # pulsar list is empty if --nofold is used
-							psr2=re.sub(r'[BJ]', '', psr)
-							prepfold_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
-							# first running prepfold with mask (if --norfi was not set)
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
-								# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
-								# I suppose it happens because name of the file is TOO long for Tempo
-								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s %s.fits" % \
-									(psr, psr2, prepfold_nbins, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, cmdline.opts.prepfold_extra_opts, self.output_prefix)
-								try: # if prepfold fails right away (sometimes happens with error like this:
-									# Read 0 set(s) of polycos for PSR 1022+1001 at 56282.138888888891 (DM = 3.6186e-317)
-									# MJD 56282.139 out of range (    0.000 to     0.000)
-									# isets = 0
-									# I guess something to do with how Tempo treats parfile. When this happens, we try to rerun prepfold with the same
-									# command but without using -par option
-									prepfold_popen = self.start_and_go(cmd, workdir=self.curdir, immediate_status_check=True)
-								except Exception:
-									self.log.warning("***** Prepfold failed when using par-file. Will try the same command but without using -par option *****")
-									cmd="prepfold -noscales -nooffsets -noxwin -psr %s -n %d -nsub %d -fine -nopdsearch -mask %s_rfifind.mask -o %s_%s %s %s.fits" % \
-										(psr, prepfold_nbins, prepfold_nsubs, self.output_prefix, psr, self.output_prefix, cmdline.opts.prepfold_extra_opts, self.output_prefix)
-									prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
-								prepfold_popens.append(prepfold_popen)
-								time.sleep(5) # will sleep for 5 secs, in order to give prepfold enough time to finish 
-                                                                              # with temporary files lile resid2.tmp otherwise it can interfere with next prepfold call
-							# running prepfold without mask
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)): 
-								output_stem="_nomask"
-							else: output_stem=""
-							# we use ../../../ instead of self.outdir for the full-name of the parfile, because in this case prepfold crashes
-							# I suppose it happens because name of the file is TOO long for Tempo
-							cmd="prepfold -noscales -nooffsets -noxwin -psr %s -par ../../../%s.par -n %d -nsub %d -fine -nopdsearch -o %s_%s%s %s %s.fits" % \
-								(psr, psr2, prepfold_nbins, prepfold_nsubs, psr, self.output_prefix, output_stem, cmdline.opts.prepfold_extra_opts, self.output_prefix)
-							try: # same reasoning as above
-								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir, immediate_status_check=True)
-							except Exception:
-								self.log.warning("***** Prepfold failed when using par-file. Will try the same command but without using -par option *****")
-								cmd="prepfold -noscales -nooffsets -noxwin -psr %s -n %d -nsub %d -fine -nopdsearch -o %s_%s%s %s %s.fits" % \
-									(psr, prepfold_nbins, prepfold_nsubs, psr, self.output_prefix, output_stem, cmdline.opts.prepfold_extra_opts, self.output_prefix)
-								prepfold_popen = self.start_and_go(cmd, workdir=self.curdir)
-							prepfold_popens.append(prepfold_popen)
-							time.sleep(5) # again will sleep for 5 secs, in order to give prepfold enough time to finish 
-                                                                      # with temporary files like resid2.tmp otherwise it can interfere with next prepfold call
+						prepfold_popens = self.start_prepfold(cmdline, total_chan)
 
 					# now running dspsr stuff...
 					if not cmdline.opts.is_skip_dspsr:
-						zapstr=""
-						if self.nrChanPerSub > 1:
-							zapstr="-j 'zap chan %s'" % (",".join([str(ii) for ii in range(0, total_chan, self.nrChanPerSub)]))
+
 						verbose="-q"
 						if cmdline.opts.is_debug: verbose="-v"
 						dspsr_popens=[] # list of dspsr Popen objects
 						for psr in self.psrs: # pulsar list is empty if --nofold is used
 							psr2=re.sub(r'[BJ]', '', psr)
 							dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
-							cmd="dspsr -b %d -E %s/%s.par %s %s -fft-bench -O %s_%s -A -L 60 -t %d %s %s.fits" % \
-								(dspsr_nbins, self.outdir, psr2, zapstr, verbose, psr, self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, self.output_prefix)
+							cmd="dspsr -b %d -A -L %d -E %s/%s.par %s -fft-bench -O %s_%s -t %d %s %s.fits" % \
+								(dspsr_nbins, cmdline.opts.tsubint, self.outdir, psr2, verbose, psr, \
+								self.output_prefix, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, self.output_prefix)
 							dspsr_popen = self.start_and_go(cmd, workdir=self.curdir)
 							dspsr_popens.append(dspsr_popen)
 
 						# waiting for dspsr to finish
 						self.waiting_list("dspsr", dspsr_popens)
 
-						# zapping rfi
-						if not cmdline.opts.is_norfi:
-							self.log.info("Zapping channels using median smoothed difference algorithm...")
-							for psr in self.psrs:  # pulsar list is empty if --nofold is used
-								cmd="paz -r -e paz.ar %s_%s.ar" % (psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-
-						# dedispersing
-						self.log.info("Dedispersing...")
 						for psr in self.psrs:  # pulsar list is empty if --nofold is used
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
-								cmd="pam -D -m %s_%s.paz.ar" % (psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-							cmd="pam -D -e dd %s_%s.ar" % (psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
+							self.log.info("Running post-dspsr processing for pulsar %s..." % (psr))
 
-						# scrunching in frequency
-						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (self.tab.nrSubbands))
-						if self.nrChanPerSub > 1:
-							for psr in self.psrs:  # pulsar list is empty if --nofold is used
-								# first, running fscrunch on zapped archive
-								if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
-									cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (self.tab.nrSubbands, psr, self.output_prefix)
-									self.execute(cmd, workdir=self.curdir)
-									# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
-									cmd="rm -f %s_%s.paz.ar" % (psr, self.output_prefix)
-									self.execute(cmd, workdir=self.curdir)
-								# running fscrunching on non-zapped archive
-								cmd="pam --setnchn %d -e fscr.AR %s_%s.dd" % (self.tab.nrSubbands, psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-								# remove non-scrunched dedispersed archive (we will always have unzapped non-dedispersed non-scrunched version)
-								cmd="rm -f %s_%s.dd" % (psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-						else: # if number of chans == number of subs, we will just rename .paz.ar to .paz.fscr.AR and .dd to .fscr.AR
-							for psr in self.psrs:  # pulsar list is empty if --nofold is used
-								if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
-									cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-									self.execute(cmd, workdir=self.curdir)
-								cmd="mv -f %s_%s.dd %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
+							# running common DSPSR post-processing
+							dspsr_postproc(self, self, cmdline, obs, psr, total_chan, self.tab.nrSubbands, self.curdir, self.output_prefix)
 
-			# running extra Psrchive programs, pam, pav,pdmp, etc... 
-			# these programs should be run quick, so run them one by one
-
+			# running pav
 			if not cmdline.opts.is_skip_dspsr and not cmdline.opts.is_feedback:
-				# first, calculating the proper max divisor for the number of subbands
-#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
-				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(self.tab.nrSubbands, 63)))
-				# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
-				pav_nchans = self.hcd(1, min(self.tab.nrSubbands, 63), self.tab.nrSubbands)
-				for psr in self.psrs:  # pulsar list is empty if --nofold is used
-					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
-						output_stem=".paz.fscr.AR"
-					else: output_stem=".fscr.AR"
-					# creating DSPSR diagnostic plots
-					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s%s" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
-                	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-                        	             (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
-                                	      psr, self.output_prefix, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
+				make_dspsr_plots(self, self, cmdline, obs, self.tab.nrSubbands, self.curdir, self.output_prefix)
 
+			# Starting pdmp
 			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
-				if not cmdline.opts.is_skip_dspsr:
-					# now running pdmp without waiting...
-					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
-						self.log.info("Running pdmp...")
-						pdmp_popens=[]  # list of pdmp Popen objects	
-						for psr in self.psrs:
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
-								output_stem=".paz.fscr.AR"
-							else: output_stem=".fscr.AR"
-							# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
-							# we still provide our own number of bins in --dspsr-extra-opts
-							try:
-								cmd="psredit -q -Q -c nbin %s/%s_%s%s" % (self.curdir, psr, self.output_prefix, output_stem)
-								binsline=os.popen(cmd).readlines()
-								if np.size(binsline) > 0:
-									best_nbins=int(binsline[0][:-1])
-									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
-										(self.tab.nrSubbands, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix, output_stem)
-									pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
-									pdmp_popens.append(pdmp_popen)
-							except Exception: pass
+				if not cmdline.opts.is_skip_dspsr and not cmdline.opts.is_nofold and not cmdline.opts.is_nopdmp:
+					pdmp_popens = start_pdmp(self, self, cmdline, obs, self.tab.nrSubbands, self.curdir, self.output_prefix)
 		
 				# waiting for prepfold to finish
 				try:
-					if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_prepfold: self.waiting_list("prepfold", prepfold_popens)
+					if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_prepfold: 
+						self.waiting_list("prepfold", prepfold_popens)
 				# we let PULP to continue if prepfold has crashed, as dspsr can run ok, or other instances of prepfold could finish ok as well
 				except: pass
 
 			# if we want to run prepdata to create a time-series and make a list of TOAs
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and cmdline.opts.is_single_pulse:	
-				self.log.info("Running single-pulse analysis...")
-				prepdata_popens=[]  # list of prepdata Popen objects
-				for psr in self.psrs:   # pulsar list is empty if --nofold is used
-					psr2=re.sub(r'[BJ]', '', psr)
-					psrdm=self.get_psr_dm("%s/%s.par" % (self.outdir, psr2))
-					# first running prepdata with mask (if --norfi was not set)
-					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
-						cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -mask %s_rfifind.mask -o %s_%s %s.fits" % \
-							(psrdm, self.output_prefix, psr, self.output_prefix, self.output_prefix)
-						prepdata_popen = self.start_and_go(cmd, workdir=self.curdir)
-						prepdata_popens.append(prepdata_popen)
-
-					# running prepdata without mask
-					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)): 
-						output_stem="_nomask"
-					else: output_stem=""
-					cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -o %s_%s%s %s.fits" % \
-						(psrdm, psr, self.output_prefix, output_stem, self.output_prefix)
-					prepdata_popen = self.start_and_go(cmd, workdir=self.curdir)
-					prepdata_popens.append(prepdata_popen)
-
-			# waiting for prepdata to finish
 			try:
-				if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and cmdline.opts.is_single_pulse:
-					self.waiting_list("prepdata", prepdata_popens)
-					# after all instances of prepdata are finished we run single_pulse_search.py on created .dat files
-					singlepulse_popens=[]  # list of single_pulse_search.py Popen objects
+				if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and cmdline.opts.is_single_pulse:	
 					for psr in self.psrs:   # pulsar list is empty if --nofold is used
 						psr2=re.sub(r'[BJ]', '', psr)
-						# first running single_pulse_search.py on .dat file created with the rfifind mask
+						psrdm=self.get_psr_dm("%s/%s.par" % (self.outdir, psr2))
+						# running prepdata with mask (if --norfi was not set)
 						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
-							cmd="single_pulse_search.py -p %s_%s.dat" % (psr, self.output_prefix)
-							singlepulse_popen = self.start_and_go(cmd, workdir=self.curdir)
-							singlepulse_popens.append(singlepulse_popen)
-
-						# running single_pulse_search.py on .dat file created without rfifind mask
-						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)): 
-							output_stem="_nomask"
-						else: output_stem=""
-						cmd="single_pulse_search.py -p %s_%s%s.dat" % (psr, self.output_prefix, output_stem)
-						singlepulse_popen = self.start_and_go(cmd, workdir=self.curdir)
-						singlepulse_popens.append(singlepulse_popen)
-					# now waiting for all instances of single_pulse_search.py to finish
-					self.waiting_list("single_pulse_search.py", singlepulse_popens)
+							cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -mask %s_rfifind.mask -o %s_%s %s.fits" % \
+								(psrdm, self.output_prefix, psr, self.output_prefix, self.output_prefix)
+						else: # running prepdata without mask
+							cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -o %s_%s %s.fits" % \
+								(psrdm, psr, self.output_prefix, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
+						# running single_pulse_search.py on .dat file (created either with mask or not)
+						cmd="single_pulse_search.py -p %s_%s.dat" % (psr, self.output_prefix)
+						self.execute(cmd, workdir=self.curdir)
 			# we let PULP to continue if prepdata (or single_pulse_search.py) has crashed, as the rest of the pipeline can finish ok
 			except: pass
 
-			# running convert on prepfold ps to pdf and png
+			# making prepfold diagnostic plots
 			if not cmdline.opts.is_nofold and not cmdline.opts.is_feedback:
-				self.log.info("Running convert on ps to pdf and png of the plots...")
-				prepfold_ps=glob.glob("%s/*.pfd.ps" % (self.curdir))
-				for psfile in prepfold_ps:
-					base=psfile.split("/")[-1].split(".ps")[0]
-					cmd="convert %s.ps %s.pdf" % (base, base)
-					# have separate try/except blocks for each convert command to allow to continue processing
-					# in case something is wrong with ps-file
-					try:
-						self.execute(cmd, workdir=self.curdir)
-					except: pass
-					cmd="convert -rotate 90 %s.ps %s.png" % (base, base)
-					try:
-						self.execute(cmd, workdir=self.curdir)
-					except : pass
-					cmd="convert -rotate 90 -crop 200x140-0 %s.ps %s.th.png" % (base, base)
-					try:
-						self.execute(cmd, workdir=self.curdir)
-					except: pass
+				self.make_prepfold_plots(obs)
 
-			# getting the list of *.pfd.bestprof files and read chi-sq values for all folded pulsars
-			if not cmdline.opts.is_nofold and not cmdline.opts.is_feedback:
-				psr_bestprofs=rglob(self.outdir, "*.pfd.bestprof", 3)
-				if len(psr_bestprofs) > 0:
-					self.log.info("Reading chi-squared values and adding to chi-squared.txt...")
-					# also preparing montage command to create combined plot
-					montage_cmd="montage -background none -pointsize 10.2 "
-					chif=open("%s/%s_sap%03d_tab%04d_chi-squared.txt" % (self.outdir, obs.id, self.sapid, self.tabid), 'w')
-					thumbs=[] # list of thumbnail files
-					# check first if all available *bestprof files are those created without mask. If so, then allow to make
-					# a diagnostic combined plot using prepfold plots without a mask
-					good_bestprofs=[file for file in psr_bestprofs if re.search("_nomask_", file) is None]
-					if len(good_bestprofs) == 0:
-						good_bestprofs=[file for file in psr_bestprofs]
-					for bp in good_bestprofs:
-						psr=bp.split("/")[-1].split("_")[0]
-						thumbfile=bp.split(self.outdir+"/")[-1].split(".pfd.bestprof")[0] + ".pfd.th.png"
-						# getting current number for SAP and TA beam
-						try: # we need this try block in case User manually creates sub-directories with some test bestprof files there
-						     # which will also be found by rglob function. So, we need to exclude them by catching an Exception
-						     # on a wrong-formed string applying int()
-							cursapid=int(thumbfile.split("_SAP")[-1].split("_")[0])
-						except: continue
-						curprocdir=thumbfile.split("_SAP")[-1].split("_")[1]
-						chi_val = 0.0
-						thumbs.append(thumbfile)
-						cmd="cat %s | grep chi-sqr | cut -d = -f 2" % (bp)
-						chiline=os.popen(cmd).readlines()
-						if np.size(chiline) > 0:
-							chi_val = float(chiline[0].rstrip())
-						else:
-							if self.sapid == cursapid and self.procdir == curprocdir:
-								self.log.warning("Warning: can't read chi-sq value from %s" % (bp))
-						chif.write("file=%s obs=%s_SAP%d_%s_%s chi-sq=%g\n" % (thumbfile, self.code, cursapid, curprocdir, psr, chi_val))
-						montage_cmd += "-label '%s SAP%d %s\n%s\nChiSq = %g' %s " % (self.code, cursapid, curprocdir, psr, chi_val, thumbfile)
-					chif.close()
-					cmd="mv %s_sap%03d_tab%04d_chi-squared.txt chi-squared.txt" % (obs.id, self.sapid, self.tabid)
-					self.execute(cmd, workdir=self.outdir)
-
-					# creating combined plots
-					# only creating combined plots when ALL corresponding thumbnail files exist. It is possible, when there are 2+ beams on
-					# the same node, that bestprof files do exist, but thumbnails were not created yet at the time when chi-squared.txt is
-					# getting created for another beam. And this will cause "montage" command to fail
-					# At the end combined plot will eventually be created for this node during the procesing of the last beam of this node
-					if len(thumbs) > 0 and len([ff for ff in thumbs if os.path.exists(ff)]) == len(thumbs):
-						# creating combined plots
-						self.log.info("Combining all pfd.th.png files in a single combined plot...")
-						montage_cmd += "combined.png"
-						self.execute(montage_cmd, workdir=self.outdir)
-						# making thumbnail version of the combined plot
-						cmd="convert -resize 200x140 -bordercolor none -border 150 -gravity center -crop 200x140-0-0 +repage combined.png combined.th.png"
-						self.execute(cmd, workdir=self.outdir)
-
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and not cmdline.opts.is_norfi and not cmdline.opts.is_skip_subdyn:
-				# waiting for subdyn to finish
+			# waiting for subdyn to finish
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and \
+			not cmdline.opts.is_norfi and not cmdline.opts.is_skip_subdyn:
 				self.waiting("subdyn.py", subdyn_popen)
 
 			# waiting for pdmp to finish
 			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
-				if not cmdline.opts.is_skip_dspsr:
-					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
-						self.waiting_list("pdmp", pdmp_popens)
-						# when pdmp is finished do extra actions with files...
-						for psr in self.psrs:
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
-								output_stem=".paz.fscr.AR"
-							else: output_stem=".fscr.AR"
-							cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
-							self.execute(cmd, is_os=True)
-							cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
-							self.execute(cmd, is_os=True)
-							# reading new DM from the *.per file
-							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm[-1], psr, self.output_prefix, output_stem)
-							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm, psr, self.output_prefix, output_stem)
-							self.execute(cmd, workdir=self.curdir)
+				if not cmdline.opts.is_skip_dspsr and not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
+					finish_pdmp(self, self, pdmp_popens, cmdline, obs, self.curdir, self.output_prefix)
+
+			# Running spectar.py to calculate pulsar spectra
+			if not cmdline.opts.is_feedback:
+				calc_psr_spectra(self, self, cmdline, obs, self.sapid, self.tabid, self.curdir, self.output_prefix)
 
 			# finishing off the processing...
 			self.finish_off(obs, cep2, cmdline)
@@ -947,10 +1015,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 					for loc in self.tab.location:
 						if loc in self.tab.rawfiles:
 							# first "mounting" corresponding locus node
-							uniqdir="/".join(self.tab.rawfiles[loc][0].split("/")[0:-1]).split("/data/")[-1]
-							input_dir="%s/%s_data/%s" % (cep2.hoover_data_dir, loc, uniqdir)
-							process = Popen(shlex.split("ls %s" % (input_dir)), stdout=PIPE, stderr=STDOUT)
-							process.communicate()
+							input_dir = self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 							# dspsr needs all polarizations S* files to be in the current directory together with h5 files,
 							# so we have to make soft links to input files
 							self.log.info("Making links to input files in the current directory...")
@@ -963,7 +1028,6 @@ CLK line will be removed from the parfile!" % (parfile,))
 								self.execute(cmd, workdir=self.curdir)
 							input_file=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[loc]]
 							input_files.extend(input_file)
-					input_file=" ".join(input_files)
 				else:
 					if cep2.current_node in self.tab.rawfiles:
 						# make a soft links in the current dir (in order for processing to be consistent with the case when data are in many nodes)
@@ -976,10 +1040,8 @@ CLK line will be removed from the parfile!" % (parfile,))
 							cmd="cp -f %s.h5 ." % (f.split(".raw")[0])
 							self.execute(cmd, workdir=self.curdir)
 						input_files=["%s.h5" % (f.split("/" + obs.id + "/")[-1]).split(".raw")[0] for f in self.tab.rawfiles[cep2.current_node]]
-						input_file=" ".join(input_files)
-					else: input_file=""
 
-				self.log.info("Input data: %s" % (input_file))
+				self.log.info("Input data: %s" % ("\n".join(input_files)))
 
 			self.output_prefix="%s_SAP%d_%s" % (obs.id, self.sapid, self.procdir)
 			self.log.info("Output file(s) prefix: %s" % (self.output_prefix))
@@ -994,7 +1056,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 				# getting the list of "_S0_" files, the number of which is how many freq splits we have
 				# we also sort this list by split number
 				s0_files=sorted([f for f in input_files if re.search("_S0_", f) is not None], key=lambda input_file: int(input_file.split("_P")[-1].split("_")[0]))
-				if not cmdline.opts.is_nofold and not cmdline.opts.is_skip_dspsr:
+				if not cmdline.opts.is_nofold and not cmdline.opts.is_nodecode:
 					verbose="-q"
 					if cmdline.opts.is_debug: verbose="-v"
 
@@ -1007,15 +1069,13 @@ CLK line will be removed from the parfile!" % (parfile,))
 						dspsr_nbins=self.get_best_nbins("%s/%s.par" % (self.outdir, psr2))
 						# loop on frequency splits
 						for ii in range(len(s0_files)):
+                                                        # refreshing NFS mounting of locus nodes
+                                                        for loc in self.tab.location:
+                                                                if loc in self.tab.rawfiles:
+                                                                        self.hoover_mounting(cep2, self.tab.rawfiles[loc][0], loc)
 							fpart=int(s0_files[ii].split("_P")[-1].split("_")[0])
-							zapstr=""
-							if self.nrChanPerSub > 1:
-								proc_subs = self.nrSubsPerFile
-								if (fpart + 1)*self.nrSubsPerFile > self.tab.nrSubbands: 
-									proc_subs = -fpart*self.nrSubsPerFile + self.tab.nrSubbands
-								zapstr="-j 'zap chan %s'" % (",".join([str(kk) for kk in range(0, proc_subs * self.nrChanPerSub, self.nrChanPerSub)]))
-							cmd="dspsr -b %d -A -L 60 %s %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d %s %s" % \
-								(dspsr_nbins, verbose, zapstr, self.outdir, psr2, \
+							cmd="dspsr -b %d -A -L %d %s -fft-bench -E %s/%s.par -O %s_%s_P%d -t %d %s %s" % \
+								(dspsr_nbins, cmdline.opts.tsubint, verbose, self.outdir, psr2, \
 								psr, self.output_prefix, fpart, cmdline.opts.nthreads, cmdline.opts.dspsr_extra_opts, s0_files[ii])
 							self.execute(cmd, workdir=self.curdir)
 
@@ -1024,47 +1084,13 @@ CLK line will be removed from the parfile!" % (parfile,))
 						ar_files=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
 						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 						self.execute(cmd, workdir=self.curdir)
+
+						# running common DSPSR post-processing
+						dspsr_postproc(self, self, cmdline, obs, psr, total_chan, nsubs_eff, self.curdir, self.output_prefix)
 						# removing ar-files from dspsr for every frequency split
 						if not cmdline.opts.is_debug:
 							remove_list=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
 							cmd="rm -f %s" % (" ".join(remove_list))
-							self.execute(cmd, workdir=self.curdir)
-
-						# zapping rfi
-						if not cmdline.opts.is_norfi:
-							self.log.info("Zapping channels using median smoothed difference algorithm...")
-							cmd="paz -r -e paz.ar %s_%s.ar" % (psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
-
-						# dedispersing
-						self.log.info("Dedispersing...")
-						if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
-							cmd="pam -D -m %s_%s.paz.ar" % (psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
-						cmd="pam -D -e dd %s_%s.ar" % (psr, self.output_prefix)
-						self.execute(cmd, workdir=self.curdir)
-
-						# scrunching in frequency
-						self.log.info("Scrunching in frequency to have %d channels in the output ar-file..." % (nsubs_eff))
-						if self.nrChanPerSub > 1:
-							# first, running fscrunch on zapped archive
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
-								cmd="pam --setnchn %d -e fscr.AR %s_%s.paz.ar" % (nsubs_eff, psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-								# remove non-scrunched zapped archive (we will always have unzapped non-scrunched version)
-								cmd="rm -f %s_%s.paz.ar" % (psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-							# running fscrunching on non-zapped archive
-							cmd="pam --setnchn %d -e fscr.AR %s_%s.dd" % (nsubs_eff, psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
-							# remove non-scrunched dedispersed archive (we will always have unzapped non-dedispersed non-scrunched version)
-							cmd="rm -f %s_%s.dd" % (psr, self.output_prefix)
-							self.execute(cmd, workdir=self.curdir)
-						else: # if number of chans == number of subs, we will just rename .paz.ar to .paz.fscr.AR and .dd to .fscr.AR
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.ar" % (self.curdir, psr, self.output_prefix)):
-								cmd="mv -f %s_%s.paz.ar %s_%s.paz.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
-								self.execute(cmd, workdir=self.curdir)
-							cmd="mv -f %s_%s.dd %s_%s.fscr.AR" % (psr, self.output_prefix, psr, self.output_prefix)
 							self.execute(cmd, workdir=self.curdir)
 
 					# removing links for input .raw files
@@ -1072,76 +1098,20 @@ CLK line will be removed from the parfile!" % (parfile,))
 						cmd="rm -f %s" % (" ".join(["%s.raw" % (f.split(".h5")[0]) for f in input_files]))
 						self.execute(cmd, workdir=self.curdir)
 
-			# running extra Psrchive programs, pam, pav,pdmp, etc... 
-			# these programs should be run quick, so run them one by one
+			# running pav
+			if not cmdline.opts.is_feedback:
+				make_dspsr_plots(self, self, cmdline, obs, nsubs_eff, self.curdir, self.output_prefix)
 
-			if not cmdline.opts.is_skip_dspsr and not cmdline.opts.is_feedback:
-				# first, calculating the proper max divisor for the number of subbands
-#				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (self.nrChanPerSub, self.tab.nrSubbands))
-				self.log.info("Getting proper value of nchans in pav -f between %d and %d..." % (1, min(nsubs_eff, 63)))
-				# calculating the greatest common denominator of self.tab.nrSubbands starting from 63 down
-				pav_nchans = self.hcd(1, min(nsubs_eff, 63), nsubs_eff)
-				for psr in self.psrs:  # pulsar list is empty if --nofold is used
-					if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
-						output_stem=".paz.fscr.AR"
-					else: output_stem=".fscr.AR"
-					# creating DSPSR diagnostic plots
-					cmd="pav -DFTp -g %s_%s_DFTp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -GTpf%d -g %s_%s_GTpf%d.ps/cps %s_%s%s" % (pav_nchans, psr, self.output_prefix, pav_nchans, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -YFp -g %s_%s_YFp.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="pav -J -g %s_%s_J.ps/cps %s_%s%s" % (psr, self.output_prefix, psr, self.output_prefix, output_stem)
-					self.execute(cmd, workdir=self.curdir)
-					cmd="convert \( %s_%s_GTpf%d.ps %s_%s_J.ps +append \) \( %s_%s_DFTp.ps %s_%s_YFp.ps +append \) \
-                	                     -append -rotate 90 -background white -flatten %s_%s_diag.png" % \
-                        	             (psr, self.output_prefix, pav_nchans, psr, self.output_prefix, psr, self.output_prefix, \
-                                	      psr, self.output_prefix, psr, self.output_prefix)
-					self.execute(cmd, workdir=self.curdir)
+			# Running pdmp
+			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and \
+			not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
+				pdmp_popens = start_pdmp(self, self, cmdline, obs, nsubs_eff, self.curdir, self.output_prefix)
+				# waiting for pdmp to finish
+				finish_pdmp(self, self, pdmp_popens, cmdline, obs, self.curdir, self.output_prefix)
 
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
-				if not cmdline.opts.is_skip_dspsr:
-					# now running pdmp without waiting...
-					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold:
-						self.log.info("Running pdmp...")
-						pdmp_popens=[]  # list of pdmp Popen objects	
-						for psr in self.psrs:
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
-								output_stem=".paz.fscr.AR"
-							else: output_stem=".fscr.AR"
-							# getting the number of bins in the ar-file (it can be different from self.get_best_nbins, because
-							# we still provide our own number of bins in --dspsr-extra-opts
-							try:
-								cmd="psredit -q -Q -c nbin %s/%s_%s%s" % (self.curdir, psr, self.output_prefix, output_stem)
-								binsline=os.popen(cmd).readlines()
-								if np.size(binsline) > 0:
-									best_nbins=int(binsline[0][:-1])
-									cmd="pdmp -mc %d -mb %d -g %s_%s_pdmp.ps/cps %s_%s%s" % \
-										(nsubs_eff, min(128, best_nbins), psr, self.output_prefix, psr, self.output_prefix, output_stem)
-									pdmp_popen = self.start_and_go(cmd, workdir=self.curdir)
-									pdmp_popens.append(pdmp_popen)
-							except Exception: pass
-		
-			# waiting for pdmp to finish
-			if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback:
-				if not cmdline.opts.is_skip_dspsr:
-					if not cmdline.opts.is_nopdmp and not cmdline.opts.is_nofold: 
-						self.waiting_list("pdmp", pdmp_popens)
-						# when pdmp is finished do extra actions with files...
-						for psr in self.psrs:
-							if not cmdline.opts.is_norfi or os.path.exists("%s/%s_%s.paz.fscr.AR" % (self.curdir, psr, self.output_prefix)):
-								output_stem=".paz.fscr.AR"
-							else: output_stem=".fscr.AR"
-							cmd="grep %s %s/pdmp.per > %s/%s_%s_pdmp.per" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
-							self.execute(cmd, is_os=True)
-							cmd="grep %s %s/pdmp.posn > %s/%s_%s_pdmp.posn" % (psr, self.curdir, self.curdir, psr, self.output_prefix)
-							self.execute(cmd, is_os=True)
-							# reading new DM from the *.per file
-							newdm = np.loadtxt("%s/%s_%s_pdmp.per" % (self.curdir, psr, self.output_prefix), comments='#', usecols=(3,3), dtype=float, unpack=True)[0]
-							if np.size(newdm) > 1: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm[-1], psr, self.output_prefix, output_stem)
-							else: cmd="pam -e pdmp.AR -d %f -DTp %s_%s%s" % (newdm, psr, self.output_prefix, output_stem)
-							self.execute(cmd, workdir=self.curdir)
+			# Running spectar.py to calculate pulsar spectra
+			if not cmdline.opts.is_feedback:
+				calc_psr_spectra(self, self, cmdline, obs, self.sapid, self.tabid, self.curdir, self.output_prefix)
 
 			# finishing off the processing...
 			self.finish_off(obs, cep2, cmdline)
