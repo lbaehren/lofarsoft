@@ -24,6 +24,7 @@ from pycrtools import metadata as md
 # This class implements the IO interface
 from interfaces import IOInterface
 
+nyquist_zone = {'LBA_30_90' : 1, 'HBA_110_190' : 2, 'HBA_170_230' : 3, 'HBA_210_250' : 3}
 
 class TBBData(IOInterface):
     """This class provides an interface to single file Transient Buffer
@@ -100,7 +101,7 @@ class TBBData(IOInterface):
             "ANTENNA_SET": lambda: self.antenna_set if hasattr(self, "antenna_set") else self.__file.antenna_set(),
             "ANTENNA_POSITION": self.__file.antenna_position,
             "ANTENNA_POSITION_ITRF": self.__file.antenna_position_itrf,
-            "NYQUIST_ZONE": lambda: [2 for i in self["SELECTED_DIPOLES"]] if "HBA" in self["ANTENNA_SET"] else [1 for i in self["SELECTED_DIPOLES"]],
+            "NYQUIST_ZONE": lambda: [nyquist_zone[self["FILTER_SELECTION"]] for i in self["SELECTED_DIPOLES"]],
             "TIME": self.__file.time,
             "SAMPLE_NUMBER": self.__file.sample_number,
             "SAMPLE_FREQUENCY_VALUE": self.__file.sample_frequency_value,
