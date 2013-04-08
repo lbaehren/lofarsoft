@@ -276,7 +276,7 @@ class CRDatabase(object):
             if status:
                 sql_selection_list.append("e.status='{0}'".format(str(status).upper()))
             if datafile_name:
-                sql_table = sql_table_d
+                sql_table = sql_table_e
                 sql_selection_list.append("d.filename='{0}'".format(str(datafile_name)))
             if antennaset:
                 sql_selection_list.append("e.antennaset='{0}'".format(str(antennaset).upper()))
