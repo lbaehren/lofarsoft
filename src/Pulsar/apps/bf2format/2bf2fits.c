@@ -127,19 +127,22 @@ void usage(){
   puts("-clipav\t\tInstead of normal clipping, write out average");
   puts("-header\t\tChange something in the header");
   puts("-headerlist\tlist available options");
-  puts("-nbits\t\tUse this number of bits.");
+  puts("-nbits\t\tUse this number of bits");
   puts("-o\t\tOutput Name(Default = PULSAR_OBS)");
-  puts("-parset\t\tRead this parset file to obtain header parameters.");
-  puts("-sigma\t\tFor the packing, use this sigma limit instead of using the minimum and maximum.");
+  puts("-parset\t\tRead this parset file to obtain header parameters");
+  puts("-sigma\t\tFor the packing, use this sigma limit instead of using the minimum and maximum");
   puts("-CS\t\tInput data is CS data (one file, total I only)");
   puts("-IS\t\tInput data is IS 2nd transpose data (one file, total I only, process like CS, header IS values)");
   puts("-H\t\tHDF5 Data Mode, only working in combination with -CS");
   puts("-append\t\tfor IS data append output fits files together");
-  puts("-skip\t\tSkip this number of blocks in the output. Only works with -CS option.");
-  puts("-trunc\t\tTruncate output after this number of blocks. Only works with -CS option.");
+  puts("-skip\t\tSkip this number of blocks in the output. Only works with -CS option");
+  puts("-trunc\t\tTruncate output after this number of blocks. Only works with -CS option");
   puts("-noZap0\t\tDo NOT zap the first frequency channel in each subband");
-  puts("-nsubs\t\tThe number of subbands in the input file.");
+  puts("-nsubs\t\tThe number of subbands in the input file (or how many to read)");
+  puts("-part\t\tSpecify current subbands' split (default = 0)");
   puts("-gains\t\tSpecify the file with the gains");
+  puts("-sap\t\tSub-array pointing (SAP) id (default = 0)");
+  puts("-tab\t\tTied-array beam (TAB) id (default = 0)");
   puts("\n");
   puts("-debugpacking\tSuper verbose mode to debug packing algoritm.");
   puts("-v\t\tverbose");
@@ -1844,7 +1847,7 @@ int convert_nocollapse_ISappend(datafile_definition fout, int beamnr, datafile_d
  */
 int main( int argc, char **argv ) 
 {
-  int i,j,b, index, firstseq, lastseq, readparset, totalnrchannels, subbandnr, nrbits, debugpacking;
+  int i,j,b, index, firstseq, lastseq, readparset, totalnrchannels, subbandnr, nrbits, debugpacking, partnr, sapid, tabid;
   //  int *seqseek; // only for IS data in append mode
                 // array that will keep the seek offsets for input files due to possible differences 
                 // between firstseq (same for all subbands) and actual first sequence number of each file
@@ -1852,7 +1855,7 @@ int main( int argc, char **argv )
   int is_H5 = 0; // if 1 then input file is H5 data
   int is_append = 0;  // if 1 then the single fits-file will be written for IS data
   int is_gains = 0;   // if 1 then raw data will be bandpass corrected
-  char buf[1024], *filename, *dummy_ptr;
+  char buf[1024], *filename, *dummy_ptr, parset_beam_str[parsetmaxlinelength];
   datafile_definition subintdata, fout;
   patrickSoftApplication application;
   FILE *fin;
@@ -1893,6 +1896,9 @@ int main( int argc, char **argv )
   readparset = 0;
   nrbits = 8;
   subbandnr = 0;
+  partnr = 0;
+  sapid = 0;
+  tabid = 0;
   skipNrBlocks = 0;
   truncNrBlocks = 0;
   subband_width = 0;
@@ -1921,6 +1927,13 @@ int main( int argc, char **argv )
         return 0;
       }else if(strcmp(argv[i], "-nbits") == 0) {
 	j = sscanf(argv[i+1], "%d", &nrbits);
+	if(j != 1) {
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        i++;
+      }else if(strcmp(argv[i], "-part") == 0) {
+	j = sscanf(argv[i+1], "%d", &partnr);
 	if(j != 1) {
 	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
@@ -1976,6 +1989,20 @@ int main( int argc, char **argv )
         i++;
       }else if(strcmp(argv[i], "-nsubs") == 0) {
 	j = sscanf(argv[i+1], "%d", &SUBBANDS);
+	if(j != 1) {
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        i++;
+      }else if(strcmp(argv[i], "-sap") == 0) {
+	j = sscanf(argv[i+1], "%d", &sapid);
+	if(j != 1) {
+	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
+	  return 0;
+	}
+        i++;
+      }else if(strcmp(argv[i], "-tab") == 0) {
+	j = sscanf(argv[i+1], "%d", &tabid);
 	if(j != 1) {
 	  fprintf(stderr, "2bf2fits: Error parsing %s option\n", argv[i]);
 	  return 0;
@@ -2179,25 +2206,48 @@ int main( int argc, char **argv )
     SAMPLES = blocksperStokes/integrationSteps;
 
 
-    s_ptr = get_ptr_entry("Observation.Beam[0].angle1", header_txt, nrlines, "=");
+    sprintf(parset_beam_str, "Observation.Beam[%d].angle1", sapid);
+    s_ptr = get_ptr_entry(parset_beam_str, header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%f", &(subintdata.ra));
     }else {
-      fprintf(stderr, "2bf2fits: Observation.Beam[0].angle1 not set\n");
+      fprintf(stderr, "2bf2fits: %s not set\n", parset_beam_str);
       return 0;     
     }
-    s_ptr = get_ptr_entry("Observation.Beam[0].angle2", header_txt, nrlines, "=");
+    sprintf(parset_beam_str, "Observation.Beam[%d].TiedArrayBeam[%d].angle1", sapid, tabid);
+    s_ptr = get_ptr_entry(parset_beam_str, header_txt, nrlines, "=");
+    if(s_ptr != NULL) {
+      float ra_offset;
+      sscanf(s_ptr, "%f", &ra_offset);
+      subintdata.ra += ra_offset;
+    }else {
+      fprintf(stderr, "2bf2fits: %s not set\n", parset_beam_str);
+      return 0;     
+    }
+    sprintf(parset_beam_str, "Observation.Beam[%d].angle2", sapid);
+    s_ptr = get_ptr_entry(parset_beam_str, header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%f", &(subintdata.dec));
     }else {
-      fprintf(stderr, "2bf2fits: Observation.Beam[0].angle1 not set\n");
+      fprintf(stderr, "2bf2fits: %s not set\n", parset_beam_str);
       return 0;     
     }
-    s_ptr = get_ptr_entry("Observation.Beam[0].target", header_txt, nrlines, "=");
+    sprintf(parset_beam_str, "Observation.Beam[%d].TiedArrayBeam[%d].angle2", sapid, tabid);
+    s_ptr = get_ptr_entry(parset_beam_str, header_txt, nrlines, "=");
+    if(s_ptr != NULL) {
+      float dec_offset;
+      sscanf(s_ptr, "%f", &dec_offset);
+      subintdata.dec += dec_offset;
+    }else {
+      fprintf(stderr, "2bf2fits: %s not set\n", parset_beam_str);
+      return 0;     
+    }
+    sprintf(parset_beam_str, "Observation.Beam[%d].target", sapid);
+    s_ptr = get_ptr_entry(parset_beam_str, header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", (subintdata.psrname));
     }else {
-      fprintf(stderr, "2bf2fits: Observation.Beam[0].target not set\n");
+      fprintf(stderr, "2bf2fits: %s not set\n", parset_beam_str);
       return 0;     
     }
 
@@ -2221,11 +2271,12 @@ int main( int argc, char **argv )
       dummy_ptr[0] = 0;
     sscanf(buf+4, "%f", &lowerBandFreq);
 
-    s_ptr = get_ptr_entry("Observation.Beam[0].subbandList", header_txt, nrlines, "=");
+    sprintf(parset_beam_str, "Observation.Beam[%d].subbandList", sapid);
+    s_ptr = get_ptr_entry(parset_beam_str, header_txt, nrlines, "=");
     if(s_ptr != NULL) {
       sscanf(s_ptr, "%s", dummy_string);
     }else {
-      fprintf(stderr, "2bf2fits: Observation.Beam[0].subbandList not set\n");
+      fprintf(stderr, "2bf2fits: %s not set\n", parset_beam_str);
       return 0;     
     }
     /* Get the list of subbands which should be there. */
@@ -2248,12 +2299,12 @@ int main( int argc, char **argv )
     
     sprintf(dummy_string2, "rm \"%s\"\n", tmpname);
     system(dummy_string2);
-    subbandFirst = channellist[0];
+    subbandFirst = channellist[partnr*SUBBANDS];
 
     nsubbands = 512;
   
 
-    printf("This is a %s obs at %f MHz (clock=%d subbandFirst=%d totalnrchannels=%d)\n", subintdata.instrument, lowerBandFreq, clockparam, subbandFirst, totalnrchannels);
+    printf("This is a %s obs at %f MHz (clock=%d subbandFirst=%d totalnrchannels=%d)\nSAP=%d TAB=%d\n", subintdata.instrument, lowerBandFreq, clockparam, subbandFirst, totalnrchannels, sapid, tabid);
 
     if (clockparam == 200) {
       bw = 100.0;
@@ -2315,7 +2366,7 @@ elif (lowerBandFreq < 40.0 and par.clock == "200"):
   }  /* End of read parset */
 
 
-  if (is_CS == 1) printf ("CS data: %d subbands\n", SUBBANDS);
+  if (is_CS == 1) printf ("CS data: %d subbands, part %d\n", SUBBANDS, partnr);
   if (is_append == 1) printf ("append mode (%d subbands), single output file will be written\n", SUBBANDS);
   printf( "%d channels %d beams %d samples %d stokes\n", CHANNELS, BEAMS, SAMPLES, STOKES );
   printf("Output Name: %s\n", OUTNAME);
