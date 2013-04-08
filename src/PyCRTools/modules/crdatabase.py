@@ -258,7 +258,7 @@ class CRDatabase(object):
             # sql_table_d = "datafiles AS d INNER JOIN " + sql_table_ed + " ON (d.datafileID=ed.datafileID)"
 
             sql_table_d = "datafiles AS d"
-            sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_d + " ON (ed.eventID=d.eventID)"
+            sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_d + " ON (ed.datafileID=d.datafileID)"
             sql_table_e = "events AS e INNER JOIN " + sql_table_ed + " ON (ed.eventID=e.eventID)"
 
             sql_table = sql_table_e
