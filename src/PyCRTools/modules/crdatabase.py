@@ -253,10 +253,6 @@ class CRDatabase(object):
         if self.db:
             # Construct SQL table
             sql_fields = "e.eventID"
-            # sql_table_e = "events AS e"
-            # sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_e + " ON (ed.eventID=e.eventID)"
-            # sql_table_d = "datafiles AS d INNER JOIN " + sql_table_ed + " ON (d.datafileID=ed.datafileID)"
-
             sql_table_d = "datafiles AS d"
             sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_d + " ON (ed.datafileID=d.datafileID)"
             sql_table_e = "events AS e INNER JOIN " + sql_table_ed + " ON (ed.eventID=e.eventID)"
@@ -296,7 +292,7 @@ class CRDatabase(object):
             if len(sql_order) > 0:
                 sql += " ORDER BY {0}".format(sql_order)
 
-            print "SQL: {0}".format(sql)
+            # print "SQL: {0}".format(sql) # DEBUG
 
             # Extracting eventIDs
             result = [record[0] for record in self.db.select(sql)]
