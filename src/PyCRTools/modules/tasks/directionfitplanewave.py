@@ -1,5 +1,5 @@
 """
-.. moduleauthor:: Name of the module author <email address of the module author>
+.. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 """
 import pycrtools as cr
 from pycrtools import tasks
@@ -8,8 +8,6 @@ import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import pytmf
 import numpy as np
-
-cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 deg = np.pi / 180.
 pi2 = np.pi / 2.
