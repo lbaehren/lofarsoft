@@ -189,7 +189,7 @@ class FindRFI(Task):
 
             if cr.hCountGreaterThan(self.f.nof_consecutive_zeros, self.dataloss_threshhold).val() > 0:
                 print "Warning: Found possible data loss in block {0}, excluding block".format(i)
-                skippedblocks += 1
+#                skippedblocks += 1
                 self.blocks_with_dataloss.append([i])
                 continue
 
