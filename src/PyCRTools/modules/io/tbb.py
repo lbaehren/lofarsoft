@@ -432,7 +432,7 @@ class TBBData(IOInterface):
         # Selection dependent initialization
         self.__initSelection()
 
-    def getTimeseriesData(self, data, block=-1, sample_offset=0):
+    def getTimeseriesData(self, data, block=-1, sample_offset=0, datacheck=False):
         """Returns timeseries data for selected antennas.
 
         Required Arguments:
@@ -460,6 +460,9 @@ class TBBData(IOInterface):
             self.__block = block
 
         cr.hReadTimeseriesData(data, self.__alignment_offset + block * self.__blocksize + self.__shift + sample_offset, self.__blocksize, self.__file)
+
+        if datacheck:
+            cr.hNumberOfConsecutiveZeros(self.nof_consecutive_zeros[...], data[...])
 
     def shiftTimeseriesData(self, sample_offset=0):
         """Shifts timeseries data for selected antennas.
