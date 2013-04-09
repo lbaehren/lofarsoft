@@ -353,13 +353,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     station["crp_plotfiles"].append(plot)
 
                 # Select antennas which are marked good for both polarization
+                fft_data = f.empty("FFT_DATA")
+                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, datacheck=True)
+
                 dipole_names = f["DIPOLE_NAMES"]
 
                 station["crp_median_cleaned_spectrum"] = findrfi.median_cleaned_spectrum
 
                 selected_dipoles = []
                 for i in range(len(dipole_names) / 2):
-                    if dipole_names[2 * i] in findrfi.good_antennas and dipole_names[2 * i + 1] in findrfi.good_antennas:
+                    if dipole_names[2 * i] in findrfi.good_antennas and dipole_names[2 * i + 1] in findrfi.good_antennas and f.nof_consecutive_zeros[2 * i] < 512 and f.nof_consecutive_zeros[2 * i + 1] < 512:
                         selected_dipoles.extend([dipole_names[2 * i], dipole_names[2 * i + 1]])
 
                 try:
@@ -371,7 +374,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Read FFT data (without Hanning window)
                 fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window)
+                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, datacheck=True)
+
+                print "NOF consecutive zeros", f.nof_consecutive_zeros
 
                 # Get corresponding frequencies
                 frequencies = cr.hArray(f["FREQUENCY_DATA"])
