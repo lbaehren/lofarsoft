@@ -24,7 +24,7 @@ from pycrtools import metadata as md
 # This class implements the IO interface
 from interfaces import IOInterface
 
-nyquist_zone = {'LBA_30_90' : 1, 'HBA_110_190' : 2, 'HBA_170_230' : 3, 'HBA_210_250' : 3}
+nyquist_zone = {'LBA_10_90' : 1, 'LBA_30_90' : 1, 'HBA_110_190' : 2, 'HBA_170_230' : 3, 'HBA_210_250' : 3}
 
 class TBBData(IOInterface):
     """This class provides an interface to single file Transient Buffer
