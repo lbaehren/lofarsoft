@@ -352,7 +352,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Find RFI and bad antennas
                 try:
                     if hba:
-                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(110, 190), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window)
+                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window)
                     else:
                         findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(30, 80), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window)
                 except ZeroDivisionError as e:
