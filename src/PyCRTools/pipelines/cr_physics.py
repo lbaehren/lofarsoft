@@ -361,10 +361,17 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 station["crp_median_cleaned_spectrum"] = findrfi.median_cleaned_spectrum
 
+                # Get calibration delays to flag antennas with wrong calibration values
+                try:
+                    cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
+                    cabledelays = np.abs(cabledelays.toNumpy)
+                except Exception:
+                    raise StationSkipped("do not have DIPOLE_CALIBRATION_DELAY value")
+
                 print "NOF consecutive zeros", f.nof_consecutive_zeros
                 selected_dipoles = []
                 for i in range(len(dipole_names) / 2):
-                    if dipole_names[2 * i] in findrfi.good_antennas and dipole_names[2 * i + 1] in findrfi.good_antennas and f.nof_consecutive_zeros[2 * i] < 512 and f.nof_consecutive_zeros[2 * i + 1] < 512:
+                    if dipole_names[2 * i] in findrfi.good_antennas and dipole_names[2 * i + 1] in findrfi.good_antennas and f.nof_consecutive_zeros[2 * i] < 512 and f.nof_consecutive_zeros[2 * i + 1] < 512 and cabledelays[2 * i] < 150.e-9 and cabledelays[2 * i + 1] < 150.e-9:
                         selected_dipoles.extend([dipole_names[2 * i], dipole_names[2 * i + 1]])
 
                 try:
