@@ -82,7 +82,7 @@ class AntennaResponse(Task):
 
         if self.test_with_identity_matrix:
             print "overriding antenna model Jones matrix with identity."
-            identity = cr.hArray(complex, dimensions=(2,2), fill=1.0)
+            identity = cr.hArray(complex, dimensions=(2,2), fill=1)
             for i in enumerate(self.frequencies):
                 cr.hDiagonalMatrix(self.inverse_jones_matrix[i], identity)
 
