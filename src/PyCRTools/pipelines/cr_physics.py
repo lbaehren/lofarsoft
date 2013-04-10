@@ -337,6 +337,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             plt.savefig(plotfile)
             station["crp_plotfiles"].append(plotfile)
 
+            # Optionally plot raw data
+            if options.debug:
+                for i in range(td.shape[0]):
+                    plt.figure()
+                    plt.plot(raw_data[i])
+                    plt.title("Timeseries raw dipole {0}".format(i))
+                    plotfile = station_plot_prefix + "raw_data-{0}.{1}".format(i, options.plot_type)
+                    plt.savefig(plotfile)
+                    station["crp_plotfiles"].append(plotfile)
+
             with process_polarization(station.polarization, '0', '1') as polarization:
 
                 # Find RFI and bad antennas
@@ -428,21 +438,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 cr.hPhaseToComplex(weights, phases)
 
                 fft_data.mul(weights)
-
-                # Get timeseries data
-                timeseries_data = f.empty("TIMESERIES_DATA")
-                nantennas = timeseries_data.shape()[0] / 2
-
-                # Optionally plot raw data
-                if options.debug:
-                    td = timeseries_data.toNumpy()
-                    for i in range(td.shape[0]):
-                        plt.figure()
-                        plt.plot(td[i])
-                        plt.title("Timeseries raw dipole {0}".format(i))
-                        plotfile = station_plot_prefix + "raw_timeseries-{0}.{1}".format(i, options.plot_type)
-                        plt.savefig(plotfile)
-                        station["crp_plotfiles"].append(plotfile)
 
                 # Get antennas positions
                 antenna_positions = f["ANTENNA_POSITIONS"]
