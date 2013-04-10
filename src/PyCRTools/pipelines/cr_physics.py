@@ -339,7 +339,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             # Optionally plot raw data
             if options.debug:
-                for i in range(td.shape[0]):
+                for i in range(raw_data.shape[0]):
                     plt.figure()
                     plt.plot(raw_data[i])
                     plt.title("Timeseries raw dipole {0}".format(i))
