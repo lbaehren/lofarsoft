@@ -364,7 +364,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Get calibration delays to flag antennas with wrong calibration values
                 try:
                     cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
-                    cabledelays = np.abs(cabledelays.toNumpy)
+                    cabledelays = np.abs(cabledelays.toNumpy())
                 except Exception:
                     raise StationSkipped("do not have DIPOLE_CALIBRATION_DELAY value")
 
