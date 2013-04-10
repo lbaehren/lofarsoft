@@ -227,6 +227,7 @@ parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg, pdf.")
 parser.add_option("--use-cc-delay", default=False, action="store_true", help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
 parser.add_option("--use-hanning-window", default=False, action="store_true", help="Apply Hanning window before FFT.")
+parser.add_option("--debug", default=False, action="store_true", help="Generate additional plots for debugging.")
 
 (options, args) = parser.parse_args()
 
@@ -499,6 +500,17 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             print "now looking for pulse in narrow range between samples {0:d} and {1:d}".format(pulse_start, pulse_end)
 
+            # Optionally plot raw data after calibrating
+            if options.debug:
+                td = timeseries_data.toNumpy()
+                for i in range(td.shape[0]):
+                    plt.figure()
+                    plt.plot(td[i, pulse_start, pulse_end])
+                    plt.title("Timeseries cut to pulse after calibration dipole {0}".format(i))
+                    plotfile = station_plot_prefix + "calibrated_timeseries-{0}.{1}".format(i, options.plot_type)
+                    plt.savefig(plotfile)
+                    station["crp_plotfiles"].append(plotfile)
+
             # Start direction fitting loopim
             n = 0
             direction_fit_converged = False
@@ -535,8 +547,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     station["crp_integrated_noise_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_noise_power).toNumpy()
 
                 # Calculate delays using Hilbert transform
-                pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2)
-
+                if options.debug:
+                    pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2, save_plots=True, plot_prefix=station_plot_prefix+"pe-", plot_type=options.plot_type, plotlist=station["crp_plotfiles"])
+                else:
+                    pulse_envelope = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2)
 
                 delays = pulse_envelope.delays
 
