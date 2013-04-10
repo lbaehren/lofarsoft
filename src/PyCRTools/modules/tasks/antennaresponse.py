@@ -46,6 +46,8 @@ class AntennaResponse(Task):
             doc="Apply antenna response backwards (e.g. without inverting the Jones matrix)."),
         apply_to_data=dict(default=True,
             doc="Apply to data, set to False if you only need the (inverse) Jones matrix."),
+        test_with_identity_matrix=dict(default=False,
+            doc="Don't apply the model, use identity matrix for mixing. For testing purposes only.")
     )
 
     def run(self):
@@ -77,6 +79,12 @@ class AntennaResponse(Task):
         print "inverting Jones matrix"
         if not self.backwards:
             cr.hInvertComplexMatrix2D(self.inverse_jones_matrix, self.jones_matrix)
+
+        if test_with_identity_matrix:
+            print "overriding antenna model Jones matrix with identity."
+            identity = cr.hArray(complex, dimensions=(2,2), fill=1.0)
+            for i in enumerate(self.frequencies):
+                cr.DiagonalMatrix(self.inverse_jones_matrix[i], identity)
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
         if self.apply_to_data:
