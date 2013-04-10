@@ -425,6 +425,17 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 timeseries_data = f.empty("TIMESERIES_DATA")
                 nantennas = timeseries_data.shape()[0] / 2
 
+                # Optionally plot raw data
+                if options.debug:
+                    td = timeseries_data.toNumpy()
+                    for i in range(td.shape[0]):
+                        plt.figure()
+                        plt.plot(td[i, pulse_start, pulse_end])
+                        plt.title("Timeseries raw dipole {0}".format(i))
+                        plotfile = station_plot_prefix + "raw_timeseries-{0}.{1}".format(i, options.plot_type)
+                        plt.savefig(plotfile)
+                        station["crp_plotfiles"].append(plotfile)
+
                 # Get antennas positions
                 antenna_positions = f["ANTENNA_POSITIONS"]
 
