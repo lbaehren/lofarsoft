@@ -675,6 +675,57 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   *J_it++ = interpolate_trilinear(V, x, y, z_ydipole, x0, y0, z0, x1, y1, z1);
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+//
+//$DOCSTRING: Create matrix with a given values on the diagonal
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hDiagonalMatrix
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(M)()("Square diagonal matrix.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(v)()("Values to put on the diagonal.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter M, const CIter M_end,
+    const CIter v, const CIter v_end)
+{
+  // Get lengths
+  const int N = std::distance(M, M_end);
+  const int Nv = std::distance(v, v_end);
+
+  // Sanity checks
+  if (N != Nv*Nv)
+  {
+    throw PyCR::ValueError("[hDiagonalMatrix] matrix and diagonal array of incompatible size.");
+  }
+
+  // Get iterators
+  CIter M_it = M;
+  CIter v_it = v;
+
+  for (int i=0; i<Nv; i++)
+  {
+    for (int j=0; j<Nv; j++)
+    {
+      if (i==j)
+      {
+        *M_it = *v_it;
+        v_it++;
+      }
+      else
+      {
+        *M_it = 0;
+      }
+      M_it++;
+    }
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //$DOCSTRING: Mix two vectors using a mixing matrix
 //$COPY_TO HFILE START --------------------------------------------------
