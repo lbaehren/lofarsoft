@@ -430,7 +430,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     td = timeseries_data.toNumpy()
                     for i in range(td.shape[0]):
                         plt.figure()
-                        plt.plot(td[i, pulse_start, pulse_end])
+                        plt.plot(td[i])
                         plt.title("Timeseries raw dipole {0}".format(i))
                         plotfile = station_plot_prefix + "raw_timeseries-{0}.{1}".format(i, options.plot_type)
                         plt.savefig(plotfile)
