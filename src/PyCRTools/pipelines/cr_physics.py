@@ -439,6 +439,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 fft_data.mul(weights)
 
+                # Get timeseries data
+                timeseries_data = f.empty("TIMESERIES_DATA")
+                nantennas = timeseries_data.shape()[0] / 2
+
                 # Get antennas positions
                 antenna_positions = f["ANTENNA_POSITIONS"]
 
