@@ -188,7 +188,7 @@ class FindRFI(Task):
             avgspectrum += magspectrum  # accumulate average spectrum
 
             if cr.hCountGreaterThan(self.f.nof_consecutive_zeros, self.dataloss_threshhold).val() > 0:
-                print "Warning: Found possible data loss in block {0}, excluding block".format(i)
+                print "Warning: Found possible data loss in block {0}".format(i)
 #                skippedblocks += 1
                 self.blocks_with_dataloss.append([i])
                 continue
