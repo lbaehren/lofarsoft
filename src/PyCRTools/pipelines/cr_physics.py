@@ -361,6 +361,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 station["crp_median_cleaned_spectrum"] = findrfi.median_cleaned_spectrum
 
+                print "NOF consecutive zeros", f.nof_consecutive_zeros
                 selected_dipoles = []
                 for i in range(len(dipole_names) / 2):
                     if dipole_names[2 * i] in findrfi.good_antennas and dipole_names[2 * i + 1] in findrfi.good_antennas and f.nof_consecutive_zeros[2 * i] < 512 and f.nof_consecutive_zeros[2 * i + 1] < 512:
