@@ -82,8 +82,8 @@ class AntennaResponse(Task):
 
         if self.test_with_identity_matrix:
             print "overriding antenna model Jones matrix with identity."
-            identity = cr.hArray(complex, dimensions=(2,2), fill=1)
-            for i in enumerate(self.frequencies):
+            identity = cr.hArray(complex, 2, fill=1)
+            for i in range(self.inverse_jones_matrix):
                 cr.hDiagonalMatrix(self.inverse_jones_matrix[i], identity)
 
         # Unfold the antenna response and mix polarizations according to the Jones matrix to get the on-sky polarizations
