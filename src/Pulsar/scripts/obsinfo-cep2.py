@@ -2343,243 +2343,239 @@ if __name__ == "__main__":
 	# Number of ObsIDs
 	Nobsids = np.size(obsids)
 
-	try:
-		# Main loop for every observation
-		for id in obsids:
-			# i don't know why people make these obsids!!!
-			if id == "L?????" or id == "L??????": continue
+	print "Nobsids = ", Nobsids
+
+	# Main loop for every observation
+	for id in obsids:
+		# i don't know why people make these obsids!!!
+		if id == "L?????" or id == "L??????": continue
 		
-			# if we do update then we do not need to initialize obsinfo class again, unless
-			# parset file does not exist
-			if is_update and obstable[id].oi.is_parset(): # update & parset file exists
-				oi=obstable[id].oi
-			else: # initializing the obsinfo class
-				oi=obsinfo(id)
+		# if we do update then we do not need to initialize obsinfo class again, unless
+		# parset file does not exist
+		if is_update and obstable[id].oi.is_parset(): # update & parset file exists
+			oi=obstable[id].oi
+		else: # initializing the obsinfo class
+			oi=obsinfo(id)
 
-			if not oi.is_parset():
-				# search for nodeslist and datadir with raw data
-				# we do this search only if ObsID is _NOT_ in obsids_redonly list
-				if id not in set(obsids_redonly) and not is_no_check_rawdata:
-					oi.rawdata_search(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
-			else:
-				# checking if raw data directories exist
-				# we only check those ObsIDs that are _NOT_ in obsids_redonly list
-				if id not in set(obsids_redonly) and not is_no_check_rawdata:
-					oi.rawdata_check(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
+		if not oi.is_parset():
+			# search for nodeslist and datadir with raw data
+			# we do this search only if ObsID is _NOT_ in obsids_redonly list
+			if id not in set(obsids_redonly) and not is_no_check_rawdata:
+				oi.rawdata_search(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
+		else:
+			# checking if raw data directories exist
+			# we only check those ObsIDs that are _NOT_ in obsids_redonly list
+			if id not in set(obsids_redonly) and not is_no_check_rawdata:
+				oi.rawdata_check(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
 
-			# class instance with output Info
-			out=outputInfo(id)	
+		# class instance with output Info
+		out=outputInfo(id)	
 
-			# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
-			# if there are data in more than one datadir in one storage node, then Total size will be taken
-			dirsizes = {}
-			for lse in storage_nodes:
-				dirsizes[lse] = ["x", "0.0"]
-			# getting the sizes only from the intersection of oi.nodeslist and storage_nodes
-			# we do collect sizes only for those ObsIDs that are _NOT_ in obsids_redonly list
-			if not is_no_check_rawdata:
-				if id not in set(obsids_redonly):
-					use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
-					# forming string with all locus nodes to check in one cexec command
-					if len(use_nodes) > 0:
-						cexeclocus=cexec_nodes[use_nodes[0]]
-						if len(use_nodes) > 1:
-							for s in use_nodes[1:]:
-								cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-						ddir=datadir_mask + "/" + id   # using mask here to get the Total size of raw data in one storage node
-						cmd="%s %s 'du -sc -B 1 %s 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, ddir)
-						cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
-						# finding all locus nodes that have the dir with raw data
-						for l in np.arange(len(cexec_output)):
-							if re.match("^-----", cexec_output[l]) is None:
-								if cexec_output[l] == "0": continue
-								if cexec_output[l].isdigit() == True:
-									lse = cexec_output[l-1].split(" ")[1]
-									dirsizes[lse][1] = cexec_output[l]
-									# getting human-readable size
-									dirsizes[lse][0] = human_readable_size(float(cexec_output[l]))
+		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
+		# if there are data in more than one datadir in one storage node, then Total size will be taken
+		dirsizes = {}
+		for lse in storage_nodes:
+			dirsizes[lse] = ["x", "0.0"]
+		# getting the sizes only from the intersection of oi.nodeslist and storage_nodes
+		# we do collect sizes only for those ObsIDs that are _NOT_ in obsids_redonly list
+		if not is_no_check_rawdata:
+			if id not in set(obsids_redonly):
+				use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
+				# forming string with all locus nodes to check in one cexec command
+				if len(use_nodes) > 0:
+					cexeclocus=cexec_nodes[use_nodes[0]]
+					if len(use_nodes) > 1:
+						for s in use_nodes[1:]:
+							cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
+					ddir=datadir_mask + "/" + id   # using mask here to get the Total size of raw data in one storage node
+					cmd="%s %s 'du -sc -B 1 %s 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, ddir)
+					cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+					# finding all locus nodes that have the dir with raw data
+					for l in np.arange(len(cexec_output)):
+						if re.match("^-----", cexec_output[l]) is None:
+							if cexec_output[l] == "0": continue
+							if cexec_output[l].isdigit() == True:
+								lse = cexec_output[l-1].split(" ")[1]
+								dirsizes[lse][1] = cexec_output[l]
+								# getting human-readable size
+								dirsizes[lse][0] = human_readable_size(float(cexec_output[l]))
 
-			# checking if this specific observation was already reduced. 
-			# Checking for both existence of the *_CSplots and *_redIS directory
-			# Only checking those ObsIDs that are _NOT_ in obsids_rawonly list
-			statusline="x"
-			CSredlocation="x"
-			ISredlocation="x"
-			# Collecting info about combined png plots
-			profiles_array=["", "", ""]   # 0 - CS, 1 - IS, 2 - FE
+		# checking if this specific observation was already reduced. 
+		# Checking for both existence of the *_CSplots and *_redIS directory
+		# Only checking those ObsIDs that are _NOT_ in obsids_rawonly list
+		statusline="x"
+		CSredlocation="x"
+		ISredlocation="x"
+		# Collecting info about combined png plots
+		profiles_array=["", "", ""]   # 0 - CS, 1 - IS, 2 - FE
 
-			# Also getting "combined.png" plot for CS data. Also we have to rename it, because the name for IS is the same
-			# CS and CV can't be recorded together, thus in the future I have to check if CV is turned on and then look for CV plot summary correspondingly
-			if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_CSplots or _redIS or both) in the Archive area
-				# looking for _CSplots first on locus101
-				if oi.CS == "+":
-#					lse=hoover_nodes[0]  # locus101
-					lse="locus092"
-					cmd="%s %s '%s -t CS -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, "", id, cexec_egrep_string)
-					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
-					if cmdout[0] != "":
-						CSredlocation=cmdout[0]
-						statusline=cmdout[1]
-						# when we are here it means, that CS data is run through standard pipeline, so sub-files should exist and
-						# the data can be potentially already ran through SEARCH pipeline. So, here we are checking if search* directories
-						# exist in each of the raw nodes with the data
-						if id not in set(obsids_redonly):
-							use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
-							# forming string with all locus nodes to check in one cexec command
-							if len(use_nodes) > 0:
-								cexeclocus=cexec_nodes[use_nodes[0]]
-								if len(use_nodes) > 1:
-									for s in use_nodes[1:]:
-										cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-								cmd="%s %s 'ls -d %s*/%s_red/search* 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id)
-								cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
-								# finding all locus nodes that have the search dir and count them
-								search_dirs_number=0
-								for l in np.arange(len(cexec_output)):
-									if re.match("^-----", cexec_output[l]) is None:
-										search_dirs_number += 1
-								# modifying the statusline
-								if search_dirs_number > 0:
-									statusline=statusline[:-1] + ",+search[%d])" % (search_dirs_number)
+		# Also getting "combined.png" plot for CS data. Also we have to rename it, because the name for IS is the same
+		# CS and CV can't be recorded together, thus in the future I have to check if CV is turned on and then look for CV plot summary correspondingly
+		if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_CSplots or _redIS or both) in the Archive area
+			# looking for _CSplots first on locus101
+			if oi.CS == "+":
+#				lse=hoover_nodes[0]  # locus101
+				lse="locus092"
+				cmd="%s %s '%s -t CS -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, id, cexec_egrep_string)
+				cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
+				if cmdout[0] != "":
+					CSredlocation=cmdout[0]
+					statusline=cmdout[1]
+					# when we are here it means, that CS data is run through standard pipeline, so sub-files should exist and
+					# the data can be potentially already ran through SEARCH pipeline. So, here we are checking if search* directories
+					# exist in each of the raw nodes with the data
+					if id not in set(obsids_redonly):
+						use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
+						# forming string with all locus nodes to check in one cexec command
+						if len(use_nodes) > 0:
+							cexeclocus=cexec_nodes[use_nodes[0]]
+							if len(use_nodes) > 1:
+								for s in use_nodes[1:]:
+									cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
+							cmd="%s %s 'ls -d %s*/%s_red/search* 2>/dev/null' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id)
+							cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+							# finding all locus nodes that have the search dir and count them
+							search_dirs_number=0
+							for l in np.arange(len(cexec_output)):
+								if re.match("^-----", cexec_output[l]) is None:
+									search_dirs_number += 1
+							# modifying the statusline
+							if search_dirs_number > 0:
+								statusline=statusline[:-1] + ",+search[%d])" % (search_dirs_number)
 
-						# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
-						#if cmdout[2].isdigit() == True:
-						#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
-						if cmdout[3] == "yes":  # combined plot exists
-							# copying combined plots and renaming them
-							profiles_array[0]="CScombined"
-							if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1 or oi.nrRings > 0:
-								combined="combined"
-								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
-							else:
-								thcombined="combined"
-								combined=cmdout[5]
-								basecombined=combined.split("/")[-1].split(".png")[0]
-								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, CSredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[0], plotsdir, id, thcombined, plotsdir, id, profiles_array[0])
-							os.system(cmd)
-						# checking if this obs is FE obs. If so, then get status maps
-#						if oi.FE == "+" and cmdout[4] == "yes":
-						if cmdout[4] == "yes":   # now also checking not just for FE obs (in case there are 'heat' maps for CS data with many TA beams)
-							# copying FE status plots
-							profiles_array[2]="status"
-							combined="status"
-							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id)
-							os.system(cmd)
-
-				# checking if this obs has CV data (then it should not have CS)
-				if oi.CV == "+":
-					lse="locus093"
-					cmd="%s %s '%s -t CV -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, id, cexec_egrep_string)
-					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
-					if cmdout[0] != "":
-						CSredlocation=cmdout[0]
-						statusline=cmdout[1]
-						# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
-						#if cmdout[2].isdigit() == True:
-						#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
-						if cmdout[4] == "yes":  # status DSPSR plots exist
-							# copying combined plots and renaming them
-							profiles_array[0]="CScombined"
-							combined="status"
+					# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
+					#if cmdout[2].isdigit() == True:
+					#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
+					if cmdout[3] == "yes":  # combined plot exists
+						# copying combined plots and renaming them
+						profiles_array[0]="CScombined"
+						if oi.nrBeams > 1 or oi.nrTiedArrayBeams > 1 or oi.nrRings > 0:
+							combined="combined"
 							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
-							os.system(cmd)
-
-				# looking for _redIS first on locus102
-				if oi.IS == "+":
-#					lse=hoover_nodes[1]  # locus102
-					lse="locus094"
-					cmd="%s %s '%s -t IS -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, id, cexec_egrep_string)
-					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
-					if cmdout[0] != "":
-						ISredlocation=cmdout[0]
-						if statusline == "x":
-							statusline=cmdout[1]
 						else:
-							statusline=statusline+" "+cmdout[1]
-						# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
-						#if cmdout[2].isdigit() == True:
-						#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
-						if cmdout[3] == "yes":  # combined plot exists
-							# copying combined plots and renaming them
-							profiles_array[1]="IScombined"
-							if oi.nrBeams > 1:
-								combined="combined"
-								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], ISredlocation, combined, ISredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[1], plotsdir, id, combined, plotsdir, id, profiles_array[1])
-							else:
-								thcombined="combined"
-								combined=cmdout[4]
-								basecombined=combined.split("/")[-1].split(".png")[0]
-								cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, ISredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[1], plotsdir, id, thcombined, plotsdir, id, profiles_array[1])
-							os.system(cmd)
+							thcombined="combined"
+							combined=cmdout[5]
+							basecombined=combined.split("/")[-1].split(".png")[0]
+							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, CSredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[0], plotsdir, id, thcombined, plotsdir, id, profiles_array[0])
+						os.system(cmd)
+					# checking if this obs is FE obs. If so, then get status maps
+#					if oi.FE == "+" and cmdout[4] == "yes":
+					if cmdout[4] == "yes":   # now also checking not just for FE obs (in case there are 'heat' maps for CS data with many TA beams)
+						# copying FE status plots
+						profiles_array[2]="status"
+						combined="status"
+						cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id)
+						os.system(cmd)
 
-			# Getting the total size of processed data in _all_ locus nodes
-			processed_dirsize = 0.0
-			use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
-			hoover_summary_nodes=["locus092", "locus093", "locus094"]
-			use_nodes.extend(hoover_summary_nodes)
-			use_nodes=list(np.unique(use_nodes))
-			# forming string with all locus nodes to check in one cexec command
-			if len(use_nodes) > 0:
-				cexeclocus=cexec_nodes[use_nodes[0]]
-				if len(use_nodes) > 1:
-					for s in use_nodes[1:]:
-						cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
-				# also adding locus101 (hoover:0) to the cexec command line
-				cmd="%s %s hoover:0 'du -sc -B 1 %s*/%s_red %s*/%s_CSplots %s*/%s_redIS %s*/%s_CVplots 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id)
-				cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
-				# finding all locus nodes that have the dir with raw data
-				for l in np.arange(len(cexec_output)):
-					if re.match("^-----", cexec_output[l]) is None:
-						if cexec_output[l] == "0": continue
-						if cexec_output[l].isdigit() == True:
-							processed_dirsize += float(cexec_output[l])
+			# checking if this obs has CV data (then it should not have CS)
+			if oi.CV == "+":
+				lse="locus093"
+				cmd="%s %s '%s -t CV -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, id, cexec_egrep_string)
+				cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
+				if cmdout[0] != "":
+					CSredlocation=cmdout[0]
+					statusline=cmdout[1]
+					# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
+					#if cmdout[2].isdigit() == True:
+					#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
+					if cmdout[4] == "yes":  # status DSPSR plots exist
+						# copying combined plots and renaming them
+						profiles_array[0]="CScombined"
+						combined="status"
+						cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[0], plotsdir, id, combined, plotsdir, id, profiles_array[0])
+						os.system(cmd)
 
-			# getting the grid links for the current ObsID and putting them to separate ascii file
-			# and making the archive status line for the table
-			archivestatus = "x"
-			archivesize = {"raw": 0.0, "sub": 0.0, "meta": 0.0}  # size of archived files of different kind
-			if len(gridfiles) != 0:
-				grid_obsid_indices = [i for i in np.arange(len(gridfiles)) if re.search(id, gridfiles[i])]
-				if len(grid_obsid_indices) != 0:
-					archivestatus = ""
-					grid_obsid_files = [gridfiles[i] for i in grid_obsid_indices]
-					grid_obsid_dates = [griddates[i] for i in grid_obsid_indices]
-					grid_obsid_times = [gridtimes[i] for i in grid_obsid_indices]
-					grid_obsid_sizes = [gridsizes[i] for i in grid_obsid_indices]
-					grid_obsid_links = [gridlinks[i] for i in grid_obsid_indices]
-					# saving the grid links to the separate ascii file
-					np.savetxt(griddir + "/%s.txt" % (id), np.transpose((grid_obsid_files, grid_obsid_dates, grid_obsid_times, [str(i) for i in grid_obsid_sizes], grid_obsid_links)), fmt="%s", delimiter="   ")
-					rawfiles = [file for file in grid_obsid_files if re.search("raw", file)]
-					if len(rawfiles) != 0: 
-						archivestatus = archivestatus+" raw"
-						archivesize["raw"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("raw", grid_obsid_files[i])])
-					subbandfiles = [file for file in grid_obsid_files if re.search("sub", file) or re.search("fits", file)]
-					if len(subbandfiles) != 0: 
-						archivestatus = archivestatus+" sub[fits]"
-						archivesize["sub"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("sub", grid_obsid_files[i]) or re.search("fits", grid_obsid_files[i])])
-					metafiles = [file for file in grid_obsid_files if re.search("meta", file)]
-					if len(metafiles) != 0: 
-						archivestatus = archivestatus+" meta"
-						archivesize["meta"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("meta", grid_obsid_files[i])])
-					archivestatus = " ".join(archivestatus.split(" ")[1:])
+			# looking for _redIS first on locus102
+			if oi.IS == "+":
+#				lse=hoover_nodes[1]  # locus102
+				lse="locus094"
+				cmd="%s %s '%s -t IS -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, id, cexec_egrep_string)
+				cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
+				if cmdout[0] != "":
+					ISredlocation=cmdout[0]
+					if statusline == "x":
+						statusline=cmdout[1]
+					else:
+						statusline=statusline+" "+cmdout[1]
+					# I commented this out as below we collect now the size of total processed data in _all_ locus nodes
+					#if cmdout[2].isdigit() == True:
+					#	processed_dirsize += float(cmdout[2]) / 1000. / 1000. / 1000.
+					if cmdout[3] == "yes":  # combined plot exists
+						# copying combined plots and renaming them
+						profiles_array[1]="IScombined"
+						if oi.nrBeams > 1:
+							combined="combined"
+							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], ISredlocation, combined, ISredlocation, combined, plotsdir, id, plotsdir, id, combined, plotsdir, id, profiles_array[1], plotsdir, id, combined, plotsdir, id, profiles_array[1])
+						else:
+							thcombined="combined"
+							combined=cmdout[4]
+							basecombined=combined.split("/")[-1].split(".png")[0]
+							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s %s/%s.th.png %s/%s' 2>&1 1>/dev/null ; mv -f %s/%s/%s.png %s/%s/%s.png 2>/dev/null ; mv -f %s/%s/%s.th.png %s/%s/%s.th.png 2>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], combined, ISredlocation, thcombined, plotsdir, id, plotsdir, id, basecombined, plotsdir, id, profiles_array[1], plotsdir, id, thcombined, plotsdir, id, profiles_array[1])
+						os.system(cmd)
 
-			# combining info
-			out.Init(id, oi, storage_nodes, dirsizes, statusline, CSredlocation, ISredlocation, processed_dirsize, profiles_array, archivestatus, archivesize)
-			obstable[id] = out
-			# printing the info line by line in debug mode
-			if is_debug:
-				print "%d       %s" % (debugcounter, out.info)
-				cmd="echo \"%d (%d)\" > %s" % (debugcounter, Nobsids, debugfile)
-				os.system(cmd)
-				debugcounter += 1
+		# Getting the total size of processed data in _all_ locus nodes
+		processed_dirsize = 0.0
+		use_nodes=list(set(oi.nodeslist).intersection(set(storage_nodes)))	
+		hoover_summary_nodes=["locus092", "locus093", "locus094"]
+		use_nodes.extend(hoover_summary_nodes)
+		use_nodes=list(np.unique(use_nodes))
+		# forming string with all locus nodes to check in one cexec command
+		if len(use_nodes) > 0:
+			cexeclocus=cexec_nodes[use_nodes[0]]
+			if len(use_nodes) > 1:
+				for s in use_nodes[1:]:
+					cexeclocus += ",%s" % (cexec_nodes[s].split(":")[1])
+			# also adding locus101 (hoover:0) to the cexec command line
+			cmd="%s %s hoover:0 'du -sc -B 1 %s*/%s_red %s*/%s_CSplots %s*/%s_redIS %s*/%s_CVplots 2>/dev/null | grep total | cut -f 1' 2>/dev/null | grep -v such | grep -v xauth | grep -v connect | egrep -v \'\\*\\*\\*\\*\\*\'" % (cexeccmd, cexeclocus, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id, psr_archive_dir, id)
+			cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
+			# finding all locus nodes that have the dir with raw data
+			for l in np.arange(len(cexec_output)):
+				if re.match("^-----", cexec_output[l]) is None:
+					if cexec_output[l] == "0": continue
+					if cexec_output[l].isdigit() == True:
+						processed_dirsize += float(cexec_output[l])
 
-	except: # when the scripts crashes here, before exiting, we do save the current DB to the file
+		# getting the grid links for the current ObsID and putting them to separate ascii file
+		# and making the archive status line for the table
+		archivestatus = "x"
+		archivesize = {"raw": 0.0, "sub": 0.0, "meta": 0.0}  # size of archived files of different kind
+		if len(gridfiles) != 0:
+			grid_obsid_indices = [i for i in np.arange(len(gridfiles)) if re.search(id, gridfiles[i])]
+			if len(grid_obsid_indices) != 0:
+				archivestatus = ""
+				grid_obsid_files = [gridfiles[i] for i in grid_obsid_indices]
+				grid_obsid_dates = [griddates[i] for i in grid_obsid_indices]
+				grid_obsid_times = [gridtimes[i] for i in grid_obsid_indices]
+				grid_obsid_sizes = [gridsizes[i] for i in grid_obsid_indices]
+				grid_obsid_links = [gridlinks[i] for i in grid_obsid_indices]
+				# saving the grid links to the separate ascii file
+				np.savetxt(griddir + "/%s.txt" % (id), np.transpose((grid_obsid_files, grid_obsid_dates, grid_obsid_times, [str(i) for i in grid_obsid_sizes], grid_obsid_links)), fmt="%s", delimiter="   ")
+				rawfiles = [file for file in grid_obsid_files if re.search("raw", file)]
+				if len(rawfiles) != 0: 
+					archivestatus = archivestatus+" raw"
+					archivesize["raw"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("raw", grid_obsid_files[i])])
+				subbandfiles = [file for file in grid_obsid_files if re.search("sub", file) or re.search("fits", file)]
+				if len(subbandfiles) != 0: 
+					archivestatus = archivestatus+" sub[fits]"
+					archivesize["sub"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("sub", grid_obsid_files[i]) or re.search("fits", grid_obsid_files[i])])
+				metafiles = [file for file in grid_obsid_files if re.search("meta", file)]
+				if len(metafiles) != 0: 
+					archivestatus = archivestatus+" meta"
+					archivesize["meta"] = np.sum([grid_obsid_sizes[i] for i in np.arange(len(grid_obsid_files)) if re.search("meta", grid_obsid_files[i])])
+				archivestatus = " ".join(archivestatus.split(" ")[1:])
+
+		# combining info
+		out.Init(id, oi, storage_nodes, dirsizes, statusline, CSredlocation, ISredlocation, processed_dirsize, profiles_array, archivestatus, archivesize)
+		obstable[id] = out
+		# printing the info line by line in debug mode
 		if is_debug:
-			print "Script crashed. Saving db, copying files and exiting..."
-		# saving the database to disk
-		save_db_copy_files (dumpfile, obstable)
-		sys.exit(1)
-		
+			print "%d       %s" % (debugcounter, out.info)
+			cmd="echo \"%d (%d)\" > %s" % (debugcounter, Nobsids, debugfile)
+			os.system(cmd)
+			debugcounter += 1
+
+
+
 	# saving the database to disk
 	save_db_copy_files (dumpfile, obstable)
 
