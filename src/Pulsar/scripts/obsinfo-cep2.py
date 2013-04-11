@@ -1359,7 +1359,7 @@ class obsstat:
 			self.dbinfo[sub]["Ntotal"] += np.size(self.subkeys)
 			for r in self.subkeys:
 				is_parset=False
-				if obstable[r].oi_is_parset(): is_parset = True
+				if obstable[r].oi.is_parset(): is_parset = True
 
 				# getting the numbers and duration
 				if is_parset and obstable[r].oi.duration != "?":
