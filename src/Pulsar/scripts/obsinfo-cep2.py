@@ -34,6 +34,7 @@
 #                Many changes were done to parsing parset files to 
 #                accomodate new keywords for new OLAP release on Jan 27
 #                Old parset format is also supported
+# Feb-Mar, 2013 - A number of significant changes
 ###################################################################
 import os, sys, glob
 import getopt
@@ -87,7 +88,6 @@ is_no_check_rawdata = False
 viewtype="usual"
 
 # The string of conditions to filter out the list of output ObsIDs
-# Under development, the only possible condition is "id.is_test" or "id.is_test == True" or "id.is_test == False"
 search_string=""
 
 # Setting User name
@@ -164,9 +164,6 @@ data_dirs=["/data"]
 datadir_mask="/data"
 # pulsar archive area stem
 psr_archive_dir="/data/LOFAR_PULSAR_ARCHIVE_"
-# test dir to keep Ashish's test reduced data (within archive area)
-# based on the presence of this dir, dataset will be marked as test
-test_dir="PULSAR_SYSTEM_TEST_OBS"
 
 # directories with parset files
 parset_logdir="/globalhome/lofarsystem/log/"
@@ -203,8 +200,7 @@ class obsinfo:
 		self.nodeslist_string=self.datadir=""
 		self.nodeslist=[]
 		self.subcluster = 'locus?'
-		self.BF=self.FD=self.IM="?"     # BF flag is for CV - complex voltage data
-		self.IS=self.CS=self.CV=self.FE="?"
+		self.IS=self.CS=self.CV=self.FE=self.IM="?"
 		self.OCD="-"  # online coherent dedispersion
 		self.rarad=self.decrad=0
                 self.rastring="????"
@@ -213,11 +209,10 @@ class obsinfo:
 		self.source=""
 		self.dur = 0
                 self.duration="?"
-		self.is_test=False   # if True, this obs is the test one
 		self.stokes="?"
 		self.nrSubbands = 0        # number of subbands
 		self.subbandList="?"       # range of subbands, e.g. 77..320
-#		self.subbands=[]           # list of subbands
+		self.subbands=[]           # list of subbands
 		self.subbandWidth = 0      # width of subband in kHz
 		self.nrChanPerSubIS = 0    # number of channels per subband (for IS)
 		self.nrChanPerSubCS = 0    # number of channels per subband (for CS)
@@ -416,22 +411,26 @@ class obsinfo:
 
 	# update info based on parset file
 	def update (self):
+
+		# reading first parset file into the list of lines
+		f = open(self.parset, 'r')
+		plines = f.read().splitlines()
+		f.close()
+
 		# Getting the Date of observation
-	        cmd="grep Observation.startTime %s | tr -d \\'" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# it means that this keyword exist and we can extract the info
-                	self.starttime=status[0][:-1].split(" = ")[-1]
+		res=[ii for ii in plines if re.search("Observation.startTime", ii) is not None]
+		if len(res) > 0:
+			# it means that this keyword exist and we can extract the info
+			self.starttime = re.sub("'", "", res[0].split(" = ")[-1])
 			# Getting the number of seconds from 1970. Can use this to sort obs out by date/time
 			self.seconds=time.mktime(time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S"))
 			self.datestring=self.starttime.split(" ")[0]
 
 		# Getting the Duration
-		cmd="grep Observation.stopTime %s | tr -d \\'" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(self.starttime) > 0 and np.size(status) > 0:
+		res=[ii for ii in plines if re.search("Observation.stopTime", ii) is not None]
+		if len(res) > 0 and np.size(self.starttime) > 0:
 			# it means that both start and stop Times exist in parset file
-			self.stoptime=status[0][:-1].split(" = ")[-1]
+			self.stoptime = re.sub("'", "", res[0].split(" = ")[-1])
 			c1 = time.strptime(self.starttime, "%Y-%m-%d %H:%M:%S")
 			c2 = time.strptime(self.stoptime, "%Y-%m-%d %H:%M:%S")
 			self.dur=time.mktime(c2)-time.mktime(c1)  # difference in seconds
@@ -439,45 +438,34 @@ class obsinfo:
 				self.duration="%.1fh" % (self.dur/3600.)
 			else:
 				self.duration="%.1fm" % (self.dur/60.)
-		
+			
 		# Leaving only time in startTime
 		self.starttime = self.starttime.split(" ")[1]
 
-		# Getting the Antenna info (HBA or LBA)
-        	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		# Getting the Antenna info (HBA or LBA) and Filter setting
+		res=[ii for ii in plines if re.search("Observation.bandFilter", ii) is not None]
+		if len(res) > 0:
                 	# Antenna array setting exists in parset file
-                	self.antenna=status[0][:-1].split(" = ")[-1].split("_")[0]
+			self.antenna = res[0].split(" = ")[-1].split("_")[0]
+			self.band = res[0].split(" = ")[-1].split("A_")[-1]
 
 		# Getting the Antenna config (LBA_OUTER, LBA_INNER, HBA_JOINED, etc.)
-        	cmd="grep 'Observation.antennaSet' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.antennaSet", ii) is not None]
+		if len(res) > 0:
                 	# Antenna Set setting exists in parset file
-                	self.antenna_config=status[0][:-1].split(" = ")[-1]
-
-		# Getting the Filter setting
-        	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-                	# band filter setting exists in parset file
-                	self.band=status[0][:-1].split(" = ")[-1].split("A_")[-1]
+			self.antenna_config = res[0].split(" = ")[-1]
 
                 # Getting the name of the Campaign
-		cmd="grep 'Observation.Campaign.name' %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
-		# Campaign name setting exists in parset file
-			self.project=status[0][:-1].split(" = ")[-1]
+		res=[ii for ii in plines if re.search("Observation.Campaign.name", ii) is not None]
+		if len(res) > 0:
+			# Campaign name setting exists in parset file
+			self.project = res[0].split(" = ")[-1]
 
 		# Getting the stations and their number (including separately the number of CS and RS)
-#        	cmd="grep 'Observation.VirtualInstrument.stationList' %s" % (self.parset,)
-        	cmd="grep 'OLAP.storageStationNames' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.storageStationNames", ii) is not None]
+		if len(res) > 0:
                 	# Stations setting exists in parset file
-                	self.stations=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+                	self.stations = res[0].split(" = ")[-1].split("[")[1].split("]")[0]
 			# removing LBA and HBA from station names, replacing HBA ears HBA0 to /0 and HBA1 to /1
 			self.stations = re.sub("HBA0", "/0", self.stations)
 			self.stations = re.sub("HBA1", "/1", self.stations)
@@ -494,50 +482,50 @@ class obsinfo:
 				self.stations_html += stations_array[n] + ","
 			self.stations_html += stations_array[-1]
 
-		# checking "locations" keywords first as in the new parset files (as from Jan 27, 2012), 
-		# "mountpoints" can give wrong values
+		# checking "locations" keywords first as in the new parset files (as from Jan 27, 2012), "mountpoints" can give wrong values
 		self.nodeslist_string = "[]"
-        	cmd="grep locations %s | awk '{print $3}' - | tr -d '[]' | sed -e 's/locus//g'" % (self.parset,)
-		try:
-			mountpoints=",".join([ss[:-1] for ss in os.popen(cmd).readlines()])
-			mountpoints_arr=np.array(mountpoints.split(","))
-			mountpoints_arr=mountpoints_arr.compress(mountpoints_arr!="")
-			if np.size(mountpoints_arr) > 0:
+		mountpoints_arr=[]
+		res=[ii for ii in plines if re.search("locations", ii) is not None]
+		if len(res) > 0:
+			for hit in res:
+				val = hit.split(" = ")[-1]
+				if val == "[]": continue
+				mountpoints_arr.extend(val.split("[")[1].split("]")[0].split(","))
+			if len(mountpoints_arr) > 0:
+				mountpoints_arr=[re.sub("locus", "", ss) for ss in mountpoints_arr]
 				self.datadir=",".join(np.unique([m.split(":")[-1] for m in mountpoints_arr]))
 				self.nodeslist_string="[" + ",".join(np.unique([m.split(":")[0] for m in mountpoints_arr])) + "]"
-		except: pass
+
 
 		# and now checking "mountpoints" keywords in the parset file to get Nodeslist and Datadir
 		# if they are empty or not exist the checking later old keywords for storageNodes and storageDirectory
 		if self.nodeslist_string == "[]":
-        		cmd="grep mountpoints %s | awk '{print $3}' - | tr -d '[]' | sed -e 's/locus//g'" % (self.parset,)
-			try:
-				mountpoints=",".join([ss[:-1] for ss in os.popen(cmd).readlines()])
-				mountpoints_arr=np.array(mountpoints.split(","))
-				mountpoints_arr=mountpoints_arr.compress(mountpoints_arr!="")
-				if np.size(mountpoints_arr) > 0:
+			mountpoints_arr=[]
+			res=[ii for ii in plines if re.search("mountpoints", ii) is not None]
+			if len(res) > 0:
+				for hit in res:
+					val = hit.split(" = ")[-1]
+					if val == "[]": continue
+					mountpoints_arr.extend(val.split("[")[1].split("]")[0].split(","))
+				if len(mountpoints_arr) > 0:
+					mountpoints_arr=[re.sub("locus", "", ss) for ss in mountpoints_arr]
 					self.datadir=",".join(np.unique([m.split(":")[-1] for m in mountpoints_arr]))
 					self.nodeslist_string="[" + ",".join(np.unique([m.split(":")[0] for m in mountpoints_arr])) + "]"
-			except: pass
 
 	        # reading the parset file
 	        # getting the info about StorageNodes. Note! For old parsets there seems to be no such a keyword Virtual...
         	# However, the old keyword OLAP.storageNodeList has "non-friendly" format, so I just ignore this by now
 		if self.nodeslist_string == "[]":
-        		cmd="grep Observation.VirtualInstrument.storageNodeList %s | sed -e 's/locus//g'" % (self.parset,)
-        		status=os.popen(cmd).readlines()
-        		if np.size(status) > 0:
-                		# it means that this keyword exist and we can extract the info
-                		self.nodeslist_string=status[0][:-1].split(" = ")[-1]
+			res=[ii for ii in plines if re.search("Observation.VirtualInstrument.storageNodeList", ii) is not None]
+			if len(res) > 0:
+				self.nodeslist_string = re.sub("locus", "", res[0].split(" = ")[-1])
 			# there were many changes in parset keywords names and datadir naming conventions around May 3, 2011
 			# so, I also need to check other keywords to get list proper locus nodes
 			if self.nodeslist_string == "[]":
-        			cmd="grep OLAP.Storage.hosts %s | sed -e 's/locus//g'" % (self.parset,)
-        			status=os.popen(cmd).readlines()
-        			if np.size(status) > 0:
-                			# it means that this keyword exist and we can extract the info
-                			self.nodeslist_string=status[0][:-1].split(" = ")[-1]
-
+				res=[ii for ii in plines if re.search("OLAP.Storage.hosts", ii) is not None]
+				if len(res) > 0:
+					self.nodeslist_string = re.sub("locus", "", res[0].split(" = ")[-1])
+		
 		if self.nodeslist_string != "[]":
 			self.nodeslist=["locus%s" % (i) for i in self.nodeslist_string.split("[")[1].split("]")[0].split(",")]
 
@@ -552,126 +540,106 @@ class obsinfo:
 		# if datadir is still empty, trying to look for old keywords
 	        # getting the name of /data? where the data are stored
 		if self.datadir == "":
-			try:
-        			cmd="grep Observation.MSNameMask %s" % (self.parset,)
-        			self.datadir="/" + os.popen(cmd).readlines()[0][:-1].split(" = ")[-1].split("/")[1]
+			res=[ii for ii in plines if re.search("Observation.MSNameMask", ii) is not None]
+			if len(res) > 0:
+				self.datadir = "/" + res[0].split(" = ")[-1].split("/")[1]
 			# it seems that for some of observations, the field Observation.MSNameMask in the parset file is missing
 			# instead, there is another field called "OLAP.Storage.targetDirectory"
-			except:
-        			cmd="grep OLAP.Storage.targetDirectory %s" % (self.parset,)
-				status=os.popen(cmd).readlines()
-				if np.size(status) > 0:
-        				self.datadir="/" + status[0][:-1].split(" = ")[-1].split("/")[1]
+			else:
+				res=[ii for ii in plines if re.search("OLAP.Storage.targetDirectory", ii) is not None]
+				if len(res) > 0:
+					self.datadir = "/" + res[0].split(" = ")[-1].split("/")[1]
 
 		# check the presence in the parset file the keyword for IS 2nd Transpose
 		# if such keyword exists then it means that parset format is "new" (as of Jan 27, 2012)
 		# so, we can sometimes skip checking other "old" keywords...
 		incoh_transposed=False
-		cmd="grep OLAP.IncoherentStokesAreTransposed %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
-				incoh_transposed=True
+		res=[ii for ii in plines if re.search("OLAP.IncoherentStokesAreTransposed", ii) is not None]
+		if len(res) > 0:
+			if res[0].split(" = ")[-1].lower()[:1] == 't': incoh_transposed=True
 
 	        # check if online coherent dedispersion (OCD) was used
-        	cmd="grep OLAP.coherentDedisperseChannels %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	self.OCD=status[0][:-1].split(" = ")[-1].lower()[:1]
+		res=[ii for ii in plines if re.search("OLAP.coherentDedisperseChannels", ii) is not None]		
+		if len(res) > 0:
+                	self.OCD=res[0].split(" = ")[-1].lower()[:1]
                 	if self.OCD == 'f':
                         	self.OCD = "-"
                 	else:
                         	self.OCD = "+"
 
 		# for new parset files (after Jan 27, 2012)
-		# getting info about the Type of the data (BF, Imaging, etc.)
-        	cmd="grep Output_CoherentStokes.enabled %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-                if np.size(status) > 0:
-                        # this info exists in parset file
-                        self.CS=status[0][:-1].split(" = ")[-1].lower()[:1]
+		# getting info about the Type of the data (CV, Imaging, etc.)
+		res=[ii for ii in plines if re.search("Output_CoherentStokes.enabled", ii) is not None]
+		if len(res) > 0:
+			self.CS=res[0].split(" = ")[-1].lower()[:1]
                         if self.CS == 'f':
                                 self.CS = "-"
-                                self.BF = "-"
+                                self.CV = "-"
                         else:
                                 self.CS = "+"
-                                self.BF = "-"
-                                cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
-                                status=os.popen(cmd).readlines()
-                                if np.size(status) > 0:
-                                        # getting Stokes string
-                                        self.stokes=status[0][:-1].split(" = ")[-1]
+                                self.CV = "-"
+				res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.which", ii) is not None]
+				if len(res) > 0:
+                                        self.stokes=res[0].split(" = ")[-1]
 					# in the transition phase there were some parset with just XY
 					# this means just 2 files, one for X, another Y
 					# now is always XXYY, i.e. 4 files get written
                                         if self.stokes == "XXYY" or self.stokes == "XY":
-                                                self.BF = "+"
+                                                self.CV = "+"
                                                 self.CS = "-"
 		
 		# in case keyword 'Output_CoherentStokes.enabled' does not exist, but format is new (after Jan 27, 2012)
 		if incoh_transposed and self.CS == "?":
-			cmd="grep TiedArrayBeam %s | grep coherent | awk '{print $3}' - | grep 'True\|T\|true\|t\|1'" % (self.parset,)
-			status=os.popen(cmd).readlines()
-			if np.size(status) > 0:
-				self.CS = "+"
-                                self.BF = "-"
-                                cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
-                                status=os.popen(cmd).readlines()
-                                if np.size(status) > 0:
-                                        # getting Stokes string
-                                        self.stokes=status[0][:-1].split(" = ")[-1]
-					# in the transition phase there were some parset with just XY
-					# this means just 2 files, one for X, another Y
-					# now is always XXYY, i.e. 4 files get written
-                                        if self.stokes == "XXYY" or self.stokes == "XY":
-                                                self.BF = "+"
-                                                self.CS = "-"
-			else:
-				self.CS = "-"
-				self.BF = "-"
+			self.CS = "-"
+			self.CV = "-"
+			res0=[ii for ii in plines if re.search("TiedArrayBeam", ii) is not None]	
+			if len(res0) > 0:
+				res=[ii.split(" = ")[-1] for ii in res0 if re.search("coherent", ii) is not None]	
+				if len(res) > 0:
+					res0=[ii for ii in res if re.search("True|true|T|t|1", ii) is not None]
+					if len(res0) > 0:
+						self.CS = "+"
+		                                self.CV = "-"
+						res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.which", ii) is not None]
+						if len(res) > 0:
+							self.stokes=res[0].split(" = ")[-1]
+							# in the transition phase there were some parset with just XY
+							# this means just 2 files, one for X, another Y
+							# now is always XXYY, i.e. 4 files get written
+							if self.stokes == "XXYY" or self.stokes == "XY":
+								self.CV = "+"
+								self.CS = "-"	
 
 	        # check if data are incoherent stokes data
-        	cmd="grep Output_IncoherentStokes.enabled %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	self.IS=status[0][:-1].split(" = ")[-1].lower()[:1]
+		res=[ii for ii in plines if re.search("Output_IncoherentStokes.enabled", ii) is not None]
+		if len(res) > 0:
+			self.IS=res[0].split(" = ")[-1].lower()[:1]
                 	if self.IS == 'f':
                         	self.IS = "-"
                 	else:
                         	self.IS = "+"
 				if self.stokes == "?":
-					cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
-					status=os.popen(cmd).readlines()
-					if np.size(status) > 0:
-						# getting Stokes string
-						self.stokes=status[0][:-1].split(" = ")[-1]
+					res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.which", ii) is not None]
+					if len(res) > 0:
+						self.stokes=res[0].split(" = ")[-1]
 
                 # at ~05.07.2012 the logic in the Parset files has changed, and the flag Output_CoherentStokes.enabled = True
                 # ONLY for CS data and not for CV data.  For CV data one needs to check Output_Beamformed.enabled flag
                 if self.IS != "+" and self.CS != "+":
                         # checking the Output_Beamformed flag
-                        cmd="grep Output_Beamformed.enabled %s" % (self.parset,)
-                        status=os.popen(cmd).readlines()
-                        if np.size(status) > 0:
-                                # this info exists in parset file
-                                if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
-                                        self.BF = "+"
+			res=[ii for ii in plines if re.search("Output_Beamformed.enabled", ii) is not None]
+			if len(res) > 0:
+				if res[0].split(" = ")[-1].lower()[:1] == 't':
+					self.CV = "+"
 					if self.stokes == "?":
-						cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
-                                		status=os.popen(cmd).readlines()
-                        		        if np.size(status) > 0:
-                                        		# getting Stokes string
-                                        		self.stokes=status[0][:-1].split(" = ")[-1]
+						res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.which", ii) is not None]
+						if len(res) > 0:
+                                        		self.stokes=res[0].split(" = ")[-1]
 
 	        # check if data are imaging
-        	cmd="grep Output_Correlated.enabled %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	self.IM=status[0][:-1].split(" = ")[-1].lower()[:1]
+		res=[ii for ii in plines if re.search("Output_Correlated.enabled", ii) is not None]		
+		if len(res) > 0:
+                	self.IM=res[0].split(" = ")[-1].lower()[:1]
                 	if self.IM == 'f':
                         	self.IM = "-"
                 	else:
@@ -679,11 +647,9 @@ class obsinfo:
 
 	        # check if data are imaging
 		if self.IM == "?":
-        		cmd="grep outputCorrelatedData %s" % (self.parset,)
-        		status=os.popen(cmd).readlines()
-        		if np.size(status) > 0:
-                		# this info exists in parset file
-                		self.IM=status[0][:-1].split(" = ")[-1].lower()[:1]
+			res=[ii for ii in plines if re.search("outputCorrelatedData", ii) is not None]
+			if len(res) > 0:
+                		self.IM=res[0].split(" = ")[-1].lower()[:1]
                 		if self.IM == 'f':
                         		self.IM = "-"
                 		else:
@@ -691,11 +657,9 @@ class obsinfo:
 
 	        # check if data are incoherent stokes data
 		if self.IS == "?":
-        		cmd="grep outputIncoherentStokes %s" % (self.parset,)
-        		status=os.popen(cmd).readlines()
-        		if np.size(status) > 0:
-                		# this info exists in parset file
-                		self.IS=status[0][:-1].split(" = ")[-1].lower()[:1]
+			res=[ii for ii in plines if re.search("outputIncoherentStokes", ii) is not None]
+			if len(res) > 0:
+                		self.IS=res[0].split(" = ")[-1].lower()[:1]
                 		if self.IS == 'f':
                         		self.IS = "-"
                 		else:
@@ -703,60 +667,51 @@ class obsinfo:
 
 	        # check if data are coherent stokes data
 		if self.CS == "?":
-        		cmd="grep outputCoherentStokes %s" % (self.parset,)
-        		status=os.popen(cmd).readlines()
-        		if np.size(status) > 0:
-                		# this info exists in parset file
-                		self.CS=status[0][:-1].split(" = ")[-1].lower()[:1]
+			res=[ii for ii in plines if re.search("outputCoherentStokes", ii) is not None]
+			if len(res) > 0:
+                		self.CS=res[0].split(" = ")[-1].lower()[:1]
                 		if self.CS == 'f':
                         		self.CS = "-"
                 		else:
                         		self.CS = "+"
 
                 # for parset files with old format
-                # getting info about the Type of the data (BF, Imaging, etc.)
+                # getting info about the Type of the data (CV, Imaging, etc.)
                 # check first if data are beamformed
 		if not incoh_transposed:
-                	if self.CS == "+": self.BF = "-"
-                	if self.BF == "?":
-                        	cmd="grep Output_Beamformed.enabled %s" % (self.parset,)
-                        	status=os.popen(cmd).readlines()
-                        	if np.size(status) > 0:
-                                	# this info exists in parset file
-                                	self.BF=status[0][:-1].split(" = ")[-1].lower()[:1]
-                                	if self.BF == 'f':
-                                        	self.BF = "-"
+                	if self.CS == "+": self.CV = "-"
+                	if self.CV == "?":
+				res=[ii for ii in plines if re.search("Output_Beamformed.enabled", ii) is not None]
+				if len(res) > 0:
+                                	self.CV=res[0].split(" = ")[-1].lower()[:1]
+                                	if self.CV == 'f':
+                                        	self.CV = "-"
                                 	else:
-                                        	self.BF = "+"
+                                        	self.CV = "+"
                         	else:
-                                	cmd="grep outputBeamFormedData %s" % (self.parset,)
-                                	status=os.popen(cmd).readlines()
-                                	if np.size(status) > 0:
-                                        	# this info exists in parset file
-                                        	self.BF=status[0][:-1].split(" = ")[-1].lower()[:1]
-                                        	if self.BF == 'f':
-                                                	self.BF = "-"
+					res=[ii for ii in plines if re.search("outputBeamFormedData", ii) is not None]
+					if len(res) > 0:
+                                        	self.CV=res[0].split(" = ")[-1].lower()[:1]
+                                        	if self.CV == 'f':
+                                                	self.CV = "-"
                                         	else:
-                                                	self.BF = "+"
+                                                	self.CV = "+"
 
 	        # check if data are fly's eye mode data
-        	cmd="grep PencilInfo.flysEye %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	self.FE=status[0][:-1].split(" = ")[-1].lower()[:1]
+		res=[ii for ii in plines if re.search("PencilInfo.flysEye", ii) is not None]
+		if len(res) > 0:
+                	self.FE=res[0].split(" = ")[-1].lower()[:1]
                 	if self.FE == 'f':
                         	self.FE = "-"
                 	else:
                         	self.FE = "+"
 
 	        # getting info about the pointing
-        	cmd="grep 'Observation.Beam\[0\].angle1' %s | grep -v AnaBeam" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[0\].angle1", ii) is not None and re.search("AnaBeam", ii) is None]
+		if len(res) > 0:
                 	# RA info exists in parset file
 			try:
-                		self.rarad=float(status[0][:-1].split(" = ")[-1])
+                		self.rarad=float(res[0].split(" = ")[-1])
 			except:
 				self.rarad=0.0
                 	rahours=self.rarad*12./3.1415926
@@ -764,12 +719,11 @@ class obsinfo:
                 	ram=int((rahours-rah)*60.)
                 	self.rastring="%02d%02d" % (rah, ram)
 
-        	cmd="grep 'Observation.Beam\[0\].angle2' %s | grep -v AnaBeam" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[0\].angle2", ii) is not None and re.search("AnaBeam", ii) is None]
+		if len(res) > 0:
                 	# DEC info exists in parset file
 			try:
-                		self.decrad=float(status[0][:-1].split(" = ")[-1])
+                		self.decrad=float(res[0].split(" = ")[-1])
 			except:
 				self.decrad=0.0
                 	decdeg=self.decrad*180./3.1415926
@@ -785,11 +739,10 @@ class obsinfo:
         	self.pointing="%s%s" % (self.rastring, self.decstring)
 
 	        # getting info about Source name (new addition to the Parset files)
-        	cmd="grep 'Observation.Beam\[0\].target' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[0\].target", ii) is not None]
+		if len(res) > 0:
                 	# Source name exists in parset file
-                	self.source=status[0][:-1].split(" = ")[-1]
+                	self.source=res[0].split(" = ")[-1]
 			if self.source != "":
 				if self.source[0] == "'":
 					self.source=self.source.split("'")[1]
@@ -798,33 +751,26 @@ class obsinfo:
 
                 # if Stokes are still undetermined (e.g. if obs is IM), then
                 # rereading default stokes for CS
-                if self.stokes == "?" or (self.CS != "+" and self.BF == "+"):
-                        cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
-                        status=os.popen(cmd).readlines()
-                        if np.size(status) > 0:
-                                # getting Stokes string
-                                self.stokes=status[0][:-1].split(" = ")[-1]
+                if self.stokes == "?" or (self.CS != "+" and self.CV == "+"):
+			res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.which", ii) is not None]
+			if len(res) > 0:
+                                self.stokes=res[0].split(" = ")[-1]
 
                 # Getting Stokes info (for old parset files)
                 if self.stokes == "?":
-                        cmd="grep OLAP.Stokes.which %s" % (self.parset,)
-                        status=os.popen(cmd).readlines()
-                        if np.size(status)>0:
-                                # getting Stokes string
-                                self.stokes=status[0][:-1].split(" = ")[-1]
+			res=[ii for ii in plines if re.search("OLAP.Stokes.which", ii) is not None]
+			if len(res) > 0:
+                                self.stokes=res[0].split(" = ")[-1]
 
 		# Getting the list of subbands
-		cmd="grep Observation.subbandList %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.subbandList", ii) is not None]
+		if len(res) > 0:
 			# getting range of subbands
-			self.subbandList=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+			self.subbandList=res[0].split(" = ")[-1].split("[")[1].split("]")[0]
                         # parsing the string with subband ranges to get list of subbands
-#                        self.subbands = self.getSubbands(self.subbandList)
-                        subbands = self.getSubbands(self.subbandList)
+                        self.subbands = self.getSubbands(self.subbandList)
                         # getting total number of Subbands
-#                        self.nrSubbands = np.size(self.subbands)
-                        self.nrSubbands = np.size(subbands)
+                        self.nrSubbands = np.size(self.subbands)
 			# in the subbands range, several ranges can be written, and also subbands can be separated
 			# just by commas. So, we leave only 8 symbols
 			if len(self.subbandList) > 8:
@@ -832,105 +778,94 @@ class obsinfo:
 
 		# in new parset files (after Jan 27, 2012) there are new keywords for number of
 		# chans per subband and this number can be different for IS and CS
-		cmd="grep OLAP.CNProc_IncoherentStokes.channelsPerSubband %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.channelsPerSubband", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				self.nrChanPerSubIS=int(status[0][:-1].split(" = ")[-1])
+				self.nrChanPerSubIS=int(res[0].split(" = ")[-1])
 			except: self.nrChanPerSubIS = 0
-		cmd="grep OLAP.CNProc_CoherentStokes.channelsPerSubband %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.channelsPerSubband", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				self.nrChanPerSubCS=int(status[0][:-1].split(" = ")[-1])
+				self.nrChanPerSubCS=int(res[0].split(" = ")[-1])
 			except: self.nrChanPerSubCS = 0
 
 		# Getting number of channels per subband
 		# for old datasets (before Jan 27, 2012) this number is the same for IS and CS
 		if self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
-			cmd="grep Observation.channelsPerSubband %s" % (self.parset,)
-			status=os.popen(cmd).readlines()
+			res=[ii for ii in plines if re.search("Observation.channelsPerSubband", ii) is not None]
 			nchanpersub = 0
-			if np.size(status)>0:
+			if len(res) > 0:
 				# getting number of channels
 				try:
-					nchanpersub=int(status[0][:-1].split(" = ")[-1])
+					nchanpersub=int(res[0].split(" = ")[-1])
 				except: nchanpersub = 0
 			if nchanpersub == 0: # if for some reason parset file does not have this keyword 'Observation.channelsPerSubband'
-				cmd="grep OLAP.Stokes.channelsPerSubband %s" % (self.parset,)
-				status=os.popen(cmd).readlines()
-				if np.size(status)>0:
+				res=[ii for ii in plines if re.search("OLAP.Stokes.channelsPerSubband", ii) is not None]
+				if len(res) > 0:
 					# getting number of channels
 					try:
-						nchanpersub=int(status[0][:-1].split(" = ")[-1])
+						nchanpersub=int(res[0].split(" = ")[-1])
 					except: nchanpersub = 0
 			if self.nrChanPerSubIS == 0: self.nrChanPerSubIS = nchanpersub
 			if self.nrChanPerSubCS == 0: self.nrChanPerSubCS = nchanpersub
 
 		# Getting the sample clock
-		cmd="grep Observation.sampleClock %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.sampleClock", ii) is not None]
+		if len(res) > 0:
 			# getting the clock
 			try:
-				self.sampleClock=int(status[0][:-1].split(" = ")[-1])
+				self.sampleClock=int(res[0].split(" = ")[-1])
 			except: self.sampleClock = 0
 		if self.sampleClock == 0: # if keyword 'Observation.sampleClock' is missing in the parset file
-			cmd="grep Observation.clockMode %s" % (self.parset,)
-			status=os.popen(cmd).readlines()
-			if np.size(status)>0:
+			res=[ii for ii in plines if re.search("Observation.clockMode", ii) is not None]
+			if len(res) > 0:
 				# getting the clock
 				try:
-					self.sampleClock=int(status[0][:-1].split(" = ")[-1].split("Clock")[1])
+					self.sampleClock=int(res[0].split(" = ")[-1].split("Clock")[1])
 				except: self.sampleClock = 0
 
 		# Getting width of the subband (in kHz)
-		cmd="grep Observation.subbandWidth %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.subbandWidth", ii) is not None]
+		if len(res) > 0:
 			# getting the width of the subband
 			try:
-				self.subbandWidth=float(status[0][:-1].split(" = ")[-1])
+				self.subbandWidth=float(res[0].split(" = ")[-1])
 			except: self.subbandWidth = 0
 		if self.subbandWidth == 0 and self.sampleClock != 0:
 			self.subbandWidth = ( ( self.sampleClock / 2. ) / 512. ) * 1000.
 		
 		# Getting the stokes integration steps (in old parset files)
-		cmd="grep OLAP.Stokes.integrationSteps %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.Stokes.integrationSteps", ii) is not None]
+		if len(res) > 0:
 			# getting integration steps
 			try:
-				self.integrationSteps=int(status[0][:-1].split(" = ")[-1])
+				self.integrationSteps=int(res[0].split(" = ")[-1])
 			except: self.integrationSteps = 0
 		if self.integrationSteps == 0: # if keyword 'OLAP.Stokes.integrationSteps' is missing in the parset file
-			cmd="grep Observation.ObservationControl.onlineControl.OLAP.Stokes.integrationSteps %s" % (self.parset,)
-			status=os.popen(cmd).readlines()
-			if np.size(status)>0:
+			res=[ii for ii in plines if re.search("Observation.ObservationControl.onlineControl.OLAP.Stokes.integrationSteps", ii) is not None]
+			if len(res) > 0:
 				# getting integration steps
 				try:
-					self.integrationSteps=int(status[0][:-1].split(" = ")[-1])
+					self.integrationSteps=int(res[0].split(" = ")[-1])
 				except: self.integrationSteps = 0
 
 		# getting timeIntegrationFactors (a la integrationSteps in new parset files) for IS and CS
 		# and calculating sampling intervals
-		cmd="grep OLAP.CNProc_IncoherentStokes.timeIntegrationFactor %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.timeIntegrationFactor", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				tfactor=int(status[0][:-1].split(" = ")[-1])
+				tfactor=int(res[0].split(" = ")[-1])
 				if tfactor != 0 and self.sampleClock != 0 and self.nrChanPerSubIS != 0:
 					self.timeresIS = tfactor / ((self.sampleClock * 1000. * 1000. / 1024.) / self.nrChanPerSubIS) * 1000.
 			except: tfactor = 0
-		cmd="grep OLAP.CNProc_CoherentStokes.timeIntegrationFactor %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.timeIntegrationFactor", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				tfactor=int(status[0][:-1].split(" = ")[-1])
+				tfactor=int(res[0].split(" = ")[-1])
 				if tfactor != 0 and self.sampleClock != 0 and self.nrChanPerSubCS != 0:
 					self.timeresCS = tfactor / ((self.sampleClock * 1000. * 1000. / 1024.) / self.nrChanPerSubCS) * 1000.
 			except: tfactor = 0
@@ -965,115 +900,104 @@ class obsinfo:
 						lower_band_edge = 80
 					else: lower_band_edge = 0
 
-#				if np.size(self.subbands) > 0 and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
-				if np.size(subbands) > 0 and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
+				if np.size(self.subbands) > 0 and self.subbandWidth != 0 and (self.nrChanPerSubIS != 0 or self.nrChanPerSubCS != 0):
                                         try:
                                                 # CS has a priority but we still have chance to modify it below
 						nchanpersub = self.nrChanPerSubCS
 						if self.nrChanPerSubIS == self.nrChanPerSubCS or self.nrChanPerSubIS == 0 or self.nrChanPerSubCS == 0:
 			                                nchanspersub = (self.nrChanPerSubIS != 0 and self.nrChanPerSubIS or self.nrChanPerSubCS)
-			                        elif self.IS == '+' and self.CS != '+' and self.BF != '+':
+			                        elif self.IS == '+' and self.CS != '+' and self.CV != '+':
 			                                nchanspersub = self.nrChanPerSubIS
-			                        elif self.IS != '+' and (self.CS == '+' or self.BF == '+'):
+			                        elif self.IS != '+' and (self.CS == '+' or self.CV == '+'):
 			                                nchanspersub = self.nrChanPerSubCS
 						else:   # still CS has a priority
 							nchanspersub = self.nrChanPerSubCS
                                                 if nchanpersub > 1: # it means that we ran 2nd polyphase
-#                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * self.subbands[0] - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
-#                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (self.subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
-                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subbands[0] - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
-                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * self.subbands[0] - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
+                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (self.subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.) - 0.5 * (self.subbandWidth / 1000. / nchanpersub)
                                                 else:
-#                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * self.subbands[0] - 0.5 * (self.subbandWidth / 1000.)
-#                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (self.subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.)
-                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * subbands[0] - 0.5 * (self.subbandWidth / 1000.)
-                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.)
+                                                        lofreq = lower_band_edge + (self.subbandWidth / 1000.) * self.subbands[0] - 0.5 * (self.subbandWidth / 1000.)
+                                                        hifreq = lower_band_edge + (self.subbandWidth / 1000.) * (self.subbands[-1] + 1) - 0.5 * (self.subbandWidth / 1000.)
                                                 self.freq_extent = hifreq - lofreq
                                                 self.cfreq = lofreq + self.freq_extent/2.
                                         except: pass
 			except: pass
 
 		# Getting number of Station beams
-		cmd="grep Observation.nrBeams %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.nrBeams", ii) is not None]
+		if len(res) > 0:
 			# getting number of station beams
 			try:
-				self.nrBeams=int(status[0][:-1].split(" = ")[-1])
+				self.nrBeams=int(res[0].split(" = ")[-1])
 			except: self.nrBeams = 0
 
 		# Getting number of TA Beams in central station beam (Beam 0)
-		cmd="grep 'Observation.Beam\[0\].nrTiedArrayBeams' %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[0\].nrTiedArrayBeams", ii) is not None]
+		if len(res) > 0:
 			# getting number of TA beams
 			try:
-				self.nrTiedArrayBeams=int(status[0][:-1].split(" = ")[-1])
+				self.nrTiedArrayBeams=int(res[0].split(" = ")[-1])
 			except: self.nrTiedArrayBeams = 0
 
 		# Getting number of TA rings
-		cmd="grep OLAP.PencilInfo.nrRings %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.PencilInfo.nrRings", ii) is not None]
+		if len(res) > 0:
 			# getting number of TA rings
 			try:
-				self.nrRings=int(status[0][:-1].split(" = ")[-1])
+				self.nrRings=int(res[0].split(" = ")[-1])
 			except: self.nrRings = 0
 		if self.nrRings == 0: # if keyword 'OLAP.PencilInfo.nrRings' is missing in the parset file
-			cmd="grep 'Observation.Beam\[0\].nrTabRings' %s" % (self.parset,)
-			status=os.popen(cmd).readlines()
-			if np.size(status)>0:
+			res=[ii for ii in plines if re.search("Observation.Beam\[0\].nrTabRings", ii) is not None]
+			if len(res) > 0:
 				# getting number of TA rings
 				try:
-					self.nrRings=int(status[0][:-1].split(" = ")[-1])
+					self.nrRings=int(res[0].split(" = ")[-1])
 				except: self.nrRings = 0
 
 		# Getting the size of the TA ring
 		if self.nrRings != 0:
-			cmd="grep OLAP.PencilInfo.ringSize %s" % (self.parset,)
-			status=os.popen(cmd).readlines()
-			if np.size(status)>0:
+			res=[ii for ii in plines if re.search("OLAP.PencilInfo.ringSize", ii) is not None]
+			if len(res) > 0:
 				# getting size of the TA ring
 				try:
-					self.ringSize=float(status[0][:-1].split(" = ")[-1])
+					self.ringSize=float(res[0].split(" = ")[-1])
 					self.ringSize = self.ringSize * (180./3.1415926)
 				except: self.ringSize = 0
 			else: # if keyword 'OLAP.PencilInfo.ringSize' is missing in the parset file
-				cmd="grep 'Observation.Beam\[0\].nrTabRingSize' %s" % (self.parset,)
-				status=os.popen(cmd).readlines()
-				if np.size(status)>0:
+				res=[ii for ii in plines if re.search("Observation.Beam\[0\].nrTabRingSize", ii) is not None]
+				if len(res) > 0:
 					# getting size of the TA ring
 					try:
-						self.ringSize=float(status[0][:-1].split(" = ")[-1])
+						self.ringSize=float(res[0].split(" = ")[-1])
 						self.ringSize = self.ringSize * (180./3.1415926)
 					except: self.ringSize = 0
 				else: # if all previous keywords for ringsize are missing (recent change since Jan27, 2012?)
-					cmd="grep 'Observation.Beam\[0\].tabRingSize' %s" % (self.parset,)
-					status=os.popen(cmd).readlines()
-					if np.size(status)>0:
+					res=[ii for ii in plines if re.search("Observation.Beam\[0\].tabRingSize", ii) is not None]
+					if len(res) > 0:
 						# getting size of the TA ring
 						try:
-							self.ringSize=float(status[0][:-1].split(" = ")[-1])
+							self.ringSize=float(res[0].split(" = ")[-1])
 							self.ringSize = self.ringSize * (180./3.1415926)
 						except: self.ringSize = 0
 
 		# in case keyword 'Output_IncoherentStokes.enabled' does not exist, but format is new (after Jan 27, 2012)
 		# also we need then decrease the number of TA beams as one of them is IS beam now
 		if incoh_transposed:
-			cmd="grep 'Observation.Beam\[0\].TiedArrayBeam' %s | grep coherent | awk '{print $3}' - | grep 'False\|false\|F\|f\|0'" % (self.parset,)
-			status=os.popen(cmd).readlines()
-			if np.size(status) > 0:
-				# so, in the array of TiedArrayBeams we have at least one IS beam, so we have to
-				# decrease then the number of TiedArrayBeams 
-				self.nrTiedArrayBeams -= np.size(status)
-				if self.IS == "?":
-                        		self.IS = "+"
-					if self.stokes == "?":
-						cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
-						status=os.popen(cmd).readlines()
-						if np.size(status) > 0:
-							# getting Stokes string
-							self.stokes=status[0][:-1].split(" = ")[-1]
+			res0=[ii for ii in plines if re.search("Observation.Beam\[0\].TiedArrayBeam", ii) is not None]
+			if len(res0) > 0:
+				res=[ii.split(" = ")[-1] for ii in res0 if re.search("coherent", ii) is not None]
+				if len(res) > 0:
+					res0=[ii for ii in res if re.search("False|false|F|f|0", ii) is not None]
+					if len(res0) > 0:
+						# so, in the array of TiedArrayBeams we have at least one IS beam, so we have to
+						# decrease then the number of TiedArrayBeams 
+						self.nrTiedArrayBeams -= len(res0)
+						if self.IS == "?":
+		                        		self.IS = "+"
+							if self.stokes == "?":
+								res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.which", ii) is not None]
+								if len(res) > 0:
+									self.stokes=res[0].split(" = ")[-1]
 		
 	# return True if parset file was found, and False otherwise
 	def is_parset (self):
@@ -1081,7 +1005,6 @@ class obsinfo:
 			return False
 		else:
 			return True
-
 
 
 
@@ -1130,7 +1053,7 @@ class outputInfo:
 			project_html = (" " + str(yr) + " ").join(project_html.split(str(yr)))
 		return project_html
 
-	def Init(self, id, oi, storage_nodes, dirsizes, statusline, CSredlocation, ISredlocation, processed_dirsize, comment, filestem_array, archivestatus, archivesize):
+	def Init(self, id, oi, storage_nodes, dirsizes, statusline, CSredlocation, ISredlocation, processed_dirsize, filestem_array, archivestatus, archivesize):
 		self.id = id
 		try:
 			self.obsyear = self.id.split("_")[0][1:]
@@ -1145,13 +1068,16 @@ class outputInfo:
 				self.seconds=time.mktime(time.strptime(self.obsyear, "%Y"))
 			except:
 				self.seconds=0
+		if not self.oi.is_parset():
+			self.comment = "NO PARSET FILE FOUND!"
+		else:
+			self.comment = ""
 		self.pointing = self.oi.pointing
 		self.statusline = statusline
 		self.subcluster = self.oi.subcluster
 		self.CSredlocation = CSredlocation
 		self.ISredlocation = ISredlocation
 		self.processed_dirsize = processed_dirsize
-		self.comment = comment
 		self.filestem_array = filestem_array
 		self.archivestatus = archivestatus
 		self.archivesize = archivesize
@@ -1164,6 +1090,10 @@ class outputInfo:
 
 	# update info and infohtml fields
 	def update(self, storage_nodes):
+		# setting local bool value for existence of the parset file
+		is_parset=False
+		if self.oi.is_parset(): is_parset = True
+	
 		# checking if the datadir exists in all lse nodes and if it does, gets the size of directory
 		self.totsize=0.0
 		self.dirsize_string=""
@@ -1196,10 +1126,10 @@ class outputInfo:
 		if self.oi.nrChanPerSubIS == self.oi.nrChanPerSubCS or self.oi.nrChanPerSubIS == 0 or self.oi.nrChanPerSubCS == 0:
 			sampling_setup="Channels/Sub:%d|" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS)
 			sampling_setup_html="Channels/Sub: %d<br>" % (self.oi.nrChanPerSubIS != 0 and self.oi.nrChanPerSubIS or self.oi.nrChanPerSubCS)
-		elif self.oi.IS == '+' and self.oi.CS != '+' and self.oi.BF != '+':
+		elif self.oi.IS == '+' and self.oi.CS != '+' and self.oi.CV != '+':
 			sampling_setup="Channels/Sub:%d|" % (self.oi.nrChanPerSubIS)
 			sampling_setup_html="Channels/Sub: %d<br>" % (self.oi.nrChanPerSubIS)
-		elif self.oi.IS != '+' and (self.oi.CS == '+' or self.oi.BF == '+'):
+		elif self.oi.IS != '+' and (self.oi.CS == '+' or self.oi.CV == '+'):
 			sampling_setup="Channels/Sub:%d|" % (self.oi.nrChanPerSubCS)
 			sampling_setup_html="Channels/Sub: %d<br>" % (self.oi.nrChanPerSubCS)
 		else:
@@ -1208,17 +1138,17 @@ class outputInfo:
 		if self.oi.timeresIS == self.oi.timeresCS or self.oi.timeresIS == 0 or self.oi.timeresCS == 0:
 			sampling_setup+="Sampling:%g_ms" % (self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
 			sampling_setup_html+="Sampling: %g ms" % (self.oi.timeresIS != 0 and self.oi.timeresIS or self.oi.timeresCS)
-		elif self.oi.IS == '+' and self.oi.CS != '+' and self.oi.BF != '+':
+		elif self.oi.IS == '+' and self.oi.CS != '+' and self.oi.CV != '+':
 			sampling_setup+="Sampling:%g_ms" % (self.oi.timeresIS)
 			sampling_setup_html+="Sampling: %g ms" % (self.oi.timeresIS)
-		elif self.oi.IS != '+' and (self.oi.CS == '+' or self.oi.BF == '+'):
+		elif self.oi.IS != '+' and (self.oi.CS == '+' or self.oi.CV == '+'):
 			sampling_setup+="Sampling:%g_ms" % (self.oi.timeresCS)
 			sampling_setup_html+="Sampling: %g ms" % (self.oi.timeresCS)
 		else:
 			sampling_setup+="Sampling:%g_ms(IS),%g_ms(CS)" % (self.oi.timeresIS, self.oi.timeresCS)
 			sampling_setup_html+="Sampling: %g ms (IS), %g ms (CS)" % (self.oi.timeresIS, self.oi.timeresCS)
 
-		if self.comment == "":
+		if is_parset:
 			if self.oi.nrRings > 0:
 				obssetup="%s|Station_Beams:%d|TA_beams:%d[%d_ring(s),%g_deg]|StartTime:%s|Clock:%d_MHz|CentrFreq:%g_MHz|BW:%g_MHz|Subbands:%d[%s,%g_kHz]|%s|Stokes:%s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, sampling_setup, self.oi.stokes)
 				obssetup_html="%s&nbsp;&nbsp;&nbsp;Station Beams: %d<br>TA beams: %d [%d ring(s), %g deg]<br>Start Time: %s<br>Clock: %d MHz<br>Center Freq: %g MHz<br>BW: %g MHz<br>Subbands: %d [%s, %g kHz]<br>%s<br>Stokes: %s" % (self.oi.antenna_config, self.oi.nrBeams, self.oi.nrTiedArrayBeams, self.oi.nrRings, self.oi.ringSize, self.oi.starttime, self.oi.sampleClock, self.oi.cfreq, self.oi.bw, self.oi.nrSubbands, self.oi.subbandList, self.oi.subbandWidth, sampling_setup_html, self.oi.stokes)
@@ -1228,47 +1158,47 @@ class outputInfo:
 
 		# forming first Info (not html) string
 		if viewtype == "brief":
-			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.statusline)
+			if is_parset:
+				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%-27s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.CV, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.statusline)
 			else: # no parset file
 				self.info = "%s	%s										%s		%s		%-27s" % (self.id, self.comment, self.CSredlocation, self.ISredlocation, self.statusline)
 		elif viewtype == "plots":
-			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
+			if is_parset:
+				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.CV, self.oi.OCD, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%s		%s		%-27s   %s" % (self.id, self.comment, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 		elif viewtype == "mega":
-			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s%-9s	%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.oi.nodeslist_string, self.dirsize_string, self.totsize, processed_dirsize_str, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
+			if is_parset:
+				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %s%-9s	%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.CV, self.oi.OCD, self.oi.nodeslist_string, self.dirsize_string, self.totsize, processed_dirsize_str, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%-16s %s%-9s	%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.dirsize_string, self.totsize, processed_dirsize_str, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 		elif viewtype == "smega":
-			if self.comment == "":
-				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %-9s	%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.oi.nodeslist_string, self.totsize, processed_dirsize_str, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
+			if is_parset:
+				self.info = "%s	%s	%s	%s	%s	%s	%s	   %-15s  %c  %c  %c  %c  %c  %c	%-16s %-9s	%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.oi.source != "" and self.oi.source or self.oi.pointing, self.oi.datestring, self.oi.project, self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.CV, self.oi.OCD, self.oi.nodeslist_string, self.totsize, processed_dirsize_str, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 			else: # no parset file
 				self.info = "%s	%s										%-16s %-9s	%-9s	%s	%s	%s		%s		%-27s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.totsize, processed_dirsize_str, obssetup, self.oi.stations, self.CSredlocation, self.ISredlocation, self.statusline, self.archivestatus)
 		else: # usual
-			if self.comment == "":
-				self.info = "%s	%s	%s	%-16s %s	%s%-9s	%-9s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, processed_dirsize_str, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.statusline, self.oi.pointing, self.oi.source, self.oi.project)
+			if is_parset:
+				self.info = "%s	%s	%s	%-16s %s	%s%-9s	%-9s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s   %s" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, processed_dirsize_str, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.CV, self.oi.OCD, self.statusline, self.oi.pointing, self.oi.source, self.oi.project)
 			else: # no parset file
-				self.info = "%s	%s		%-16s %s	%s%-9s	%-9s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, processed_dirsize_str, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.BF, self.oi.OCD, self.statusline, self.oi.pointing, self.oi.source, self.oi.project)
+				self.info = "%s	%s		%-16s %s	%s%-9s	%-9s		%c  %c  %c  %c  %c  %c	%-27s	%s   %s   %s" % (self.id, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string, self.totsize, processed_dirsize_str, self.oi.FE, self.oi.IM, self.oi.IS, self.oi.CS, self.oi.CV, self.oi.OCD, self.statusline, self.oi.pointing, self.oi.source, self.oi.project)
 
 		# now forming first Info html string
 		if viewtype == "brief":
-			if self.comment == "":
+			if is_parset:
 				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.CSredlocation, self.ISredlocation)
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.CV == "-" and "&#8211;" or self.oi.CV, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.CSredlocation, self.ISredlocation)
 				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.CSredlocation, self.ISredlocation)
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.CV == "-" and "&#8211;" or self.oi.CV, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.CSredlocation, self.ISredlocation)
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.CSredlocation, self.ISredlocation)
 
 		elif viewtype == "plots" or viewtype == "mega" or viewtype == "smega":
-			if self.comment == "":
+			if is_parset:
 				if self.oi.source == "":
-					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD)
+					self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.pointing, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.CV == "-" and "&#8211;" or self.oi.CV, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD)
 				else:
-					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD)
+					self.infohtml="<td>%s</td>\n <td align=center><a href=\"%s\">%s</a></td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.get_link(), self.oi.source, self.oi.datestring, self.get_html_project(self.oi.project), self.oi.duration, self.oi.antenna, self.oi.band, self.oi.stations_string, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.CV == "-" and "&#8211;" or self.oi.CV, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD)
 			else: # no parset file
 					self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>" % (self.id, self.colspan, self.comment)
 
@@ -1297,10 +1227,10 @@ class outputInfo:
 				self.infohtml = self.infohtml + "\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=left style=\"white-space: nowrap;\">%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.oi.nodeslist_string, self.totsize, processed_dirsize_str, obssetup_html, self.oi.stations_html, self.CSredlocation, self.ISredlocation, self.statusline.replace("-", "&#8211;"), self.archivestatus == "x" and self.archivestatus or "<a href=\"grid/%s.txt\">%s</a>" % (self.id, self.archivestatus))
 
 		else: # usual
-			if self.comment == "":
-				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, processed_dirsize_str, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source, self.get_html_project(self.oi.project))
+			if is_parset:
+				self.infohtml="<td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.oi.datestring, self.oi.duration, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, processed_dirsize_str, self.oi.FE == "-" and "&#8211;" or self.oi.FE, self.oi.IM == "-" and "&#8211;" or (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.CV == "-" and "&#8211;" or self.oi.CV, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source, self.get_html_project(self.oi.project))
 			else: # no parset file
-				self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, processed_dirsize_str, self.oi.FE == "-" and "&#8211;" or self.oi.FE, (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.BF == "-" and "&#8211;" or self.oi.BF, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source, self.get_html_project(self.oi.project))
+				self.infohtml="<td>%s</td>\n <td colspan=%d align=center><font color=\"brown\"><b>%s</b></font></td>\n <td>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>\n <td align=center>%s</td>" % (self.id, self.colspan, self.comment, self.oi.nodeslist_string, self.oi.datadir, self.dirsize_string_html, self.totsize, processed_dirsize_str, self.oi.FE == "-" and "&#8211;" or self.oi.FE, (self.oi.IM == "+" and "<a style=\"text-decoration:none\" href=\"%s\">+</a>" % (IMredlocation) or self.oi.IM), self.oi.IS == "-" and "&#8211;" or self.oi.IS, self.oi.CS == "-" and "&#8211;" or self.oi.CS, self.oi.CV == "-" and "&#8211;" or self.oi.CV, self.oi.OCD == "-" and "&#8211;" or self.oi.OCD, self.statusline.replace("-", "&#8211;"), self.oi.pointing, self.oi.source, self.get_html_project(self.oi.project))
 
 
 
@@ -1428,15 +1358,18 @@ class obsstat:
 				self.subkeys = []
 			self.dbinfo[sub]["Ntotal"] += np.size(self.subkeys)
 			for r in self.subkeys:
+				is_parset=False
+				if obstable[r].oi_is_parset(): is_parset = True
+
 				# getting the numbers and duration
-				if obstable[r].comment == "" and obstable[r].oi.duration != "?":
+				if is_parset and obstable[r].oi.duration != "?":
 					self.dbinfo[sub]["totDuration"] += obstable[r].oi.dur
-				if obstable[r].comment == "" and obstable[r].statusline != "x":
+				if is_parset and obstable[r].statusline != "x":
 					self.dbinfo[sub]["Nprocessed"] += 1
 					if obstable[r].oi.duration != "?":
 						self.dbinfo[sub]["processedDuration"] += obstable[r].oi.dur
 				# getting the number of archived observations (of all types)
-				if obstable[r].comment == "" and obstable[r].archivestatus != "x":
+				if is_parset and obstable[r].archivestatus != "x":
 					self.dbinfo[sub]["Narchived"] += 1
 					if re.search("raw", obstable[r].archivestatus):
 						self.dbinfo[sub]["Narchived_raw"] += 1
@@ -1448,66 +1381,65 @@ class obsstat:
 						self.dbinfo[sub]["Narchived_meta"] += 1
 						self.dbinfo[sub]["Archivedsize_meta"] += obstable[r].archivesize["meta"]
 				# getting the number and sizes of observations without Parset files
-				if not obstable[r].oi.is_parset():
+				if not is_parset:
 					self.dbinfo[sub]["Nno_parset"] += 1
 					self.dbinfo[sub]["totNoParsetsize_raw"] += float(obstable[r].totsize)
 					self.dbinfo[sub]["totNoParsetsize_proc"] += float(obstable[r].processed_dirsize)
 
 				# getting the number of obs of different type
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+":
+				if is_parset and obstable[r].oi.IS == "+":
 					self.dbinfo[sub]["Nistype"] += 1
-					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.CV == "-":
 						self.dbinfo[sub]["Nistype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.CS == "+":
+				if is_parset and obstable[r].oi.CS == "+":
 					self.dbinfo[sub]["Ncstype"] += 1
-					if obstable[r].oi.IS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.IS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.CV == "-":
 						self.dbinfo[sub]["Ncstype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.FE == "+":
+				if is_parset and obstable[r].oi.FE == "+":
 					self.dbinfo[sub]["Nfetype"] += 1
-					if obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-" and obstable[r].oi.CV == "-":
 						self.dbinfo[sub]["Nfetype_only"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IM == "+":
+				if is_parset and obstable[r].oi.IM == "+":
 					self.dbinfo[sub]["Nimtype"] += 1
-					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-":
+					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.CV == "-":
 						self.dbinfo[sub]["Nimtype_only"] += 1
 						self.dbinfo[sub]["IMonlyRawsize"] += float(obstable[r].totsize)
 						if obstable[r].oi.duration != "?":
 							self.dbinfo[sub]["IMonlyDuration"] += obstable[r].oi.dur
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+":
+				if is_parset and obstable[r].oi.CV == "+":
 					self.dbinfo[sub]["Nbftype"] += 1
 					if obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-" and obstable[r].oi.IS == "-" and obstable[r].oi.IM == "-":
 						self.dbinfo[sub]["Nbftype_only"] += 1
 
 				# getting the number of some observing types' mixtures
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-":
+				if is_parset and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.CV == "-":
 					self.dbinfo[sub]["Niscsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.CS == "-":
+				if is_parset and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.CV == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nisim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IM == "-":
+				if is_parset and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.CV == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Niscs"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IS == "-":
+				if is_parset and obstable[r].oi.CS == "+" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "-" and obstable[r].oi.CV == "-" and obstable[r].oi.IS == "-":
 					self.dbinfo[sub]["Ncsim"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.IS == "-":
+				if is_parset and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CV == "-" and obstable[r].oi.IS == "-":
 					self.dbinfo[sub]["Ncsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.CS == "-":
+				if is_parset and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CV == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.BF == "-" and obstable[r].oi.CS == "-":
+				if is_parset and obstable[r].oi.IM == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.CV == "-" and obstable[r].oi.CS == "-":
 					self.dbinfo[sub]["Nimfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.BF == "-":
+				if is_parset and obstable[r].oi.IS == "+" and obstable[r].oi.CS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CV == "-":
 					self.dbinfo[sub]["Niscsfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-":
+				if is_parset and obstable[r].oi.CV == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.IM == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.FE == "-":
 					self.dbinfo[sub]["Nbfis"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-":
+				if is_parset and obstable[r].oi.CV == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.IS == "-" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbffe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.BF == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-":
+				if is_parset and obstable[r].oi.CV == "+" and obstable[r].oi.IS == "+" and obstable[r].oi.FE == "+" and obstable[r].oi.CS == "-" and obstable[r].oi.IM == "-":
 					self.dbinfo[sub]["Nbfisfe"] += 1
-				if obstable[r].comment == "" and obstable[r].oi.OCD == "+":
+				if is_parset and obstable[r].oi.OCD == "+":
 					self.dbinfo[sub]["Nocd"] += 1
 
 				# getting the sizes
-				if obstable[r].comment == "":
+				if is_parset:
 					self.dbinfo[sub]["totRawsize"] += float(obstable[r].totsize)
-				if obstable[r].comment == "":
 					self.dbinfo[sub]["totProcessedsize"] += float(obstable[r].processed_dirsize)
 
 			self.dbinfo[sub]["totDuration"] /= 3600.
@@ -1956,10 +1888,9 @@ def usage (prg):
           --search <expr>            - under development... Conditions can be combined using 'and' and 'or'. Spaces around them are\n\
                                        crucial. Parentheses and 'not' are not allowed. Search parameter should start with 'id.'\n\
                                        For boolean parameters, you should use 'True' and 'False'. Some of the possible parameters are:\n\
-                                       id.is_test (boolean, if True then this is system test observation), id.source, id.pointing,\n\
-                                       id.id, is.duration, id.antenna, id.band, id.subcluster, id.datadir, id.nodelist_string (string),\n\
+                                       id.source, id.pointing, id.id, id.duration, id.antenna, id.band, id.datadir, id.nodelist_string (string),\n\
                                        id.nstations, id.ncorestations, id.nremotestations (integer), id.dur (float, duration in seconds)\n\
-                                       id.rarad, id.decrad (float, RA and DEC in radians), id.IS, id.CS, id.FE, id.IM, id.BF, id.FD\n\
+                                       id.rarad, id.decrad (float, RA and DEC in radians), id.IS, id.CS, id.FE, id.IM, id.CV\n\
                                        (characters, '+', '-', or '?')\n\
           --stats                    - to calculate the statistics of existent observations in the database\n\
                                        can be used together with --from and --to options, and with --html option\n\
@@ -2222,6 +2153,7 @@ if __name__ == "__main__":
 	if os.path.exists(archivefile):
 		gridfiles, griddates, gridtimes, gridsizes, gridlinks = np.loadtxt(archivefile, usecols=(0,1,2,3,4), dtype=str, unpack=True, comments='#')
 		lotfiles, lotdates, lottimes, lotsizes, lotlinks = np.loadtxt(lotaasfile, usecols=(0,1,2,3,4), dtype=str, unpack=True, comments='#')
+		lotsizes = [re.sub("-", "0.0", ss) for ss in lotsizes]
 		gridfiles = np.append(gridfiles, lotfiles)
 		griddates = np.append(griddates, lotdates)
 		gridtimes = np.append(gridtimes, lottimes)
@@ -2304,7 +2236,6 @@ if __name__ == "__main__":
 		# Decided to allow additional text before _red or _lta
 		# On CEPII archive areas with all IS and CS data will be on 'hoover' nodes, so I don't need to search all locus nodes
 		obsids_reds=[]
-		test_obsids=[] # the list of ObsIDs that have reduced data in 'test_dir' - we mark them as TEST
 	
 		# checking first locus101 (hoover_nodes[0])
 #		lse=hoover_nodes[0]
@@ -2313,7 +2244,6 @@ if __name__ == "__main__":
 		cmd="%s %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexec_nodes[lse], psr_archive_dir + lse, "*_CSplots", cexec_egrep_string)
 		dirlist = os.popen(cmd).readlines()
 		obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_CSplots")[0] for i in dirlist])
-		test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_CSplots")[0] for i in dirlist if re.search(test_dir, i)])
 
 		# then checking locus102 (hoover_nodes[1])
 #		lse=hoover_nodes[1]
@@ -2322,7 +2252,6 @@ if __name__ == "__main__":
 		cmd="%s %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexec_nodes[lse], psr_archive_dir + lse, "*_redIS", cexec_egrep_string)
 		dirlist = os.popen(cmd).readlines()
 		obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_redIS")[0] for i in dirlist])
-		test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_redIS")[0] for i in dirlist if re.search(test_dir, i)])
 
 		# then checking for CV data
 		lse="locus093"
@@ -2330,7 +2259,6 @@ if __name__ == "__main__":
 		cmd="%s %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | grep -v xauth | grep -v connect | %s" % (cexeccmd, cexec_nodes[lse], psr_archive_dir + lse, "*_CVplots", cexec_egrep_string)
 		dirlist = os.popen(cmd).readlines()
 		obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_CVplots")[0] for i in dirlist])
-		test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_CVplots")[0] for i in dirlist if re.search(test_dir, i)])
 
 			# also getting the list of *_lta directories to get a list of ObsIDs
 			# in case if data was already processed and archived
@@ -2338,11 +2266,9 @@ if __name__ == "__main__":
 #			cmd="cexec %s 'find %s -type d -name \"%s\" -print 2>/dev/null' 2>/dev/null | grep -v Permission | grep -v such | %s" % (cexec_nodes[s], psr_archive_dir + s, "*_lta", cexec_egrep_string)
 #			dirlist = os.popen(cmd).readlines()
 #			obsids_reds = np.append(obsids_reds, [i.split("/")[-1].split("_lta")[0] for i in dirlist])
-#			test_obsids = np.append(test_obsids, [i.split("/")[-1].split("_lta")[0] for i in dirlist if re.search(test_dir, i)])
 
 		# getting unique list of ObsIDs based only on archived data
 		obsids_reds=np.unique(obsids_reds)
-		test_obsids=np.unique(test_obsids)
 
 		# getting the list of ObsIDs that _DO NOT HAVE_ raw data
 		# based on this list we will not check the raw data (sizes) for ObsIDs in this list
@@ -2431,23 +2357,15 @@ if __name__ == "__main__":
 				oi=obsinfo(id)
 
 			if not oi.is_parset():
-				comment = "NO PARSET FILE FOUND!"
 				# search for nodeslist and datadir with raw data
 				# we do this search only if ObsID is _NOT_ in obsids_redonly list
 				if id not in set(obsids_redonly) and not is_no_check_rawdata:
 					oi.rawdata_search(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
 			else:
-				comment = ""
 				# checking if raw data directories exist
 				# we only check those ObsIDs that are _NOT_ in obsids_redonly list
 				if id not in set(obsids_redonly) and not is_no_check_rawdata:
 					oi.rawdata_check(storage_nodes, data_dirs, cexec_nodes, cexec_egrep_string)
-
-			# mark the dataset as test if it has reduced data in test_dir
-			if id in set(test_obsids):
-				oi.is_test = True
-			else: # this "False" part is important in case some ObsID was first the "test" and then it got non-test
-				oi.is_test = False
 
 			# class instance with output Info
 			out=outputInfo(id)	
@@ -2491,13 +2409,13 @@ if __name__ == "__main__":
 			profiles_array=["", "", ""]   # 0 - CS, 1 - IS, 2 - FE
 
 			# Also getting "combined.png" plot for CS data. Also we have to rename it, because the name for IS is the same
-			# CS and BF can't be recorded together, thus in the future I have to check if BF is turned on and then look for BF plot summary correspondingly
+			# CS and CV can't be recorded together, thus in the future I have to check if CV is turned on and then look for CV plot summary correspondingly
 			if id not in set(obsids_rawonly):  # only check ObsIDs that do have Reduced dir (_CSplots or _redIS or both) in the Archive area
 				# looking for _CSplots first on locus101
 				if oi.CS == "+":
 #					lse=hoover_nodes[0]  # locus101
 					lse="locus092"
-					cmd="%s %s '%s -t CS -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
+					cmd="%s %s '%s -t CS -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, "", id, cexec_egrep_string)
 					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
 					if cmdout[0] != "":
 						CSredlocation=cmdout[0]
@@ -2548,10 +2466,10 @@ if __name__ == "__main__":
 							cmd="mkdir -p %s/%s ; %s %s 'cp -f %s/%s.png %s/%s.th.png %s/%s' 2>&1 1>/dev/null" % (plotsdir, id, cexeccmd, cexec_nodes[lse], CSredlocation, combined, CSredlocation, combined, plotsdir, id)
 							os.system(cmd)
 
-				# checking if this obs has BF data (then it should not have CS)
-				if oi.BF == "+":
+				# checking if this obs has CV data (then it should not have CS)
+				if oi.CV == "+":
 					lse="locus093"
-					cmd="%s %s '%s -t CV -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
+					cmd="%s %s '%s -t CV -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, id, cexec_egrep_string)
 					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
 					if cmdout[0] != "":
 						CSredlocation=cmdout[0]
@@ -2570,7 +2488,7 @@ if __name__ == "__main__":
 				if oi.IS == "+":
 #					lse=hoover_nodes[1]  # locus102
 					lse="locus094"
-					cmd="%s %s '%s -t IS -d %s%s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, oi.is_test and "/" + test_dir or "", id, cexec_egrep_string)
+					cmd="%s %s '%s -t IS -d %s -id \"%s\"' | grep -v xauth | %s" % (cexeccmd, cexec_nodes[lse], process_dir_status_script, psr_archive_dir + lse, id, cexec_egrep_string)
 					cmdout=[line[:-1] for line in os.popen(cmd).readlines()]
 					if cmdout[0] != "":
 						ISredlocation=cmdout[0]
@@ -2646,7 +2564,7 @@ if __name__ == "__main__":
 					archivestatus = " ".join(archivestatus.split(" ")[1:])
 
 			# combining info
-			out.Init(id, oi, storage_nodes, dirsizes, statusline, CSredlocation, ISredlocation, processed_dirsize, comment, profiles_array, archivestatus, archivesize)
+			out.Init(id, oi, storage_nodes, dirsizes, statusline, CSredlocation, ISredlocation, processed_dirsize, profiles_array, archivestatus, archivesize)
 			obstable[id] = out
 			# printing the info line by line in debug mode
 			if is_debug:
