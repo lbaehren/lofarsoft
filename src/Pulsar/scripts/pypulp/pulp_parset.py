@@ -59,7 +59,7 @@ def find_pulsars(rarad, decrad, cmdline, max_distance):
 class SAPBeam:
 	# si - system info object
 	# root - "parent" class of the sap beam
-	def __init__(self, id, parset, si, cmdline, root, log=None):
+	def __init__(self, id, plines, si, cmdline, root, log=None):
 		self.sapid = id            # ID number of the SAP beam
 
 		self.rarad=self.decrad=0
@@ -76,72 +76,64 @@ class SAPBeam:
 		self.psrs = []             # up to 3 brightest pulsars in the SAP
 
 		# Getting the list of subbands
-		cmd="grep 'Observation.Beam\[%d\].subbandList' %s" % (self.sapid, parset)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].subbandList" % (self.sapid), ii) is not None]
+		if len(res) > 0:
 			# getting range of subbands
-			self.subbandList=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+			self.subbandList=res[0].split(" = ")[-1].split("[")[1].split("]")[0]
 			# parsing the string with subband ranges to get list of subbands
 			self.subbands = root.getSubbands(self.subbandList)
 			# getting total number of Subbands
 			self.nrSubbands = np.size(self.subbands)
 
 	        # getting info about the pointing
-        	cmd="grep 'Observation.Beam\[%d\].angle1' %s | grep -v AnaBeam" % (self.sapid, parset)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].angle1" % (self.sapid), ii) is not None and re.search("AnaBeam", ii) is None]
+		if len(res) > 0:
                 	# RA info exists in parset file
 			try:
-                		self.rarad=np.float64(status[0][:-1].split(" = ")[-1])
+                		self.rarad=np.float64(res[0].split(" = ")[-1])
 			except: pass
 
-        	cmd="grep 'Observation.Beam\[%d\].angle2' %s | grep -v AnaBeam" % (self.sapid, parset)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].angle2" % (self.sapid), ii) is not None and re.search("AnaBeam", ii) is None]
+		if len(res) > 0:
                 	# DEC info exists in parset file
 			try:
-                		self.decrad=np.float64(status[0][:-1].split(" = ")[-1])
+                		self.decrad=np.float64(res[0].split(" = ")[-1])
 			except: pass
 
 	        # getting info about Source name
-        	cmd="grep 'Observation.Beam\[%d\].target' %s" % (self.sapid, parset)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].target" % (self.sapid), ii) is not None]
+		if len(res) > 0:
                 	# Source name exists in parset file
-                	self.source=status[0][:-1].split(" = ")[-1]
+                	self.source=res[0].split(" = ")[-1]
 			if self.source != "":
 				if self.source[0] == "'":
 					self.source=self.source.split("'")[1]
 				if self.source[0] == "\"":
 					self.source=self.source.split("\"")[1]
 
-		# Getting number of TA Beams in central station beam (Beam 0)
-		# including possible IS beam
-		cmd="grep 'Observation.Beam\[%d\].nrTiedArrayBeams' %s" % (self.sapid, parset)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		# Getting number of TA Beams in station beam including possible IS beam
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].nrTiedArrayBeams" % (self.sapid), ii) is not None]
+		if len(res) > 0:
 			# getting number of TA beams
 			try:
-				self.nrTiedArrayBeams=int(status[0][:-1].split(" = ")[-1])
+				self.nrTiedArrayBeams=int(res[0].split(" = ")[-1])
 			except: pass
 
 		# Getting number of TA rings
-		cmd="grep 'Observation.Beam\[%d\].nrTabRings' %s" % (self.sapid, parset)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].nrTabRings" % (self.sapid), ii) is not None]
+		if len(res) > 0:
 			# getting number of TA rings
 			try:
-				self.nrRings=int(status[0][:-1].split(" = ")[-1])
+				self.nrRings=int(res[0].split(" = ")[-1])
 			except: pass
 
 		# Getting the size of the TA ring (in deg)
 		if self.nrRings != 0:
-			cmd="grep 'Observation.Beam\[%d\].tabRingSize' %s" % (self.sapid, parset)
-			status=os.popen(cmd).readlines()
-			if np.size(status)>0:
+			res=[ii for ii in plines if re.search("Observation.Beam\[%d\].tabRingSize" % (self.sapid), ii) is not None]
+			if len(res) > 0:
 				# getting size of the TA ring
 				try:
-					self.ringSize=np.float64(status[0][:-1].split(" = ")[-1])
+					self.ringSize=np.float64(res[0].split(" = ")[-1])
 					self.ringSize = self.ringSize * (180./3.1415926)
 				except: pass
 
@@ -156,7 +148,7 @@ class SAPBeam:
 
 		# initializing SAP beams objects and making the list of SAP beams
 		for tid in np.arange(self.nrTiedArrayBeams):
-			tab=TABeam(tid, parset, si, cmdline, root, self.sapid, self.nrSubbands, self.rarad, self.decrad, log)
+			tab=TABeam(tid, plines, si, cmdline, root, self.sapid, self.nrSubbands, self.rarad, self.decrad, log)
 			self.tabs.append(tab)
 
 
@@ -164,7 +156,7 @@ class SAPBeam:
 # Class TABeam describes the parameters specific for particular TA beam, which can be truly
 # TA beam or beam from individual station in FE mode
 class TABeam:
-	def __init__(self, id, parset, si, cmdline, root, sapid, nrSubbands, sapRA, sapDEC, log=None):
+	def __init__(self, id, plines, si, cmdline, root, sapid, nrSubbands, sapRA, sapDEC, log=None):
 		self.tabid = id            # ID number of the TA beam
 		self.parent_sapid = sapid  # ID of the parent SAP beam
 
@@ -184,47 +176,42 @@ class TABeam:
 		self.numfiles=0            # number of all files for this beam (sum of rawfiles for each node)
 
 	        # getting info about the pointing (offsets from the SAP center)
-        	cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].angle1' %s | grep -v AnaBeam" % (sapid, self.tabid, parset)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].TiedArrayBeam\[%d\].angle1" % (sapid, self.tabid), ii) is not None and re.search("AnaBeam", ii) is None]		
+		if len(res) > 0:
                 	# RA info exists in parset file
 			try:
-                		self.rarad=np.float64(status[0][:-1].split(" = ")[-1]) + sapRA
+                		self.rarad=np.float64(res[0].split(" = ")[-1]) + sapRA
 			except: pass
 
-        	cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].angle2' %s | grep -v AnaBeam" % (sapid, self.tabid, parset)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].TiedArrayBeam\[%d\].angle2" % (sapid, self.tabid), ii) is not None and re.search("AnaBeam", ii) is None]		
+		if len(res) > 0:
                 	# DEC info exists in parset file
 			try:
-                		self.decrad=np.float64(status[0][:-1].split(" = ")[-1]) + sapDEC
+                		self.decrad=np.float64(res[0].split(" = ")[-1]) + sapDEC
 			except: pass
 
 		# getting if beam is coherent or not
-		cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].coherent' %s | awk '{print $3}' - | grep 'True\|T\|true\|t\|1'" % (sapid, self.tabid, parset)
-		status=os.popen(cmd).readlines()
-		if np.size(status) > 0:
-			self.is_coherent=True
+		res=[ii.split(" = ")[-1] for ii in plines if re.search("Observation.Beam\[%d\].TiedArrayBeam\[%d\].coherent" % (sapid, self.tabid), ii) is not None]
+		if len(res) > 0:
+			res0=[ii for ii in res if re.search("True|true|T|t|1", ii) is not None]
+			if len(res0) > 0: self.is_coherent=True
 
 	        # getting DM
-        	cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].dispersionMeasure' %s" % (sapid, self.tabid, parset)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].TiedArrayBeam\[%d\].dispersionMeasure" % (sapid, self.tabid), ii) is not None]
+		if len(res) > 0:
 			try:
-                		self.DM=np.float64(status[0][:-1].split(" = ")[-1])
+                		self.DM=np.float64(res[0].split(" = ")[-1])
 			except: pass
 
 	        # getting specification type of the beam
-        	cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].specificationType' %s" % (sapid, self.tabid, parset)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-	       		self.specificationType=status[0][:-1].split(" = ")[-1]
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].TiedArrayBeam\[%d\].specificationType" % (sapid, self.tabid), ii) is not None]
+		if len(res) > 0:
+	       		self.specificationType=res[0].split(" = ")[-1]
 
 		# getting station list
-        	cmd="grep 'Observation.Beam\[%d\].TiedArrayBeam\[%d\].stationList' %s" % (sapid, self.tabid, parset)
-                status=os.popen(cmd).readlines()
-                if np.size(status)>0:
-                        self.stationList = status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0].split(",")
+		res=[ii for ii in plines if re.search("Observation.Beam\[%d\].TiedArrayBeam\[%d\].stationList" % (sapid, self.tabid), ii) is not None]
+		if len(res) > 0:
+                        self.stationList = res[0].split(" = ")[-1].split("[")[1].split("]")[0].split(",")
 
 		# Determining where the raw data are....
                 # forming string with all locus nodes needed to check in one cexec command
@@ -277,10 +264,9 @@ class TABeam:
 					self.numfiles += len(self.rawfiles[loc])
 
 		# Now getting the list of assigned files for this beam from the Parset file
-       		cmd="grep %s_SAP%03d_B%03d %s | awk '{print $3}' - | tr -d '[]'" % (root.id, sapid, self.tabid, parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
-			self.assigned_files=[el for el in status[0][:-1].split(",") if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), el)]
+		res=[ii.split(" = ")[-1] for ii in plines if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), ii) is not None]
+		if len(res) > 0:
+			self.assigned_files=[el for el in res[0].split("[")[1].split("]")[0].split(",") if re.search("%s_SAP%03d_B%03d" % (root.id, sapid, self.tabid), el)]
 			# if we are processing not all the frequency splits, then we include only files from those splits that we need	
 			if cmdline.opts.nsplits != root.nsplits:
 				tmp_assigned_files=[]
@@ -417,12 +403,17 @@ class Observation:
 
 	# update info based on parset file
 	def update (self, si, cmdline, log=None):
-		# Getting the Date of observation
-	        cmd="grep Observation.startTime %s | tr -d \\'" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# it means that this keyword exist and we can extract the info
-                	self.startdate=status[0][:-1].split(" = ")[-1]
+
+                # reading first parset file into the list of lines
+                f = open(self.parset, 'r')
+                plines = f.read().splitlines()
+                f.close()
+
+                # Getting the Date of observation
+                res=[ii for ii in plines if re.search("Observation.startTime", ii) is not None]
+                if len(res) > 0:
+                        # it means that this keyword exist and we can extract the info
+                        self.startdate = re.sub("'", "", res[0].split(" = ")[-1])
 			self.starttime = self.startdate.split(" ")[1]
 			# checking if startdate is after Jan 27, 2012 or not. If not throw the error
 			c1 = time.strptime(self.startdate, "%Y-%m-%d %H:%M:%S")
@@ -434,25 +425,21 @@ only for observations that were taken after this date"
 				else: print msg
 				quit(1)
 
-		# Getting the Duration
-		cmd="grep Observation.stopTime %s | tr -d \\'" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(self.startdate) > 0 and np.size(status) > 0:
-			# it means that both start and stop Times exist in parset file
-			stoptime=status[0][:-1].split(" = ")[-1]
+                # Getting the Duration
+                res=[ii for ii in plines if re.search("Observation.stopTime", ii) is not None]
+                if len(res) > 0 and np.size(self.startdate) > 0:
+                        # it means that both start and stop Times exist in parset file
+                        stoptime = re.sub("'", "", res[0].split(" = ")[-1])
 			c1 = time.strptime(self.startdate, "%Y-%m-%d %H:%M:%S")
 			c2 = time.strptime(stoptime, "%Y-%m-%d %H:%M:%S")
 			self.duration=time.mktime(c2)-time.mktime(c1)  # difference in seconds
 			self.startdate  = self.startdate.split(" ")[0]
-		
-		# Getting the Antenna info (HBA or LBA) and Filter setting
-        	cmd="grep 'Observation.bandFilter' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-                	# Antenna array setting exists in parset file
-                	self.antenna=status[0][:-1].split(" = ")[-1].split("_")[0]
-                	# band filter setting exists in parset file
-                	self.band=status[0][:-1].split(" = ")[-1].split("A_")[-1]
+
+                # Getting the Antenna info (HBA or LBA) and Filter setting
+                res=[ii for ii in plines if re.search("Observation.bandFilter", ii) is not None]
+                if len(res) > 0:
+                        self.antenna = res[0].split(" = ")[-1].split("_")[0]
+                        self.band = res[0].split(" = ")[-1].split("A_")[-1]
 
 		# changing cmdline FWHM-related options in the _copy_ of Cmdline class
                 if cmdline.opts.fwhm_CS < 0.0:
@@ -462,33 +449,25 @@ only for observations that were taken after this date"
                         if self.antenna == "HBA": cmdline.opts.fwhm_IS = si.fov_hba
                         if self.antenna == "LBA": cmdline.opts.fwhm_IS = si.fov_lba
 
-		# Getting the Antenna config (LBA_OUTER, LBA_INNER, HBA_JOINED, etc.)
-        	cmd="grep 'Observation.antennaSet' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-                	# Antenna Set setting exists in parset file
-                	self.antenna_config=status[0][:-1].split(" = ")[-1]
+                # Getting the Antenna config (LBA_OUTER, LBA_INNER, HBA_JOINED, etc.)
+                res=[ii for ii in plines if re.search("Observation.antennaSet", ii) is not None]
+                if len(res) > 0:
+                        self.antenna_config = res[0].split(" = ")[-1]
 
-		# Getting the name of the Campaign
-        	cmd="grep 'Observation.Campaign.name' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-                	# Campaign name setting exists in parset file
-                	self.project=status[0][:-1].split(" = ")[-1]
+                # Getting the name of the Campaign
+                res=[ii for ii in plines if re.search("Observation.Campaign.name", ii) is not None]
+                if len(res) > 0:
+                        self.project = res[0].split(" = ")[-1]
 
 		# Getting the name of the Campaign's PI
-        	cmd="grep 'Observation.Campaign.PI' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-                	# Campaign's PI name setting exists in parset file
-                	self.projectPI=status[0][:-1].split(" = ")[-1].split("'")[1]
+		res=[ii for ii in plines if re.search("Observation.Campaign.PI", ii) is not None]
+		if len(res) > 0:
+                	self.projectPI=res[0].split(" = ")[-1].split("'")[1]
 
-		# Getting the stations and their number (including separately the number of CS and RS)
-        	cmd="grep 'OLAP.storageStationNames' %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status)>0:
-                	# Stations setting exists in parset file
-                	stations=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+                # Getting the stations and their number (including separately the number of CS and RS)
+                res=[ii for ii in plines if re.search("OLAP.storageStationNames", ii) is not None]
+                if len(res) > 0:
+                	stations=res[0].split(" = ")[-1].split("[")[1].split("]")[0]
 			# removing LBA and HBA from station names, replacing HBA ears HBA0 to /0 and HBA1 to /1
 			stations = re.sub("HBA0", "/0", stations)
 			stations = re.sub("HBA1", "/1", stations)
@@ -499,12 +478,10 @@ only for observations that were taken after this date"
 			self.ncorestations = stations.count("CS")
 			self.nremotestations = stations.count("RS")
 
-		# checking "locations" keywords first as in the new parset files (as from Jan 27, 2012), 
-		# "mountpoints" can give wrong values
-        	cmd="grep Output_Beamformed.locations %s | awk '{print $3}' - | tr -d '[]'" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
-			self.assigned_nodeslist=status[0][:-1].split(",")
+		# checking "locations" keywords first as in the new parset files (as from Jan 27, 2012) "mountpoints" can give wrong values
+		res=[ii for ii in plines if re.search("Output_Beamformed.locations", ii) is not None]
+		if len(res) > 0:
+			self.assigned_nodeslist=res[0].split(" = ")[-1].split("[")[1].split("]")[0].split(",")
 			self.assigned_nodeslist=[n.split(":")[0] for n in self.assigned_nodeslist]
 			self.assigned_nodeslist=np.unique(self.assigned_nodeslist)
 		# checking if all nodes in assigned_nodeslist are in alive
@@ -516,26 +493,20 @@ only for observations that were taken after this date"
 				if log != None: log.warning(msg)
 				else: print msg
 
-	        # check if online coherent dedispersion (OCD) was used
-        	cmd="grep OLAP.coherentDedisperseChannels %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	if status[0][:-1].split(" = ")[-1].lower()[:1] == 't': self.OCD=True
+                # check if online coherent dedispersion (OCD) was used
+                res=[ii for ii in plines if re.search("OLAP.coherentDedisperseChannels", ii) is not None]
+                if len(res) > 0:
+			if res[0].split(" = ")[-1].lower()[:1] == 't': self.OCD=True
 
-                # getting info about the Type of the data (CV, CS, IS, FE, Imaging, etc.)
-                cmd="grep Output_CoherentStokes.enabled %s" % (self.parset,)
-                status=os.popen(cmd).readlines()
-                if np.size(status) > 0:
-                        # this info exists in parset file
-                        if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
-                                self.CS = True
+		# getting info about the Type of the data (CV, CS, IS, FE, Imaging, etc.)
+                res=[ii for ii in plines if re.search("Output_CoherentStokes.enabled", ii) is not None]
+                if len(res) > 0:
+			if res[0].split(" = ")[-1].lower()[:1] == 't':
+				self.CS = True
                                 self.CV = False
-                                cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
-                                status=os.popen(cmd).readlines()
-                                if np.size(status) > 0:
-                                        # getting Stokes string
-                                        self.stokesCS=status[0][:-1].split(" = ")[-1]
+                                res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.which", ii) is not None]
+                                if len(res) > 0:
+					self.stokesCS=res[0].split(" = ")[-1]
                                         # in the transition phase there were some parset with just XY
                                         # this means just 2 files, one for X, another Y
                                         # now is always XXYY, i.e. 4 files get written
@@ -544,33 +515,25 @@ only for observations that were taken after this date"
                                                 self.CS = False
 
 	        # check if data are incoherent stokes data
-        	cmd="grep Output_IncoherentStokes.enabled %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
+		res=[ii for ii in plines if re.search("Output_IncoherentStokes.enabled", ii) is not None]
+		if len(res) > 0:
+                	if res[0].split(" = ")[-1].lower()[:1] == 't':
                         	self.IS = True
-				cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
-				status=os.popen(cmd).readlines()
-				if np.size(status) > 0:
-					# getting Stokes string
-					self.stokesIS=status[0][:-1].split(" = ")[-1]
+				res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.which", ii) is not None]
+				if len(res) > 0:
+					self.stokesIS=res[0].split(" = ")[-1]
 
 		# at ~05.07.2012 the logic in the Parset files has changed, and the flag Output_CoherentStokes.enabled = True
 		# ONLY for CS data and not for CV data.  For CV data one needs to check Output_Beamformed.enabled flag
 		if self.IS == False and self.CS == False:
 			# checking the Output_Beamformed flag
-        		cmd="grep Output_Beamformed.enabled %s" % (self.parset,)
-			status=os.popen(cmd).readlines()
-	        	if np.size(status) > 0:
-        	        	# this info exists in parset file
-                		if status[0][:-1].split(" = ")[-1].lower()[:1] == 't':
+			res=[ii for ii in plines if re.search("Output_Beamformed.enabled", ii) is not None]
+			if len(res) > 0:
+                		if res[0].split(" = ")[-1].lower()[:1] == 't':
                         		self.CV = True
-					cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
-					status=os.popen(cmd).readlines()
-					if np.size(status) > 0:
-						# getting Stokes string
-						self.stokesCS=status[0][:-1].split(" = ")[-1]
+					res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.which", ii) is not None]
+					if len(res) > 0:
+						self.stokesCS=res[0].split(" = ")[-1]
 						if self.stokesCS != "XXYY" and self.stokesCS != "XY":
 							msg="Wrong Stokes setting '%s' for CV observation for ObsID = %s" % (self.stokesCS, self.id)
 							if log != None: log.error(msg)
@@ -578,41 +541,30 @@ only for observations that were taken after this date"
 							quit(1)
 
 	        # check if data are imaging
-        	cmd="grep Output_Correlated.enabled %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	if status[0][:-1].split(" = ")[-1].lower()[:1] == 't': self.IM = True
-
+		res=[ii for ii in plines if re.search("Output_Correlated.enabled", ii) is not None]
+		if len(res) > 0:
+                	if res[0].split(" = ")[-1].lower()[:1] == 't': self.IM = True
 
 	        # check if data are fly's eye mode data
-        	cmd="grep PencilInfo.flysEye %s" % (self.parset,)
-        	status=os.popen(cmd).readlines()
-        	if np.size(status) > 0:
-                	# this info exists in parset file
-                	if status[0][:-1].split(" = ")[-1].lower()[:1] == 't': self.FE = True
+		res=[ii for ii in plines if re.search("PencilInfo.flysEye", ii) is not None]
+		if len(res) > 0:
+                	if res[0].split(" = ")[-1].lower()[:1] == 't': self.FE = True
 
-                # if Stokes are still undetermined (e.g. if obs is IM), then
-                # rereading default stokes for CS
+                # if Stokes are still undetermined (e.g. if obs is IM), then rereading default stokes for CS
                 if self.stokesCS == "":
-                        cmd="grep OLAP.CNProc_CoherentStokes.which %s" % (self.parset,)
-                        status=os.popen(cmd).readlines()
-                        if np.size(status) > 0:
-                                # getting Stokes string
-                                self.stokesCS=status[0][:-1].split(" = ")[-1]
+			res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.which", ii) is not None]
+			if len(res) > 0:
+                                self.stokesCS=res[0].split(" = ")[-1]
                 if self.stokesIS == "":
-                        cmd="grep OLAP.CNProc_IncoherentStokes.which %s" % (self.parset,)
-                        status=os.popen(cmd).readlines()
-                        if np.size(status) > 0:
-                                # getting Stokes string
-                                self.stokesIS=status[0][:-1].split(" = ")[-1]
+			res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.which", ii) is not None]
+			if len(res) > 0:
+                                self.stokesIS=res[0].split(" = ")[-1]
 
 		# Getting the list of subbands
-		cmd="grep Observation.subbandList %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.subbandList", ii) is not None]
+		if len(res) > 0:
 			# getting range of subbands
-			self.subbandList=status[0][:-1].split(" = ")[-1].split("[")[1].split("]")[0]
+			self.subbandList=res[0].split(" = ")[-1].split("[")[1].split("]")[0]
 			# parsing the string with subband ranges to get list of subbands
 			self.subbands = self.getSubbands(self.subbandList)
 			# getting total number of Subbands
@@ -620,38 +572,34 @@ only for observations that were taken after this date"
 
 		# in new parset files (after Jan 27, 2012) there are new keywords for number of
 		# chans per subband and this number can be different for IS and CS
-		cmd="grep OLAP.CNProc_IncoherentStokes.channelsPerSubband %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.channelsPerSubband", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				self.nrChanPerSubIS=int(status[0][:-1].split(" = ")[-1])
+				self.nrChanPerSubIS=int(res[0].split(" = ")[-1])
 			except: pass
 
-		cmd="grep OLAP.CNProc_CoherentStokes.channelsPerSubband %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.channelsPerSubband", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				self.nrChanPerSubCS=int(status[0][:-1].split(" = ")[-1])
+				self.nrChanPerSubCS=int(res[0].split(" = ")[-1])
 			except: pass
 
 		# getting the number of subbands per File for IS
-		cmd="grep OLAP.CNProc_IncoherentStokes.subbandsPerFile %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.subbandsPerFile", ii) is not None]
+		if len(res) > 0:
 			# getting number of subbands per file for IS
 			try:
-				self.nrSubsPerFileIS=int(status[0][:-1].split(" = ")[-1])
+				self.nrSubsPerFileIS=int(res[0].split(" = ")[-1])
 			except: pass
 
 		# getting the number of subbands per File for CS
-		cmd="grep OLAP.CNProc_CoherentStokes.subbandsPerFile %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.subbandsPerFile", ii) is not None]
+		if len(res) > 0:
 			# getting number of subbands per file for CS
 			try:
-				self.nrSubsPerFileCS=int(status[0][:-1].split(" = ")[-1])
+				self.nrSubsPerFileCS=int(res[0].split(" = ")[-1])
 			except: pass
 
 		# calculate the number of frequency splits
@@ -668,50 +616,45 @@ only for observations that were taken after this date"
 			cmdline.opts.nsplits -= (cmdline.opts.first_freq_split + cmdline.opts.nsplits - self.nsplits)
 
 		# Getting the sample clock
-		cmd="grep Observation.sampleClock %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.sampleClock", ii) is not None]
+		if len(res) > 0:
 			# getting the clock
 			try:
-				self.sampleClock=int(status[0][:-1].split(" = ")[-1])
+				self.sampleClock=int(res[0].split(" = ")[-1])
 			except: pass
 		if self.sampleClock == 0: # if keyword 'Observation.sampleClock' is missing in the parset file
-			cmd="grep Observation.clockMode %s" % (self.parset,)
-			status=os.popen(cmd).readlines()
-			if np.size(status)>0:
+			res=[ii for ii in plines if re.search("Observation.clockMode", ii) is not None]
+			if len(res) > 0:
 				# getting the clock
 				try:
-					self.sampleClock=int(status[0][:-1].split(" = ")[-1].split("Clock")[1])
+					self.sampleClock=int(res[0].split(" = ")[-1].split("Clock")[1])
 				except: pass
 
 		# Getting width of the subband (in kHz)
-		cmd="grep Observation.subbandWidth %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.subbandWidth", ii) is not None]
+		if len(res) > 0:
 			# getting the width of the subband
 			try:
-				self.subbandWidth=float(status[0][:-1].split(" = ")[-1])
+				self.subbandWidth=float(res[0].split(" = ")[-1])
 			except: pass
 		if self.subbandWidth == 0 and self.sampleClock != 0:
 			self.subbandWidth = ( ( self.sampleClock / 2. ) / 512. ) * 1000.
 		
 		# getting timeIntegrationFactors for IS and CS and calculating sampling intervals
-		cmd="grep OLAP.CNProc_IncoherentStokes.timeIntegrationFactor %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_IncoherentStokes.timeIntegrationFactor", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				self.downsample_factorIS=int(status[0][:-1].split(" = ")[-1])
+				self.downsample_factorIS=int(res[0].split(" = ")[-1])
 				if self.downsample_factorIS != 0 and self.sampleClock != 0 and self.nrChanPerSubIS != 0:
 					self.samplingIS = self.downsample_factorIS / ((self.sampleClock * 1000. * 1000. / 1024.) / self.nrChanPerSubIS) * 1000.
 			except: pass
 
-		cmd="grep OLAP.CNProc_CoherentStokes.timeIntegrationFactor %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("OLAP.CNProc_CoherentStokes.timeIntegrationFactor", ii) is not None]
+		if len(res) > 0:
 			# getting number of channels
 			try:
-				self.downsample_factorCS=int(status[0][:-1].split(" = ")[-1])
+				self.downsample_factorCS=int(res[0].split(" = ")[-1])
 				if self.downsample_factorCS != 0 and self.sampleClock != 0 and self.nrChanPerSubCS != 0:
 					self.samplingCS = self.downsample_factorCS / ((self.sampleClock * 1000. * 1000. / 1024.) / self.nrChanPerSubCS) * 1000.
 			except: pass
@@ -754,17 +697,16 @@ only for observations that were taken after this date"
 			except: pass
 
 		# Getting number of Station beams
-		cmd="grep Observation.nrBeams %s" % (self.parset,)
-		status=os.popen(cmd).readlines()
-		if np.size(status)>0:
+		res=[ii for ii in plines if re.search("Observation.nrBeams", ii) is not None]
+		if len(res) > 0:
 			# getting number of station beams
 			try:
-				self.nrBeams=int(status[0][:-1].split(" = ")[-1])
+				self.nrBeams=int(res[0].split(" = ")[-1])
 			except: pass
 
 		# initializing SAP beams objects and making the list of SAP beams
 		for sid in np.arange(self.nrBeams):
-			sap=SAPBeam(sid, self.parset, si, cmdline, self, log)
+			sap=SAPBeam(sid, plines, si, cmdline, self, log)
 			self.saps.append(sap)
 
 		# calculating the total number of TABs in all SAPs
