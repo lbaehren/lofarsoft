@@ -190,7 +190,7 @@ class Imager(Task):
                 self.image = np.zeros(shape=(self.ntimesteps, self.NAXIS1, self.NAXIS2, self.nfreq), dtype=float)
 
         if self.phase_calibrate:
-            self.cabledelays = cr.hArray(f["DIPOLE_CALIBRATION_DELAY"])
+            self.cabledelays = cr.hArray(self.data["DIPOLE_CALIBRATION_DELAY"])
             self.calibration_phases = cr.hArray(float, dimensions=fft_data, name="Phases", xvalues=frequencies)
             self.calibration_weights = cr.hArray(complex, dimensions=fft_data, name="Complex Weights")
 
