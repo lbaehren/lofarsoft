@@ -305,7 +305,7 @@ class BeamData(IOInterface):
         fullparsetname=BF_PARSETS+Obs_ID+'.parset'
 
         if not os.path.isfile(fullparsetname):
-            print "WARNING: Missing corresponding parset file: " + fullparsetname)
+            print "WARNING: Missing corresponding parset file: " + fullparsetname
             return [None,None]
 
         offsets = cr.hArray(float,self.__nofBeamDataSets)
