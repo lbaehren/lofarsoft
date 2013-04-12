@@ -179,7 +179,8 @@ def call_populate_script(data_filename=""):
             commandline = commandline_base + "{0} {1}".format(db_filename, data_filename)
             print commandline
 
-            status = subprocess.call(commandline, stdout=log_file, stderr=subprocess.STDOUT, shell=True)
+            if (subprocess.call(commandline, stdout=log_file, stderr=subprocess.STDOUT, shell=True) != 0):
+                print "Error: cannot add file {0} to database".format(data_filename)
 
             attempt += 1
 
