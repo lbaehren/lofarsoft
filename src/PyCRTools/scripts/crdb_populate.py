@@ -486,9 +486,12 @@ class DataExtractor(object):
         result = 0
 
         if self.isOpen():
-            seconds = self._datafile["TIME"][0]
-            subsec  = self._datafile["SAMPLE_NUMBER"][0] * self._datafile["SAMPLE_INTERVAL"][0]
-            result = int(seconds) # + round(subsec + 0.5))
+            try:
+                seconds = self._datafile["TIME"][0]
+                subsec  = self._datafile["SAMPLE_NUMBER"][0] * self._datafile["SAMPLE_INTERVAL"][0]
+                result = int(seconds) # + round(subsec + 0.5))
+            except:
+                raise IOError("Unable to read timestamp. File '{0}' not added to database.".format(self.filename))
         else:
             raise ValueError("No open datafile")
 
@@ -501,7 +504,10 @@ class DataExtractor(object):
         result = []
 
         if self.isOpen():
-            result = list(set(self._datafile["STATION_NAME"]))
+            try:
+                result = list(set(self._datafile["STATION_NAME"]))
+            except:
+                raise IOError("Unable to read station name. File '{0}' not added to database.".format(self.filename))
 
         return result
 
@@ -512,8 +518,10 @@ class DataExtractor(object):
         result = ""
 
         if self.isOpen():
-            result = self._datafile["ANTENNA_SET"]
-
+            try:
+                result = self._datafile["ANTENNA_SET"]
+            except:
+                raise IOError("Unable to read antenna set. File '{0}' not added to database.".format(self.filename))
         return result
 
 
@@ -537,11 +545,14 @@ class DataExtractor(object):
             root_pathname = "VHECR_LORA-"
 
             # Timestamp
-            time_s      = self._datafile["TIME"][0]
-            time_s_str  = time.strftime("%Y%m%dT%H%M%S",time.gmtime(time_s))
-            time_ms     = int(self._datafile["SAMPLE_INTERVAL"][0]*self._datafile["SAMPLE_NUMBER"][0]*1000)
-            time_ms_str = str(time_ms).zfill(3)
-            time_stamp  = time_s_str+"."+time_ms_str+"Z"
+            try:
+                time_s      = self._datafile["TIME"][0]
+                time_s_str  = time.strftime("%Y%m%dT%H%M%S",time.gmtime(time_s))
+                time_ms     = int(self._datafile["SAMPLE_INTERVAL"][0]*self._datafile["SAMPLE_NUMBER"][0]*1000)
+                time_ms_str = str(time_ms).zfill(3)
+                time_stamp  = time_s_str+"."+time_ms_str+"Z"
+            except:
+                raise IOError("Unable to read timestamp. File '{0}' not added to database.".format(self.filename))
 
             polname = "pol%s" %(pol)
 
