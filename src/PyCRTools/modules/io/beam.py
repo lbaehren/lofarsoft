@@ -47,7 +47,7 @@ class BeamData(IOInterface):
         self.__cloffdelay = self.__clock_offsets()
 
         #Align the stations to the same block since second started.
-        self.__block_alignment = max(self.__block_number()) - self.__block_number()
+        self.__block_alignment = self.__block_number() - self.__block_number() #max(self.__block_number()) - self.__block_number()
 
         # Total number of chunks
         self.__nchunks = self.getNchunks()
@@ -111,7 +111,7 @@ class BeamData(IOInterface):
             self.__block = value
         elif key is "DM":
             self.__dm = value
-            self.__dm_offset = self.calcDedispersionIndex(self.__dm)
+            self.__dm_offset = self.calcDedispersionIndex(self.__dm, Ref_Freq=1.69e8)
         elif key is "NCHUNKS":
             self.__nchunks = value
         elif key is "CAL_DELAY":
@@ -297,9 +297,16 @@ class BeamData(IOInterface):
         '''Gathers the clock offsets of the stations from the parsets, and calculates in number of samples and the residual.
         '''
 
+        #WARNING: time offset may need to be calculated per frequency, need to check.
+
+
         BF_PARSETS=os.environ["BF_PARSETS"].rstrip('/')+'/'
         Obs_ID = self.__filename[0].split('/')[-1].split('_')[0]
         fullparsetname=BF_PARSETS+Obs_ID+'.parset'
+
+        if not os.path.isfile(fullparsetname):
+            print "WARNING: Missing corresponding parset file: " + fullparsetname)
+            return [None,None]
 
         offsets = cr.hArray(float,self.__nofBeamDataSets)
         for i in range(self.__nofBeamDataSets):
@@ -444,7 +451,7 @@ class BeamData(IOInterface):
         phases_cloff = cr.hArray(float, weights_cloff, fill=0)
         phases_cloff.delaytophase(self['BEAM_FREQUENCIES'],self.__cloffdelay[1])
         weights_cloff.phasetocomplex(phases_cloff)
-        data[...].mul(weights_cloff[...])
+#        data[...].mul(weights_cloff[...])
 
         # Adding extra calibration delay between stations.
         if np.any(self['CAL_DELAY']):
