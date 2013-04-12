@@ -39,9 +39,9 @@ static void get_string(FILE * inputfile, int *nbytes, char string[])
    int nchar;
    strcpy(string, "ERROR");
    chkfread(&nchar, sizeof(int), 1, inputfile);
+   *nbytes = sizeof(int);
    if (nchar > 80 || nchar < 1)
       return;
-   *nbytes = sizeof(int);
    chkfread(string, nchar, 1, inputfile);
    string[nchar] = '\0';
    *nbytes += nchar;
