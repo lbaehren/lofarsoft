@@ -191,8 +191,8 @@ class Imager(Task):
 
         if self.phase_calibrate:
             self.cabledelays = cr.hArray(self.data["DIPOLE_CALIBRATION_DELAY"])
-            self.calibration_phases = cr.hArray(float, dimensions=self.fft_data, name="Phases", xvalues=self.frequencies)
-            self.calibration_weights = cr.hArray(complex, dimensions=self.fft_data, name="Complex Weights")
+            self.calibration_phases = cr.hArray(float, dimensions=self.fftdata, name="Phases", xvalues=self.frequencies)
+            self.calibration_weights = cr.hArray(complex, dimensions=self.fftdata, name="Complex Weights")
 
             cr.hDelayToPhase(self.calibration_phases, self.frequencies, self.calibration_cabledelays)
             cr.hPhaseToComplex(self.calibration_weights, self.calibration_phases)
