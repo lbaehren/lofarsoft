@@ -194,7 +194,7 @@ class Imager(Task):
             self.calibration_phases = cr.hArray(float, dimensions=self.fftdata, name="Phases", xvalues=self.frequencies)
             self.calibration_weights = cr.hArray(complex, dimensions=self.fftdata, name="Complex Weights")
 
-            cr.hDelayToPhase(self.calibration_phases, self.frequencies, self.calibration_cabledelays)
+            cr.hDelayToPhase(self.calibration_phases, self.frequencies, self.cabledelays)
             cr.hPhaseToComplex(self.calibration_weights, self.calibration_phases)
 
     def run(self):
