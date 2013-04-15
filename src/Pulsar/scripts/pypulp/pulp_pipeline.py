@@ -523,7 +523,7 @@ class Pipeline:
 			# first, we make a list of beams that require this combining. We can't use self.units list directly 
 			# as it has element for each part
 			beams_combine=[]
-			for unit in self.units:
+			for unit in [u for u in self.units if u.summary_node == sumnode]:
 				if len(unit.tab.location) > 1 and cmdline.opts.is_nohoover:
 					beams_combine.append("%d:%d" % (unit.sapid, unit.tabid))
 			beams_combine=np.unique(beams_combine)
