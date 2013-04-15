@@ -68,7 +68,7 @@ class CRDatabasePopulator(object):
 
             # Include: h5
             print "  filtering in h5..."
-            self.filename_list = [f for f in self.filename_list if ("h5" in f)]
+            self.filename_list = [f for f in self.filename_list if (f.endswith("h5"))]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
@@ -91,7 +91,7 @@ class CRDatabasePopulator(object):
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
 
             # Only include R000 files
-            print "  Filtering in R000..."
+            print "  filtering in R000..."
             self.filename_list = [f for f in self.filename_list if ("R000" in f)]
             if options.verbose:
                 print "    list contains {0} files after filtering".format(len(self.filename_list))
