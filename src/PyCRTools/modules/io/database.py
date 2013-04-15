@@ -290,3 +290,19 @@ class Database(object):
 
         if self._autoclose:
             sql_file.close()
+
+    def isSqlite(self):
+        """Check if database is an SQLite3 database.
+        """
+        if self._dbtype=="sqlite3":
+            return True
+        else:
+            return False
+
+    def isPostgresql(self):
+        """Check if database is a PostgreSQL database.
+        """
+        if self._dbtype=="postgresql":
+            return True
+        else:
+            return False

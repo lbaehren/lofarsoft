@@ -254,9 +254,8 @@ class CRDatabase(object):
             # Construct SQL table
             sql_fields = "e.eventID"
             sql_table_d = "datafiles AS d"
-            sql_table_ed = "event_datafile AS ed INNER JOIN " + sql_table_d + " ON (ed.datafileID=d.datafileID)"
-            sql_table_e = "events AS e INNER JOIN " + sql_table_ed + " ON (ed.eventID=e.eventID)"
-
+            sql_table_ed = sql_table_d + " INNER JOIN event_datafile AS ed ON (ed.datafileID=d.datafileID)"
+            sql_table_e = sql_table_ed + " INNER JOIN events AS e ON (ed.eventID=e.eventID)"
             sql_table = sql_table_e
             sql_order = order
             sql_selection_list = []
@@ -410,7 +409,7 @@ class CRDatabase(object):
             # Construct SQL table
             sql_fields = "d.datafileID"
             sql_table_d = "datafiles AS d"
-            sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " ON (ed.datafileID=d.datafileID)"
+            sql_table_e = sql_table_d + " INNER JOIN event_datafile AS ed ON (ed.datafileID=d.datafileID)"
             sql_table = sql_table_d     # Default sql_table value
             sql_order = order
             sql_selection_list = []
@@ -556,8 +555,9 @@ class CRDatabase(object):
             # Construct SQL table
             sql_fields = "s.stationID"
             sql_table_s = "stations AS s"
-            sql_table_d = "datafile_station AS ds INNER JOIN " + sql_table_s + " ON (ds.stationID=s.stationID)"
-            sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " AND (ed.datafileID=ds.datafileID)"
+            sql_table_d = sql_table_s + " INNER JOIN datafile_station AS ds ON (ds.stationID=s.stationID)"
+            sql_table_e = sql_table_d + " INNER_JOIN event_datafile AS ed ON (ed.datafileID=ds.datafileID)"
+
             sql_table = sql_table_s     # Default sql_table value
             sql_order = order
             sql_selection_list = []
@@ -708,9 +708,10 @@ class CRDatabase(object):
             # Construct SQL table
             sql_fields = "p.polarizationID"
             sql_table_p = "polarizations AS p"
-            sql_table_s = "station_polarization AS sp INNER JOIN " + sql_table_p + " ON (sp.polarizationID=p.polarizationID)"
-            sql_table_d = "datafile_station AS ds INNER JOIN " + sql_table_s + " AND (ds.stationID=sp.stationID)"
-            sql_table_e = "event_datafile AS ed INNER JOIN " + sql_table_d + " AND (ed.datafileID=ds.datafileID)"
+            sql_table_s = sql_table_p + " INNER JOIN station_polarization AS sp ON (sp.polarizationID=p.polarizationID)"
+            sql_table_d = sql_table_s + " INNER JOIN datafile_station AS ds ON (ds.stationID=sp.stationID)"
+            sql_table_e = sql_table_d + " INNER JOIN event_datafile AS ed ON (ed.datafileID=ds.datafileID)"
+
             sql_table = sql_table_p     # Default sql_table value
             sql_order = order
             sql_selection_list = []
