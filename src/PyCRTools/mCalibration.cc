@@ -110,9 +110,60 @@ double phase_interpolate(const double a, const double b, const double delta)
 }
 
 /* Linear interpolation of complex values on a 3 dimensional grid.
+   Interpolation is performed using the real and imaginary part separately. */
+std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
+                                           const double x, const double y, const double z,
+                                           const double x0, const double y0, const double z0,
+                                           const double x1, const double y1, const double z1)
+{
+    double c00, c10, c01, c11, c0, c1, re, im;
+    double a[8];
+    int i;
+
+    const double xd = (x - x0) / (x1 - x0);
+    const double yd = (y - y0) / (y1 - y0);
+    const double zd = (z - z0) / (z1 - z0);
+
+    /* Interpolate real part */
+    for (i=0; i<8; i++)
+    {
+      a[i] = real(V[i]);
+    }
+
+    c00 = a[0] * (1 - xd) + a[4] * xd;
+    c10 = a[2] * (1 - xd) + a[6] * xd;
+    c01 = a[1] * (1 - xd) + a[5] * xd;
+    c11 = a[3] * (1 - xd) + a[7] * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
+
+    re = c0 * (1 - zd) + c1 * zd;
+
+    /* Interpolate imaginary part */
+    for (i=0; i<8; i++)
+    {
+      a[i] = imag(V[i]);
+    }
+
+    c00 = a[0] * (1 - xd) + a[4] * xd;
+    c10 = a[2] * (1 - xd) + a[6] * xd;
+    c01 = a[1] * (1 - xd) + a[5] * xd;
+    c11 = a[3] * (1 - xd) + a[7] * xd;
+
+    c0 = c00 * (1 - yd) + c10 * yd;
+    c1 = c01 * (1 - yd) + c11 * yd;
+
+    im = c0 * (1 - zd) + c1 * zd;
+
+    /* Return result as new complex value */
+    return complex(re, im);
+}
+
+/* Linear interpolation of complex values on a 3 dimensional grid.
    Interpolation is performed using the phase and amplitude separately,
    no phase wrapping is applied so care is needed. */
-std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
+std::complex<double> interpolate_trilinear_polar(const std::complex<double> (&V)[8],
                                            const double x, const double y, const double z,
                                            const double x0, const double y0, const double z0,
                                            const double x1, const double y1, const double z1)
