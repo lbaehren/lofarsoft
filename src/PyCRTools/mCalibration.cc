@@ -157,7 +157,7 @@ std::complex<double> interpolate_trilinear(const std::complex<double> (&V)[8],
     im = c0 * (1 - zd) + c1 * zd;
 
     /* Return result as new complex value */
-    return std::complex(re, im);
+    return std::complex<double>(re, im);
 }
 
 /* Linear interpolation of complex values on a 3 dimensional grid.
