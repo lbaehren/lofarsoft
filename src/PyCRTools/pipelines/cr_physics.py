@@ -558,7 +558,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     timeseries_data_dbf = cr.hArray(float, dimensions=(2,dbf_theta.beamformed_timeseries.shape()[0]))
                     timeseries_data_dbf[0].copy(dbf_theta.beamformed_timeseries)
                     timeseries_data_dbf[1].copy(dbf_phi.beamformed_timeseries)
-                
+
                     pulse_envelope_dbf = cr.trun("PulseEnvelope", timeseries_data=timeseries_data_dbf, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, save_plots=True, plot_prefix=station_plot_prefix+"dbf-", plot_type=options.plot_type, plotlist=station["crp_plotfiles"], extra=True)
 
                     station["crp_integrated_pulse_power_dbf"] = cr.hArray(pulse_envelope_dbf.integrated_pulse_power).toNumpy()
@@ -812,7 +812,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 #        print 'no glitch indices arE:'
 #        print noGlitchIndices
         try:
-            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays[noGlitchIndices], positions=all_station_antenna_positions[noGlitchIndices], stationnames=all_station_antennas_stationnames[noGlitchIndices], loracore=core, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays[noGlitchIndices], positions=all_station_antenna_positions[noGlitchIndices], stationnames=all_station_antennas_stationnames[noGlitchIndices], loracore=core, lora_direction=lora_direction, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
             # put into database: wavefront.fitPlanar = (az, el, mse) and wavefront.fitPointSource = (az, el, R, mse)
             event["wavefront_fit_planar"] = wavefront.fitPlaneWave
             event["wavefront_fit_pointsource"] = wavefront.fitPointSource

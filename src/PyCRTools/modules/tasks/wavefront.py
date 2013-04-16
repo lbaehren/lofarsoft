@@ -31,7 +31,7 @@ from numpy import sin, cos, tan, sqrt
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 
-
+c = 299792458.0
 deg2rad = np.pi / 180
 
 def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0):
@@ -112,6 +112,7 @@ class Wavefront(Task):
         positions = dict( default = None, doc = "Antenna positions array in [Nx3] format (2D)."),
         stationnames = dict( default=None, doc="Array of station names for each antenna in 'positions'"),
         loracore = dict( default=None, doc="LORA shower core position. If not given, (0, 0) will be assumed."),
+        lora_direction = dict( default=None, doc="LORA shower direction."),
         interStationDelays = dict( default=None, doc="Inter-station delays as a correction on current LOFAR clock offsets. To be obtained e.g. from the CalibrateFM Task. Assumed to be in alphabetic order in the station name e.g. CS002, CS003, ... If not given, zero correction will be assumed." ),
         stationList = dict( default=None, doc="List of station names present in the positions and arrivaltimes arrays. Only needed if interStationDelays also supplied."),
         stationStartIndex = dict( default=None, doc="List of start indices of a given station. Array should end with an entry n where n = nof antennas. Only needed if interStationDelays given."),
@@ -241,6 +242,58 @@ class Wavefront(Task):
             p = self.plot_prefix + "wavefront_vs_planewave.{0}".format(self.plot_type)
             plt.savefig(p)
             self.plotlist.append(p)
+
+        # Make 1-D projected plot of curvature:
+        # - take shower direction and core position from LORA
+        # - project antenna positions to shower coordinates (in the plane with shower axis as normal vector)
+        # - subtract the (plane-wave) time difference due to the distance shower plane - real antenna position
+        #az = np.radians(self.lora_direction[0])
+        #el = np.radians(self.lora_direction[1])
+        (az, el) = direction_fit_plane_wave.meandirection_azel
+#        print (az, el)
+        cartesianDirection = - np.array([cos(el) * sin(az), cos(el) * cos(az), sin(el)]) # minus sign for incoming vector!
+        #core = np.array([self.loracore[0], self.loracore[1], 0.0])
+        fakecoreX = 0.0
+        fakecoreY = 0.0
+        for pos in goodPositions2D:
+            fakecoreX += pos[0]
+            fakecoreY += pos[1]
+        core = (1.0 / len(goodPositions2D)) * np.array([fakecoreX, fakecoreY, 0.0])
+
+        axisDistance = []
+        showerPlaneTimeDelay = []
+
+        for pos in goodPositions2D:
+            relpos = pos - core
+            delay = (1/c) * np.dot(cartesianDirection, relpos)
+            distance = np.linalg.norm(relpos - np.dot(cartesianDirection, relpos) * cartesianDirection)
+            axisDistance.append(distance)
+            showerPlaneTimeDelay.append(delay)
+
+        axisDistance = np.array(axisDistance)
+        showerPlaneTimeDelay = np.array(showerPlaneTimeDelay)
+
+        reducedArrivalTimes = goodTimes - showerPlaneTimeDelay
+
+        plt.figure()
+        start = 0
+        colors = ['b', 'g', 'r', 'c', 'm', 'y'] * 4 # don't want to run out of colors array
+        for i in range(len(stationList)):
+            start = stationStartIndex[i]
+            end = stationStartIndex[i+1]
+            plt.scatter(axisDistance[start:end], 1e9 * reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
+        plt.legend()
+        plt.xlabel('Distance from axis [m]')
+        plt.ylabel('Arrival time in fitted shower plane [ns]')
+        #plt.plot(a, expectedDelays*1e9, c='g')
+        plt.title('Arrival times vs distance from fit-centered shower axis')
+        if self.save_plots:
+            p = self.plot_prefix + "wavefront_arrivaltime_showerplane.{0}".format(self.plot_type)
+            plt.savefig(p)
+            self.plotlist.append(p)
+
+
+
 
         # rotate antenna position axes to a, p coordinates. a = along time gradient, p = perpendicular to that
         # Make plots for arrival times and second-order curvature:
