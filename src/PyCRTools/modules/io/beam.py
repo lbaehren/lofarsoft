@@ -357,6 +357,7 @@ class BeamData(IOInterface):
 
     def getRelativeAntennaPositions(self):
         """Returns relative Station positions. The positions are of the center of the station (which depend on the ANTENNA_SET used).
+            If using "single-antenna FFTed time series saved in beam format", then it returns the single antenna positinos relative to that station.
 
         Output:
         a two dimensional array containing the Cartesian position of
@@ -368,11 +369,21 @@ class BeamData(IOInterface):
 
         pos = cr.hArray(float, [self['NOF_BEAM_DATASETS'], 3])
 
-        for i, file in enumerate(self.__files):
-#            pos[i] = file.par.hdr['BeamFormer']['stationpos']
-            pos[i] = md.getStationPositions(self['STATION_NAME'][i], self['ANTENNA_SET'][i], return_as_hArray=True,coordinatesystem='ITRF')
+        #This diferentiates between regular stations beams, and single-antenna FFTed time series saved in beam format.
+        if self.__files[0].par.hdr['BeamFormer']['nantennas_total'] == 1:  #Quick.n.dirty if statement, could make it more general, but this will work for now.
+            phase_center = md.getStationPositions(self['STATION_NAME'][0], self['ANTENNA_SET'][0], return_as_hArray=True,coordinatesystem='ITRF')
 
-        pos = md.convertITRFToLocal(pos,reflonlat=None)
+            for i, file in enumerate(self.__files):
+                pos[i] = md.get('AbsoluteAntennaPositions',list(beams._BeamData__files[0].par.hdr['BeamFormer']['antennas_used']),self['ANTENNA_SET'][0],return_as_hArray=True)
+
+            pos = md.convertITRFToLocal(pos,phase_center=phase_center,reflonlat=None)
+
+        else:
+            for i, file in enumerate(self.__files):
+    #            pos[i] = file.par.hdr['BeamFormer']['stationpos']
+                pos[i] = md.getStationPositions(self['STATION_NAME'][i], self['ANTENNA_SET'][i], return_as_hArray=True,coordinatesystem='ITRF')
+
+            pos = md.convertITRFToLocal(pos,reflonlat=None)
 
         return pos
 
