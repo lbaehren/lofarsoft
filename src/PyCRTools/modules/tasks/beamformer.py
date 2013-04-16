@@ -574,7 +574,7 @@ class BeamFormer(tasks.Task):
 
         station_centered = dict(workarray = True,
                                 default = True,
-                                doc = "if True using the 'ANTENNA_POSITONS' (phase center at the center of the station), otherwise 'ANTENNA_POSITION'(phase center at the LOFAR center), info elsewere on their meanings.")
+                                doc = "if True using the phase center at the center of the station, otherwise the phase center at the LOFAR center.")
     )
 
     def run(self):
