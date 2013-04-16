@@ -1094,7 +1094,7 @@ def getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=False):
 
     return antpos
 
-def getRelativeAntennaPositionsNew(station, antennaset, LOFAR_centered=True ,return_as_hArray=True,refpos=None):
+def getRelativeAntennaPositionsNew(station, antennaset,return_as_hArray=False, LOFAR_centered=True,phase_center=None):
     """Returns the antenna positions of all the antennas in the station
     relative to the center of the station for the specified antennaset.
     station can be the name or id of the station.
@@ -1115,21 +1115,21 @@ def getRelativeAntennaPositionsNew(station, antennaset, LOFAR_centered=True ,ret
     Parameter          Default Description
     ================== ======= ===================================================================
     *LOFAR_centered*   True    Get the relative positions to the center of LOFAR, or to the station if False.
-    *return_as_hArray* True    Return as hArray.
-    *refpos*           None    Reference position in ITRF.
+    *return_as_hArray* False    Return as hArray.
+    *phase_center*     None    Reference position in ITRF.
     ================== ======= ===================================================================
 
     """
 
     itrfpos = getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=True)
 
-    if LOFAR_centered and not refpos:
-        refpos = ITRFCS002
+    if LOFAR_centered and not phase_center:
+        phase_center = ITRFCS002
     else:
-        if not refpos:
-            refpos = getStationPositions(station, antennaset, return_as_hArray=True,coordinatesystem='ITRF')
+        if not phase_center:
+            phase_center = getStationPositions(station, antennaset, return_as_hArray=True,coordinatesystem='ITRF')
     reflonlat = None
-    returnpos = convertITRFToLocal(itrfpos, refpos=refpos, reflonlat=reflonlat)
+    returnpos = convertITRFToLocal(itrfpos, phase_center=phase_center, reflonlat=reflonlat)
 
     if not return_as_hArray:
         returnpos = returnpos.toNumpy()
@@ -1173,7 +1173,7 @@ def getAntennaPositions(station, antennaset, return_as_hArray=False):
     """
 
     itrfpos = getAbsoluteAntennaPositions(station, antennaset, return_as_hArray=True)
-    returnpos = convertITRFToLocal(itrfpos, refpos=ITRFCS002, reflonlat=lonlatCS002)
+    returnpos = convertITRFToLocal(itrfpos, phase_center=ITRFCS002, reflonlat=lonlatCS002)
 
     if not return_as_hArray:
         returnpos = returnpos.toNumpy()
@@ -1397,7 +1397,7 @@ def getRotationMatrix(station,antennaset):
 
     raise NotImplementedError
 
-def convertITRFToLocal(itrfpos, refpos=ITRFCS002, reflonlat=lonlatCS002):
+def convertITRFToLocal(itrfpos, phase_center=ITRFCS002, reflonlat=lonlatCS002):
     """.. todo:: Document :func:`~metadata.convertITRFToLocal`.
     """
 
@@ -1417,7 +1417,7 @@ def convertITRFToLocal(itrfpos, refpos=ITRFCS002, reflonlat=lonlatCS002):
 
     returnpos = cr.hArray(float, itrfpos.shape())
     itrfpos_dump = cr.hArray(float, itrfpos, itrfpos)  # Used for avoiding unwanted modification of itrfpos.
-    itrfpos_dump.sub(refpos)
+    itrfpos_dump.sub(phase_center)
 
     returnpos[...].muladd(Arg0, itrfpos_dump[..., 0])
     returnpos[...].muladd(Arg1, itrfpos_dump[..., 1])
