@@ -340,7 +340,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # Optionally plot raw data
             if options.debug:
                 for i in range(raw_data.shape[0]):
-                    plt.figure()
+                    plt.clf()
                     plt.plot(raw_data[i])
                     plt.title("Timeseries raw dipole {0}".format(i))
                     plotfile = station_plot_prefix + "raw_data-{0}.{1}".format(i, options.plot_type)
@@ -522,7 +522,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             if options.debug:
                 td = timeseries_data.toNumpy()
                 for i in range(td.shape[0]):
-                    plt.figure()
+                    plt.clf()
                     plt.plot(td[i, pulse_start:pulse_end])
                     plt.title("Timeseries cut to pulse after calibration dipole {0}".format(i))
                     plotfile = station_plot_prefix + "calibrated_timeseries-{0}.{1}".format(i, options.plot_type)
@@ -637,6 +637,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             station["crp_plotfiles"].append(plotfile)
 
             # Plot spectrum after antenna model unfolding
+            plt.clf()
             plt.semilogy(frequencies.toNumpy(), np.median(np.abs(antenna_response.on_sky_polarization.toNumpy()), axis=0))
             plotfile = station_plot_prefix + "spectrum_after_antenna_model.{0}".format(options.plot_type)
             plt.title("Median spectrum after antenna model.")
