@@ -638,7 +638,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             # Plot spectrum after antenna model unfolding
             plt.clf()
-            plt.plot(frequencies.toNumpy(), np.log(np.median(np.square(antenna_response.on_sky_polarization.toNumpy()), axis=0)))
+            plt.plot(frequencies.toNumpy() / 1.e6, np.log(np.median(np.square(antenna_response.on_sky_polarization.toNumpy()), axis=0)))
             plotfile = station_plot_prefix + "spectrum_after_antenna_model.{0}".format(options.plot_type)
             plt.title("Median spectrum after antenna model.")
             plt.xlabel("Frequency [MHz]")
