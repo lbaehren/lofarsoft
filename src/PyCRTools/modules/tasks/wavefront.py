@@ -273,7 +273,12 @@ class Wavefront(Task):
         axisDistance = np.array(axisDistance)
         showerPlaneTimeDelay = np.array(showerPlaneTimeDelay)
 
-        reducedArrivalTimes = goodTimes - showerPlaneTimeDelay
+        reducedArrivalTimes = 1e9 * (goodTimes - showerPlaneTimeDelay)
+
+        polyfit = np.polyfit(axisDistance, reducedArrivalTimes, 4)
+        polyvalues = np.poly1d(polyfit)
+
+        reducedArrivalTimes -= polyfit[4]
 
         plt.figure()
         start = 0
@@ -281,12 +286,14 @@ class Wavefront(Task):
         for i in range(len(stationList)):
             start = stationStartIndex[i]
             end = stationStartIndex[i+1]
-            plt.scatter(axisDistance[start:end], 1e9 * reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
+            plt.scatter(axisDistance[start:end], reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
+
+        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', c='r')
         plt.legend()
         plt.xlabel('Distance from axis [m]')
         plt.ylabel('Arrival time in fitted shower plane [ns]')
         #plt.plot(a, expectedDelays*1e9, c='g')
-        plt.title('Arrival times vs distance from fit-centered shower axis')
+        plt.title('Arrival times vs distance from fit-centered shower axis\n Polyfit coeffs t = %1.5f r + %1.5f r^2 + %1.5f r^3 + %1.5f r^4' % (polyfit[3], polyfit[2], polyfit[1], polyfit[0]))
         if self.save_plots:
             p = self.plot_prefix + "wavefront_arrivaltime_showerplane.{0}".format(self.plot_type)
             plt.savefig(p)
