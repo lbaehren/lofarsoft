@@ -257,7 +257,7 @@ class PipeUnitPart(PipeUnit):
                                 if not cmdline.opts.is_nodecode:
                                         verbose=""
                                         if cmdline.opts.is_debug: verbose="-v"
-                                        cmd="2bf2fits %s %s -parset %s -append -nbits 8 -A 100 -sigma 3 -nsubs %d -sap %d -tab %d -part %d -o %s %s" % (verbose, self.raw2fits_extra_options, obs.parset, nsubs_eff, self.sapid, self.tabid, self.part, self.output_prefix, input_file)
+                                        cmd="2bf2fits %s %s -parset %s -append -nbits 8 -A %d -sigma %d -nsubs %d -sap %d -tab %d -part %d -o %s %s %s" % (verbose, self.raw2fits_extra_options, obs.parset, cmdline.opts.decode_nblocks, cmdline.opts.decode_sigma, nsubs_eff, self.sapid, self.tabid, self.part, self.output_prefix, cmdline.opts.bf2fits_extra_opts, input_file)
                                         self.execute(cmd, workdir=self.curdir)
                                         # fixing the coordinates
                                         #cmd="fix_fits_coordinates.py %s.fits" % (self.output_prefix)
@@ -316,26 +316,19 @@ class PipeUnitPart(PipeUnit):
                         # if we want to run prepdata to create a time-series and make a list of TOAs
                         try:
                                 if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and cmdline.opts.is_single_pulse:
-                                        for psr in self.psrs:   # pulsar list is empty if --nofold is used
-                                                psr2=re.sub(r'[BJ]', '', psr)
-                                                psrdm=self.get_psr_dm("%s/%s.par" % (self.outdir, psr2))
-                                                # running prepdata with mask (if --norfi was not set)
-                                                if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
-                                                        cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -mask %s_rfifind.mask -o %s_%s %s.fits" % \
-                                                                (psrdm, self.output_prefix, psr, self.output_prefix, self.output_prefix)
-                                                else: # running prepdata without mask
-                                                        cmd="prepdata -noscales -nooffsets -noclip -nobary -dm %f -o %s_%s %s.fits" % \
-                                                                (psrdm, psr, self.output_prefix, self.output_prefix)
-                                                self.execute(cmd, workdir=self.curdir)
-                                                # running single_pulse_search.py on .dat file (created either with mask or not)
-                                                cmd="single_pulse_search.py -p %s_%s.dat" % (psr, self.output_prefix)
-                                                self.execute(cmd, workdir=self.curdir)
+                                        self.run_prepdata(cmdline)
                         # we let PULP to continue if prepdata (or single_pulse_search.py) has crashed, as the rest of the pipeline can finish ok
                         except: pass
 
                         # making prepfold diagnostic plots
                         if not cmdline.opts.is_nofold and not cmdline.opts.is_feedback:
                                 self.make_prepfold_plots(obs)
+
+                        # Running "RRATs" analysis (prepsubband + single_pulse_search.py for a range of DMs)
+                        try:
+                                if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and cmdline.opts.is_rrats:
+                                        self.run_rrats_analysis(cmdline)
+                        except: pass
 
                         # waiting for subdyn to finish
                         if not cmdline.opts.is_plots_only and not cmdline.opts.is_feedback and \

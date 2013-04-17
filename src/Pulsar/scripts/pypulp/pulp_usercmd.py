@@ -90,6 +90,9 @@ and only one pulsar name should be given for --par option to work", default="", 
         	self.cmd.add_option('--single-pulse', action="store_true", dest='is_single_pulse', 
                            help="running single-pulse analysis in addition to folding a profile (implemented only \
 for IS/CS data (PRESTO part of the pipeline only), for CV data only filterbank file will be created on the processing node)", default=False)
+        	self.cmd.add_option('--rrats', action="store_true", dest='is_rrats', 
+                           help="running prepsubband for a range of DMs (default - 100 around nominal DM of the pulsar) and prepdata for DM=0 \
+followed by single_pulse_search.py. Use --prepsubband-extra-opts to set different DM range/step", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
 TA beam number, with no spaces. The argument can have leading hat character '^' to indicate that \
@@ -121,8 +124,6 @@ Otherwise, the new results will be overwritten/added to existing directory", def
                            help="set the length of each subintegration to SECS. Default is 60 secs for CS/IS and 5 secs for CV mode", default=-1, type='int')
         	self.cmd.add_option('--dspsr-extra-opts', dest='dspsr_extra_opts', metavar='STRING',
                            help="specify extra additional options for Dspsr command", default="", type='str')
-        	self.cmd.add_option('--prepfold-extra-opts', dest='prepfold_extra_opts', metavar='STRING',
-                           help="specify extra additional options for Prepfold command", default="", type='str')
         	self.cmd.add_option('--no-hoover', action="store_true", dest='is_nohoover',
                            help="do not use hoover node locus101 for processing, but instead rsync data to target locus nodes", default=False)
         	self.cmd.add_option('--first-frequency-split', dest='first_freq_split', metavar='SPLIT#',
@@ -157,6 +158,16 @@ with --beams option and only the first beam will be used if there are several sp
                            help="optional parameter to turn off running prepfold part of the pipeline", default=False)
         	self.groupCS.add_option('--with-dal', action="store_true", dest='is_with_dal',
                            help="use dspsr directly to read raw data instead of 2bf2fits. No PRESTO routines though...", default=False)
+        	self.groupCS.add_option('--2bf2fits-extra-opts', dest='bf2fits_extra_opts', metavar='STRING',
+                           help="specify extra additional options for 2bf2fits command", default="", type='str')
+        	self.groupCS.add_option('--decode-nblocks', dest='decode_nblocks', metavar='#BLOCKS',
+                           help="read #BLOCKS at once in 2bf2fits. Same as -A option in 2bf2fits. Default: %default", default=100, type='int')
+        	self.groupCS.add_option('--decode-sigma', dest='decode_sigma', metavar='INTEGER',
+                           help="sigma limit value used for packing in 2bf2fits. Same as -sigma option in 2bf2fits. Default: %default", default=3, type='int')
+        	self.groupCS.add_option('--prepfold-extra-opts', dest='prepfold_extra_opts', metavar='STRING',
+                           help="specify extra additional options for Prepfold command", default="", type='str')
+        	self.groupCS.add_option('--prepsubband-extra-opts', dest='prepsubband_extra_opts', metavar='STRING',
+                           help="specify extra additional options for Prepsubband command when --rrats is used", default="", type='str')
 		self.cmd.add_option_group(self.groupCS)
 		# adding CV extra options
 	        self.groupCV = opt.OptionGroup(self.cmd, "Complex voltage (CV) extra options")
@@ -552,20 +563,27 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
 					log.info("User-specified BEAMS to be excluded: %s" % (", ".join(self.user_excluded_beams)))
 				if self.opts.is_plots_only: log.info("Diagnostic plots ONLY")
 				else:
+					log.info("USING HOOVER NODES = %s" % (self.opts.is_nohoover and "no" or "yes"))
 					if obs.CV: 
-						log.info("USING HOOVER NODES = %s" % (self.opts.is_nohoover and "no" or "yes"))
 						log.info("DSPSR with LOFAR DAL = %s" % (self.opts.is_nodal and "no" or "yes"))
+					else:
+						log.info("DSPSR with LOFAR DAL = %s" % (self.opts.is_with_dal and "yes" or "no"))
 					if self.opts.first_freq_split != 0:
 						log.info("FIRST FREQUENCY SPLIT = %d" % (self.opts.first_freq_split))
 					if self.opts.nsplits != -1:
 						log.info("NUMBER OF SPLITS = %d" % (self.opts.nsplits))
-					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes"))
+					log.info("Data decoding = %s" % (self.opts.is_nodecode and "no" or "yes (-A %d -sigma %d)" % (self.opts.decode_nblocks, self.opts.decode_sigma)))
+					if not obs.CV and not self.opts.is_nodecode and not self.opts.is_with_dal and self.opts.bf2fits_extra_opts != "":
+						log.info("2bf2fits user extra options: %s" % (self.opts.bf2fits_extra_opts))
 					log.info("RFI Zapping = %s" % (self.opts.is_norfi and "no" or "yes"))
 					log.info("Subdyn.py = %s" % ((self.opts.is_skip_subdyn == False and self.opts.is_norfi == False) and "yes" or "no"))
 					log.info("Prepfold = %s" % (self.opts.is_skip_prepfold and "no" or "yes"))
 					if self.opts.prepfold_extra_opts != "" and not self.opts.is_skip_prepfold:
 						log.info("Prepfold user extra options: %s" % (self.opts.prepfold_extra_opts))
 					log.info("Single-pulse analysis = %s" % (self.opts.is_single_pulse and "yes" or "no"))
+					log.info("RRATs analysis = %s" % (self.opts.is_rrats and "yes" or "no"))
+					if self.opts.prepsubband_extra_opts != "" and self.is_rrats:
+						log.info("Prepsubband user extra options: %s" % (self.opts.prepsubband_extra_opts))
 					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or \
 						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
 					if self.opts.dspsr_extra_opts != "" and not self.opts.is_skip_dspsr:
