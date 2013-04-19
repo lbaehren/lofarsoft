@@ -1,0 +1,12 @@
+"""""""""""""""""""""""""""""""
+On the 21 th November 2012
+by Nicolas Vilchez
+LPC2E/Nançay Radioastonomy station
+nicolas.vilchez@cnrs-orleans.fr
+"""""""""""""""""""""""""""""""
+
+This code will convert dynspec data to dynspec data (more details on release notes) with a time selection and/or a time and frequency rebinning for an lighter ICD6 dataset. 
+
+It allows a for simple visualisation 
+
+this code is interfaced by using a python infertaces which is contained in ICD3-Extractor directory
