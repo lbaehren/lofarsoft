@@ -47,7 +47,7 @@ class AntennaResponse(Task):
         apply_to_data=dict(default=True,
             doc="Apply to data, set to False if you only need the (inverse) Jones matrix."),
         test_with_identity_matrix=dict(default=False,
-            doc="Don't apply the model, use identity matrix for mixing. For testing purposes only.")
+            doc="Don't apply the model, use identity matrix for mixing. For testing purposes only."),
         vt=dict(default=np.loadtxt(os.environ["LOFARSOFT"] + "/data/lofar/antenna_response_model/LBA_Vout_theta.txt", skiprows=1), doc="Table with complex antenna response for X dipole to wave purely polarized in theta direction."),
         vp=dict(default=np.loadtxt(os.environ["LOFARSOFT"] + "/data/lofar/antenna_response_model/LBA_Vout_phi.txt", skiprows=1), doc="Table with complex antenna response for X dipole to wave purely polarized in phi direction."),
     )
