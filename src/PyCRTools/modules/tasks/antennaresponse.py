@@ -55,8 +55,8 @@ class AntennaResponse(Task):
     def run(self):
         """Run.
         """
-        cvt = cr.hArray(vt[:, 3] + 1j * self.vt[:, 4])
-        cvp = cr.hArray(vp[:, 3] + 1j * self.vp[:, 4])
+        cvt = cr.hArray(self.vt[:, 3] + 1j * self.vt[:, 4])
+        cvp = cr.hArray(self.vp[:, 3] + 1j * self.vp[:, 4])
 
         fstart = 10.0 * 1.e6
         fstep = 1.0 * 1.e6
