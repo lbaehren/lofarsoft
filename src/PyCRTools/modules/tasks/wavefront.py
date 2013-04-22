@@ -288,12 +288,15 @@ class Wavefront(Task):
             end = stationStartIndex[i+1]
             plt.scatter(axisDistance[start:end], reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
 
-        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', c='r')
+        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
+        plt.xlim([0.0, 50*int(max(axisDistance) / 50) + 50])
         plt.legend()
+
         plt.xlabel('Distance from axis [m]')
+
         plt.ylabel('Arrival time in fitted shower plane [ns]')
         #plt.plot(a, expectedDelays*1e9, c='g')
-        plt.title('Arrival times vs distance from fit-centered shower axis\n Polyfit coeffs t = %1.5f r + %1.5f r^2 + %1.5f r^3 + %1.5f r^4' % (polyfit[3], polyfit[2], polyfit[1], polyfit[0]))
+        plt.title('Arrival times vs distance from fit-centered shower axis\n Polyfit coeffs (r=r_100): t = %2.2f r + %2.2f r^2 + %2.2f r^3 + %2.2f r^4' % (polyfit[3] * 100, polyfit[2] * 10000, polyfit[1] * 10**6, polyfit[0]*10**8))
         if self.save_plots:
             p = self.plot_prefix + "wavefront_arrivaltime_showerplane.{0}".format(self.plot_type)
             plt.savefig(p)
