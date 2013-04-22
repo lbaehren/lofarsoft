@@ -36,9 +36,9 @@ class GalacticNoise(Task):
     def fourier_series(self, x, p):
         """Evaluates a partial Fourier series
 
-        ...math::
+        .. math::
 
-            F(x) \approx \frac{a_{0}}{2} + \sum_{n=1}^{\mathrm{order}} a_{n} \sin(nx) + b_{n} \cos(nx)
+            F(x) \\approx \\frac{a_{0}}{2} + \\sum_{n=1}^{\\mathrm{order}} a_{n} \\sin(nx) + b_{n} \\cos(nx)
 
         """
 
