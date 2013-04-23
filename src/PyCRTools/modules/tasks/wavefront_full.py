@@ -18,7 +18,7 @@ later?: Reprocess cross correlation over 0/1 polarisation inside each station.
 .. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
 """
 
-from pycrtools.tasks import Task
+from pycrtools.tasks import Task, crosscorrelateantennas, shower, directionfitplanewave
 import pycrtools as cr
 from pycrtools import srcfind as sf
 from pycrtools import lora
@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 cr.tasks.__raiseTaskDeprecationWarning(__name__)
 
 deg2rad = np.pi / 180
+c = 299792458.0
 
 def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0):
     # Quality function for simplex search
@@ -183,7 +184,7 @@ class Wavefront_full(Task):
 
             timeseries = self.f.empty("TIMESERIES_DATA")
             # get timeseries data with pulse, then cut out a region around the pulse.
-            cutoutSize = 512
+            cutoutSize = 2048
             self.f.getTimeseriesData(timeseries, block = block)
             nofChannels = timeseries.shape()[0]
             cutoutTimeseries = cr.hArray(float, dimensions=[nofChannels, cutoutSize])
@@ -204,19 +205,31 @@ class Wavefront_full(Task):
 
             sample_interval = 5.0e-9 # hardcoded...
             # is the index of the ref antenna also in the full list of antids / antpos
-
+            yy = cutoutTimeseries.toNumpy()
+            plt.figure()
+            plt.plot(yy[0])
+            plt.plot(yy[1])
+            plt.plot(yy[2])
+            plt.plot(yy[23])
             # now cross correlate all channels in full_timeseries, get relative times
-            crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", timeseries_data=cutoutTimeseries, oversamplefactor=64)
+            crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", timeseries_data=cutoutTimeseries, oversamplefactor=10, save_plots=True)
+
+            yy = crosscorr.crosscorr_data.toNumpy()
+            plt.figure()
+            plt.plot(yy[5])
+            plt.plot(yy[17])
 
             # And determine the relative offsets between them
-            maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot=True, plotend=5, sampleinterval=sample_interval / crosscorr.oversamplefactor, peak_width=11, splineorder=3, refant=refant)
+            #maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot=True, plotend=5, sampleinterval=sample_interval / crosscorr.oversamplefactor, peak_width=11, splineorder=3, refant=refant)
+            maxima_cc = cr.trerun('FindPulseDelay', "delay", trace=crosscorr.crosscorr_data, refant=0, sampling_frequency=200.0e6*10)
 
             # plot lags, plot flagged lags from a k-sigma criterion on the crosscorr maximum
 
-            cr.hArray(maxima_cc.lags).plot()
+            #cr.hArray(maxima_cc.lags).plot()
 
             # Plot arrival times, do plane-wave fit, plot residuals wrt plane wave
-            arrivaltime = cr.hArray(maxima_cc.lags)
+            #arrivaltime = cr.hArray(maxima_cc.lags)
+            arrivaltime = cr.hArray(maxima_cc.delays)
             times = arrivaltime.toNumpy()
             positions = antennaPositions.toNumpy().ravel()
 
@@ -229,10 +242,10 @@ class Wavefront_full(Task):
             if not type(self.interStationDelays) == type(None): # cannot do if self.interStationDelays, apparently...
                 subsampleOffsets -= self.interStationDelays
 
-    #        subsampleOffsets[1] -= 0.11e-9
-    #        subsampleOffsets[2] -= -1.30e-9
-    #        subsampleOffsets[3] -= -1.32e-9
-    #        subsampleOffsets[4] -= 0.71e-9
+            subsampleOffsets[1] -= 0.11e-9
+            subsampleOffsets[2] -= -1.30e-9
+            subsampleOffsets[3] -= -1.32e-9
+            subsampleOffsets[4] -= 0.71e-9
 
             stationList = self.f["STATION_LIST"]
             print stationList
@@ -292,6 +305,93 @@ class Wavefront_full(Task):
         (az, el) = direction_fit_plane_wave.meandirection_azel  # check
         planarDirection = cr.hArray([az / deg2rad, el / deg2rad, 0.])
 
+#todo        stationStartIndex = []
+#        stationList = []
+#        for i in range(len(goodStationNames)):
+#            if goodStationNames[i] != goodStationNames[i-1]:
+#                stationList.append(goodStationNames[i])
+#                stationStartIndex.append(i)
+#        stationStartIndex.append(len(goodStationNames)) # last index + 1 for indexing with start:end
+
+        # Make 1-D projected plot of curvature:
+        # - take shower direction and core position from LORA
+        # - project antenna positions to shower coordinates (in the plane with shower axis as normal vector)
+        # - subtract the (plane-wave) time difference due to the distance shower plane - real antenna position
+        #az = np.radians(self.lora_direction[0])
+        #el = np.radians(self.lora_direction[1])
+        (az, el) = direction_fit_plane_wave.meandirection_azel
+        (az, el) = (318.73 * deg2rad, 50.93 * deg2rad)
+        # HACK LORA values in here
+#        print (az, el)
+        cartesianDirection = - np.array([cos(el) * sin(az), cos(el) * cos(az), sin(el)]) # minus sign for incoming vector!
+        #core = np.array([self.loracore[0], self.loracore[1], 0.0])
+
+        fakecoreX = 0.0
+        fakecoreY = 0.0
+        for pos in goodPositions2D:
+            fakecoreX += pos[0]
+            fakecoreY += pos[1]
+        #core = (1.0 / len(goodPositions2D)) * np.array([fakecoreX, fakecoreY, 0.0])
+        core = np.array([-132.5, 101.8, 0.0])
+        print 'Core position: '
+        print 'x = %3.2f, y = %3.2f' % (core[0], core[1])
+        def fitQualityFromCore(core):
+            axisDistance = []
+            showerPlaneTimeDelay = []
+
+            for pos in goodPositions2D:
+                relpos = pos - core
+                delay = (1/c) * np.dot(cartesianDirection, relpos)
+                distance = np.linalg.norm(relpos - np.dot(cartesianDirection, relpos) * cartesianDirection)
+                axisDistance.append(distance)
+                showerPlaneTimeDelay.append(delay)
+
+            axisDistance = np.array(axisDistance)
+            showerPlaneTimeDelay = np.array(showerPlaneTimeDelay)
+
+            reducedArrivalTimes = 1e9 * (goodTimes - showerPlaneTimeDelay)
+
+            polyfit = np.polyfit(axisDistance, reducedArrivalTimes, 4)
+            polyvalues = np.poly1d(polyfit)
+            chi_squared = np.sum((np.polyval(polyfit, axisDistance) - reducedArrivalTimes) ** 2) / (len(axisDistance) - 4)
+            reducedArrivalTimes -= polyfit[4]
+
+            return (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues)
+        (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(core)
+
+        plt.figure()
+        start = 0
+        colors = ['b', 'g', 'r', 'c', 'm', 'y'] * 4 # don't want to run out of colors array
+        for i in range(len(stationList)):
+            start = stationStartIndex[i]
+            end = stationStartIndex[i+1]
+            plt.scatter(axisDistance[start:end]**2, reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
+
+        plt.plot(np.sort(axisDistance**2), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
+        plt.xlim([0.0, 50 * int(max(axisDistance)**2 / 50) + 50])
+
+        plt.legend()
+        plt.xlabel('Distance from axis [m]')
+        plt.ylabel('Arrival time in fitted shower plane [ns]')
+        #plt.plot(a, expectedDelays*1e9, c='g')
+        plt.title('Arrival times vs distance from fit-centered shower axis\n Polyfit coeffs (r=r_100): t = %2.2f r + %2.2f r^2 + %2.2f r^3 + %2.2f r^4\nchi^2 = %2.2f' % (polyfit[3] * 100, polyfit[2] * 10000, polyfit[1] * 10**6, polyfit[0]*10**8, chi_squared))
+#        if self.save_plots:
+#            p = self.plot_prefix + "wavefront_arrivaltime_showerplane.{0}".format(self.plot_type)
+#            plt.savefig(p)
+#            self.plotlist.append(p)
+        xsteps = 100
+        ysteps = 100
+        imarray = np.zeros((xsteps, ysteps))
+        for x in range(xsteps):
+            print x
+            for y in range(ysteps):
+                core = np.array([-150.0 + 300.0 * float(x)/xsteps, -150.0 + 300.0 * float(y)/ysteps, 0.0])
+                chi_squared = fitQualityFromCore(core)[0]
+                imarray[x, y] = chi_squared
+
+        plt.figure()
+        plt.imshow(imarray, cmap=plt.cm.hot_r, extent=(-150.0, 150.0, -150.0, 150.0))
+        plt.colorbar()
         # rotate antenna position axes to a, p coordinates. a = along time gradient, p = perpendicular to that
 
         (x, y) = (goodPositions2D[:, 0], goodPositions2D[:, 1])
