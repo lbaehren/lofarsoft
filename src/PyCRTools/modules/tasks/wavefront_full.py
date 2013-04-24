@@ -320,21 +320,13 @@ class Wavefront_full(Task):
         #az = np.radians(self.lora_direction[0])
         #el = np.radians(self.lora_direction[1])
         (az, el) = direction_fit_plane_wave.meandirection_azel
-        (az, el) = (318.73 * deg2rad, 50.93 * deg2rad)
+        print 'Fitted az = %3.2f, el = %3.2f' % (az / deg2rad, el / deg2rad)
+#        (az, el) = (318.73 * deg2rad, 50.93 * deg2rad)
+        print 'LORA az = %3.2f, el = %3.2f' % (az / deg2rad, el / deg2rad)
         # HACK LORA values in here
 #        print (az, el)
         cartesianDirection = - np.array([cos(el) * sin(az), cos(el) * cos(az), sin(el)]) # minus sign for incoming vector!
         #core = np.array([self.loracore[0], self.loracore[1], 0.0])
-
-        fakecoreX = 0.0
-        fakecoreY = 0.0
-        for pos in goodPositions2D:
-            fakecoreX += pos[0]
-            fakecoreY += pos[1]
-        #core = (1.0 / len(goodPositions2D)) * np.array([fakecoreX, fakecoreY, 0.0])
-        core = np.array([-132.5, 101.8, 0.0])
-        print 'Core position: '
-        print 'x = %3.2f, y = %3.2f' % (core[0], core[1])
         def fitQualityFromCore(core):
             axisDistance = []
             showerPlaneTimeDelay = []
@@ -357,6 +349,37 @@ class Wavefront_full(Task):
             reducedArrivalTimes -= polyfit[4]
 
             return (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues)
+
+        xsteps = 150
+        ysteps = 150
+        imarray = np.zeros((xsteps, ysteps))
+        bestCore = None
+        bestChi2 = 1.0e9
+        for x in range(xsteps):
+            print x
+            for y in range(ysteps):
+                core = np.array([-150.0 + 300.0 * float(x)/xsteps, -150.0 + 300.0 * float(y)/ysteps, 0.0])
+                chi_squared = fitQualityFromCore(core)[0]
+                imarray[x, y] = chi_squared
+                if chi_squared < bestChi2:
+                    bestChi2 = chi_squared
+                    bestCore = core
+
+        plt.figure()
+        plt.imshow(imarray, cmap=plt.cm.hot_r, extent=(-150.0, 150.0, -150.0, 150.0), origin='lower')
+        plt.colorbar()
+
+        fakecoreX = 0.0
+        fakecoreY = 0.0
+        for pos in goodPositions2D:
+            fakecoreX += pos[0]
+            fakecoreY += pos[1]
+        fakecore = (1.0 / len(goodPositions2D)) * np.array([fakecoreX, fakecoreY, 0.0])
+        print 'Fit-center core: x = %3.2f, y = %3.2f' % (fakecore[0], fakecore[1])
+#        core = np.array([-132.5, 101.8, 0.0])
+        core = bestCore
+        print 'Core position: '
+        print 'x = %3.2f, y = %3.2f' % (core[0], core[1])
         (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(core)
 
         plt.figure()
@@ -365,10 +388,10 @@ class Wavefront_full(Task):
         for i in range(len(stationList)):
             start = stationStartIndex[i]
             end = stationStartIndex[i+1]
-            plt.scatter(axisDistance[start:end]**2, reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
+            plt.scatter(axisDistance[start:end], reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
 
-        plt.plot(np.sort(axisDistance**2), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
-        plt.xlim([0.0, 50 * int(max(axisDistance)**2 / 50) + 50])
+        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
+        plt.xlim([0.0, 50 * int(max(axisDistance) / 50) + 50])
 
         plt.legend()
         plt.xlabel('Distance from axis [m]')
@@ -379,19 +402,6 @@ class Wavefront_full(Task):
 #            p = self.plot_prefix + "wavefront_arrivaltime_showerplane.{0}".format(self.plot_type)
 #            plt.savefig(p)
 #            self.plotlist.append(p)
-        xsteps = 100
-        ysteps = 100
-        imarray = np.zeros((xsteps, ysteps))
-        for x in range(xsteps):
-            print x
-            for y in range(ysteps):
-                core = np.array([-150.0 + 300.0 * float(x)/xsteps, -150.0 + 300.0 * float(y)/ysteps, 0.0])
-                chi_squared = fitQualityFromCore(core)[0]
-                imarray[x, y] = chi_squared
-
-        plt.figure()
-        plt.imshow(imarray, cmap=plt.cm.hot_r, extent=(-150.0, 150.0, -150.0, 150.0))
-        plt.colorbar()
         # rotate antenna position axes to a, p coordinates. a = along time gradient, p = perpendicular to that
 
         (x, y) = (goodPositions2D[:, 0], goodPositions2D[:, 1])
