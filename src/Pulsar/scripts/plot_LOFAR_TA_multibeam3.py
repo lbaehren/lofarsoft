@@ -7,7 +7,7 @@ import matplotlib.pylab as plb
 import matplotlib.ticker as ticker
 from matplotlib.patches import Ellipse, Rectangle
 import numpy as np
-import sys, re
+import sys, re, os
 import ephem
 from math import cos, atan, pi
 from operator import indexOf
@@ -116,6 +116,8 @@ if __name__ == '__main__':
         	          help="The number of rings around the maximum-snr point, to use for weighted fit (default: 2)")
 	parser.add_option("-l", "--linedash",action="store_true", dest="dash", default=False,
         	          help="Dash the beams not used for localisation")
+	parser.add_option("-w", "--writerm",action="store_true", dest="writerm", default=False,
+        	          help="Write out script for non-detection FITS file deletion")
 
 	(options, args) = parser.parse_args()
 	if len(sys.argv) < 2:
@@ -225,11 +227,28 @@ if __name__ == '__main__':
         for i,val in enumerate(weights):
             dsq[i] = (x[j]-x[i])**2 + (y[j]-y[i])**2
         # set the weights of the farther-out beams to zero
+        outlist=[]
         for i,val in enumerate(weights):
             if dsq[i] > np.sort(dsq)[npoints-2]:
                 weights[i] = 0.0
+                outlist.append(i)
                 if options.dash:
                     linestyle[i] = 'dotted' # 'dashed'
+
+        # write out a string for non-detection beam deletion
+        if options.writerm:
+            filename = "/cep1home/leeuwen/grid/rmfiles/rm-%s.sh" % obsid
+            file = open(filename, "w")
+            file.write("cd /data/LOFAR_PULSAR_ARCHIVE_`hostname`\n")
+            for i in outlist:
+                # beamstring = '{' + ','.join(str(int(Beams_good[i])) for i in outlist) + '}'
+                cmd = "rm -f %s_red/stokes/SAP%s/BEAM%s/%s_SAP%s_BEAM%s.fits\n" % (
+                    obsid, options.sap, str(int(Beams_good[i])), 
+                    obsid, options.sap, str(int(Beams_good[i])) )
+                file.write(cmd)
+            file.close()
+            os.chmod(filename, 0755)
+            print "wrote FITS removal script for non-detected beams at %s" % filename
 
 	# calculate the weighted mean:
 	xmean,xerr = wmom(x, weights, inputmean=None, calcerr=True, sdev=False)
