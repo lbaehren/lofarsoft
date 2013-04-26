@@ -652,8 +652,6 @@ class BeamFormer(tasks.Task):
                 self.antennaIDs = list(cr.ashArray(cr.hArray(self.datafile["DIPOLE_NAMES"])[self.antennas]))
                 antennaID = self.antennaIDs[iantenna]
                 self.datafile["SELECTED_DIPOLES"] = [antennaID]
-                if self.sample_offset:
-                    self.datafile.shiftTimeseriesData(sample_offset=self.sample_offset)  # Need to calculate this each time after having a new antenna selection.
                 print "# Start antenna =", antenna, "(ID=", str(antennaID) + "):"
                 if self.station_centered:
                     self.antpos = self.datafile.getRelativeAntennaPositionsNew()
