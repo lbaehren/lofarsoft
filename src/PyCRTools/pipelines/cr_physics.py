@@ -637,14 +637,15 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             station["crp_plotfiles"].append(plotfile)
 
             # Plot spectrum after antenna model unfolding
-            plt.clf()
-            plt.plot(frequencies.toNumpy() / 1.e6, np.log(np.median(np.square(antenna_response.on_sky_polarization.toNumpy()), axis=0)))
-            plotfile = station_plot_prefix + "spectrum_after_antenna_model.{0}".format(options.plot_type)
-            plt.title("Median spectrum after antenna model.")
-            plt.xlabel("Frequency [MHz]")
-            plt.ylabel("Log-Spectral Power [ADU]")
-            plt.savefig(plotfile)
-            station["crp_plotfiles"].append(plotfile)
+            if not hba:
+                plt.clf()
+                plt.plot(frequencies.toNumpy() / 1.e6, np.log(np.median(np.square(antenna_response.on_sky_polarization.toNumpy()), axis=0)))
+                plotfile = station_plot_prefix + "spectrum_after_antenna_model.{0}".format(options.plot_type)
+                plt.title("Median spectrum after antenna model.")
+                plt.xlabel("Frequency [MHz]")
+                plt.ylabel("Log-Spectral Power [ADU]")
+                plt.savefig(plotfile)
+                station["crp_plotfiles"].append(plotfile)
 
             # Add parameters
             station["crp_pulse_delay"] = delays.toNumpy().reshape((nantennas, 2))[:,pulse_envelope.strongest_polarization]
