@@ -412,7 +412,7 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end,
   const HInteger nbefore = flat_start;
   const HInteger nafter = N - flat_end - 1;
 
-  Iter *data_it = data;
+  Iter data_it = data;
 
   HInteger i=0;
   while (data_it != data_end)
