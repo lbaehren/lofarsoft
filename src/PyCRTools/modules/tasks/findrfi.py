@@ -79,6 +79,7 @@ class FindRFI(Task):
         refant=dict(default=None, doc="Optional parameter to set reference antenna number."),
 
         freq_range=dict(default=None, doc="Optional frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)"),
+        bandpass_filter=dict(default=None, doc"Optional bandpass filter to multiply with."),
         fft_data=dict(default=lambda self: cr.hArray(complex, dimensions=(self.nantennas, self.nfreq)),
             doc="Fourier transform of timeseries_data_resampled."),
         bad_antennas = dict(default=[],
@@ -156,6 +157,8 @@ class FindRFI(Task):
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
             self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window, hanning_fraction=self.hanning_fraction, datacheck=True)
+            if self.bandpass:
+                self.f.getFFTData[...].mul(self.bandpass_filter)
             # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
             # difference!

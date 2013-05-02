@@ -324,16 +324,17 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 raise StationError("{0}, signal is at edge of file".format(e.message))
 
             # Get bandpass filter
+            bandpass_filter.fill(0.)
+            if hba:
+                bandpass_filter[int(nf * 20. / 100.):int(nf * 90. / 100.)] = 1.0
+            else:
+                bandpass_filter.fill(1.0)
+
             nf = f["BLOCKSIZE"] / 2 + 1
             edge_width=10.
-            print "nf", nf
-            print "width", int(edge_width * nf / f["CLOCK_FREQUENCY"])
-            gaussian_weights = cr.hArray(cr.hGaussianWeights(int(edge_width * nf / f["CLOCK_FREQUENCY"])))
-            bandpass_filter[int(nf * 20. / 100.):int(nf * 90. / 100.)] = 1.0
-            cr.hRunningAverage(bandpass_filter, gaussian_weights)
 
-            np.save("bandpass_filter.npy", bandpass_filter.toNumpy())
-            np.save("frequencies.npy", f["FREQUENCY_DATA"].toNumpy())
+            gaussian_weights = cr.hArray(cr.hGaussianWeights(int(edge_width * nf / f["CLOCK_FREQUENCY"])))
+            cr.hRunningAverage(bandpass_filter, gaussian_weights)
 
             # Make plot of timeseries data in both polarizations of first selected antenna
             try:
@@ -366,10 +367,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Find RFI and bad antennas
                 try:
-                    if hba:
-                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window, hanning_fraction=0.2)
-                    else:
-                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(30, 80), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window, hanning_fraction=0.2)
+                    findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window, hanning_fraction=0.2, bandpass_filter=bandpass_filter)
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
