@@ -478,21 +478,23 @@ class TBBData(IOInterface):
         """
         self.__shift = sample_offset
 
-    def getFFTData(self, data, block=-1, hanning=True, datacheck=False):
+    def getFFTData(self, data, block=-1, hanning=True, hanning_fraction=1.0, datacheck=False):
         """Writes FFT data for selected antennas to data array.
 
         Required Arguments:
 
-        ============= =================================================
-        Parameter     Description
-        ============= =================================================
-        *data*        data array to write FFT data to.
-        *block*       index of block to return data from.
-        *hanning*     apply Hannnig filter to timeseries data before
-                      the FFT.
-        *datacheck*   check for blocks of consecutive zeros indicating
-                      data loss
-        ============= =================================================
+        =============      =================================================
+        Parameter          Description
+        =============      =================================================
+        *data*             data array to write FFT data to.
+        *block*            index of block to return data from.
+        *hanning*          apply Hannnig filter to timeseries data before
+                           the FFT.
+        *hanning_fraction* fraction of the window to hanning filter at start
+                           and end
+        *datacheck*        check for blocks of consecutive zeros indicating
+                           data loss
+        =============      =================================================
 
         Output:
         a two dimensional array containing the FFT data of the
@@ -517,7 +519,7 @@ class TBBData(IOInterface):
 
         # Apply Hanning filter
         if hanning:
-            self.__scratch[...].applyhanningfilter()
+			self.__scratch[...].applyhanningfilter(0.5, int(self.__blocksize * (1.0 - hanning_fraction)))
 
         # Perform FFT
         cr.hFFTWExecutePlan(data, self.__scratch, self.__plan)
