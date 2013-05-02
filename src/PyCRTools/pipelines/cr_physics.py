@@ -352,9 +352,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Find RFI and bad antennas
                 try:
                     if hba:
-                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window)
+                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window, hanning_fraction=0.2)
                     else:
-                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(30, 80), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window)
+                        findrfi = cr.trun("FindRFI", f=f, nofblocks=10, freq_range=(30, 80), save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window, hanning_fraction=0.2)
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
@@ -365,7 +365,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Select antennas which are marked good for both polarization
                 fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, datacheck=True)
+                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, hanning_fraction=0.2, datacheck=True)
 
                 dipole_names = f["DIPOLE_NAMES"]
 
@@ -393,7 +393,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Read FFT data (without Hanning window)
                 fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, datacheck=True)
+                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, hanning_fraction=0.2, datacheck=True)
 
                 print "NOF consecutive zeros", f.nof_consecutive_zeros
 

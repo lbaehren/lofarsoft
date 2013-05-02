@@ -112,6 +112,8 @@ class FindRFI(Task):
         testplots = dict(default=False, doc="Show test plots."),
         apply_hanning_window = dict(default=True,
             doc="Apply Hanning window to data before FFT."),
+        hanning_fraction = dict(default=1.0,
+            doc="Fraction of the window to Hanning filter (at beginning and end of timeseries) 0.2 is 10% at both ends."),
         dataloss_threshhold = dict(default=10, doc="NOF consecutive zeros in timeseries to be considered due to dataloss."),
         blocks_with_dataloss = dict(default=0, doc="Blocks that have been found to contain dataloss.", output=True),
     )
@@ -153,7 +155,7 @@ class FindRFI(Task):
 #            x = f["TIMESERIES_DATA"]
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
-            self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window, datacheck=True)
+            self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window, hanning_fraction=self.hanning_fraction, datacheck=True)
             # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
             # difference!
