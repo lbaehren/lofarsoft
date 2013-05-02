@@ -324,13 +324,13 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 raise StationError("{0}, signal is at edge of file".format(e.message))
 
             # Get bandpass filter
+            nf = f["BLOCKSIZE"] / 2 + 1
             bandpass_filter.fill(0.)
             if hba:
                 bandpass_filter.fill(1.0)
             else:
                 bandpass_filter[int(nf * 20. / 100.):int(nf * 90. / 100.)] = 1.0
 
-            nf = f["BLOCKSIZE"] / 2 + 1
             edge_width=10.
 
             gaussian_weights = cr.hArray(cr.hGaussianWeights(int(edge_width * nf / f["CLOCK_FREQUENCY"])))
