@@ -158,6 +158,7 @@ class FindRFI(Task):
 #            stdx = x.stddev()[0]
             self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window, hanning_fraction=self.hanning_fraction, datacheck=True)
             if self.bandpass_filter:
+                print "Applying bandpass"
                 self.fft_data[...].mul(self.bandpass_filter)
             # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
