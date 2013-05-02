@@ -79,7 +79,7 @@ class FindRFI(Task):
         refant=dict(default=None, doc="Optional parameter to set reference antenna number."),
 
         freq_range=dict(default=None, doc="Optional frequency range to consider; everything outside the range is flagged as 'bad'. Give as tuple, e.g. (30, 80)"),
-        bandpass_filter=dict(default=None, doc"Optional bandpass filter to multiply with."),
+        bandpass_filter=dict(default=None, doc="Optional bandpass filter to multiply with."),
         fft_data=dict(default=lambda self: cr.hArray(complex, dimensions=(self.nantennas, self.nfreq)),
             doc="Fourier transform of timeseries_data_resampled."),
         bad_antennas = dict(default=[],
