@@ -326,9 +326,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # Get bandpass filter
             bandpass_filter.fill(0.)
             if hba:
-                bandpass_filter[int(nf * 20. / 100.):int(nf * 90. / 100.)] = 1.0
-            else:
                 bandpass_filter.fill(1.0)
+            else:
+                bandpass_filter[int(nf * 20. / 100.):int(nf * 90. / 100.)] = 1.0
 
             nf = f["BLOCKSIZE"] / 2 + 1
             edge_width=10.
