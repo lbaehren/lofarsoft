@@ -327,10 +327,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             nf = f["BLOCKSIZE"] / 2 + 1
             edge_width=10.e6
             gaussian_weights = cr.hGaussianWeights(int(edge_width * f["CLOCK_FREQUENCY"] / nf))
-            bandpass[int(nf * 20. / 200.):int(nf * 90. / 200.)] = 1.0
-            cr.hRunningAverage(bandpass, gaussian_weights)
+            bandpass_filter[int(nf * 20. / 200.):int(nf * 90. / 200.)] = 1.0
+            cr.hRunningAverage(bandpass_filter, gaussian_weights)
 
-            np.save("bandpass.npy", bandpass.toNumpy())
+            np.save("bandpass_filter.npy", bandpass_filter.toNumpy())
             np.save("frequencies.npy", f["FREQUENCY_DATA"].toNumpy())
 
             # Make plot of timeseries data in both polarizations of first selected antenna
