@@ -377,9 +377,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     station["crp_plotfiles"].append(plot)
 
                 # Select antennas which are marked good for both polarization
-                fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, hanning_fraction=0.2, datacheck=True)
-
                 dipole_names = f["DIPOLE_NAMES"]
 
                 station["crp_median_cleaned_spectrum"] = findrfi.median_cleaned_spectrum
@@ -409,6 +406,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, hanning_fraction=0.2, datacheck=True)
 
                 print "NOF consecutive zeros", f.nof_consecutive_zeros
+
+                # Apply bandpass
+                fft_data[...].mul(bandpass_filter)
 
                 # Get corresponding frequencies
                 frequencies = cr.hArray(f["FREQUENCY_DATA"])
