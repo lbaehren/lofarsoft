@@ -390,7 +390,46 @@ void HFPP_FUNC_NAME(const Iter data, const Iter data_end, const IterFilter filte
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//-----------------------------------------------------------------------
+//$DOCSTRING: Apply a Hanning filter to the start and end of a vector.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hApplyHanningFilterStartEnd
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HFPP_TEMPLATED_TYPE)(data)()("Input and return vector containing the data on which the Hanning filter will be applied.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HInteger)(flat_start)()("Start sample of the flat part.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_2 (HInteger)(flat_end)()("End sample of the flat part.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END ----------------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+*/
+template <class Iter>
+void HFPP_FUNC_NAME(const Iter data, const Iter data_end,
+                    const HInteger flat_start, const HInteger flat_end)
+{
+  const HInteger N = data_end - data;
+  const HInteger nbefore = flat_start;
+  const HInteger nafter = N - flat_end - 1;
 
+  Iter *data_it = data;
+
+  HInteger i=0;
+  while (data_it != data_end)
+  {
+    if (data_it - data < flat_start)
+    {
+      *data_it *= 0.5 * (1 - cos(M_PI * i/nbefore));
+    }
+    else if (data_it - data > flat_end)
+    {
+      *data_it *= 0.5 * (1 - cos(M_PI * (N-i)/nafter));
+    }
+    data_it++;
+    i++;
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Apply a Hanning filter on a vector.
