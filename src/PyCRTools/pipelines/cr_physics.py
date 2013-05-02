@@ -326,7 +326,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             # Get bandpass filter
             nf = f["BLOCKSIZE"] / 2 + 1
             edge_width=10.e6
-            gaussian_weights = cr.hGaussianWeights(int(edge_width * f["CLOCK_FREQUENCY"] / nf))
+            gaussian_weights = cr.hArray(cr.hGaussianWeights(int(edge_width * f["CLOCK_FREQUENCY"] / nf)))
             bandpass_filter[int(nf * 20. / 200.):int(nf * 90. / 200.)] = 1.0
             cr.hRunningAverage(bandpass_filter, gaussian_weights)
 
