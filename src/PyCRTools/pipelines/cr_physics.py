@@ -260,6 +260,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
     fftwplan = cr.FFTWPlanManyDftR2c(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
     ifftwplan = cr.FFTWPlanManyDftC2r(options.blocksize, 1, 1, 1, 1, 1, cr.fftw_flags.ESTIMATE)
 
+    # Create bandpass filter
+    bandpass_filter = cr.hArray(float, options.blocksize / 2 + 1)
+
     # Loop over all stations in event
     stations = []
     for f in event.datafiles:
@@ -319,6 +322,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 f.shiftTimeseriesData(shift)
             except ValueError as e:
                 raise StationError("{0}, signal is at edge of file".format(e.message))
+
+            # Get bandpass filter
+            nf = f["BLOCKSIZE"] / 2 + 1
+            edge_width=10.e6
+            gaussian_weights = cr.hGaussianWeights(int(edge_width * f["CLOCK_FREQUENCY"] / nf))
+            bandpass[int(nf * 20. / 200.):int(nf * 90. / 200.)] = 1.0
+            cr.hRunningAverage(bandpass, gaussian_weights)
+
+            np.save("bandpass.npy", bandpass.toNumpy())
+            np.save("frequencies.npy", f["FREQUENCY_DATA"].toNumpy())
 
             # Make plot of timeseries data in both polarizations of first selected antenna
             try:
