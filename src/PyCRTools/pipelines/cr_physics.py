@@ -329,7 +329,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             if hba:
                 bandpass_filter.fill(1.0)
             else:
-                bandpass_filter[int(nf * 20. / 100.):int(nf * 90. / 100.)] = 1.0
+                bandpass_filter[int(nf * 30. / 100.):int(nf * 80. / 100.)] = 1.0
 
             edge_width=10.
 
