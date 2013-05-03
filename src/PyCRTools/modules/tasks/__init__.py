@@ -518,7 +518,9 @@ class TaskInit(type):
                 par_doc_default = str(v["default"]).strip()
                 par_doc += " [default value: "
                 # Print string values in quotes
-                if isinstance(v["default"], (str, unicode, basestring)):
+                if isinstance(v["default"], (int, long, float)):
+                    par_doc += par_doc_default
+                elif isinstance(v["default"], (str, unicode, basestring)):
                     par_doc += "'" + par_doc_default + "'"
                 else:
                     if par_doc_default:
