@@ -157,9 +157,6 @@ class FindRFI(Task):
 #            maxx = x.max()[0]
 #            stdx = x.stddev()[0]
             self.f.getFFTData(self.fft_data, block=i + self.startblock, hanning=self.apply_hanning_window, hanning_fraction=self.hanning_fraction, datacheck=True)
-            if self.bandpass_filter:
-                print "Applying bandpass"
-                self.fft_data[...].mul(self.bandpass_filter)
             # Note: No hanning window if we want to measure power accurately from spectrum
             # in the same units as power from timeseries. Applying a window gives (at least) a scale factor
             # difference!
@@ -261,6 +258,10 @@ class FindRFI(Task):
 #        plt.plot(np.log(cleanedspectrum.toNumpy()[0]))
 #        plt.plot(np.log(cleanedspectrum.toNumpy()[20]))
         self.cleaned_spectrum = cleanedspectrum
+        if self.bandpass_filter:
+            print "Applying bandpass"
+            self.cleaned_spectrum[...].mul(self.bandpass_filter)
+        
         # cleanedspectrum[self.dirty_channels] = np.float('nan')
 
         # Get median cleaned spectrum (over all antennas)
