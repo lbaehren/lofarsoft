@@ -258,9 +258,6 @@ class FindRFI(Task):
 #        plt.plot(np.log(cleanedspectrum.toNumpy()[0]))
 #        plt.plot(np.log(cleanedspectrum.toNumpy()[20]))
         self.cleaned_spectrum = cleanedspectrum
-        if self.bandpass_filter:
-            print "Applying bandpass"
-            self.cleaned_spectrum[...].mul(self.bandpass_filter)
         
         # cleanedspectrum[self.dirty_channels] = np.float('nan')
 
@@ -268,6 +265,10 @@ class FindRFI(Task):
         median_cleaned_spectrum = np.copy(y)
         median_cleaned_spectrum[self.dirty_channels] = 0.0
         self.median_cleaned_spectrum = cr.hArray(median_cleaned_spectrum)
+
+        if self.bandpass_filter:
+            print "Applying bandpass"
+            self.median_cleaned_spectrum.mul(self.bandpass_filter)
 
         self.amplitude_spectrum = self.cleaned_spectrum.new()
         self.amplitude_spectrum.copy(self.cleaned_spectrum)
