@@ -513,8 +513,7 @@ class TaskInit(type):
         for p, v in sorted(dct.items()):
             par_doc = newline + "*" + p + "*"
             # Check for default values
-            if ("default" in v and
-                (not isinstance(v["default"], types.FunctionType))):
+            if ("default" in v and (not isinstance(v["default"], types.FunctionType))):
                 par_doc_default = str(v["default"]).strip()
                 par_doc += " [default value: "
                 # Print string values in quotes
@@ -522,9 +521,13 @@ class TaskInit(type):
                     par_doc += par_doc_default
                 elif isinstance(v["default"], (str, unicode, basestring)):
                     par_doc += "'" + par_doc_default + "'"
+                elif v["default"] is None:
+                    par_doc += "None"
                 else:
                     if par_doc_default:
-                        par_doc += "``" + par_doc_default.__repr__().replace(r'\n', '') + "``"
+                        par_doc_default = par_doc_default.__repr__()
+                        par_doc_default = par_doc_default.replace(r'\n', '')
+                        par_doc += "``" + par_doc_default + "``"
                 par_doc += "]"
             par_doc += newline
             # Check for documentation
