@@ -209,10 +209,10 @@ A simple example is given below::
       \"""
       Documentation of task - parameters will be added automatically
       \"""
-      parameters = {
-          "x":{"default":None,doc:"x-value - a positional parameter","positional":1},
-          "y":{"default":2, doc:"y-value - a normal keyword parameter"},
-          "xy":{"default":lambda ws:ws.y*ws.x,doc:"Example of a derived parameter."}}
+      parameters = dict(
+          x=dict(default=None, doc='x-value - a positional parameter', positional=1),
+          y=dict(default=2, doc='y-value - a normal keyword parameter'),
+          xy=dict(default=lambda ws: ws.y * ws.x, doc='Example of a derived parameter.'))
       def init(self):
           print "Calling optional initialization routine - Nothing to do here."
       def run(self):
