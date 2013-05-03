@@ -525,13 +525,12 @@ class TaskInit(type):
                 else:
                     if par_doc_default:
                         par_doc_default = par_doc_default.__repr__()
-                        if par_doc_default.startswith("'"):
-                            par_doc_default = par_doc_default[1:]
-                        if par_doc_default.endswith("'"):
-                            par_doc_default = par_doc_default[:-1]
+                        if ((par_doc_default.startswith("'") and par_doc_default.endswith("'")) or
+                            (par_doc_default.startswith('"') and par_doc_default.endswith('"'))):
+                            par_doc_default = par_doc_default[1:-1]
                         par_doc_default = par_doc_default.replace(r'\n', '')
                         par_doc += "``" + par_doc_default + "``"
-                par_doc += "]"
+                par_doc += " ]"
             par_doc += newline
             # Check for documentation
             if "doc" in v:
