@@ -264,11 +264,12 @@ class FindRFI(Task):
         # Get median cleaned spectrum (over all antennas)
         median_cleaned_spectrum = np.copy(y)
         median_cleaned_spectrum[self.dirty_channels] = 0.0
-        self.median_cleaned_spectrum = cr.hArray(median_cleaned_spectrum)
 
         if self.bandpass_filter:
             print "Applying bandpass"
-            self.median_cleaned_spectrum.mul(self.bandpass_filter)
+            median_cleaned_spectrum *= self.bandpass_filter.toNumpy()
+
+        self.median_cleaned_spectrum = cr.hArray(median_cleaned_spectrum)
 
         self.amplitude_spectrum = self.cleaned_spectrum.new()
         self.amplitude_spectrum.copy(self.cleaned_spectrum)
