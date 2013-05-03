@@ -516,12 +516,11 @@ class TaskInit(type):
             if ("default" in v and (not isinstance(v["default"], types.FunctionType))):
                 par_doc_default = str(v["default"]).strip()
                 par_doc += " [default value: "
-                # Print string values in quotes
-                if isinstance(v["default"], (int, long, float)):
+                if isinstance(v["default"], (int, long, float)):  # Scalars
                     par_doc += par_doc_default
-                elif isinstance(v["default"], (str, unicode, basestring)):
+                elif isinstance(v["default"], (str, unicode, basestring)):  # Print string values in quotes
                     par_doc += "'" + par_doc_default + "'"
-                elif v["default"] is None:
+                elif v["default"] is None:  # None value
                     par_doc += "None"
                 else:
                     if par_doc_default:
