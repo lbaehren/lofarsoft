@@ -522,7 +522,7 @@ class TaskInit(type):
                     par_doc += "'" + par_doc_default + "'"
                 else:
                     if par_doc_default:
-                        par_doc += "``" + par_doc_default + "``"
+                        par_doc += "``" + par_doc_default.__repr__().replace(r'\n', '') + "``"
                 par_doc += "]"
             par_doc += newline
             # Check for documentation
