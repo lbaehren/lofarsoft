@@ -483,9 +483,9 @@ class TBBData(IOInterface):
 
         Required Arguments:
 
-        =============      =================================================
+        ================== =================================================
         Parameter          Description
-        =============      =================================================
+        ================== =================================================
         *data*             data array to write FFT data to.
         *block*            index of block to return data from.
         *hanning*          apply Hannnig filter to timeseries data before
@@ -494,7 +494,7 @@ class TBBData(IOInterface):
                            and end
         *datacheck*        check for blocks of consecutive zeros indicating
                            data loss
-        =============      =================================================
+        ================== =================================================
 
         Output:
         a two dimensional array containing the FFT data of the
