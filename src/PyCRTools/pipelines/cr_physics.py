@@ -346,7 +346,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             # Optionally plot raw data
             if options.debug:
-                t = 1.e6 * np.range(raw_data.shape[1]) / f["CLOCK_FREQUENCY"]
+                t = 1.e6 * np.arange(raw_data.shape[1]) / f["CLOCK_FREQUENCY"]
                 for i in range(raw_data.shape[0]):
                     plt.clf()
                     plt.plot(t, raw_data[i])
