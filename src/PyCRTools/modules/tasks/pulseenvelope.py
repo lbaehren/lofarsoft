@@ -204,7 +204,7 @@ class PulseEnvelope(Task):
 
             s = self.timeseries_data_resampled.toNumpy()
             y = self.envelope.toNumpy()
-            x = 5.e-6 * self.resample_factor * np.arange(y.shape[1])
+            x = 1.e6 * np.arange(y.shape[1]) / (self.sampling_frequency * self.resample_factor)
 
             # Single pulse envelope of first antenna
             for i in self.plot_antennas:
