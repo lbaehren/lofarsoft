@@ -5046,7 +5046,54 @@ std::vector<HNumber> HFPP_FUNC_NAME (HInteger len) {
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Returns vector of wieghts with Gaussian distribution.
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hGaussianWeights
+//-----------------------------------------------------------------------
+#define HFPP_BUILD_ADDITIONAL_Cpp_WRAPPERS HFPP_NONE
+//#define HFPP_FUNC_SLICED HFPP_FALSE
+#define HFPP_FUNCDEF  (HNumber)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_VECTOR)(STL)(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HInteger)(len)()("Lengths of weights vector")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_1 (HNumber)(nsigma)()("Number of sigma for falloff")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
 
+  Description:
+
+  Returns vector of weights of length ``len`` with a Gaussian
+  distribution centered at :math:`\\mu=` ``len/2`` and
+  :math:`\\sigma=` ``len/nsigma`` (i.e. the Gaussian extends over :math:`nsigma
+  \\sigma` in both directions).
+*/
+ //template <class T>
+
+std::vector<HNumber> HFPP_FUNC_NAME (HInteger len, HNumber nsigma) {
+  // Sanity check
+  if (len <= 0) {
+    throw PyCR::ValueError("Length of weight vector should be > 0.");
+  }
+
+  vector<HNumber> weights(len,0.0);
+  HInteger i, middle=len/2;
+  HNumber f, sum=0.0;
+
+  for (i=0; i<len; i++) {
+    f=funcGaussian(i,max(len/((HNumber)nsigma * 2.0),NUMBER_ONE),middle);
+    weights[i]=f;
+    sum+=f;
+  };
+  //Normalize to unity
+  if (abs(sum) < A_LOW_NUMBER) {
+    throw PyCR::ZeroDivisionError("Sum value is 0.");
+  } else {
+    for (i=0; i<len; i++) weights[i] /= sum;
+  }
+
+  return weights;
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
 //-----------------------------------------------------------------------
 //$DOCSTRING: Create a normalized weight vector.
