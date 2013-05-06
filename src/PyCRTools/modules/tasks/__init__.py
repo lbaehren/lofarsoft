@@ -519,7 +519,7 @@ class TaskInit(type):
                 if isinstance(v["default"], (int, long, float)):  # Scalars
                     par_doc += par_doc_default
                 elif isinstance(v["default"], (str, unicode, basestring)):  # Print string values in quotes
-                    par_doc += "'" + par_doc_default + "'"
+                    par_doc += "\"" + par_doc_default + "\""
                 elif v["default"] is None:  # None value
                     par_doc += "None"
                 else:
