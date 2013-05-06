@@ -344,14 +344,6 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             if raw_data.shape[0] < 2:
                 raise StationError("File of station contains less than 2 antennas.")
 
-            plt.subplot(2,1,1)
-            plt.plot(raw_data[0])
-            plt.subplot(2,1,2)
-            plt.plot(raw_data[1])
-            plotfile = station_plot_prefix + "raw_data.{0}".format(options.plot_type)
-            plt.savefig(plotfile)
-            station["crp_plotfiles"].append(plotfile)
-
             # Optionally plot raw data
             if options.debug:
                 for i in range(raw_data.shape[0]):
