@@ -43,6 +43,38 @@ def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0)
 
     return mse
 
+def fitQualityFromCore(core, az, el, positions2D, times):
+    cartesianDirection = - np.array([cos(el) * sin(az), cos(el) * cos(az), sin(el)]) # minus sign for incoming vector!
+    axisDistance = []
+    showerPlaneTimeDelay = []
+
+    for pos in positions2D:
+        relpos = pos - core
+        delay = (1/c) * np.dot(cartesianDirection, relpos)
+        distance = np.linalg.norm(relpos - np.dot(cartesianDirection, relpos) * cartesianDirection)
+        axisDistance.append(distance)
+        showerPlaneTimeDelay.append(delay)
+
+    axisDistance = np.array(axisDistance)
+    showerPlaneTimeDelay = np.array(showerPlaneTimeDelay)
+
+    reducedArrivalTimes = 1e9 * (times - showerPlaneTimeDelay)
+
+    polyfit = np.polyfit(axisDistance, reducedArrivalTimes, 4)
+    polyvalues = np.poly1d(polyfit)
+    chi_squared = np.sum((np.polyval(polyfit, axisDistance) - reducedArrivalTimes) ** 2) / (len(axisDistance) - 4)
+    reducedArrivalTimes -= polyfit[4]
+
+    return (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues)
+
+def chi2Minimizer_azel(azel, core, positions2D, times):
+    (az, el) = azel
+    chi2 = fitQualityFromCore(core, az, el, positions2D, times)[0]
+    print 'Evaluated direction: az = %3.3f, el = %2.3f, chi^2 = %1.4f' % (az / deg2rad, el / deg2rad, chi2)
+
+    return chi2
+
+
 def flaggedIndicesForOutliers(inarray, k_sigma = 5):
     # Remove outliers beyond k-sigma (above and below)
     # Use robust estimators, i.e. median and percentile-based sigma.
@@ -321,66 +353,21 @@ class Wavefront_full(Task):
         #el = np.radians(self.lora_direction[1])
         (az, el) = direction_fit_plane_wave.meandirection_azel
         print 'Fitted az = %3.2f, el = %3.2f' % (az / deg2rad, el / deg2rad)
-#        (az, el) = (318.73 * deg2rad, 50.93 * deg2rad)
+        (az, el) = (318.73 * deg2rad, 50.93 * deg2rad)
         print 'LORA az = %3.2f, el = %3.2f' % (az / deg2rad, el / deg2rad)
         # HACK LORA values in here
 #        print (az, el)
-        cartesianDirection = - np.array([cos(el) * sin(az), cos(el) * cos(az), sin(el)]) # minus sign for incoming vector!
         #core = np.array([self.loracore[0], self.loracore[1], 0.0])
-        def fitQualityFromCore(core):
-            axisDistance = []
-            showerPlaneTimeDelay = []
+        core = np.array([-132.5, 101.8, 0])
+        # Fit optimum az, el for this core
+        optimum = fmin(chi2Minimizer_azel, (az, el), (core, goodPositions2D, goodTimes), xtol=1e-5, ftol=1e-5, full_output=1)
+        (bestAz, bestEl) = optimum[0]
+        print 'Optimum az/el:'
+        print 'az = %3.3f, el = %2.3f' % (bestAz / deg2rad, bestEl / deg2rad)
 
-            for pos in goodPositions2D:
-                relpos = pos - core
-                delay = (1/c) * np.dot(cartesianDirection, relpos)
-                distance = np.linalg.norm(relpos - np.dot(cartesianDirection, relpos) * cartesianDirection)
-                axisDistance.append(distance)
-                showerPlaneTimeDelay.append(delay)
-
-            axisDistance = np.array(axisDistance)
-            showerPlaneTimeDelay = np.array(showerPlaneTimeDelay)
-
-            reducedArrivalTimes = 1e9 * (goodTimes - showerPlaneTimeDelay)
-
-            polyfit = np.polyfit(axisDistance, reducedArrivalTimes, 4)
-            polyvalues = np.poly1d(polyfit)
-            chi_squared = np.sum((np.polyval(polyfit, axisDistance) - reducedArrivalTimes) ** 2) / (len(axisDistance) - 4)
-            reducedArrivalTimes -= polyfit[4]
-
-            return (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues)
-
-        xsteps = 150
-        ysteps = 150
-        imarray = np.zeros((xsteps, ysteps))
-        bestCore = None
-        bestChi2 = 1.0e9
-        for x in range(xsteps):
-            print x
-            for y in range(ysteps):
-                core = np.array([-150.0 + 300.0 * float(x)/xsteps, -150.0 + 300.0 * float(y)/ysteps, 0.0])
-                chi_squared = fitQualityFromCore(core)[0]
-                imarray[x, y] = chi_squared
-                if chi_squared < bestChi2:
-                    bestChi2 = chi_squared
-                    bestCore = core
-
-        plt.figure()
-        plt.imshow(imarray, cmap=plt.cm.hot_r, extent=(-150.0, 150.0, -150.0, 150.0), origin='lower')
-        plt.colorbar()
-
-        fakecoreX = 0.0
-        fakecoreY = 0.0
-        for pos in goodPositions2D:
-            fakecoreX += pos[0]
-            fakecoreY += pos[1]
-        fakecore = (1.0 / len(goodPositions2D)) * np.array([fakecoreX, fakecoreY, 0.0])
-        print 'Fit-center core: x = %3.2f, y = %3.2f' % (fakecore[0], fakecore[1])
-#        core = np.array([-132.5, 101.8, 0.0])
-        core = bestCore
         print 'Core position: '
         print 'x = %3.2f, y = %3.2f' % (core[0], core[1])
-        (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(core)
+        (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(core, bestAz, bestEl, goodPositions2D, goodTimes)
 
         plt.figure()
         start = 0
@@ -495,5 +482,33 @@ class Wavefront_full(Task):
 
         """
         see test script testCrosscorr_MultiTBB.py for commented-out stuff
+
+        ysteps = 50
+        imarray = np.zeros((xsteps, ysteps))
+        bestCore = None
+        bestChi2 = 1.0e9
+        for x in range(xsteps):
+            print x
+            for y in range(ysteps):
+                core = np.array([-150.0 + 300.0 * float(x)/xsteps, -150.0 + 300.0 * float(y)/ysteps, 0.0])
+                chi_squared = fitQualityFromCore(core, az, el, goodPositions2D, goodTimes)[0]
+                imarray[x, y] = chi_squared
+                if chi_squared < bestChi2:
+                    bestChi2 = chi_squared
+                    bestCore = core
+
+        plt.figure()
+        plt.imshow(imarray, cmap=plt.cm.hot_r, extent=(-150.0, 150.0, -150.0, 150.0), origin='lower')
+        plt.colorbar()
+
+        fakecoreX = 0.0
+        fakecoreY = 0.0
+        for pos in goodPositions2D:
+            fakecoreX += pos[0]
+            fakecoreY += pos[1]
+        fakecore = (1.0 / len(goodPositions2D)) * np.array([fakecoreX, fakecoreY, 0.0])
+        print 'Fit-center core: x = %3.2f, y = %3.2f' % (fakecore[0], fakecore[1])
+#        core = np.array([-132.5, 101.8, 0.0])
+        core = bestCore
 
         """
