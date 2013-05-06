@@ -431,6 +431,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 galactic_noise = cr.trun("GalacticNoise", fft_data=fft_data, channel_width=f["SAMPLE_FREQUENCY"][0] / f["BLOCKSIZE"], timestamp=tbb_time, antenna_set=f["ANTENNA_SET"], original_power=antennas_cleaned_power)
 
                 station["crp_galactic_noise"] = galactic_noise.galactic_noise_power
+                station["crp_relative_gain_correction_factor"] = np.square(galactic_noise.correction_factor.toNumpy())
 
                 # Apply calibration delays
                 try:
