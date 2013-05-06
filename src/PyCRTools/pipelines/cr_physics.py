@@ -532,6 +532,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
             # Optionally plot raw data after calibrating
             if options.debug:
+                cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
+
                 td = timeseries_data.toNumpy()
                 for i in range(td.shape[0]):
                     plt.clf()
