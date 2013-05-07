@@ -332,7 +332,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             else:
                 bandpass_filter[int(nf * 30. / 100.)-(ne/2):int(nf * 80. / 100.)+(ne/2)] = 1.0
 
-            gaussian_weights = cr.hArray(cr.hGaussianWeights(ne), 4.0)
+            gaussian_weights = cr.hArray(cr.hGaussianWeights(ne, 4.0))
             cr.hRunningAverage(bandpass_filter, gaussian_weights)
 
             # Make plot of timeseries data in both polarizations of first selected antenna
