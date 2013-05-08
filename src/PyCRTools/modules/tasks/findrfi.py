@@ -300,6 +300,7 @@ class FindRFI(Task):
             # Plot only the uncleaned spectrum
 #            plt.figure()
             plt.plot(freqs, logspectrum, c='b')
+            ax = plt.gca()
             if self.plot_title:
                 plt.title('Median-average spectrum of all antennas')
             plt.xlabel('Frequency [MHz]')
@@ -321,6 +322,7 @@ class FindRFI(Task):
             plt.plot(freqs, dirtyspectrum, 'x', c='r', markersize=8)
             if self.plot_title:
                 plt.title('Median-average spectrum of all antennas, with flagging')
+            plt.ylim(ax.get_ylim())
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('Log-Spectral Power [ADU]')
 #            self.plot_finish(filename=self.plot_name + "-avgspectrum_withflags",filetype=self.filetype)
@@ -348,10 +350,11 @@ class FindRFI(Task):
             # Average spectrum (cleaned)
             plt.figure()
             log_cleanedspectrum = np.log(median_cleaned_spectrum)
-            log_cleanedspectrum[log_cleanedspectrum < np.min(logspectrum)] = np.nan
+            log_cleanedspectrum[log_cleanedspectrum < ax.get_ylim()[1]] = np.nan
             plt.plot(freqs, log_cleanedspectrum, c='b')
             if self.plot_title:
                 plt.title('Median-average spectrum of all antennas, cleaned')
+            plt.ylim(ax.get_ylim())
             plt.xlabel('Frequency [MHz]')
             plt.ylabel('Log-Spectral Power [ADU]')
             p = self.plot_prefix + "average_spectrum_cleaned.{0}".format(self.plot_type)
