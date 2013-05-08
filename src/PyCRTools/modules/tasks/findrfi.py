@@ -348,6 +348,7 @@ class FindRFI(Task):
             # Average spectrum (cleaned)
             plt.figure()
             log_cleanedspectrum = np.log(median_cleaned_spectrum)
+            log_cleanedspectrum[log_cleanedspectrum < np.min(logspectrum)] = np.nan
             plt.plot(freqs, log_cleanedspectrum, c='b')
             if self.plot_title:
                 plt.title('Median-average spectrum of all antennas, cleaned')
