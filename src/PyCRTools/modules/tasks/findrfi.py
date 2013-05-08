@@ -343,6 +343,7 @@ class FindRFI(Task):
 
                 # move to testplots?
                 p = self.plot_prefix + "average_spectrum_phasevariance.{0}".format(self.plot_type)
+                self.plotlist.append(p)
                 plt.savefig(p)
 
 
