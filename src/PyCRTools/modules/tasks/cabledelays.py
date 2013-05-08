@@ -5,6 +5,7 @@ Cabledelays
 Task: Get cable delays by gathering / averaging from a given pipeline 'results' directory.
 
 .. moduleauthor:: Arthur Corstanje <a.corstanje@astro.ru.nl>
+
 """
 
 import pycrtools as cr
@@ -25,8 +26,18 @@ def timeStringNow():
 
 
 def gatherresults(topdir, maxspread, antennaSet):
-    """
-    Gather fitted cable delay results from all 'results.py' files in the subdirectories of 'topdir'.
+    """Gather fitted cable delay results from all 'results.py' files in the subdirectories of 'topdir'.
+
+    **Properties**
+
+    ============= ====================
+    Parameter     Description
+    ============= ====================
+    *topdir*      --
+    *maxspread*   --
+    *antennaSet*  --
+    ============= ====================
+
     """
     if not topdir:
         return None
@@ -169,7 +180,18 @@ def gatherresults(topdir, maxspread, antennaSet):
 
 
 def obtainvalue(par, key):
-    """This function returns the value from a parameter dict or a default value if the key does not exist"""
+    """This function returns the value from a parameter dict or a default value if the key does not exist.
+
+    **Properties**
+
+    ==========  ==================================
+    Parameter   Description
+    ==========  ==================================
+    *par*       --
+    *key*       --
+    ==========  ==================================
+
+    """
     defaultvalues = dict(
         title=False,
         loracore=None,
@@ -197,7 +219,18 @@ def obtainvalue(par, key):
 
 
 def getDelaysFromPhaseCalibrationTables(stationName, theseAntennas):
+    """Get the delays from the phase calibration tables.
 
+    **Properties**
+
+    ================  ============================================================
+    Parameter         Description
+    ================  ============================================================
+    *stationName*     --
+    *theseAntennas*   --
+    ================  ============================================================
+
+    """
     RCUlist = []  # get the RCU list we have in 'theseAntennas'
     for id in theseAntennas:
         thisRCU = int(id) % 100
@@ -218,7 +251,8 @@ def getDelaysFromPhaseCalibrationTables(stationName, theseAntennas):
 
 
 class cabledelays(tasks.Task):
-    """
+    """Cable delays.
+
     **Description:**
 
     Get cable delays.
@@ -226,14 +260,15 @@ class cabledelays(tasks.Task):
     **Usage:**
 
     **See also:**
+
     :class:`plotfootprint`
 
-    **Example:**
+    **Example**::
 
-    ::
         filefilter="/Volumes/Data/sandertv/VHECR/LORAtriggered/results/VHECR_LORA-20110716T094509.665Z/"
         crfootprint=cr.trun("plotfootprint",filefilter=filefilter,pol=polarization)
-   """
+
+    """
     parameters = dict(
         topdir=dict(default=None,
                     doc="Top-level results directory from which to gather cable delays"),
