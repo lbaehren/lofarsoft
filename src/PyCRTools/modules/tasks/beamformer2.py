@@ -543,17 +543,24 @@ class BeamFormer2(tasks.Task):
         caclulated it will only be recalculated if explicitly asked
         for with recalc=True.
 
-        *beams* = ``None`` - Input array. Take self.beams from task, if None.
-        *recalc*= ``False`` - If true force a recalculation of the time series beam if it exists
-        *block* = 0 - Which  block to plot, or Ellipsis ('...') for all
-        *NyquistZone* = 1 - NyquistZone=2,4,... means flip the data left to right before FFT.
-        *doabs* = ``True`` - Take the absolute of the timeseries before plotting.
-        *smooth* = 0 - If > 0 smooth data with a Gaussian kernel of that size.
-        *plotspec* = ``False`` - If True plot the average spectrum instead.
-        *xlim*       tuple with minimum and maximum limits for the *x*-axis.
-        *ylim*       tuple with minimum and maximum limits for the *y*-axis.
+        **Properties**
+
+        ==============  ==========  ==========================================================================
+        Parameter       Default         Description
+        ==============  ==========  ==========================================================================
+        *beams*         ``None``    Input array. Take self.beams from task, if None.
+        *recalc*        ``False``   If true force a recalculation of the time series beam if it exists
+        *block*         0           Which  block to plot, or Ellipsis ('...') for all
+        *NyquistZone*   1           NyquistZone=2,4,... means flip the data left to right before FFT.
+        *doabs*         ``True``    Take the absolute of the timeseries before plotting.
+        *smooth*        0           If > 0 smooth data with a Gaussian kernel of that size.
+        *plotspec*      ``False``   If True plot the average spectrum instead.
+        *xlim*          ``None``    Tuple with minimum and maximum limits for the *x*-axis.
+        *ylim*          ``None``    Tuple with minimum and maximum limits for the *y*-axis.
+        ==============  ==========  ==========================================================================
 
         The final time series (all blocks) is stored in Task.tbeams.
+
         """
         if beams == None:
             beams = self.beams
@@ -590,12 +597,17 @@ class BeamFormer2(tasks.Task):
         [self.nblocks,self.nbeams,self.speclen], do a NyquistSwap, if
         necessary, and then an inverse FFT.
 
-        *beams* = None - Input array. Take self.beams from task, if None.
-        *NyquistZone* = 1 - NyquistZone=2,4,... means flip the data left to right before FFT.
-        *doabs* = False - Take the absolute of the timeseries, if True.
-        *smooth* = 0 - If > 0 smooth datat with a Gaussian kernel of that size.
+        ==============  ============  ==========================================================================
+        Parameter       Default       Description
+        ==============  ============  ==========================================================================
+        *beams*         ``None``      Input array. Take self.beams from task, if None.
+        *NyquistZone*   1             NyquistZone=2,4,... means flip the data left to right before FFT.
+        *doabs*         ``False``     Take the absolute of the timeseries, if True.
+        *smooth*        0             If > 0 smooth datat with a Gaussian kernel of that size.
+        ==============  ============  ==========================================================================
 
         The final time series (all blocks) is stored in Task.tbeams and returned.
+
         """
 
         if beams == None:
@@ -687,22 +699,22 @@ class BeamFormer2(tasks.Task):
         Plot the dynamic spectrum. Provide the dynamic spectrum
         computed by the Task DynamicSpectrum as input.
 
-        *plot_cleanspec* = None - If False, don't plot the cleaned
-         spectrum (provided as dynspec.par.cleanspec).
+        =================  ========  ============================================================
+        Parameter          Default   Description
+        =================  ========  ============================================================
+        *plot_cleanspec*   ``None``  If False, don't plot the cleaned spectrum (provided as dynspec.par.cleanspec).
+        *dmin*             ``None``  Minimum z-value (intensity) in dynamic spectrum to plot
+        *dmax*             ``None``  Maximum z-value (intensity) in dynamic spectrum to plot
+        *cmin*             ``None``  Minimum z-value (intensity) in clean dynamic spectrum to plot
+        *cmax*             ``None``  Maximum z-value (intensity) in clean dynamic spectrum to plot
+        =================  ========  ============================================================
 
-         *dmin* - Minimum z-value (intensity) in dynamic spectrum to plot
+        Example::
 
-         *dmax* - Maximum z-value (intensity) in dynamic spectrum to plot
+          tload "DynamicSpectrum"
+          dsp=cr.hArrayRead("Saturn.h5.dynspec.pcr")
+          Task.dynplot(dsp,cmin=2.2*10**-5,cmax=0.002,dmin=6.8,dmax=10)
 
-         *cmin* - Minimum z-value (intensity) in clean dynamic spectrum to plot
-
-         *cmax* - Maximum z-value (intensity) in clean dynamic spectrum to plot
-
-         Example:
-
-         tload "DynamicSpectrum"
-         dsp=cr.hArrayRead("Saturn.h5.dynspec.pcr")
-         Task.dynplot(dsp,cmin=2.2*10**-5,cmax=0.002,dmin=6.8,dmax=10)
         """
         if hasattr(dynspec, "par") and hasattr(dynspec.par, "cleanspec") and not plot_cleanspec == False:
             cleanspec = dynspec.par.cleanspec
