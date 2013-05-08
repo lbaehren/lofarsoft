@@ -59,7 +59,20 @@ def vectorAverage(directions):
 
 
 def getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays):
-    """
+    """Scan the array of time differences.
+
+    **Properties**
+
+    ====================== ===========================================
+    Parameter              Description
+    ====================== ===========================================
+    *timeDiff*             --
+    *stationStartIndex*    --
+    *interStationDelays*   --
+    ====================== ===========================================
+
+    **Description**:
+
     Scan the array of time differences (between measured phases and the modeled incoming wave)
     for presence of offsets that are a multiple of 5 ns.
     Note: due to the modulo-2pi from the phases, only small multiples (effectively +/- 1) can be
@@ -93,6 +106,21 @@ def getOneSampleShifts(timeDiff, stationStartIndex, interStationDelays):
     return oneSampleShifts
 
 def getMultiFreqDelay(lines, freqs, phase_average, median_phase_spreads, modelTimes):
+    """Get multi-frequency delay.
+
+    **Properties**
+
+    ======================== ============================================================
+    Parameter                Description
+    ======================== ============================================================
+    *lines*                  --
+    *freqs*                  --
+    *phase_average*          --
+    *median_phase_spreads*   --
+    *modelTimes*             --
+    ======================== ============================================================
+
+    """
     strongestChannels = []
     f0 = freqs[1]
     for line in lines: # determine strongest frequency in [line-0.1, line+0.1]
@@ -148,14 +176,15 @@ class CalibrateFM(Task):
     **Usage:**
 
     **See also:**
+
     :class:`plotfootprint`
 
-    **Example:**
+    **Example**::
 
-    ::
         filefilter="/Volumes/Data/sandertv/VHECR/LORAtriggered/results/VHECR_LORA-20110716T094509.665Z/"
         crfootprint=cr.trun("plotfootprint",filefilter=filefilter,pol=polarization)
-   """
+
+    """
     parameters = dict(
         filefilter = dict(default=None,
                           doc="File filter for multiple data files in one event, e.g. '/my/data/dir/L45472_D20120206T030115.786Z*.h5' "),
