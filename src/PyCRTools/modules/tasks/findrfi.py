@@ -329,23 +329,21 @@ class FindRFI(Task):
             plt.savefig(p)
             self.plotlist.append(p)
 
-            if self.testplots:
-                fig = plt.figure()
-                ax1 = fig.add_subplot(111)
-                ax1.plot(freqs, logspectrum, c='b')
-                ax1.set_xlabel('Frequency [MHz]')
-                # Make the y-axis label and tick labels match the line color.
-                ax1.set_ylabel('Log-Spectral Power [ADU]')
+            fig = plt.figure()
+            ax1 = fig.add_subplot(111)
+            ax1.plot(freqs, logspectrum, c='b')
+            ax1.set_xlabel('Frequency [MHz]')
+            # Make the y-axis label and tick labels match the line color.
+            ax1.set_ylabel('Log-Spectral Power [ADU]')
 
-                ax2 = ax1.twinx()
-                ax2.plot(freqs, medians, c='r'  )
-                ax2.set_ylabel('Phase Variance')
+            ax2 = ax1.twinx()
+            ax2.plot(freqs, medians, c='r'  )
+            ax2.set_ylabel('Phase Variance')
 
-                # move to testplots?
-                p = self.plot_prefix + "average_spectrum_phasevariance.{0}".format(self.plot_type)
-                self.plotlist.append(p)
-                plt.savefig(p)
-
+            # move to testplots?
+            p = self.plot_prefix + "average_spectrum_phasevariance.{0}".format(self.plot_type)
+            self.plotlist.append(p)
+            plt.savefig(p)
 
             # Average spectrum (cleaned)
             plt.figure()
