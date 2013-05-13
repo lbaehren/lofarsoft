@@ -292,8 +292,8 @@ double interpolate_phase_trilinear(const std::complex<double> (&V)[8],
 #define HFPP_PARDEF_0 (HNumber)(polx)()("Polarization X.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_1 (HNumber)(poly)()("Polarization Y.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_2 (HNumber)(polz)()("Polarization Z.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_3 (HNumber)(pol0)()("Polarization 0.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
-#define HFPP_PARDEF_4 (HNumber)(pol1)()("Polarization 1.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_3 (HNumber)(polt)()("Polarization theta.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_4 (HNumber)(polp)()("Polarization phi.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
 #define HFPP_PARDEF_5 (HNumber)(az)()("Azimuth in radians East positive from North.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 #define HFPP_PARDEF_6 (HNumber)(el)()("Elevation in radians positive up.")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
 //$COPY_TO END --------------------------------------------------
@@ -301,7 +301,7 @@ double interpolate_phase_trilinear(const std::complex<double> (&V)[8],
   \brief $DOCSTRING
   $PARDOCSTRING
 
-  Convention: pol0 represents the on sky polarization theta, while pol1 represents phi
+  Convention: polt represents the on sky polarization theta, while polp represents phi
 
 */
 
@@ -309,16 +309,16 @@ template <class NIter>
 void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
     const NIter poly, const NIter poly_end,
     const NIter polz, const NIter polz_end,
-    const NIter pol0, const NIter pol0_end,
-    const NIter pol1, const NIter pol1_end,
+    const NIter polt, const NIter polt_end,
+    const NIter polp, const NIter polp_end,
     const HNumber az, const HNumber el)
 {
 
   // Get length of output vector
-  const int N = std::distance(pol0, pol0_end);
+  const int N = std::distance(polt, polt_end);
 
   // Sanity checks
-  if (N != std::distance(pol1, pol1_end) || N != std::distance(polx, polx_end) || N != std::distance(poly, poly_end) || N != std::distance(polz, polz_end))
+  if (N != std::distance(polp, polp_end) || N != std::distance(polx, polx_end) || N != std::distance(poly, poly_end) || N != std::distance(polz, polz_end))
   {
     throw PyCR::ValueError("[hProjectPolarizations] input vectors have incompatible sizes.");
   }
@@ -328,8 +328,8 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
   const double phi = (M_PI / 2) - az;
 
   // Get iterators
-  NIter pol0_it = pol0;
-  NIter pol1_it = pol1;
+  NIter polt_it = polt;
+  NIter polp_it = polp;
   NIter polx_it = polx;
   NIter poly_it = poly;
   NIter polz_it = polz;
@@ -337,12 +337,12 @@ void HFPP_FUNC_NAME (const NIter polx, const NIter polx_end,
   for (int i=0; i<N; i++)
   {
     // Project onto new coordinate frame
-    *polx_it = -1.0 * cos(phi) * cos(theta) * *pol0_it - sin(phi) * *pol1_it;
-    *poly_it = -1.0 * sin(phi) * cos(theta) * *pol0_it + cos(phi) * *pol1_it;
-    *polz_it = sin(theta) * *pol1_it;
+    *polx_it = cos(theta) * cos(phi) * *polt_it - sin(phi) * *polp_it;
+    *poly_it = cos(theta) * sin(phi) * *polt_it + cos(phi) * *polp_it;
+    *polz_it = -sin(theta) * *polt_it;
 
-    ++pol0_it;
-    ++pol1_it;
+    ++polt_it;
+    ++polp_it;
     ++polx_it;
     ++poly_it;
     ++polz_it;
