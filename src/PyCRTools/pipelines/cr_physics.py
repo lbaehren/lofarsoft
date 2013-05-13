@@ -111,7 +111,7 @@ def process_event(event):
         event.statusmessage = "sigterm recieved"
         raise
     finally:
-        event["last_processed"] = datetime.datetime.utcnow().strftime("%Y-%M-%d")
+        event["last_processed"] = datetime.datetime.utcnow().strftime("%Y-%m-%d")
         event.write()
         print "-- event {0} completed in {1:.3f} s".format(event._id, time.clock() - start)
 
