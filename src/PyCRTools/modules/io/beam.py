@@ -56,7 +56,7 @@ class BeamData(IOInterface):
         self.__dm = dm
         self.__dm_offset = None
 
-        # Current delay calibration (between stations)
+        # Current delay calibration (between stations) ...  from CC function.
         self.__caldelay = cr.hArray(float, len(self.__files), fill=0)  # Need to maybe replace this with a function that reads metadata in the future...?
 
         # Create keyword dict for easy access
@@ -111,7 +111,10 @@ class BeamData(IOInterface):
             self.__block = value
         elif key is "DM":
             self.__dm = value
-            self.__dm_offset = self.calcDedispersionIndex(self.__dm, Ref_Freq=1.69e8)
+            if self['FILENAMES'][0].split('/')[-1].split('_')[0]=='L43784':
+                self.__dm_offset = self.calcDedispersionIndex(self.__dm, Ref_Freq=1.69e8)
+            else:
+                self.__dm_offset = self.calcDedispersionIndex(self.__dm)
         elif key is "NCHUNKS":
             self.__nchunks = value
         elif key is "CAL_DELAY":
@@ -288,7 +291,7 @@ class BeamData(IOInterface):
             raise NotImplementedError('Stations started observing at a different second. Fix not implemented yet.')
 
         for nbeam in range(self.__nofBeamDataSets):
-            offset = max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER']) + self.__cloffdelay[0][nbeam]
+            offset = max(self.__files[nbeam].par.hdr['SAMPLE_NUMBER'])
             block_start.append(int(np.ceil(offset/float(self.__files[0].par.hdr['BeamFormer']['blocklen']))))
 
         return cr.hArray(block_start)
@@ -296,9 +299,6 @@ class BeamData(IOInterface):
     def __clock_offsets(self):
         '''Gathers the clock offsets of the stations from the parsets, and calculates in number of samples and the residual.
         '''
-
-        #WARNING: time offset may need to be calculated per frequency, need to check.
-
 
         BF_PARSETS=os.environ["BF_PARSETS"].rstrip('/')+'/'
         Obs_ID = self.__filename[0].split('/')[-1].split('_')[0]
@@ -313,11 +313,11 @@ class BeamData(IOInterface):
             f_clock_offset = float(md.getClockCorrectionParset(fullparsetname,self.__files[i].par.hdr['STATION_NAME'][0], antennaset=self.__files[i].par.hdr['BeamFormer']['antenna_set']))
             offsets[i] = f_clock_offset/self.__files[i].par.hdr['SAMPLE_INTERVAL'][0]
 
-        # Residual offsets to reference frequency
+        # Residual offsets
         residual = cr.hArray(float, len(offsets), fill=offsets)
         cr.hFmod(residual, 1)
 
-        # Integer offsets to reference frequency
+        # Integer offsets
         offset = offsets - residual
         residual *= self.__files[0].par.hdr['SAMPLE_INTERVAL'][0]
 
@@ -369,7 +369,7 @@ class BeamData(IOInterface):
 
         pos = cr.hArray(float, [self['NOF_BEAM_DATASETS'], 3])
 
-        #This diferentiates between regular stations beams, and single-antenna FFTed time series saved in beam format.
+        #This diferentiates between regular stations beams, and single-(antenna/tile) FFTed time series saved in beam format.
         if self.__files[0].par.hdr['BeamFormer']['nantennas_total'] == 1:  #Quick.n.dirty if statement, could make it more general, but this will work for now.
             phase_center = md.getStationPositions(self['STATION_NAME'][0], self['ANTENNA_SET'][0], return_as_hArray=True,coordinatesystem='ITRF')
 
@@ -449,6 +449,7 @@ class BeamData(IOInterface):
             except:
                 pass
             pass
+
             # Addding phase correction to DM offsets. (coherent dedispersion).
             weights_dm = self.empty('FFT_DATA')
             phases_dm = cr.hArray(float, weights_dm.shape()[1], fill=0)
@@ -462,10 +463,11 @@ class BeamData(IOInterface):
         phases_cloff = cr.hArray(float, weights_cloff, fill=0)
         phases_cloff.delaytophase(self['BEAM_FREQUENCIES'],self.__cloffdelay[1])
         weights_cloff.phasetocomplex(phases_cloff)
-#        data[...].mul(weights_cloff[...])
+        data[...].mul(weights_cloff[...])
 
         # Adding extra calibration delay between stations.
         if np.any(self['CAL_DELAY']):
+            #Need to add algebraically up to sample lvl, then on phases.
             weights = self.empty('FFT_DATA')
             phases = cr.hArray(float, weights, fill=0)
             phases.delaytophase(self['BEAM_FREQUENCIES'], self['CAL_DELAY'])
@@ -557,6 +559,22 @@ class BeamData(IOInterface):
         residuals *= -1 * dt    # Since use exclusively by getFFTData.
 
         return [offsets, residuals]
+
+    def calcTimeStart():
+        """ This function calculates the stating time from all beams.
+
+            NOTE: The best use for this function comes before the beams are made, so maybe need to add this to the beamformer instead, or to beamform.
+        """
+
+        raise NotImplementedError
+
+
+        t = cr.hArray(float,[len(__filename)])
+
+        for i, file in enumerate(__filename):
+            t[i] = max(file['SAMPLE_NUMBER'])*file['SAMPLE_INTERVAL'][0]+file['CLOCK_OFFSET'][0]
+
+        return max(ts)
 
     def close(self):
         """Closes file and sets the data attribute `.closed` to
