@@ -227,7 +227,6 @@ parser.add_option("--dbname", default=None, help="PostgreSQL dbname.")
 parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg, pdf.")
 parser.add_option("--use-cc-delay", default=False, action="store_true", help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
 parser.add_option("--beamform-outer-stations", default=False, action="store_true", help="Beamform outer stations (slow).")
-parser.add_option("--use-hanning-window", default=False, action="store_true", help="Apply Hanning window before FFT.")
 parser.add_option("--debug", default=False, action="store_true", help="Generate additional plots for debugging.")
 
 (options, args) = parser.parse_args()
@@ -362,7 +361,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Find RFI and bad antennas
                 try:
-                    findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=options.use_hanning_window, hanning_fraction=0.2, bandpass_filter=bandpass_filter)
+                    findrfi = cr.trun("FindRFI", f=f, nofblocks=10, save_plots=True, plot_prefix=station_plot_prefix, plot_type=options.plot_type, plotlist=[], apply_hanning_window=True, hanning_fraction=0.2, bandpass_filter=bandpass_filter)
                 except ZeroDivisionError as e:
                     raise StationError("findrfi reports NaN in file {0}".format(e.message))
 
@@ -398,7 +397,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Read FFT data (without Hanning window)
                 fft_data = f.empty("FFT_DATA")
-                f.getFFTData(fft_data, block_number_lora, options.use_hanning_window, hanning_fraction=0.2, datacheck=True)
+                f.getFFTData(fft_data, block_number_lora, True, hanning_fraction=0.2, datacheck=True)
 
                 print "NOF consecutive zeros", f.nof_consecutive_zeros
 
