@@ -169,18 +169,23 @@ class FindRFI(Task):
             if i == 0 and self.refant < 0:  # in first block, determine reference antenna (which channel has median power)
                 magspectrum.square()
                 channel_power = 2 * cr.hArray(magspectrum[...].sum())
-                refant = np.argsort(channel_power.toNumpy())[self.nantennas / 2]
-                refant = int(refant)  # numpy.int64 causes problems...
-                print 'Taking channel %d as reference antenna' % refant
-                self.refant = refant
+                even_refant = 2 * np.argsort(channel_power.toNumpy()[0::2])[self.nantennas / 4]
+                odd_refant = 1 + 2 * np.argsort(channel_power.toNumpy()[1::2])[self.nantennas / 4]
+                even_refant = int(even_refant)  # numpy.int64 causes problems...
+                odd_refant = int(odd_refant)
+                print 'Taking channel %d as reference antenna' % even_refant
+                self.refant = even_refant # hack
                 # the index halfway in the sorted array is the channel with median power
                 magspectrum.sqrt()
 #            magspectrum += 1e-9
 
             incphase.copy(spectrum)
             incphase /= (magspectrum + 1.0e-9)  # divide abs-magnitude out to get exp(i phi). Avoid div by 0
-            incphaseRef = cr.hArray(incphase[refant].vec())  # improve? i.e. w/o memory leak. Phases of refant channel for all freqs
-            incphase /= incphaseRef
+            evenincphaseRef = cr.hArray(incphase[even_refant].vec()) # improve? i.e. w/o memory leak. Phases of refant channel for all freqs
+            oddincphaseRef = cr.hArray(incphase[odd_refant].vec())
+            incphase[range(0, self.nantennas, 2), ...] /= evenincphaseRef
+            incphase[range(1, self.nantennas, 2), ...] /= oddincphaseRef
+
             incphase[..., 0] = 1.0  # reject DC component and first harmonic.
             incphase[..., 1] = 1.0
 
@@ -228,10 +233,20 @@ class FindRFI(Task):
         phaseRMS = incPhaseRMS
         self.phase_RMS = phaseRMS
         x = phaseRMS.toNumpy()
-        medians = np.median(x, axis=0)
-        medians[0] = 1.0
-        medians[1] = 1.0
-        self.median_phase_spreads = cr.hArray(medians)
+        #medians = np.median(x, axis=0)
+        evenmedians = np.median(x[np.arange(0, x.shape[0], 2)], axis=0)
+        oddmedians = np.median(x[np.arange(1, x.shape[0], 2)], axis=0)
+#        medians = oddmedians.copy()
+
+#        for i in range(len(medians)):
+#            medians[i] = min(evenmedians[i], oddmedians[i])
+
+#        import pdb; pdb.set_trace()
+        evenmedians[0] = 1.0
+        oddmedians[0] = 1.0
+        evenmedians[1] = 1.0
+        oddmedians[1] = 1.0
+        self.median_phase_spreads = cr.hArray(evenmedians) # change!
         # print ' There are %d medians' % len(medians)
 
         # Get average spectrum, median over antennas for every freq channel
@@ -242,7 +257,16 @@ class FindRFI(Task):
         # Get 'dirty channels' for output, and to show in plot
         # Extend dirty channels to both sides, especially when having large blocksizes
         flagwidth = 1 + self.blocksize / 4096
-        dirty_channels = dirtyChannelsFromPhaseSpreads(medians, flagwidth=flagwidth, testplots=self.testplots)
+        even_dirty_channels = dirtyChannelsFromPhaseSpreads(evenmedians, flagwidth=flagwidth, testplots=self.testplots)
+        odd_dirty_channels = dirtyChannelsFromPhaseSpreads(oddmedians, flagwidth=flagwidth, testplots=self.testplots)
+
+        dirty_channels = []
+        for i in range(self.blocksize/2):
+            if i in even_dirty_channels or i in odd_dirty_channels:
+                dirty_channels.append(i)
+#            dirty_channels = [x for x in even_dirty_channels or x in odd_dirty_channels]
+#            dirty_channels.append(
+
         # if a frequency range was given, flag everything outside the range as 'dirty'
 
         if self.freq_range:  # flagged as dirty or outside range
@@ -258,7 +282,7 @@ class FindRFI(Task):
 #        plt.plot(np.log(cleanedspectrum.toNumpy()[0]))
 #        plt.plot(np.log(cleanedspectrum.toNumpy()[20]))
         self.cleaned_spectrum = cleanedspectrum
-        
+
         # cleanedspectrum[self.dirty_channels] = np.float('nan')
 
         # Get median cleaned spectrum (over all antennas)
@@ -339,7 +363,7 @@ class FindRFI(Task):
             ax1.set_ylabel('Log-Spectral Power [ADU]')
 
             ax2 = ax1.twinx()
-            ax2.plot(freqs, medians, c='r'  )
+            ax2.plot(freqs, evenmedians, c='r'  ) # HACK! Need some combination of even and odd.
             ax2.set_ylabel('Phase Variance')
 
             # move to testplots?
