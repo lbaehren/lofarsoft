@@ -755,7 +755,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 # Get pulse strength
                 pulse_envelope_01 = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2, save_plots=True, plot_prefix=station_plot_prefix+'pol01', plot_type=options.plot_type, plotlist=[], extra=True)
-                polarization['0']['crp_plotfiles'].append(pulse_envelope_01.plotlist[0])
+                polarization['0']['crp_plotfiles'].extend(pulse_envelope_01.plotlist[0:len(pulse_envelope_01.plotlist):2])
+                polarization['1']['crp_plotfiles'].extend(pulse_envelope_01.plotlist[1:len(pulse_envelope_01.plotlist):2])
+
                 polarization['0']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_01.peak_amplitude).toNumpy().reshape((nantennas, 2))
                 polarization['0']["crp_integrated_pulse_power"] = cr.hArray(pulse_envelope_01.integrated_pulse_power).toNumpy().reshape((nantennas, 2))
                 polarization['0']["crp_integrated_noise_power"] = cr.hArray(pulse_envelope_01.integrated_noise_power).toNumpy().reshape((nantennas, 2))
