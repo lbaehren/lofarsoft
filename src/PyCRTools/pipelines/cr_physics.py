@@ -747,19 +747,19 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                     cr_found = True
 
-       with process_polarization(station.polarization, '0', '1') as polarization:
+            with process_polarization(station.polarization, '0', '1') as polarization:
 
-           # Get original gain calibrated (but not antenna response corrected) timeseries data
-           timeseries_data.fill(0.)
-           cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
+                # Get original gain calibrated (but not antenna response corrected) timeseries data
+                timeseries_data.fill(0.)
+                cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
 
-           # Get pulse strength
-           pulse_envelope_01 = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2, save_plots=True, plot_prefix=station_plot_prefix+'pol01', plot_type=options.plot_type, plotlist=[], extra=True)
-           polarization['0']['crp_plotfiles'].append(pulse_envelope_01.plotlist[0])
-           polarization['0']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_01.peak_amplitude).toNumpy().reshape((nantennas, 2))
-           polarization['0']["crp_integrated_pulse_power"] = cr.hArray(pulse_envelope_01.integrated_pulse_power).toNumpy().reshape((nantennas, 2))
-           polarization['0']["crp_integrated_noise_power"] = cr.hArray(pulse_envelope_01.integrated_noise_power).toNumpy().reshape((nantennas, 2))
-           polarization['0']["crp_rms"] = cr.hArray(pulse_envelope_01.rms).toNumpy().reshape((nantennas, 2))
+                # Get pulse strength
+                pulse_envelope_01 = cr.trun("PulseEnvelope", timeseries_data=timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16, npolarizations=2, save_plots=True, plot_prefix=station_plot_prefix+'pol01', plot_type=options.plot_type, plotlist=[], extra=True)
+                polarization['0']['crp_plotfiles'].append(pulse_envelope_01.plotlist[0])
+                polarization['0']["crp_pulse_peak_amplitude"] = cr.hArray(pulse_envelope_01.peak_amplitude).toNumpy().reshape((nantennas, 2))
+                polarization['0']["crp_integrated_pulse_power"] = cr.hArray(pulse_envelope_01.integrated_pulse_power).toNumpy().reshape((nantennas, 2))
+                polarization['0']["crp_integrated_noise_power"] = cr.hArray(pulse_envelope_01.integrated_noise_power).toNumpy().reshape((nantennas, 2))
+                polarization['0']["crp_rms"] = cr.hArray(pulse_envelope_01.rms).toNumpy().reshape((nantennas, 2))
 
     if cr_found:
 
