@@ -146,7 +146,7 @@ class psr_par:
         if hasattr(self, 'PB') and hasattr(self, 'A1') and not \
                (hasattr(self, 'E') or hasattr(self, 'ECC')):
             setattr(self, 'E', 0.0)
-        if hasattr(self, 'T0') and not hasattr(self, 'TASC'):
+        if hasattr(self, 'T0') and hasattr(self, 'PB') and hasattr(self, 'OM')  and not hasattr(self, 'TASC'):
             setattr(self, 'TASC', self.T0 - self.PB * self.OM/360.0)
         pf.close()
     def __str__(self):
