@@ -44,6 +44,77 @@ def mseMinimizer(direction, pos, times, outlierThreshold=0, allowOutlierCount=0)
 
     return mse
 
+
+def fitQualityFromCore(core, az, el, positions2D, times, stationList=None, stationStartIndex=None, saveplot=False, plotname=''): #Get polyfit quality given core, az, el.
+    cartesianDirection = - np.array([cos(el) * sin(az), cos(el) * cos(az), sin(el)]) # minus sign for incoming vector!
+    axisDistance = []
+    showerPlaneTimeDelay = []
+
+    for pos in positions2D:
+        relpos = pos - core
+        delay = (1/c) * np.dot(cartesianDirection, relpos)
+        distance = np.linalg.norm(relpos - np.dot(cartesianDirection, relpos) * cartesianDirection)
+        axisDistance.append(distance)
+        showerPlaneTimeDelay.append(delay)
+
+    axisDistance = np.array(axisDistance)
+    showerPlaneTimeDelay = np.array(showerPlaneTimeDelay)
+
+    reducedArrivalTimes = 1e9 * (times - showerPlaneTimeDelay)
+
+    polyfit = np.polyfit(axisDistance, reducedArrivalTimes, 4)
+    polyvalues = np.poly1d(polyfit)
+    chi_squared = np.sum((np.polyval(polyfit, axisDistance) - reducedArrivalTimes) ** 2) / (len(axisDistance) - 4)
+    reducedArrivalTimes -= polyfit[4]
+
+    if saveplot:
+        plt.figure()
+        start = 0
+        colors = ['b', 'g', 'r', 'c', 'm', 'y'] * 4 # don't want to run out of colors array
+        for i in range(len(stationList)):
+            start = stationStartIndex[i]
+            end = stationStartIndex[i+1]
+            plt.scatter(axisDistance[start:end], reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
+
+        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
+        plt.xlim([0.0, 50*int(max(axisDistance) / 50) + 50])
+        plt.legend()
+
+        plt.xlabel('Distance from axis [m]')
+        plt.ylabel('Arrival time in shower plane [ns]')
+        #plt.plot(a, expectedDelays*1e9, c='g')
+        plt.title('Arrival times vs distance from  shower axis\n Polyfit coeffs (r=r_100): t = %2.2f r + %2.2f r^2 + %2.2f r^3 + %2.2f r^4\nchi^2 = %2.2f' % (polyfit[3] * 100, polyfit[2] * 10000, polyfit[1] * 10**6, polyfit[0]*10**8, chi_squared))
+
+
+    return (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues)
+
+
+def chi2Minimizer_azel(azel, core, positions2D, times, verbose=True):
+    # Optimization function that optimizes for az/el in scipy's fmin simplex fit.
+    (az, el) = azel
+    chi2 = fitQualityFromCore(core, az, el, positions2D, times)[0]
+    if verbose:
+        print 'Evaluated direction: az = %3.3f, el = %2.3f, chi^2 = %1.4f' % (az / deg2rad, el / deg2rad, chi2)
+
+    return chi2
+
+def getAlternateCorePosition(eventID):
+    import re
+    positionsFilename = '/vol/astro/lofar/vhecr/lora_triggered/alternate_core_positions.txt'
+    if not os.path.isfile(positionsFilename):
+        return None
+
+    infile = open(positionsFilename, 'r')
+    # Read in the parameters from the parset file
+    alternateCore = None
+    for line in infile:
+        params = re.split(' |, ', line)
+        if int(params[0]) == eventID:
+            alternateCore = np.array([float(params[1]), float(params[2]), 0.0])
+            break
+
+    return alternateCore
+
 def flaggedIndicesForOutliers(inarray, k_sigma = 5):
     # Remove outliers beyond k-sigma (above and below)
     # Use robust estimators, i.e. median and percentile-based sigma.
@@ -116,6 +187,8 @@ class Wavefront(Task):
         interStationDelays = dict( default=None, doc="Inter-station delays as a correction on current LOFAR clock offsets. To be obtained e.g. from the CalibrateFM Task. Assumed to be in alphabetic order in the station name e.g. CS002, CS003, ... If not given, zero correction will be assumed." ),
         stationList = dict( default=None, doc="List of station names present in the positions and arrivaltimes arrays. Only needed if interStationDelays also supplied."),
         stationStartIndex = dict( default=None, doc="List of start indices of a given station. Array should end with an entry n where n = nof antennas. Only needed if interStationDelays given."),
+        eventID = dict( default = -1, doc = "Event id used to read in alternate core position from simulations."),
+        bruteforce_fit = dict( default=False, doc="Run brute force fit to get core position from arrival times (takes long!)"),
 #        blocksize = dict ( default = 65536, doc = "Blocksize." ),
 #        nantennas = dict( default = lambda self : self.f["NOF_SELECTED_DATASETS"],
 #            doc = "Number of selected antennas." ),
@@ -249,61 +322,90 @@ class Wavefront(Task):
         # - subtract the (plane-wave) time difference due to the distance shower plane - real antenna position
         #az = np.radians(self.lora_direction[0])
         #el = np.radians(self.lora_direction[1])
-        (az, el) = direction_fit_plane_wave.meandirection_azel
+        (az, el) = direction_fit_plane_wave.meandirection_azel # Starting point for optimization az/el search
 #        print (az, el)
-        cartesianDirection = - np.array([cos(el) * sin(az), cos(el) * cos(az), sin(el)]) # minus sign for incoming vector!
-        #core = np.array([self.loracore[0], self.loracore[1], 0.0])
-        fakecoreX = 0.0
-        fakecoreY = 0.0
-        for pos in goodPositions2D:
-            fakecoreX += pos[0]
-            fakecoreY += pos[1]
-        core = (1.0 / len(goodPositions2D)) * np.array([fakecoreX, fakecoreY, 0.0])
 
-        axisDistance = []
-        showerPlaneTimeDelay = []
+        alternateCore = getAlternateCorePosition(self.eventID)
+        if alternateCore is not None:
+            print 'Taking alternate core position from simulations: %3.2f, %3.2f' % (alternateCore[0], alternateCore[1])
+            self.loracore[0] = alternateCore[0]
+            self.loracore[1] = alternateCore[1]
 
-        for pos in goodPositions2D:
-            relpos = pos - core
-            delay = (1/c) * np.dot(cartesianDirection, relpos)
-            distance = np.linalg.norm(relpos - np.dot(cartesianDirection, relpos) * cartesianDirection)
-            axisDistance.append(distance)
-            showerPlaneTimeDelay.append(delay)
+        if self.bruteforce_fit:
+            xsteps = 50
+            ysteps = 50
+            imarray = np.zeros((ysteps, xsteps))
+            bestCore = None
+            bestChi2 = 1.0e9
+            bestAz_overall = 0.0
+            bestEl_overall = 0.0
+            for x in range(xsteps):
+                print x
+                for y in range(ysteps):
+                    core = np.array([-150.0 + 300.0 * float(x) / (xsteps-1), -150.0 + 300.0 * float(y) / (ysteps-1), 0.0])
+                    optimum = fmin(chi2Minimizer_azel, (az, el), (core, goodPositions2D, goodTimes, False), xtol=1e-5, ftol=1e-5, full_output=1)
+                    (bestAz, bestEl) = optimum[0]
 
-        axisDistance = np.array(axisDistance)
-        showerPlaneTimeDelay = np.array(showerPlaneTimeDelay)
+                    chi_squared = fitQualityFromCore(core, bestAz, bestEl, goodPositions2D, goodTimes)[0]
+                    imarray[ysteps - y - 1, x] = chi_squared
+                    if chi_squared < bestChi2:
+                        bestChi2 = chi_squared
+                        bestCore = core
+                        bestAz_overall = bestAz
+                        bestEl_overall = bestEl
 
-        reducedArrivalTimes = 1e9 * (goodTimes - showerPlaneTimeDelay)
+            plt.figure()
+            plt.imshow(imarray, cmap=plt.cm.hot_r, extent=(-150.0, 150.0, -150.0, 150.0))
+            plt.colorbar()
+#            plt.clim(bestChi2 * 0.9, bestChi2 * 1.5)
+            plt.title('Optimal chi^2 by varying az/el\nGiven core position below\nLORA core = (%3.1f, %3.1f); fitted core = (%3.0f, %3.0f)' % (self.loracore[0], self.loracore[1], bestCore[0], bestCore[1]))
+            plt.xlabel('Distance east [m]')
+            plt.ylabel('Distance north [m]')
 
-        polyfit = np.polyfit(axisDistance, reducedArrivalTimes, 4)
-        polyvalues = np.poly1d(polyfit)
+            if self.save_plots:
+                p = self.plot_prefix + "wavefront_optimalcore_bruteforce.{0}".format(self.plot_type)
+                plt.savefig(p)
+                self.plotlist.append(p)
 
-        reducedArrivalTimes -= polyfit[4]
+                plt.clim(bestChi2 * 0.9, bestChi2 * 1.5)
 
-        plt.figure()
-        start = 0
-        colors = ['b', 'g', 'r', 'c', 'm', 'y'] * 4 # don't want to run out of colors array
-        for i in range(len(stationList)):
-            start = stationStartIndex[i]
-            end = stationStartIndex[i+1]
-            plt.scatter(axisDistance[start:end], reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
+                p = self.plot_prefix + "wavefront_optimalcore_bruteforce_zoomed.{0}".format(self.plot_type)
+                plt.savefig(p)
+                self.plotlist.append(p)
 
-        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
-        plt.xlim([0.0, 50*int(max(axisDistance) / 50) + 50])
-        plt.legend()
+            core = bestCore # Take this core position in the following plot
+        else:
+            core = np.array([self.loracore[0], self.loracore[1], 0.0]) # Or use given LORA core instead
 
-        plt.xlabel('Distance from axis [m]')
+        optimum = fmin(chi2Minimizer_azel, (az, el), (core, goodPositions2D, goodTimes), xtol=1e-5, ftol=1e-5, full_output=1)
+        (bestAz, bestEl) = optimum[0]
+        print 'Optimum az/el:'
+        print 'az = %3.3f, el = %2.3f' % (bestAz / deg2rad, bestEl / deg2rad)
 
-        plt.ylabel('Arrival time in fitted shower plane [ns]')
-        #plt.plot(a, expectedDelays*1e9, c='g')
-        plt.title('Arrival times vs distance from fit-centered shower axis\n Polyfit coeffs (r=r_100): t = %2.2f r + %2.2f r^2 + %2.2f r^3 + %2.2f r^4' % (polyfit[3] * 100, polyfit[2] * 10000, polyfit[1] * 10**6, polyfit[0]*10**8))
-        if self.save_plots:
-            p = self.plot_prefix + "wavefront_arrivaltime_showerplane.{0}".format(self.plot_type)
+        print 'Core position: '
+        print 'x = %3.2f, y = %3.2f' % (core[0], core[1])
+        if self.bruteforce_fit: # improve...duplicate code !
+            plotname = 'best_fitted_core'
+            (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(bestCore, bestAz, bestEl, goodPositions2D, goodTimes, stationList, stationStartIndex, saveplot = True, plotname=plotname)
+            if self.save_plots:
+                p = self.plot_prefix + "wavefront_arrivaltime_showerplane-"+plotname+".{0}".format(self.plot_type)
+                plt.savefig(p)
+                self.plotlist.append(p)
+            # redo for given LORA/alternate core
+            loracore = np.array([self.loracore[0], self.loracore[1], 0.0]) # Or use given LORA core instead
+            optimum = fmin(chi2Minimizer_azel, (az, el), (loracore, goodPositions2D, goodTimes), xtol=1e-5, ftol=1e-5, full_output=1)
+            (lora_bestAz, lora_bestEl) = optimum[0]
+            (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(loracore, lora_bestAz, lora_bestEl, goodPositions2D, goodTimes, stationList, stationStartIndex, saveplot = True, plotname='best_fitted_core')
+            plotname = 'alternate_core' if alternateCore is not None else 'lora_core'
+
+        else: # just do the plot for given LORA core
+            plotname = 'alternate_core' if alternateCore is not None else 'lora_core'
+            (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(core, bestAz, bestEl, goodPositions2D, goodTimes, stationList, stationStartIndex, saveplot = True, plotname=plotname)
+
+        if self.save_plots: # in both cases, this is the loracore one
+            p = self.plot_prefix + "wavefront_arrivaltime_showerplane-"+plotname+".{0}".format(self.plot_type)
             plt.savefig(p)
             self.plotlist.append(p)
-
-
-
 
         # rotate antenna position axes to a, p coordinates. a = along time gradient, p = perpendicular to that
         # Make plots for arrival times and second-order curvature:

@@ -826,13 +826,18 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 #        print 'no glitch indices arE:'
 #        print noGlitchIndices
         try:
-            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays[noGlitchIndices], positions=all_station_antenna_positions[noGlitchIndices], stationnames=all_station_antennas_stationnames[noGlitchIndices], loracore=core, lora_direction=lora_direction, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
+            if int(options.id) in [48361669, 80495081, 81409140, 82312457, 82321543, 86122409, 86129434, 86132542, 87892283, 92380604, 94294418, 94175691]:
+                bruteforce_fit = True # Good list that we want a brute force search for the core position for.
+            else:
+                bruteforce_fit = False
+
+            wavefront = cr.trun("Wavefront", arrivaltimes=all_station_pulse_delays[noGlitchIndices], positions=all_station_antenna_positions[noGlitchIndices], stationnames=all_station_antennas_stationnames[noGlitchIndices], loracore=core, lora_direction=lora_direction, eventID = options.id, bruteforce_fit = bruteforce_fit, save_plots=True, plot_prefix=event_plot_prefix,plot_type=options.plot_type, plotlist=event["crp_plotfiles"])
             # put into database: wavefront.fitPlanar = (az, el, mse) and wavefront.fitPointSource = (az, el, R, mse)
             event["wavefront_fit_planar"] = wavefront.fitPlaneWave
             event["wavefront_fit_pointsource"] = wavefront.fitPointSource
             event["wavefront_curvature_radius"] = wavefront.fitPointSource[2]
         except:
-           print "wavefront returned problem"
+            print "wavefront returned problem"
 
         event.status = "CR_FOUND"
         event.statusmessage = ""
