@@ -507,6 +507,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     polarization['1'].status = "BAD"
                     polarization['1'].statusmessage = "no significant pulse found in beamformed signal"
 
+                pstatus = {'0' : {'status' : polarization['0'].status, 'statusmessage' : polarization['0'].statusmessage},
+                           '1' : {'status' : polarization['1'].status, 'statusmessage' : polarization['1'].statusmessage}}
+
             # skip this station for further processing when no cosmic ray signal is found in the beamformed timeseries
             # in the LORA direction for at least one of the polarizations
             if cr_found_in_station:
@@ -762,6 +765,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 polarization['0']["crp_integrated_pulse_power"] = cr.hArray(pulse_envelope_01.integrated_pulse_power).toNumpy().reshape((nantennas, 2))
                 polarization['0']["crp_integrated_noise_power"] = cr.hArray(pulse_envelope_01.integrated_noise_power).toNumpy().reshape((nantennas, 2))
                 polarization['0']["crp_rms"] = cr.hArray(pulse_envelope_01.rms).toNumpy().reshape((nantennas, 2))
+
+                polarization['0'].status = pstatus['0']['status']
+                polarization['0'].statusmessage = pstatus['0']['statusmessage']
+                polarization['1'].status = pstatus['1']['status']
+                polarization['1'].statusmessage = pstatus['1']['statusmessage']
 
     if cr_found:
 
