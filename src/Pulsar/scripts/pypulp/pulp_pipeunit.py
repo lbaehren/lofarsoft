@@ -483,9 +483,9 @@ CLK line will be removed from the parfile!" % (parfile,))
 
 	def power_of_two(self, value):
 		"""
-		Returns the closest power of two value to the input value (from the high side)
+		Returns the closest power of two value to the input value (from the low side)
 		"""
-		return int(math.pow(2, math.ceil(math.log(value)/math.log(2))))
+		return int(math.pow(2, math.floor(math.log(value)/math.log(2))))
 
 	def get_best_nbins(self, parf):
 		"""
