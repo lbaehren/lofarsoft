@@ -86,6 +86,8 @@ class FindRFI(Task):
             doc="Antennas found to be bad.", output=True),
         good_antennas = dict(default=lambda self: [name for name in self.f["SELECTED_DIPOLES"] if name not in self.bad_antennas],
             doc="Antennas found to be good.", output=True),
+        flag_range_antennas = dict(default=[0.5,2.],
+            doc="Multiples of median power between which an antenna is considered good."),    
         dirty_channels = dict(default=[],
             doc="List of channels found to contain RFI", output=True),
         median_average_spectrum = dict(default=None, doc="Average power spectrum, in ADC units, uncleaned (raw data). Median over antennas is taken; dimension = [nfreq].", output=True),
@@ -312,7 +314,7 @@ class FindRFI(Task):
         # and that it is robust for up to 50% - 1 outliers!
         median_power = self.antennas_cleaned_power.median()[0]
         channel_ids = self.f["SELECTED_DIPOLES"]
-        self.good_antennas = [channel_ids[i] for i in range(self.nantennas) if (0.5 * median_power < self.antennas_cleaned_power[i] < 2.0 * median_power)]
+        self.good_antennas = [channel_ids[i] for i in range(self.nantennas) if (self.flag_range_antennas[0] * median_power < self.antennas_cleaned_power[i] < self.flag_range_antennas[1] * median_power)]
         self.bad_antennas = [id for id in channel_ids if id not in self.good_antennas]
         print 'There are %d bad antennas (outliers in cleaned-power): ' % len(self.bad_antennas)
         print self.bad_antennas
