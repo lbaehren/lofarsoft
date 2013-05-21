@@ -71,6 +71,7 @@ def fitQualityFromCore(core, az, el, positions2D, times, stationList=None, stati
         plt.figure()
         start = 0
         colors = ['b', 'g', 'r', 'c', 'm', 'y'] * 4 # don't want to run out of colors array
+        print 'Doing scatter plot...'
         for i in range(len(stationList)):
             start = stationStartIndex[i]
             end = stationStartIndex[i+1]
@@ -332,8 +333,8 @@ class Wavefront(Task):
             self.loracore[1] = alternateCore[1]
 
         if self.bruteforce_fit:
-            xsteps = 50
-            ysteps = 50
+            xsteps = 5
+            ysteps = 5
             imarray = np.zeros((ysteps, xsteps))
             bestCore = None
             bestChi2 = 1.0e9
@@ -386,6 +387,14 @@ class Wavefront(Task):
         print 'x = %3.2f, y = %3.2f' % (core[0], core[1])
         if self.bruteforce_fit: # improve...duplicate code !
             plotname = 'best_fitted_core'
+            print 'Getting plot data for 1D plot - First pass for brute force!'
+            print core
+            print goodPositions2D.shape
+            print goodTimes.shape
+            print stationList
+            print stationStartIndex
+            print '...'
+
             (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(bestCore, bestAz, bestEl, goodPositions2D, goodTimes, stationList, stationStartIndex, saveplot = True, plotname=plotname)
             if self.save_plots:
                 p = self.plot_prefix + "wavefront_arrivaltime_showerplane-"+plotname+".{0}".format(self.plot_type)
@@ -395,12 +404,29 @@ class Wavefront(Task):
             loracore = np.array([self.loracore[0], self.loracore[1], 0.0]) # Or use given LORA core instead
             optimum = fmin(chi2Minimizer_azel, (az, el), (loracore, goodPositions2D, goodTimes), xtol=1e-5, ftol=1e-5, full_output=1)
             (lora_bestAz, lora_bestEl) = optimum[0]
+            print 'Getting plot data for 1D plot'
+            print core
+            print goodPositions2D.shape
+            print goodTimes.shape
+            print stationList
+            print stationStartIndex
+            print '...'
             (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(loracore, lora_bestAz, lora_bestEl, goodPositions2D, goodTimes, stationList, stationStartIndex, saveplot = True, plotname='best_fitted_core')
+            print 'Plot done.'
             plotname = 'alternate_core' if alternateCore is not None else 'lora_core'
 
         else: # just do the plot for given LORA core
+            print 'Setting plotname'
             plotname = 'alternate_core' if alternateCore is not None else 'lora_core'
+            print 'Getting plot data for 1D plot'
+            print core
+            print goodPositions2D.shape
+            print goodTimes.shape
+            print stationList
+            print stationStartIndex
+            print '...'
             (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues) = fitQualityFromCore(core, bestAz, bestEl, goodPositions2D, goodTimes, stationList, stationStartIndex, saveplot = True, plotname=plotname)
+            print 'done'
 
         if self.save_plots: # in both cases, this is the loracore one
             p = self.plot_prefix + "wavefront_arrivaltime_showerplane-"+plotname+".{0}".format(self.plot_type)
