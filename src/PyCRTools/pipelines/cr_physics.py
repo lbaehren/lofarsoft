@@ -228,6 +228,7 @@ parser.add_option("--plot-type", default="png", help="Plot type (e.g. png, jpeg,
 parser.add_option("--use-cc-delay", default=False, action="store_true", help="Use cross correlation delays instead of Hilbert transform maxima when calculating direction.")
 parser.add_option("--beamform-outer-stations", default=False, action="store_true", help="Beamform outer stations (slow).")
 parser.add_option("--debug", default=False, action="store_true", help="Generate additional plots for debugging.")
+parser.add_option("--store-calibrated-pulse-block", default=False, action="store_true", help="Store calibrated pulse block for offline analysis.")
 
 (options, args) = parser.parse_args()
 
@@ -544,6 +545,12 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     plotfile = station_plot_prefix + "calibrated_timeseries-{0}.{1}".format(i, options.plot_type)
                     plt.savefig(plotfile)
                     station["crp_plotfiles"].append(plotfile)
+
+            # Store calibrated pulse block
+            if options.store_calibrated_pulse_block:
+                cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
+
+                np.save(os.path.join(directory, "calibrated_pulse_block-{0}-{1}.npy".format(options.id, station.stationname)), timeseries_data.toNumpy())
 
             # Start direction fitting loopim
             n = 0
