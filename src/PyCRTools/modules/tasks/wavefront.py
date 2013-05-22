@@ -71,13 +71,19 @@ def fitQualityFromCore(core, az, el, positions2D, times, stationList=None, stati
         plt.figure()
         start = 0
         colors = ['b', 'g', 'r', 'c', 'm', 'y'] * 4 # don't want to run out of colors array
+        print 'Axis distance: '
+        print axisDistance.shape
+        print 'Reduced times: '
+        print reducedArrivalTimes.shape
         print 'Doing scatter plot...'
         for i in range(len(stationList)):
+            print '%d st station, name = %s' % (i, stationList[i])
             start = stationStartIndex[i]
             end = stationStartIndex[i+1]
             plt.scatter(axisDistance[start:end], reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
-
+        print 'plot...'
         plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
+        print 'done'
         plt.xlim([0.0, 50*int(max(axisDistance) / 50) + 50])
         plt.legend()
 
@@ -85,7 +91,7 @@ def fitQualityFromCore(core, az, el, positions2D, times, stationList=None, stati
         plt.ylabel('Arrival time in shower plane [ns]')
         #plt.plot(a, expectedDelays*1e9, c='g')
         plt.title('Arrival times vs distance from  shower axis\n Polyfit coeffs (r=r_100): t = %2.2f r + %2.2f r^2 + %2.2f r^3 + %2.2f r^4\nchi^2 = %2.2f' % (polyfit[3] * 100, polyfit[2] * 10000, polyfit[1] * 10**6, polyfit[0]*10**8, chi_squared))
-
+        print 'title etc. done'
 
     return (chi_squared, axisDistance, reducedArrivalTimes, polyfit, polyvalues)
 
