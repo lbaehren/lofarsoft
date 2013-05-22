@@ -147,6 +147,7 @@ class FindRFI(Task):
         skippedblocks = 0
         refant = self.refant  # determine reference antenna from median power; do not rely on antenna 0 being alive...
         self.blocks_with_dataloss = []
+        nyquistZone = self.f["NYQUIST_ZONE"][0]
         for i in range(nblocks):
         # accumulate list of arrays of phases, from spectrum of all antennas of every block
         # have to cut out the block with the pulse... autodetect is best?
@@ -164,8 +165,13 @@ class FindRFI(Task):
             # difference!
             # But no window makes the cleaning less effective... :(
             spectrum = self.fft_data / self.f["BLOCKSIZE"]  # normalize back to ADC units
-            spectrum[..., 0] = 0.0  # reject DC component
-            spectrum[..., 1] = 0.0  # reject 1st harmonic. NB! May be wrong for getting power estimates !!!
+            if nyquistZone % 2 == 1: # 1, 3 etc. is unswapped
+                spectrum[..., 0] = 0.0  # reject DC component
+                spectrum[..., 1] = 0.0  # reject 1st harmonic. NB! May be wrong for getting power estimates !!!
+            else:
+                spectrum[..., -1] = 0.0
+                spectrum[..., -2] = 0.0 # reject the same DC component, but Nyquist-swapped channels...!
+
             magspectrum.copy(spectrum)
             magspectrum.abs()
             if i == 0 and self.refant < 0:  # in first block, determine reference antenna (which channel has median power)
@@ -188,8 +194,12 @@ class FindRFI(Task):
             incphase[range(0, self.nantennas, 2), ...] /= evenincphaseRef
             incphase[range(1, self.nantennas, 2), ...] /= oddincphaseRef
 
-            incphase[..., 0] = 1.0  # reject DC component and first harmonic.
-            incphase[..., 1] = 1.0
+            if nyquistZone % 2 == 1:
+                incphase[..., 0] = 1.0  # reject DC component and first harmonic.
+                incphase[..., 1] = 1.0
+            else:
+                incphase[..., -1] = 1.0
+                incphase[..., -2] = 1.0
 
             incphasemean += incphase  # accumulate Sum( exp(i phi) ) for all blocks
 
@@ -305,6 +315,7 @@ class FindRFI(Task):
         # Sum up power for avg spectrum
         # Factor 2 because of real-FFT.
         self.antennas_cleaned_power = 2 * cr.hArray(self.cleaned_spectrum[...].sum())
+
 #        dirty_power = 2 * cr.hArray(avgspectrum[...].sum() ) - cleaned_power
 #        total_power = 2 * cr.hArray(avgspectrum[...].sum() )
 
