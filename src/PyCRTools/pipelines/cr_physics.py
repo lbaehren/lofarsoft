@@ -860,8 +860,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
             event["wavefront_fit_planar"] = wavefront.fitPlaneWave
             event["wavefront_fit_pointsource"] = wavefront.fitPointSource
             event["wavefront_curvature_radius"] = wavefront.fitPointSource[2]
-        except:
-            print "wavefront returned problem"
+        except Exception as e:
+            print "wavefront returned problem:"
+            print e.message
 
         event.status = "CR_FOUND"
         event.statusmessage = ""
