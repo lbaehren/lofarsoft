@@ -82,7 +82,7 @@ def fitQualityFromCore(core, az, el, positions2D, times, stationList=None, stati
             end = stationStartIndex[i+1]
             plt.scatter(axisDistance[start:end], reducedArrivalTimes[start:end], 20, label=stationList[i], c = colors[i], marker='o')
         print 'plot...'
-        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], marker='-', lw=3, c='r')
+        plt.plot(np.sort(axisDistance), polyvalues(np.sort(axisDistance)) - polyfit[4], lw=3, c='r')
         print 'done'
         plt.xlim([0.0, 50*int(max(axisDistance) / 50) + 50])
         plt.legend()
