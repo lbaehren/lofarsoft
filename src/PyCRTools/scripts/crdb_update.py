@@ -69,7 +69,7 @@ if options.event_type == 'HBA':
     
 elif options.event-type == 'LBA':
     cur.execute("UPDATE events SET status='NEW' WHERE (antennaset='LBA_INNER' OR antennaset='LBA_OUTER')")  
-
+elif options.event_type != None:
     cur.execute("UPDATE events SET status='NEW' WHERE (antennaset='{0}'".format(options.event-type))")           
 
 con.commit()
