@@ -93,7 +93,7 @@ class AntennaResponse(Task):
             # Copy FFT data over for correction
             self.on_sky_polarization.copy(self.instrumental_polarization)
 
-            if options.swap_dipoles:
+            if self.swap_dipoles:
                 print "swapping dipoles"
                 cr.hSwap(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...])
 
