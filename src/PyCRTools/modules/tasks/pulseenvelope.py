@@ -200,9 +200,12 @@ class PulseEnvelope(Task):
             cr.hAtan2(self.polarization_angle[...], self.stokes[..., 2], self.stokes[..., 1])
             self.polarization_angle /= 2
 
+        s = self.timeseries_data_resampled.toNumpy()
+        self.sign = s[:, self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)]
+        self.sign /= np.abs(self.sign)
+
         if self.save_plots:
 
-            s = self.timeseries_data_resampled.toNumpy()
             y = self.envelope.toNumpy()
             x = 1.e6 * np.arange(y.shape[1]) / (self.sampling_frequency * self.resample_factor)
 
