@@ -291,7 +291,7 @@ class Shower(Task):
                 cr.plt.figure()
                 if self.ldf_total_signal:
                     cr.plt.scatter(Dist, self.total_signals, c=self.ldf_color_x, marker=self.ldf_marker_x, label="total")
-                else if self.vxb:
+                elif self.vxb:
                     cr.plt.scatter(Dist, self.signals[:, 0], c=self.ldf_color_x, marker=self.ldf_marker_x, label=r"$\vec{v}\times\vec{B}$")
                     cr.plt.scatter(Dist, self.signals[:, 1], c=self.ldf_color_y, marker=self.ldf_marker_y, label=r"$\vec{v}\times\vec{v}\times\vec{B}$")
                     cr.plt.scatter(Dist, self.signals[:, 2], c=self.ldf_color_z, marker=self.ldf_marker_z, label=r"$\vec{v}$")
