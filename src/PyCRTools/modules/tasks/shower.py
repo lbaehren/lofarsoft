@@ -60,6 +60,8 @@ class Shower(Task):
         plotlist=dict(default=[],
             doc="List of output plots.", output=True),
 
+        vxb = dict(default = False,
+            doc="Use vxB, vxvxB and v polarization labels."),
         ldf_enable=dict(default=False,
             doc="Draw Lateral Distribution Function, signal vs. distance from shower axis"),
         ldf_logplot=dict(default=True,
@@ -314,6 +316,10 @@ class Shower(Task):
 
                     if self.ldf_total_signal:
                         cr.plt.scatter(Dist, self.signals, c=ldf_colors, marker=self.ldf_marker_x, label="x",cmap=self.footprint_colormap)
+                    else if self.vxb:
+                        cr.plt.scatter(Dist, self.signals[:, 0], c=ldf_colors, marker=self.ldf_marker_x, label=r"$\vec{v}\times \vec{B}$",cmap=self.footprint_colormap)
+                        cr.plt.scatter(Dist, self.signals[:, 1], c=ldf_colors, marker=self.ldf_marker_y, label=r"$\vec{v}\times \vec{v} \times{B}$",cmap=self.footprint_colormap)
+                        cr.plt.scatter(Dist, self.signals[:, 2], c=ldf_colors, marker=self.ldf_marker_z, label=r"$\vec{v}$",cmap=self.footprint_colormap)
                     else:
                         cr.plt.scatter(Dist, self.signals[:, 0], c=ldf_colors, marker=self.ldf_marker_x, label="x",cmap=self.footprint_colormap)
                         cr.plt.scatter(Dist, self.signals[:, 1], c=ldf_colors, marker=self.ldf_marker_y, label="y",cmap=self.footprint_colormap)
