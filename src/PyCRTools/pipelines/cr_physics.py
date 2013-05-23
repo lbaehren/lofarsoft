@@ -564,7 +564,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
 
                 else:
-                    if f["ANTENNA_SET"] = "LBA_OUTER":
+                    if f["ANTENNA_SET"] == "LBA_OUTER":
                         antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
                     else:
                         antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction, swap_dipoles=True)
