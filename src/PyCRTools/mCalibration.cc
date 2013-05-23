@@ -778,6 +778,51 @@ void HFPP_FUNC_NAME (const CIter M, const CIter M_end,
 }
 //$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
 
+//$DOCSTRING: Swap two vectors
+//$COPY_TO HFILE START --------------------------------------------------
+#define HFPP_FUNC_NAME hSwap
+//-----------------------------------------------------------------------
+#define HFPP_FUNCDEF  (HFPP_VOID)(HFPP_FUNC_NAME)("$DOCSTRING")(HFPP_PAR_IS_SCALAR)()(HFPP_PASS_AS_VALUE)
+#define HFPP_PARDEF_0 (HComplex)(vec0)()("Vector 0.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+#define HFPP_PARDEF_1 (HComplex)(vec1)()("Vector 1.")(HFPP_PAR_IS_VECTOR)(STDIT)(HFPP_PASS_AS_REFERENCE)
+//$COPY_TO END --------------------------------------------------
+/*!
+  \brief $DOCSTRING
+  $PARDOCSTRING
+
+*/
+
+template <class CIter>
+void HFPP_FUNC_NAME (const CIter vec0, const CIter vec0_end,
+    const CIter vec1, const CIter vec1_end)
+{
+  // Temporary variable
+  complex<double> temp[2];
+
+  // Get lengths
+  const int N = std::distance(vec0, vec0_end);
+
+  // Sanity checks
+  if (N != std::distance(vec1, vec1_end))
+  {
+    throw PyCR::ValueError("[hSwap] input vectors have incompatible sizes.");
+  }
+
+  // Get iterators
+  CIter vec0_it = vec0;
+  CIter vec1_it = vec1;
+
+  for (int i=0; i<N; i++)
+  {
+    temp[0] = *vec0_it;
+    temp[1] = *vec1_it;
+
+    *vec0_it++ = temp[1];
+    *vec1_it++ = temp[0];
+  }
+}
+//$COPY_TO HFILE: #include "hfppnew-generatewrappers.def"
+
 //$DOCSTRING: Mix two vectors using a mixing matrix
 //$COPY_TO HFILE START --------------------------------------------------
 #define HFPP_FUNC_NAME hMatrixMix

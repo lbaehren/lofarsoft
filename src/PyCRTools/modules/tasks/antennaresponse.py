@@ -43,6 +43,8 @@ class AntennaResponse(Task):
             doc = "Jones matrix for each frequency."),
         inverse_jones_matrix=dict(default = lambda self: cr.hArray(complex, dimensions=(self.frequencies.shape()[0], 2, 2)),
             doc="Inverse Jones matrix for each frequency."),
+        swap_dipoles=dict(default=False,
+            doc="Swap dipoles before mixing."),
         backwards=dict(default=False,
             doc="Apply antenna response backwards (e.g. without inverting the Jones matrix)."),
         apply_to_data=dict(default=True,
@@ -91,9 +93,14 @@ class AntennaResponse(Task):
             # Copy FFT data over for correction
             self.on_sky_polarization.copy(self.instrumental_polarization)
 
+            if options.swap_dipoles:
+                print "swapping dipoles"
+                cr.hSwap(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...])
+
             if not self.backwards:
                 print "unfolding antenna pattern"
                 cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...], self.inverse_jones_matrix)
             else:
                 print "unfolding antenna pattern (backwards)"
                 cr.hMatrixMix(self.on_sky_polarization[0:self.nantennas:2, ...], self.on_sky_polarization[1:self.nantennas:2, ...], self.jones_matrix)
+

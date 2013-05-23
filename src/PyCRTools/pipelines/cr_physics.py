@@ -564,7 +564,10 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
 
                 else:
-                    antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
+                    if f["ANTENNA_SET"] = "LBA_OUTER":
+                        antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
+                    else:
+                        antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction, swap_dipoles=True)
 
                     # Get timeseries data
                     cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], ifftwplan)
@@ -723,10 +726,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 xyz_timeseries_data = cr.hArray(float, dimensions=(3 * nantennas, options.blocksize))
 
-                if f["ANTENNA_SET"] = "LBA_OUTER":
-                    cr.hProjectPolarizations(xyz_timeseries_data[0:3 * nantennas:3, ...], xyz_timeseries_data[1:3 * nantennas:3, ...], xyz_timeseries_data[2:3 * nantennas:3, ...], timeseries_data[1:2 * nantennas:2, ...], timeseries_data[0:2 * nantennas:2, ...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
-                else:
-                    cr.hProjectPolarizations(xyz_timeseries_data[0:3 * nantennas:3, ...], xyz_timeseries_data[1:3 * nantennas:3, ...], xyz_timeseries_data[2:3 * nantennas:3, ...], timeseries_data[0:2 * nantennas:2, ...], timeseries_data[1:2 * nantennas:2, ...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
+                cr.hProjectPolarizations(xyz_timeseries_data[0:3 * nantennas:3, ...], xyz_timeseries_data[1:3 * nantennas:3, ...], xyz_timeseries_data[2:3 * nantennas:3, ...], timeseries_data[0:2 * nantennas:2, ...], timeseries_data[1:2 * nantennas:2, ...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
 
                 if options.store_calibrated_pulse_block:
                     np.save(os.path.join(directory, "xyz_calibrated_pulse_block-{0}-{1}.npy".format(options.id, station.stationname)), xyz_timeseries_data.toNumpy())
