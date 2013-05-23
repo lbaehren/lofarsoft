@@ -724,6 +724,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 xyz_timeseries_data = cr.hArray(float, dimensions=(3 * nantennas, options.blocksize))
                 cr.hProjectPolarizations(xyz_timeseries_data[0:3 * nantennas:3, ...], xyz_timeseries_data[1:3 * nantennas:3, ...], xyz_timeseries_data[2:3 * nantennas:3, ...], timeseries_data[0:2 * nantennas:2, ...], timeseries_data[1:2 * nantennas:2, ...], pytmf.deg2rad(pulse_direction[0]), pytmf.deg2rad(pulse_direction[1]))
 
+                if options.store_calibrated_pulse_block:
+                    np.save(os.path.join(directory, "xyz_calibrated_pulse_block-{0}-{1}.npy".format(options.id, station.stationname)), xyz_timeseries_data.toNumpy())
+
                 # Get Stokes parameters
 #                stokes_parameters = cr.trun("StokesParameters", timeseries_data=xyz_timeseries_data, pulse_start=pulse_start, pulse_end=pulse_end, resample_factor=16)
 
