@@ -859,9 +859,9 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         noGlitchIndices = np.where( abs(all_station_fit_residuals) < 3e-9 )
 #        print 'no glitch indices arE:'
 #        print noGlitchIndices
-        try: # HACK
+        try:
             if int(options.id) in [48361669, 80495081, 81409140, 82312457, 82321543, 86122409, 86129434, 86132542, 87892283, 92380604, 94294418, 94175691]:
-                bruteforce_fit = False # Good list that we want a brute force search for the core position for.
+                bruteforce_fit = True # Good list that we want a brute force search for the core position for.
             else:
                 bruteforce_fit = False
 
