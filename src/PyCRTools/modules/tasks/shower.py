@@ -271,6 +271,10 @@ class Shower(Task):
                 cr.plt.figure()
                 if self.ldf_total_signal:
                     cr.plt.errorbar(Dist, self.total_signals, yerr=self.total_uncertainties, xerr=Dist_uncert, c='k', marker=self.ldf_marker_x, linestyle="None", label="total")
+                elif self.vxb:
+                    cr.plt.errorbar(Dist, self.signals[:, 0], yerr=[sig_uncer[:, 0], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_x, marker=self.ldf_marker_x, linestyle="None", label=r"$\vec{v}\times\vec{B}$")
+                    cr.plt.errorbar(Dist, self.signals[:, 1], yerr=[sig_uncer[:, 1], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_y, marker=self.ldf_marker_y, linestyle="None", label=r"$\vec{v}\times\vec{v}\times\vec{B}$")
+                    cr.plt.errorbar(Dist, self.signals[:, 2], yerr=[sig_uncer[:, 2], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_z, marker=self.ldf_marker_z, linestyle="None", label=r"$\vec{v}$")
                 else:
                     cr.plt.errorbar(Dist, self.signals[:, 0], yerr=[sig_uncer[:, 0], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_x, marker=self.ldf_marker_x, linestyle="None", label="x")
                     cr.plt.errorbar(Dist, self.signals[:, 1], yerr=[sig_uncer[:, 1], self.signals_uncertainties[:, 0]], xerr=Dist_uncert, c=self.ldf_color_y, marker=self.ldf_marker_y, linestyle="None", label="y")
