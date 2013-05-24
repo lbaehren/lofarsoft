@@ -201,7 +201,9 @@ class PulseEnvelope(Task):
             self.polarization_angle /= 2
 
         s = self.timeseries_data_resampled.toNumpy()
-        self.sign = s[:, self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)]
+        self.sign = np.zeros(s.shape[0])
+        for i in range(s.shape[0]):
+            self.sign[i] = s[i, self.maxpos[i] + (self.pulse_start - self.window_start) * int(self.resample_factor)]
         self.sign /= np.abs(self.sign)
 
         if self.save_plots:
