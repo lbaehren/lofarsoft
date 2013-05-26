@@ -582,7 +582,7 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
 						log.info("Prepfold user extra options: %s" % (self.opts.prepfold_extra_opts))
 					log.info("Single-pulse analysis = %s" % (self.opts.is_single_pulse and "yes" or "no"))
 					log.info("RRATs analysis = %s" % (self.opts.is_rrats and "yes" or "no"))
-					if self.opts.prepsubband_extra_opts != "" and self.is_rrats:
+					if self.opts.prepsubband_extra_opts != "" and self.opts.is_rrats:
 						log.info("Prepsubband user extra options: %s" % (self.opts.prepsubband_extra_opts))
 					log.info("DSPSR = %s" % (self.opts.is_skip_dspsr and "no" or \
 						(self.opts.nthreads == 2 and "yes, #threads = %d (default)" % (self.opts.nthreads) or "yes, #threads = %d" % (self.opts.nthreads))))
