@@ -203,6 +203,8 @@ class Wavefront(Task):
 #        pulse_block = dict( default = 0, doc = "Block nr. where the pulse is" ),
 #        refant = dict(default = None, doc = "Optional parameter to set reference antenna number."),
         pol = dict(default = 0, doc = "Polarization. Only (to be) used for reference / plotting purposes."),
+        use_title = dict(default = True, doc="Show title above plots."),
+        use_colormap = dict(default="jet", doc="Colormap to use, e.g. autumn_r or jet"),
         ## OUTPUT PARAMS ##
         pointsourceArrivalTimes = dict( default = None, doc = "Arrival times from best-fit point source approximation", output = True),
         planewaveArrivalTimes = dict( default = None, doc = "Arrival times from best-fit plane-wave approximation.", output = True),
@@ -278,9 +280,10 @@ class Wavefront(Task):
 
         signals = np.copy(times)
         signals.fill(2.71) # signal power not used here; do not give all 1.0 as the log is taken.
-        fptask = cr.trerun("Shower", "1", positions=positions2D, signals=signals, timelags=times, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
+        fptask = cr.trerun("Shower", "1", positions=positions2D, signals=signals, timelags=times, footprint_colormap=self.use_colormap, footprint_enable=True, footprint_shower_enable=False)
 
-        plt.title('Footprint using crosscorrelated arrival times')
+        if self.use_title:
+            plt.title('Footprint using crosscorrelated arrival times')
         # Do plane-wave direction fit on full arrivaltimes
         # Fit pulse direction
         print 'Do plane wave fit on full arrival times (cross correlations here)...'
@@ -315,7 +318,7 @@ class Wavefront(Task):
         stationStartIndex.append(len(goodStationNames)) # last index + 1 for indexing with start:end
 
         # now the good one: difference between measured arrival times and plane wave fit!
-        fptask_delta = cr.trerun("Shower", "3", positions=goodPositions2D, signals=goodSignals, timelags=goodResidues, footprint_colormap='jet', footprint_enable=True, footprint_shower_enable=False)
+        fptask_delta = cr.trerun("Shower", "3", positions=goodPositions2D, signals=goodSignals, timelags=goodResidues, footprint_colormap=self.use_colormap, footprint_enable=True, footprint_shower_enable=False)
         plt.title('Footprint of residual delays w.r.t. planewave fit')
 
         if self.save_plots:
