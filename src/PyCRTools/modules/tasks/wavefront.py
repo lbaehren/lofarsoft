@@ -342,8 +342,8 @@ class Wavefront(Task):
             self.loracore[1] = alternateCore[1]
 
         if self.bruteforce_fit:
-            xsteps = 5
-            ysteps = 5
+            xsteps = 10
+            ysteps = 10
             imarray = np.zeros((ysteps, xsteps))
             bestCore = None
             bestChi2 = 1.0e9
