@@ -323,7 +323,12 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 f.shiftTimeseriesData(shift)
             except ValueError as e:
                 raise StationError("{0}, signal is at edge of file".format(e.message))
-
+            
+            #Check for strange things in the datafile, especially clockfrequency
+            if f["CLOCK_FREQUENCY"] == 0.:
+                raise StationError("Clock frequency is set to zero, skipping station.")
+            
+            
             # Get bandpass filter
             nf = f["BLOCKSIZE"] / 2 + 1
             ne = int(10. * nf / f["CLOCK_FREQUENCY"])
