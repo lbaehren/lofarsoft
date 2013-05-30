@@ -323,12 +323,12 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 f.shiftTimeseriesData(shift)
             except ValueError as e:
                 raise StationError("{0}, signal is at edge of file".format(e.message))
-            
+
             #Check for strange things in the datafile, especially clockfrequency
             if f["CLOCK_FREQUENCY"] == 0.:
                 raise StationError("Clock frequency is set to zero, skipping station.")
-            
-            
+
+
             # Get bandpass filter
             nf = f["BLOCKSIZE"] / 2 + 1
             ne = int(10. * nf / f["CLOCK_FREQUENCY"])
@@ -865,10 +865,16 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
         # Plot wavefront shape using arrival times (from all_station_pulse_delays)
         # filter out all channels with > +/- 3 ns fit residual. This removes all 5-ns glitches as well as bad pulse position estimates.
         # Later we'll try to correct for glitches by collecting database values of fit residuals.
-        noGlitchIndices = np.where( abs(all_station_fit_residuals) < 3e-9 )
+        noGlitchIndices = np.where( (abs(all_station_fit_residuals) < 3e-9) )
 #        print 'no glitch indices arE:'
 #        print noGlitchIndices
         try:
+            restrictToSuperterpIndices = []
+            for index in noGlitchIndices[0]: # HACK to exclude outer core stations.
+                if all_station_antennas_stationnames[index] in ['CS002', 'CS003', 'CS004', 'CS005', 'CS006', 'CS007']:
+                    restrictToSuperterpIndices.append(index)
+            noGlitchIndices = np.array(restrictToSuperterpIndices)
+
             if int(options.id) in [48361669, 73149753, 80495081, 81409140, 82312457, 82321543, 86122409, 86129434, 86132542, 87892283, 92380604, 94294418, 94175691]:
                 bruteforce_fit = True # Good list that we want a brute force search for the core position for.
             else:
