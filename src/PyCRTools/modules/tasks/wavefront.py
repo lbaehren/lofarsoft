@@ -318,7 +318,7 @@ class Wavefront(Task):
         stationStartIndex.append(len(goodStationNames)) # last index + 1 for indexing with start:end
 
         # now the good one: difference between measured arrival times and plane wave fit!
-        fptask_delta = cr.trerun("Shower", "3", positions=goodPositions2D, signals=goodSignals, timelags=goodResidues, footprint_colormap=self.use_colormap, footprint_enable=True, footprint_shower_enable=False)
+        fptask_delta = cr.trerun("Shower", "3", positions=goodPositions2D, signals=goodSignals, timelags=goodResidues, footprint_colormap=self.use_colormap, footprint_enable=True, footprint_shower_enable=False, footprint_use_title=self.use_title)
         plt.title('Footprint of residual delays w.r.t. planewave fit')
 
         if self.save_plots:
