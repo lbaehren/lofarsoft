@@ -11,7 +11,6 @@ import cPickle
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
 import psr_utils as pu
-import parfile
 from pulp_parset import Observation, radial_distance, find_pulsars
 from pulp_usercmd import CMDLine, check_pulsars
 from pulp_sysinfo import CEP2Info

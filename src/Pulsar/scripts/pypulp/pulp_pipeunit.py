@@ -11,7 +11,6 @@ import cPickle
 import subprocess, shlex
 from subprocess import PIPE, STDOUT, Popen
 import psr_utils as pu
-import parfile
 from pulp_parset import Observation, radial_distance, find_pulsars
 from pulp_usercmd import CMDLine, check_pulsars
 from pulp_sysinfo import CEP2Info
@@ -493,8 +492,20 @@ CLK line will be removed from the parfile!" % (parfile,))
 		and sampling interval (tsamp)
 		"""
 		try:
-			ephem=parfile.psr_par(parf) # there should not be empty lines in the parfile, otherwise psr_par crashes
-			nbins=self.power_of_two(int(math.ceil(ephem.P0*1000.0/self.sampling)))
+			f = open(parf, 'r')
+			parlines = f.read().splitlines()
+			f.close()
+			res=[ii for ii in parlines if re.search("F0", ii) is not None]
+			if len(res) > 0:
+				f0=float(re.sub("\s+", " ", res[0]).split(" ")[1])
+				nbins=self.power_of_two(int(math.ceil((1000.0/f0)/self.sampling)))
+			else:
+				res=[ii for ii in parlines if re.search("P0", ii) is not None]
+				if len(res) > 0:
+					p0=float(re.sub("\s+", " ", res[0]).split(" ")[1])
+					nbins=self.power_of_two(int(math.ceil(p0*1000.0/self.sampling)))
+				else:
+					nbins=1024
 			if nbins > 1024: return 1024
 			else: return nbins
 		except: return 1024
@@ -505,8 +516,12 @@ CLK line will be removed from the parfile!" % (parfile,))
 		"""
 		dm=0
 		try:
-			ephem=parfile.psr_par(parf)
-			dm=ephem.DM
+			f = open(parf, 'r')
+			parlines = f.read().splitlines()
+			f.close()
+			res=[ii for ii in parlines if re.search("DM", ii) is not None]
+			if len(res) > 0:
+				dm=float(re.sub("\s+", " ", res[0]).split(" ")[1])
 		except: pass
 		return dm
 
