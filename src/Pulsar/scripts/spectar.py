@@ -78,7 +78,7 @@ for line in open(opts.parset, 'r').readlines():
         deltat = float(string.split(line, "= ")[1].strip())/2
 
 if abs(ra_offset) > tabrad or abs(dec_offset) > tabrad:
-    print "The offset of the beam %d is too large from the SAP%d center" % (tabid, sapid)
+    print "The offset of the beam %d is too large from the SAP%d center" % (opts.tabid, opts.sapid)
     sys.exit(1)    
 else:
     alt += ra_offset
