@@ -561,7 +561,7 @@ class Pipeline:
 						if len(ar_files) == 0:
 							self.log.info("skipped")
 						else:
-                                	        	cmd="psradd -R -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
+                                	        	cmd="psradd -R -m time -o %s_%s.ar %s" % (psr, output_prefix, " ".join(ar_files))
                                         		self.execute(cmd, workdir=curdir)
 
 							# running common DSPSR post-processing

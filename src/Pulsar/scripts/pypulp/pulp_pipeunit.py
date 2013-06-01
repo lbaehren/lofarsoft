@@ -1148,7 +1148,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 						# running psradd to add all freq channels together
 						self.log.info("Adding frequency channels together...")
 						ar_files=glob.glob("%s/%s_%s_P*.ar" % (self.curdir, psr, self.output_prefix))
-						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
+						cmd="psradd -R -m time -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 						self.execute(cmd, workdir=self.curdir)
 
 						# running common DSPSR post-processing

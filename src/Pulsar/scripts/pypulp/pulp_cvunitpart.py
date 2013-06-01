@@ -167,7 +167,7 @@ class CVUnitPart(PipeUnitPart, CVUnit):
 						# running psradd to add all freq channels together for this frequency split
 						self.log.info("Adding frequency channels together for the frequency split %d ..." % self.part)
 						ar_files=glob.glob("%s/%s_%s_SB*_CH*.ar" % (self.curdir, psr, self.output_prefix))
-						cmd="psradd -R -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
+						cmd="psradd -R -m time -o %s_%s.ar %s" % (psr, self.output_prefix, " ".join(ar_files))
 						self.execute(cmd, workdir=self.curdir)
 
 						# removing files created by dspsr for each freq channel
