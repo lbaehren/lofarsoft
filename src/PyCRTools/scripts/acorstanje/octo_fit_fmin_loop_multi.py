@@ -279,24 +279,23 @@ while thisBlock < nofblocks:										#Loop over all blocks in that file
         ltext  = leg.get_texts()
         plt.setp(ltext, fontsize=28)
         plt.figure()
-        import pdb; pdb.set_trace()
 
         # now cross correlate all channels in full_timeseries, get relative times
-        crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", timeseries_data=timeseries, oversamplefactor=16)
+#        crosscorr = cr.trerun('CrossCorrelateAntennas', "crosscorr", timeseries_data=timeseries, oversamplefactor=16)
 
-        y = crosscorr.crosscorr_data.toNumpy()
-        plt.plot(y[0]) # will have maximum at 16 * blocksize / 2 (8192)
-        plt.figure()
-        plt.plot(y[2]) # will have a shifted maximum
-        plt.title('Shifted Maximum')
+#        y = crosscorr.crosscorr_data.toNumpy()
+#        plt.plot(y[0]) # will have maximum at 16 * blocksize / 2 (8192)
+#        plt.figure()
+#        plt.plot(y[2]) # will have a shifted maximum
+#        plt.title('Shifted Maximum')
 
         #	And determine the relative offsets between them
-        sample_interval = 5.0e-9
-        maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot = True, plotend=5, sampleinterval = sample_interval / crosscorr.oversamplefactor, peak_width = 11, splineorder = 3, refant = 0)
+#        sample_interval = 5.0e-9
+#        maxima_cc = cr.trerun('FitMaxima', "Lags", crosscorr.crosscorr_data, doplot = True, plotend=5, sampleinterval = sample_interval / crosscorr.oversamplefactor, peak_width = 11, splineorder = 3, refant = 0)
 
     # Measured time delays from LOFAR system
     #maxima_cc.lags *= 1e9
-    maxima_cc.lags.copy(1e9 * timeOfMaximum.vec())
+#    maxima_cc.lags.copy(1e9 * timeOfMaximum.vec())
 #    thisLofarDelay = cr.hArray(maxima_cc.lags).toNumpy()
     thisLofarDelay = 1e9 * timeOfMaximum.toNumpy()
     lofar_delay_allblocks[thisBlock] = thisLofarDelay
@@ -354,15 +353,30 @@ def sq_error_minimizer(p, x0,y0,z0,x1,y1,z1, times_from_lofar):
 
 # Take away antennas with huge time delays (outliers)
 exclude_list = []
-for i in range(0,len(lofar_delay)):
-	if lofar_delay[i]<-200 or lofar_delay[i]>200:
-		exclude_list.append(i)
+# for multi-TBB, remove outliers per station, i.e. > +/- 200 ns from station median
+stationStartIndex = f["STATION_STARTINDEX"]
+nofStations = len(stationStartIndex) - 1
+for i in range(nofStations):
+    start = stationStartIndex[i]
+    end = stationStartIndex[i+1]
+    thisStationMedian = np.median(lofar_delay[start:end])
+    for j in range(start, end):
+        if abs(lofar_delay[j] - thisStationMedian) > 200:
+            exclude_list.append(j)
 
+#for i in range(0,len(lofar_delay)):
+#	if lofar_delay[i]<-200 or lofar_delay[i]>200:
+#		exclude_list.append(i)
+
+#if len(exclude_list) > 0:
+#    lofar_delay[np.array(exclude_list)] = np.float('nan')
+#lofar_exclude_delay = lofar_delay
 #LOFAR times from the system without the outliers
 lofar_exclude_delay = np.delete(lofar_delay,exclude_list)
 north1 = np.delete(north,exclude_list)						#antenna positions excluding outlier antennas
 east1 = np.delete(east,exclude_list)
 height1 = np.delete(height,exclude_list)
+#(north1, east1, height1) = (np.array(north), np.array(east), np.array(height))
 print lofar_exclude_delay
 
 #startPosition = [northocto+8., eastocto-8., hocto+9.9] # from octocopter GPS
@@ -439,6 +453,9 @@ print '     '
 print fit
 
 new_time_exp = np.delete(time_diff_exp,exclude_list)		#new time_diff_exp without the antennas with outliers in lofar_delay
+#new_time_exp = np.array(time_diff_exp)
+#new_time_exp[np.array(exclude_list)] = np.float('nan')
+
 fit_fct = lofar_exclude_delay - fit
 fit_fct -= np.median(fit_fct)
 print '-----------------------------------------------------------------------------'
@@ -524,12 +541,30 @@ plt.ylim(-45,45)
 print '-----------------------------------------------------------------------------'
 print 'The time differences, not fitted, with outliers'
 print '     '
-diff_delay = time_diff_exp - cr.hArray(maxima_cc.lags).toNumpy()
+diff_delay = time_diff_exp - lofar_delay #cr.hArray(maxima_cc.lags).toNumpy()
 diff_delay -= np.median(diff_delay)
 print diff_delay
+
+# Get inter-station clock offsets remaining
+interStationDelays = []
+for i in range(nofStations):
+    start = stationStartIndex[i]
+    end = stationStartIndex[i+1]
+    thisStationMedian = np.median(diff_delay[start:end])
+    if i == 0:
+        diff_delay -= thisStationMedian
+        thisStationMedian = 0.0
+    interStationDelays.append(thisStationMedian)
+
+print ' --- Inter-station delays ---'
+i = 0
+for station in f["STATION_LIST"]:
+    print station + ': %3.3f' % interStationDelays[i]
+    i += 1
+
 plt.figure()
 plt.plot(time_diff_exp, 'ro')
-plt.plot(cr.hArray(maxima_cc.lags).toNumpy(), 'bo')
+plt.plot(lofar_delay, 'bo')
 plt.plot(diff_delay, 'go')
 plt.xlabel('Antenna number')
 plt.ylabel('Time difference expected - measured [ns]')
