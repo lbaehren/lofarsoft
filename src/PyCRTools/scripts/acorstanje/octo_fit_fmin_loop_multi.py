@@ -233,6 +233,17 @@ except Exception:
 
 nofChannels = f["NOF_SELECTED_DATASETS"]
 
+subsampleOffsetsPerStation = f["SUBSAMPLE_CLOCK_OFFSET"] # numpy array
+
+stationList = f["STATION_LIST"]
+stationStartIndex = f["STATION_STARTINDEX"]
+nofStations = len(stationStartIndex) - 1
+subsampleOffsets = np.zeros(len(cabledelays))
+for i in range(nofStations):
+    start = stationStartIndex[i]
+    end = stationStartIndex[i+1]
+    subsampleOffsets[start:end] = subsampleOffsetsPerStation[i] # get them per antenna, makes it easy to correct
+
 # ...Timeseries analysis starts here...
 timeseries = f.empty("TIMESERIES_DATA")
 
@@ -241,6 +252,7 @@ thisBlock = 0
 lofar_delay_allblocks = np.zeros( (nofblocks, nofChannels) )
 shift = 0
 datablocknr = 0
+
 while thisBlock < nofblocks:										#Loop over all blocks in that file
     datablocknr += int(shift / 2048)
     shift %= 2048
@@ -252,6 +264,7 @@ while thisBlock < nofblocks:										#Loop over all blocks in that file
     timeOfMaximum = locateFirstMaximum(timeseries, debug=False if thisBlock == 0 else False)
     # Apply cable delays
     timeOfMaximum -= cabledelays
+    timeOfMaximum -= cr.hArray(subsampleOffsets.tolist()) # sign...?
 
     if thisBlock == 0:
         #	Plot the original pulse
@@ -355,7 +368,6 @@ def sq_error_minimizer(p, x0,y0,z0,x1,y1,z1, times_from_lofar):
 exclude_list = []
 # for multi-TBB, remove outliers per station, i.e. > +/- 200 ns from station median
 stationStartIndex = f["STATION_STARTINDEX"]
-nofStations = len(stationStartIndex) - 1
 for i in range(nofStations):
     start = stationStartIndex[i]
     end = stationStartIndex[i+1]
