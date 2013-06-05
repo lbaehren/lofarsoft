@@ -51,13 +51,13 @@ struct chanIdVal {
 
 /*
  \file ttbbctlIn.cc
- 
+
  \ingroup CR_Applications
- 
- \brief A program to trigger on dispersed pulses found in LOFAR beamformed data. (MS files). 
- 
+
+ \brief A program to trigger on dispersed pulses found in LOFAR beamformed data. (MS files).
+
  \author Sander ter Veen
- 
+
  \date 2012/09/26
  */
 
@@ -70,11 +70,11 @@ struct chanIdVal {
         float sample[SUBBANDS][CHANNELS];
     };
     but usually read in as multiple SAMPLES at the same time. Data is big-endian 32-bit IEEE floats.
-    For analysis they are usually swapped.    
+    For analysis they are usually swapped.
 */
 
 
-//public static unsafe 
+//public static unsafe
 /*
  \brief Swaps a number (cnt) of integers from big-endian to little endian
 */
@@ -85,7 +85,7 @@ void SwapFloats(unsigned char* data, int cnt) {
     while (cnt-- > 0) {
             char a = *p; //0
             p++;      //p=1
-            char b = *p; //1, 
+            char b = *p; //1,
             *p = *(p + 1); //2 --> 1
             p++;   //p=2
             *p = b; // 3--> 2
@@ -94,7 +94,7 @@ void SwapFloats(unsigned char* data, int cnt) {
             *p = a;  //3=0
             p++;
     }
-    
+
 }
 
 // Calculate bad channels that should not be used in the analysis. This function has now been implemented in the RFI cleaning class. I'm checking if this is still used.
@@ -118,11 +118,11 @@ vector<chanIdVal> CalcBadChannels(float* data_start, float* data_end, int nrchan
             sumvector[ch]+=*it;
             stdOverPower[ch]+=(*it)*(*it);
         }
-        stdOverPower[ch]/=(sumvector[ch]*sumvector[ch]);  
+        stdOverPower[ch]/=(sumvector[ch]*sumvector[ch]);
         stdOverPowerSort[ch]=stdOverPower[ch];
     }
     // Find top 10 and bottom 10 percent of stdOverPower and determine average and standarddeviation of the rest of the values.
-    
+
     sort (stdOverPowerSort.begin(), stdOverPowerSort.end());
     vector<float>::iterator it2;
     double sum=0;
@@ -137,7 +137,7 @@ vector<chanIdVal> CalcBadChannels(float* data_start, float* data_end, int nrchan
             nrelem++;
 //        }
     }
-    nrelem-=(nrsamples-validsamples); 
+    nrelem-=(nrsamples-validsamples);
     double average=sum/nrelem;
     sortStd=sqrt(sqr/nrelem-average*average);
     if(isnan(sortStd)){
@@ -148,7 +148,7 @@ vector<chanIdVal> CalcBadChannels(float* data_start, float* data_end, int nrchan
         float limit=average+cutlevel*sortStd;
         int index=0;
         for(it2=stdOverPower.begin(); it2<stdOverPower.end(); it2++){
-            if(isnan(*it2)){ 
+            if(isnan(*it2)){
                 cout << " nan " <<  index;
             }
             if(*it2 > limit) {
@@ -160,7 +160,7 @@ vector<chanIdVal> CalcBadChannels(float* data_start, float* data_end, int nrchan
             index++;
         }
     }
-    
+
     return badChans;
 }
 
@@ -226,10 +226,10 @@ vector<int> CalcBadSamples(float* data_start, float* data_end, int nrchannels, i
                 badcollapsedSamples.push_back(index);
             }
             index++;
-        } 
+        }
     }
-    
-    sort(badcollapsedSamples.begin(),badcollapsedSamples.end()); 
+
+    sort(badcollapsedSamples.begin(),badcollapsedSamples.end());
     int prevvalue=-1;
     int count=0;
     for(it=badcollapsedSamples.begin(); it<badcollapsedSamples.end();it++){
@@ -285,28 +285,28 @@ vector<float> channelSumSqr(float* data_start, float* data_end, int nrchannels, 
 
 
 // check if a file exists (not used in the code at the momemnt, but maybe we should).
-bool FileExists(string strFilename) { 
-	struct stat stFileInfo; 
-	bool blnReturn; 
-	int intStat; 
-	
-	// Attempt to get the file attributes 
-	intStat = stat(strFilename.c_str(),&stFileInfo); 
-	if(intStat == 0) { 
-		// We were able to get the file attributes 
-		// so the file obviously exists. 
-		blnReturn = true; 
-	} else { 
-		// We were not able to get the file attributes. 
-		// This may mean that we don't have permission to 
-		// access the folder which contains this file. If you 
-		// need to do that level of checking, lookup the 
-		// return values of stat which will give you 
-		// more details on why stat failed. 
-		blnReturn = false; 
-	} 
-	
-	return(blnReturn); 
+bool FileExists(string strFilename) {
+	struct stat stFileInfo;
+	bool blnReturn;
+	int intStat;
+
+	// Attempt to get the file attributes
+	intStat = stat(strFilename.c_str(),&stFileInfo);
+	if(intStat == 0) {
+		// We were able to get the file attributes
+		// so the file obviously exists.
+		blnReturn = true;
+	} else {
+		// We were not able to get the file attributes.
+		// This may mean that we don't have permission to
+		// access the folder which contains this file. If you
+		// need to do that level of checking, lookup the
+		// return values of stat which will give you
+		// more details on why stat failed.
+		blnReturn = false;
+	}
+
+	return(blnReturn);
 }
 
 //_______________________________________________________________________________
@@ -315,7 +315,7 @@ bool FileExists(string strFilename) {
 /*
     The task of the program is to dedisperse data in several bands by summing
     the channels with the correct offset. It does this for several dispersion
-    trials. For each dispersion trial it will try to find pulses in access of 
+    trials. For each dispersion trial it will try to find pulses in access of
     triggerlevel*standard deviation above the mean. It will do this for different
     pulse lengths.
 */
@@ -326,7 +326,7 @@ int main (int argc,
 	bool failsafe=0; // Do not continu if a sequence number is missing. This would hint
     // to dropped data. But now sequence numbers are not used anymore, but data is padded
     // with zeros for new blocks
-    
+
 /* Set default values that will mostly be filled by commandline options. */
 
 // Length to integrate over for the trigger
@@ -381,13 +381,13 @@ int main (int argc,
     int resampleFactorFreq=1;
 // lowest subband of the data
 	int startsubbandnumber=321;
-// padding now used only for swapping floats. 
-// NOTE: Verbose output needs some more work 
+// padding now used only for swapping floats.
+// NOTE: Verbose output needs some more work
 	bool DoPadding=0, verbose=false;
 // ZeroDM substracts the average of each time sample. Effect on detection efficiency
 // and RFI mitigation needs to be investigated.
     bool DoZeroDM=false;
-// file extensions used. Obsolete? 
+// file extensions used. Obsolete?
 	std::string extension=".stokes";
 // integration on the correlator
 	int timeintegration=1;
@@ -395,26 +395,26 @@ int main (int argc,
 	int nrCombinedSBs = 1;
 // using HBA or LBA data?
 	int HBAmode = 1;
-// where to store output 
+// where to store output
 	string pulsedir = "pulses";
     bool cleanRFI = true;
 // extra sleep time between blocks
     int sleeptime = 0;
-// starttime is used to calculate actual trigger time. Not calculated at te moment when the 
+// starttime is used to calculate actual trigger time. Not calculated at te moment when the
 // program is called.
     unsigned long int starttime_sec=0;
     unsigned long int starttime_ns=0;
 // Send UDP messages with trigger information?
     bool DoNotSendUDPtriggers=false;
-	
+
 	/*
 	 Check if filename of the dataset is provided on the command line; if only
 	 a fraction of the possible tests can be carried out.
 	 */
-	
-// Input from the commandline is written to the appropriate keywords.	
+
+// Input from the commandline is written to the appropriate keywords.
 	for(int argcounter(1); argcounter < argc; argcounter++){
-	    std::string topic = string(argv[argcounter]); 
+	    std::string topic = string(argv[argcounter]);
 		if(topic == "help" || argc < 2){
 			cout << "Options:\n"
 			"-c <config file>\n"
@@ -489,11 +489,11 @@ int main (int argc,
 		} else if(topic == "-ilrange"){
 			argcounter++;
             int intlenlen=atoi(argv[argcounter]);
-            integrationlength.resize(intlenlen); 
+            integrationlength.resize(intlenlen);
             cout << "integration lengths: ";
             for(int i=0;i<intlenlen;i++){
                 argcounter++;
-                integrationlength[i] = atoi(argv[argcounter]);    
+                integrationlength[i] = atoi(argv[argcounter]);
                 cout << integrationlength[i] << " ";
             }
             cout << endl;
@@ -520,11 +520,11 @@ int main (int argc,
 		} else if(topic == "-Cnr"){
 			argcounter++;
 			CoinNr = atoi(argv[argcounter]);
-			cout << "Coincidence subbands required " << CoinNr << endl;	
+			cout << "Coincidence subbands required " << CoinNr << endl;
 		} else if(topic == "-sleep"){
 			argcounter++;
             sleeptime=(int) 1000000*atof(argv[argcounter]);
-			cout << "Sleep for " << sleeptime << "us" << endl; 
+			cout << "Sleep for " << sleeptime << "us" << endl;
 		} else if(topic == "-Ctime"){
 			argcounter++;
 			CoinTime = atoi(argv[argcounter]);
@@ -532,7 +532,7 @@ int main (int argc,
 		} else if(topic == "-stb"){
 			argcounter++;
 			startpos = atol(argv[argcounter]);
-			cout << "First block " << startpos << endl;	
+			cout << "First block " << startpos << endl;
 		} else if(topic == "-ch"){
 			argcounter++;
 			channels = atoi(argv[argcounter]);
@@ -587,8 +587,8 @@ int main (int argc,
 				argcounter++;
 			    DMvalues[i]=atof(argv[argcounter]);
                 cout << " " << DMvalues[i];
-			}		
-            cout << endl;	
+			}
+            cout << endl;
 		} else if(topic == "-DMrange"){
 			argcounter++;
 			float firstDM=atof(argv[argcounter]);
@@ -598,14 +598,14 @@ int main (int argc,
 			float endDM=atof(argv[argcounter]);
             float nDMsf = (endDM-firstDM)/stepDM;
             cout << firstDM << " " << stepDM << " " << endDM << " " << (endDM-firstDM)/stepDM << endl;
-			nDMs = (int) nDMsf+1;
+			nDMs = (int) round(nDMsf+1);
 			cout << "dispersion measure ("<< nDMs <<"): " ;
 			DMvalues.resize(nDMs);
 			for(int i=0;i<nDMs;i++){
 			    DMvalues[i]=firstDM+i*stepDM;
                 cout << " " << DMvalues[i];
-			}		
-            cout << endl;	
+			}
+            cout << endl;
 		} else if(topic == "-freq"){
 			argcounter++;
 			nFreqs = atoi(argv[argcounter]);
@@ -615,8 +615,8 @@ int main (int argc,
 				argcounter++;
 			    FREQvalues[i]=atof(argv[argcounter]);
                 if(i<20){ cout << " " << FREQvalues[i]; }
-			}		
-            cout << endl;	
+			}
+            cout << endl;
 		} else if(topic == "-badch"){
 			argcounter++;
 			nBadChannels = atoi(argv[argcounter]);
@@ -626,8 +626,8 @@ int main (int argc,
 				argcounter++;
 			    BadChannels[i]=atoi(argv[argcounter]);
                 if(i<20){ cout << " " << BadChannels[i]; }
-			}		
-            cout << endl;	
+			}
+            cout << endl;
 		} else if(topic == "-tInt"){
 			argcounter++;
 			timeintegration = atoi(argv[argcounter]);
@@ -636,7 +636,7 @@ int main (int argc,
 			argcounter++;
 			starttime_sec = atoi(argv[argcounter]);
             argcounter++;
-			starttime_ns = atoi(argv[argcounter]);            
+			starttime_ns = atoi(argv[argcounter]);
 			cout << "start time of observation: " << starttime_sec << " " << starttime_ns << endl;
 		} else if(topic == "-nrCSB"){
 			argcounter++;
@@ -654,17 +654,17 @@ int main (int argc,
 			cout << "specify at least an config file with -c <config file>";
 		}
 	}
-	
-	
-	
+
+
+
 	//cout << logfilename << endl << triggerlogfilename << endl;
-	
+
 	//============================= NEW I/O code ======================================================
-	
-	
-	
-	
-	
+
+
+
+
+
 	float ReferenceFreq=SubbandToFreq(startsubbandnumber,HBAmode);
 	float FreqResolution = CalcFreqResolution(channels);
 	float TimeResolution = CalcTimeResolution(channels,timeintegration)*resampleFactorTime;
@@ -687,9 +687,9 @@ int main (int argc,
     int TotNrChannels=nFreqs; //nstreams*nrCombinedSBs*channels;
 	cout << "Nr of input files: " << ninputfiles << "; Nr of streams: " << nstreams << endl;
 	int StartChannel;
-	
+
 	// Initialize SBtriggers and coincidence mechanism
-	
+
 	float DMval=DM;
     cout << "Making Subband triggers and Coincidence checks" << endl;
 	SubbandTrigger* SBTs[nstreams][nDMs];
@@ -701,15 +701,15 @@ int main (int argc,
     //for(int i=nDMs-1;i>=0;i--){
     //   cc[i]=new CoinCheck;
     //}
-    
+
     if (cc==NULL)
 	{
 		cerr << "Memory could not be allocated\n";
 		return 1;
 	}
 	//CoinCheck cc[nDMs];
-	
-	
+
+
     UDPsend* UDPtransmitter=new UDPsend();
 	int StreamCounter=0;
     int SB=firstSB;
@@ -730,26 +730,26 @@ int main (int argc,
                 // total number of channels in this stream
                 printf("Channel, %i, Integration, %i ",channels,timeintegration);
                 //if(stream==1 && DMcounter==0)
-                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples/resampleFactorTime,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, UDPtransmitter, startpos, integrationlength, DoPadding, DoPadding, verbose, DoNotSendUDPtriggers, obsID, beam); // Add obsID and beam    
-                
+                SBTs[StreamCounter][DMcounter] = new SubbandTrigger(StreamCounter, NrChPerSB, samples/resampleFactorTime,DMval,triggerlevel,ReferenceFreq, FREQvalues, StartChannel, NrChannels, TotNrChannels, FreqResolution, TimeResolution, starttime_sec, starttime_ns, UDPtransmitter, startpos, integrationlength, DoPadding, DoPadding, verbose, DoNotSendUDPtriggers, obsID, beam); // Add obsID and beam
+
                 //}
             }
-	        
+
 			//SBTs[StreamCounter][DMcounter]->summary();
 		}
 		StreamCounter++;
 	}
     std::cout << "initialization done.";
-   
-	
+
+
 	// Initialize coincidence
 
-    // Output file	
+    // Output file
 /*    FILE * pFileOut;
     pFileOut = new FILE;
     pFileOut = fopen((inputfile+".out").c_str(),"wb");
-*/	
-	//--------------READ IN THE FILES----------------------------------	
+*/
+	//--------------READ IN THE FILES----------------------------------
     FILE * pFile;
     pFile = new FILE;
     pFile = fopen(inputfile.c_str(),"rb");
@@ -757,11 +757,11 @@ int main (int argc,
         cout << "File not there yet" << endl;
         usleep(500000);
         pFile = fopen(inputfile.c_str(),"rb");
-    } 	
-        
-        
-    
-	
+    }
+
+
+
+
     // Create file objects for summary of datastreams
 	ofstream pulselogfile;
 	int pulsenr=1;
@@ -769,9 +769,9 @@ int main (int argc,
     int mynDMs=nDMs;
     if(nstreams*nDMs > 50){
         int mynDMs=1;
-    } 
+    }
 
-    // Create log files        
+    // Create log files
 	string alltriggerlogfilename;
 	alltriggerlogfilename=pulsedir+"/found_triggers.log";
 	string flaggedchansfilename=pulsedir+"/flaggedchans.log";
@@ -781,7 +781,7 @@ int main (int argc,
 	string avfilename=pulsedir+"/average.log";
 	string stdfilename=pulsedir+"/stddev.log";
     string offsetfilename=pulsedir+"/offset.log";
-    
+
     ofstream * fcfile = new ofstream;
     fcfile->open(flaggedchansfilename.c_str(), ios::binary  | ios::out);
     ofstream * fsfile = new ofstream;
@@ -801,14 +801,14 @@ int main (int argc,
 	//triggerlogfile.open(triggerlogfilename.c_str());
 	alltriggerlogfile.open(alltriggerlogfilename.c_str(),ios::out | ios::app);
 
-    //writing offsets to file	
+    //writing offsets to file
     for(int DMcounter=0; DMcounter<nDMs; DMcounter++){
         for(int fc2=0;fc2<nstreams;fc2++){
             	SBTs[fc2][DMcounter]->writeOffset(offsetfile);
         }
     }
     offsetfile->close();
-    // used for reading files        
+    // used for reading files
 	unsigned num;
 	fpos_t pos;
     // Datasize is total number of channels (frequencies) * number of samples
@@ -853,8 +853,8 @@ int main (int argc,
     // should put this in pulsedir? Should check what is actually logged.
     std:string outFileName="RFIsummary.txt" ;
     RFIcleaning RFIcleaner(resamp_data, resamp_data_end, nFreqs, NrChPerSB, samples/resampleFactorTime, cutlevel, number_of_divisions, outFileName);
-	
-	
+
+
     int ch;
     // Data can start at another block
 	fseek(pFile, startpos*blockdatasize, SEEK_SET);
@@ -869,7 +869,7 @@ int main (int argc,
             cout << "Current positions " << blockNr << " " << startpos << " " << ftell(pFile)/blockdatasize << endl;
       //  }
         num = fread( &(data[0]), blockdatasize, 1, pFile); //read data
-        
+
         if( !num) {
             // Data could not be read. Wait a little and try again.
             cout << "*";
@@ -877,7 +877,7 @@ int main (int argc,
             usleep(50000);
             fsetpos(pFile,&pos);
             blockNr--;
-            
+
             //i--; //1 file k--
             continue;
         }
@@ -899,21 +899,21 @@ int main (int argc,
         for(float *it3=resamp_data; it3<resamp_data_end; it3++){
             *it3=0;
         }
-        
+
         if(resampleFactorTime>=1){
             float *dptr;
             float *dptrRes;
             #ifdef _OPENMP
                 #pragma omp parallel for private(dptr,dptrRes)
             #else
-            #endif // _OPENMP  
+            #endif // _OPENMP
             for(int ch=0; ch<TotNrChannels;ch++){
                 for(int step=0;step<resampleFactorTime;step++){
                     dptr=data+step*TotNrChannels+ch;
                     dptrRes=resamp_data+ch;
                     for ( ; dptr<data_end ; dptr+=resampleFactorTime*TotNrChannels){
                         if(step==0){*dptrRes=0.0;}
-                        *dptrRes+=*dptr; 
+                        *dptrRes+=*dptr;
                         dptrRes+=TotNrChannels;
 
 
@@ -921,8 +921,8 @@ int main (int argc,
                 }
             }
         }
-        
-   /* 
+
+   /*
         float sum1=0;
         float sum2=0;
         float sum3=0;
@@ -965,14 +965,14 @@ int main (int argc,
 
 if(doFlagging){
         if(verbose){
-            cout << "Flagging channels in bewtween " << resamp_data << " " << resamp_data_end << endl; 
+            cout << "Flagging channels in bewtween " << resamp_data << " " << resamp_data_end << endl;
         }
 
-// RFI cleaning. Calculate baseline (sum over time for each channel) and divide by it. 
+// RFI cleaning. Calculate baseline (sum over time for each channel) and divide by it.
 // This makes the average one.
 // Calculate the sum of the square of the samples
 // This should be roughly equal for pure noise
-// RFI channels stick out here, and are cut off by calculating and cleaning bad channels 
+// RFI channels stick out here, and are cut off by calculating and cleaning bad channels
         if(RFIcleaner.checkDataloss(3)){
             lastBadBlock=blockNr;
         }
@@ -985,7 +985,7 @@ if(doFlagging){
         RFIcleaner.calcBaseline(); // NOTE this should be one? Do we need to calculate it?
         //RFIcleaner.printBaseline();
         RFIcleaner.calcSqrBaseline();
-        nrFlaggedChannels=RFIcleaner.calcBadChannels(15); // 15 sigma cut, because bad samples may also give rise to 
+        nrFlaggedChannels=RFIcleaner.calcBadChannels(15); // 15 sigma cut, because bad samples may also give rise to
         // seeing a lot of 'bad' channels.
         if(verbose){
             RFIcleaner.printBadChannels();
@@ -999,7 +999,7 @@ if(doFlagging){
 // samples that are more than cutlevel*sigma above average in at least 2 of the quarters are flagged
         nrFlaggedSamples=RFIcleaner.calcBadSamples(4); // cutlevel = 4 sigma
         if(verbose){
-            
+
             RFIcleaner.printBadSamples();
         }
         RFIcleaner.cleanSamples("1"); // replace by 1
@@ -1036,7 +1036,7 @@ if(doFlagging){
                     RFIcleaner.calcAverageTimeseriesStream(Rstartchan,Rendchan);
                     RFIcleaner.printAverageTimeseriesStream(false);
                 }
-                
+
             }
 
         }
@@ -1049,17 +1049,17 @@ if(doFlagging){
         //RFIcleaner.writeBaseline(basefile, blockNr);
 
         if(verbose){
-            cout << " We are here now . 1 " << sizeof(chanIdVal)<< endl;     
+            cout << " We are here now . 1 " << sizeof(chanIdVal)<< endl;
         }
 
 } //do flagging
         if(verbose){
-            cout << " We are here now . 2 " << endl;     
+            cout << " We are here now . 2 " << endl;
         }
 
         // For each stream
 		for(int sc=0; sc < nstreams; sc++){
-            
+
 
             // Do the DMs in parallel
             #ifdef _OPENMP
@@ -1068,8 +1068,8 @@ if(doFlagging){
             #else
                 //std::cout<<"Running in serial mode"<<std::endl;
             #endif // _OPENMP
-		    
-            
+
+
         	for(int DMcounter=0; DMcounter<nDMs; DMcounter++){	//analyse data of one stream for all DMs
                 if(verbose){
                     cout << "Processing " << sc << " " << DMcounter << endl;
@@ -1079,7 +1079,7 @@ if(doFlagging){
                 SBTs[sc][DMcounter]->setNrFlaggedChannels(nrFlaggedChannels);
                 SBTs[sc][DMcounter]->setNrFlaggedSamples(nrFlaggedSamples);
                 SBTs[sc][DMcounter]->setLastBadBlock(lastBadBlock);
-                
+
 				foundpulse=SBTs[sc][DMcounter]->dedisperseData2(resamp_data, blockNr, &cc[DMcounter], CoinNr, CoinTime,Transposed);
                 //# calcAverageStddev : calculates average, stddev and thresholdlevel
 				foundpulse=SBTs[sc][DMcounter]->calcAverageStddev(blockNr);
@@ -1097,19 +1097,19 @@ if(doFlagging){
                     datamonitor[sc][DMcounter] << SBTs[sc][DMcounter]->blockAnalysisSummary() << "\n";
                 } */
 				if(foundpulse){ // actually finding pulses is handled by a separate program, or maybe we want to incorporate it here again.
-                    
-                    // output information and send it to a logfile 
+
+                    // output information and send it to a logfile
                     cout << "Found pulse " << pulsenr << " " << SBTs[sc][DMcounter]->FoundTriggers();
                     alltriggerlogfile << "pulse " << pulsenr << " " <<SBTs[sc][DMcounter]->FoundTriggers();
                     alltriggerlogfile.flush();
                     // output dedispersed timeseries for the detected pulse
 					for(int fc2=0;fc2<nstreams;fc2++){
-						
+
 						stringstream pulselogfn;
 						pulselogfn << pulsedir << "/pulse" << pulsenr << "_" << fc2 << ".log";
 						string pulselogfilename;
 						pulselogfn >> pulselogfilename;
-						
+
 						SBTs[fc2][DMcounter]->makeplotBuffer(pulselogfilename);
 
 					}
@@ -1126,7 +1126,7 @@ if(doFlagging){
 						SBTs[sc][DMcounter]->makeplotDedispBlock(pulselogfilename);
                 }
 			}
-			
+
 
 		}
         usleep(sleeptime);
@@ -1150,7 +1150,7 @@ if(doFlagging){
     alltriggerlogfile.close();
     basefile->close();
     sqrtimeseriesfile->close();
-    //fclose(pFileOut); 
+    //fclose(pFileOut);
     // NOTE close pFile?
 	return 0;
 }
