@@ -6,7 +6,7 @@
 
 namespace FRAT {
 	namespace coincidence {
-		
+
 		CoinCheck::CoinCheck() :
 		itsNrTriggers (0),
 		itsInitialized (false) {
@@ -29,8 +29,8 @@ namespace FRAT {
             std::cout << "Coincheck constructed" << std::endl;
 			// LOG_DEBUG ("FRAT construction");
 		}
-		
-		
+
+
 		//
 		// ~CoinCheck()
 		//
@@ -38,8 +38,8 @@ namespace FRAT {
 		{
 			// LOG_DEBUG ("FRAT destruction");
 		}
-		
-		
+
+
 		// Check the contents of the buffer if a coincidence is found
 		// make timewindow a double?
 		// could also be int
@@ -47,7 +47,7 @@ namespace FRAT {
 			unsigned int i,foundSBs[nChannles],nfound;
 			unsigned int startindex,runindex;
 			int reftime;
-			
+
 			startindex = first;
 			while ((startindex!=trigBuffer[latestindex].next) && (startindex < FRAT_TASK_BUFFER_LENGTH)) {
 				runindex = trigBuffer[startindex].next;
@@ -58,10 +58,10 @@ namespace FRAT {
                 {
 					//check if current time is higher than the reftime. Stop if that is not the case
 					if(trigBuffer[runindex].Time!=0)
-                    {  
+                    {
 						for (i=0; i<nfound; i++)
-                        { 
-							if (foundSBs[i] == trigBuffer[runindex].SBnr) 
+                        {
+							if (foundSBs[i] == trigBuffer[runindex].SBnr)
                             {
 								//i; //prevents i to be nfound so you would trigger on one less.
 								//if(i==nfound-1){i++;};
@@ -69,18 +69,18 @@ namespace FRAT {
 								break; //break the for-loop;
 							};
 						};
-						if (i == nfound) 
-                        { 
+						if (i == nfound)
+                        {
 							if (nfound+2 > nChannles)
-                            { 
+                            {
 								std::cout << "Subbands found:" ;
 								for (i=0; i<nfound; i++)
                                 {
 									std::cout << " " << foundSBs[i];
 								}
 								std::cout << " " << trigBuffer[runindex].SBnr << std::endl;
-								return true; 
-							}; //startindex; 
+								return true;
+							}; //startindex;
 							foundSBs[nfound] = trigBuffer[runindex].SBnr;
 							std::cout << "Subbands found:" ;
 							for (i=0; i<nfound; i++)
@@ -99,18 +99,18 @@ namespace FRAT {
 			//return -1;
 			return false;
 		};
-		// Add a trigger message to the buffer. 
+		// Add a trigger message to the buffer.
 		unsigned int CoinCheck::add2buffer(const triggerEvent& trigger){
 			// double date;
 			unsigned int newindex,runindex;
-			
+
 			std::cout << "Adding new event: SB " << trigger.subband << " at time " << trigger.time << std::endl;
-			
+
 			// date = trigger.itsTime + trigger.itsSampleNr/200e6;
 			newindex = last;
 			last = trigBuffer[last].prev;
 			trigBuffer[last].next = FRAT_TASK_BUFFER_LENGTH;
-			
+
 			trigBuffer[newindex].SBnr     = trigger.subband;
 			// trigBuffer[newindex].SeqNr     = trigger.fitsSeqNr;
 			trigBuffer[newindex].Time      = trigger.time;
@@ -119,11 +119,11 @@ namespace FRAT {
 			trigBuffer[newindex].NrSamples = trigger.length;
 			trigBuffer[newindex].PeakValue = trigger.max;
 			//  trigBuffer[newindex].date      = date;
-			
+
 			runindex = first;
 			while (runindex < FRAT_TASK_BUFFER_LENGTH){
-				if (trigBuffer[runindex].Time <= trigger.time) { 
-					break; 
+				if (trigBuffer[runindex].Time <= trigger.time) {
+					break;
 				};
 				runindex = trigBuffer[runindex].next;
 			};
@@ -143,29 +143,29 @@ namespace FRAT {
 					trigBuffer[runindex].prev = newindex;
 				};
 			};
-			
+
 			//		for(int index=0; index<FRAT_TASK_BUFFER_LENGTH; index++){
 			//			std::cout << "Buffer index " << index << "; time: " << trigBuffer[index].Time << ";SB: " << trigBuffer[index].SBnr << "; prev: " << trigBuffer[index].prev << "; next: " << trigBuffer[index].next << std::endl;
 			//		}
 			//		std::cout << "first: " << first << "; last: " << last << std::endl;
-			return newindex;	
+			return newindex;
 		};
 	};
-	
+
 	namespace analysis {
-    
+
     UDPsend::UDPsend(){
 			hostname=FRAT_HOSTNAME;
             send_data = new char[sizeof(struct triggerEvent)];
             host= (struct hostent *) gethostbyname(hostname);
-		    std::cout << "Setting network connection "  << std::endl;	
-        
+		    std::cout << "Setting network connection "  << std::endl;
+
             if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
             {
                 perror("socket");
                 exit(1);
             }
-			
+
             server_addr.sin_family = AF_INET;
             server_addr.sin_port = htons(FRAT_TRIGGER_PORT_0);
             server_addr.sin_addr = *((struct in_addr *)host->h_addr);
@@ -184,13 +184,13 @@ namespace FRAT {
         return true;
         cout << " SEND SEND SEND SEND SEND " << n << "\n";
     }
-    
 
-    
-		
+
+
+
     SubbandTrigger::SubbandTrigger(int StreamID, int NrChannels, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, float StartFreq, float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, long startBlock, int IntegrationLength, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam)
     {
-			
+
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
 			DoPadding=InDoPadding;
 			UseSamplesOr2=InUseSamplesOr2;
@@ -201,10 +201,10 @@ namespace FRAT {
 			} else {
 				itsNrSamplesOr2 = NrSamples;
 			}
-		    noSend=noSend;	
+		    noSend=noSend;
 			itsStreamID=StreamID;
 			itsDM = DM;
-			itsIntegrationLength=IntegrationLength; 
+			itsIntegrationLength=IntegrationLength;
 			itsTriggerLevel = TriggerLevel;
 			itsStartFreq = StartFreq;
 			itsReferenceFreq = ReferenceFreq;
@@ -223,30 +223,30 @@ namespace FRAT {
 			InitDedispersionOffset();
 			verbose=verbose;
             std::cout << "verbose " << verbose << std::endl;
-		    std::cout << "Resizing dedispersionBuffer "  << std::endl;	
+		    std::cout << "Resizing dedispersionBuffer "  << std::endl;
 			DeDispersedBuffer.resize(itsBufferLength, 0.0);
-		    std::cout << "Resizing sum Buffer "  << std::endl;	
+		    std::cout << "Resizing sum Buffer "  << std::endl;
 			DeDispersed.resize(itsBufferLength, 0.0);
 			SumDeDispersed.resize(itsNrSamples, 0.0);
 			hostname=FRAT_HOSTNAME;
 			if(!noSend){
                 send_data = new char[sizeof(struct triggerEvent)];
                 host= (struct hostent *) gethostbyname(hostname);
-		    std::cout << "Setting network connection "  << std::endl;	
-            
+		    std::cout << "Setting network connection "  << std::endl;
+
                 if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
                 {
                     perror("socket");
                     exit(1);
                 }
-			
+
                 server_addr.sin_family = AF_INET;
                 server_addr.sin_port = htons(FRAT_TRIGGER_PORT_0);
                 server_addr.sin_addr = *((struct in_addr *)host->h_addr);
                 bzero(&(server_addr.sin_zero),8);
-		    }	
-			
-			
+		    }
+
+
 			trigger.time=0;
 			trigger.length=0;
 			trigger.block=0;
@@ -259,10 +259,10 @@ namespace FRAT {
 			trigger.DM=DM;
             trigger.utc_second=5000;
             trigger.utc_nanosecond=10000;
-			
+
     }
-        
- /*      
+
+ /*
         SubbandTrigger::SubbandTrigger(int StreamID, int ChannelsPerSubband, int NrSamples, float DM, float TriggerLevel, float ReferenceFreq, std::vector<float> FREQvalues, int StartChannel, int NrChannels, int TotNrChannels,  float FreqResolution, float TimeResolution, unsigned long int starttime_utc_sec, unsigned long int starttime_utc_nanosec, FRAT::analysis::UDPsend* UDPtransmitter, long startBlock, int IntegrationLength, int nrblocks, bool InDoPadding, bool InUseSamplesOr2, bool verbose, bool noSend, int obsID, int beam )
         {
             std::vector<int> IntegrationLengthVector;
@@ -290,11 +290,11 @@ namespace FRAT {
 			} else {
 				itsNrSamplesOr2 = NrSamples;
 			}
-			
+
 			itsStreamID=StreamID;
 			itsDM = DM;
             if(IntegrationLengthVector.size()>0){
-                itsIntegrationLength=IntegrationLengthVector[0]; 
+                itsIntegrationLength=IntegrationLengthVector[0];
             } else {
                 cerr << "Integration lengths not defined" << endl;
             }
@@ -306,7 +306,7 @@ namespace FRAT {
 			itsTimeResolution = TimeResolution;
 			itsSequenceNumber = startBlock-1;
             itsStarttime_utc_sec=starttime_utc_sec;
-            itsStarttime_utc_ns=starttime_utc_nanosec;            
+            itsStarttime_utc_ns=starttime_utc_nanosec;
 			itsBlockNumber = 0;
 			itsTotalValidSamples = 0;
 			itsSBaverage=1e22;
@@ -316,9 +316,9 @@ namespace FRAT {
 			itsBufferLength=1000;
 			InitDedispersionOffset(FREQvalues);
             std::cout << "verbose SBtrigger " << verbose << std::endl;
-		    std::cout << "Resizing dedispersionBuffer "  << itsBufferLength << std::endl;	
+		    std::cout << "Resizing dedispersionBuffer "  << itsBufferLength << std::endl;
 			DeDispersedBuffer.resize(itsBufferLength, 0.0);
-		    std::cout << "Resizing sum Buffer "  << std::endl;	
+		    std::cout << "Resizing sum Buffer "  << std::endl;
 			DeDispersed.resize(itsBufferLength, 0.0);
 			SumDeDispersed.resize(itsNrSamples, 0.0);
 			hostname=FRAT_HOSTNAME;
@@ -328,8 +328,8 @@ namespace FRAT {
             if(!noSend){
                 send_data = new char[sizeof(struct triggerEvent)];
                 host= (struct hostent *) gethostbyname(hostname);
-                
-                std::cout << "Setting network connection "  << std::endl;	
+
+                std::cout << "Setting network connection "  << std::endl;
                 if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
                 {
                     perror("socket");
@@ -339,9 +339,9 @@ namespace FRAT {
                 server_addr.sin_port = htons(FRAT_TRIGGER_PORT_0);
                 server_addr.sin_addr = *((struct in_addr *)host->h_addr);
                 bzero(&(server_addr.sin_zero),8);
-            } 
-                
-			
+            }
+
+
 			trigger.time=0;
 			trigger.length=0;
 			trigger.block=0;
@@ -355,23 +355,23 @@ namespace FRAT {
             trigger.utc_second=1234;
             trigger.utc_nanosecond=56789;
             trigger.lastBadBlock=-10000;
-			
+
 		}
-	
+
         void SubbandTrigger::setLastBadBlock(int block){
             trigger.lastBadBlock=block;
         }
-		
+
 		void SubbandTrigger::summary()
 		{
-			
+
 			// To be added to input: IntegrationLength, UseSamplesOr2, DoPadding
 			std::cout << "=========SUMMARY =============" << std::endl;
 			std::cout << "DoPadding " << DoPadding << std::endl;
 			//UseSamplesOr2=InUseSamplesOr2;
 			std::cout << "NrChannels " << itsNrChannels << std::endl ;
 			std::cout << "NrSamples " << itsNrSamples << std::endl;
-			
+
 			std::cout << "StreamID " << itsStreamID << std::endl;
 			std::cout << "DM " << itsDM << std::endl;
 			std::cout << "Integration Length " << itsIntegrationLength << std::endl;
@@ -394,13 +394,13 @@ namespace FRAT {
 				std::cout << " " << dedispersionoffset[channel];
 			}
 			std::cout << std::endl;
-				
+
 		    std::cout << "=========SUMMARY END===========\n\n\n" << std::endl;
 			//DeDispersedBuffer.resize(itsBufferLength, 0.0);
 			//DeDispersed.resize(itsBufferLength, 0.0);
-			
-			
-			
+
+
+
 			//trigger.time=0;
 			//trigger.length=0;
 			//trigger.block=0;
@@ -408,19 +408,19 @@ namespace FRAT {
 			//trigger.sum=0;
 			//trigger.max=0;
 			//trigger.subband=0;
-			
-			
-			
-			
+
+
+
+
 		}
-		
-		
-		
+
+
+
 		SubbandTrigger::~SubbandTrigger()
 		{
 			// LOG_DEBUG ("FRAT CoinCheck destruction");
 		}
-		
+
 		bool SubbandTrigger::dedisperseData2(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
             //# Version used in the trigger
             //# Input: data, 2-dimensional, axis frequencies and time (dynamic spectrum)
@@ -429,12 +429,12 @@ namespace FRAT {
             //# The data has already gone through an endianness swap and some RFI mitigation steps.
             //# Task 1: Dedisperse data
             //# How?: Loop over time and frequency
-            //# Add data[time][frequency] to the correct sample in DeDispersedBuffer, that is at position (totaltime+dedispersionoffset[channel])%itsBufferLength 
-            //# 
+            //# Add data[time][frequency] to the correct sample in DeDispersedBuffer, that is at position (totaltime+dedispersionoffset[channel])%itsBufferLength
+            //#
 			bool pulsefound=false;
-			if( ++itsSequenceNumber!=sequenceNumber && false) { 
-				std::cerr << "discontinous data" << std::endl; 
-			    return false; 
+			if( ++itsSequenceNumber!=sequenceNumber && false) {
+				std::cerr << "discontinous data" << std::endl;
+			    return false;
 			} else {
 				itsFoundTriggers="";
                 //itsSequenceNumber==sequenceNumber;
@@ -459,25 +459,25 @@ namespace FRAT {
 					rest=totaltime%itsBufferLength;
                     channeltimeindex+=itsTotNrChannels; // increase index for each sample by the number of values on the channel axis
                     channelindex=channeltimeindex+itsStartChannel+itsNrChannels; // move to the highest frequency of this band. Then count downwards.
-                    
+
 					for(int channel=itsNrChannels-1; channel>0; channel--){
                         channelindex--;
 						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=data[channelindex];
                     } // for channel
                     //***  channel=0; *******
-                    
+
                     channelindex--;
-                    
+
                     //value = data[channelindex];
-                        
+
                     //DeDispersedBuffer[rest]+=value;
                     //value = data[channelindex];
-                        
+
                     DeDispersedBuffer[rest]+=data[channelindex];
                     blocksum+=DeDispersedBuffer[rest];
                     DeDispersed[rest]=DeDispersedBuffer[rest];
 
-                
+
                     DeDispersedBuffer[rest]=0;
 
 				} // for time
@@ -490,9 +490,9 @@ namespace FRAT {
     bool SubbandTrigger::calcAverageStddev(unsigned int sequenceNumber){
         bool pulsefound=false;
         float subsum=0;
-        if( itsSequenceNumber!=sequenceNumber && false) { 
-            std::cerr << "discontinous data" << std::endl; 
-            return false; 
+        if( itsSequenceNumber!=sequenceNumber && false) {
+            std::cerr << "discontinous data" << std::endl;
+            return false;
 	    } else {
             itsFoundTriggers="";
             if(verbose){
@@ -511,15 +511,15 @@ namespace FRAT {
                 SBaverage+=DeDispersed[rest];
                 SBstdev+=DeDispersed[rest]*DeDispersed[rest];
                 SBsumsamples++;
-			}	
+			}
 				// Update class parameters;
 				//itsSBstdev = SBstdev;
-				
+
             if(SBsumsamples>0){
                 itsSBaverage = SBaverage/SBsumsamples;
                 itsSBaverage=blocksum/SBsumsamples;
                 SBstdev/=SBsumsamples;
-                
+
             }
             itsSBstdev=sqrt(SBstdev-itsSBaverage*itsSBaverage);
 				//for(int it=rest;it>rest-SBsumsamples;it--){
@@ -531,17 +531,17 @@ namespace FRAT {
                 std::cerr << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
             }
             //std::string output;
-            
+
             itsPrevTriggerLevel = (itsTriggerThreshold-itsSBaverage)/itsSBstdev;
             itsTriggerThreshold = itsSBaverage+itsTriggerLevel*itsSBstdev;
             itsSBaverageVector.push_back(itsSBaverage);
             itsSBstdevVector.push_back(itsSBstdev);
         }
-			
-			
+
+
         return pulsefound;
-        
-    
+
+
     }
 
 
@@ -560,16 +560,16 @@ namespace FRAT {
 //# Correct SB average and stddev for the integration length
         SBaverage=itsSBaverage*IntegrationLength;
         SBstdev=itsSBstdev*sqrt(1.0*IntegrationLength);
-        float TriggerThreshold=SBaverage+itsTriggerLevel*SBstdev; 
+        float TriggerThreshold=SBaverage+itsTriggerLevel*SBstdev;
         trigger.SBaverage=SBaverage;
         trigger.SBstdev=SBstdev;
         trigger.Threshold=SBaverage+itsTriggerLevel*SBstdev;
 
         unsigned long int utc_second;
         unsigned long int utc_nanosecond;
-        if( itsSequenceNumber!=sequenceNumber && false) { 
-            std::cerr << "discontinous data" << std::endl; 
-            return false; 
+        if( itsSequenceNumber!=sequenceNumber && false) {
+            std::cerr << "discontinous data" << std::endl;
+            return false;
 	    } else {
             itsFoundTriggers="";
             //blocksum =0.0;
@@ -603,7 +603,7 @@ namespace FRAT {
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
                             trigger.width=IntegrationLength;
-                        }     
+                        }
                         if(time==itsNrSamples-1 && itsBlockNumber>minBlockNumber){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
@@ -638,7 +638,7 @@ namespace FRAT {
                         subsum=DeDispersed[rest]+DeDispersed[rest-1];
                     } else {
                         subsum=DeDispersed[rest]+DeDispersed[itsBufferLength-1];
-                    } 
+                    }
                     if(subsum>TriggerThreshold) {
                         //ADD TRIGGER ALGORITHM OR FUNCTION
                         if(trigger.length==IntegrationLength && trigger.time-itsReferenceTime+nextTriggerTimeOffset==totaltime && time!=0){
@@ -661,7 +661,7 @@ namespace FRAT {
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
                             trigger.width=IntegrationLength;
-                        }     
+                        }
                         if(time==itsNrSamples-1 && itsBlockNumber>minBlockNumber){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
@@ -687,7 +687,7 @@ namespace FRAT {
                     }
 
                 } // for time
-              } else if(IntegrationLength>2){ // make this >2	
+              } else if(IntegrationLength>2){ // make this >2
                 rest=itsSequenceNumber*itsNrSamples%itsBufferLength;
                 subsum=0;
                 samplessummed=1;
@@ -705,7 +705,7 @@ namespace FRAT {
                         samplessummed++;
                     }
                 }
-               */      
+               */
                 for(int time=0; time<itsNrSamples; time++){
                     //std::cout << std::endl << " time " << time ;
                     totaltime=itsSequenceNumber*itsNrSamples+time;
@@ -756,7 +756,7 @@ namespace FRAT {
                             trigger.block=itsBlockNumber;
                             trigger.max=(trigger.sum-SBaverage)/SBstdev;
                             trigger.width=IntegrationLength;
-                        }     
+                        }
                         if(time==itsNrSamples-1 && itsBlockNumber>minBlockNumber){
                             // send trigger at last sample of block, as it's overwritten next
                             utc_second=(unsigned long int) trigger.time*itsTimeResolution;
@@ -782,17 +782,17 @@ namespace FRAT {
                     }
 
                 } // for time
-            }    
-                
-                
-                
-            
+            }
+
+
+
+
         }
     //    }
         return pulsefound;
-        
-        
-    }        
+
+
+    }
 
     bool SubbandTrigger::processData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
             //# Input: data, 2-dimensional, axis frequencies and time (dynamic spectrum)
@@ -801,17 +801,17 @@ namespace FRAT {
             //# The data has already gone through an endianness swap and some RFI mitigation steps.
             //# Task 1: Dedisperse data
             //# How?: Loop over time and frequency
-            //# Add data[time][frequency] to the correct sample in DeDispersedBuffer, that is at position (totaltime+dedispersionoffset[channel])%itsBufferLength 
-            //# 
+            //# Add data[time][frequency] to the correct sample in DeDispersedBuffer, that is at position (totaltime+dedispersionoffset[channel])%itsBufferLength
+            //#
 			bool pulsefound=false;
             float subsum=0;
-			if( ++itsSequenceNumber!=sequenceNumber && false) { 
-				std::cerr << "discontinous data" << std::endl; 
-			    return false; 
+			if( ++itsSequenceNumber!=sequenceNumber && false) {
+				std::cerr << "discontinous data" << std::endl;
+			    return false;
 			} else {
 				itsFoundTriggers="";
 				itsBlockNumber=sequenceNumber;
-			    if(verbose){	
+			    if(verbose){
                     std::cout << "Processing block " << sequenceNumber << std::endl;
                 }
                 blocksum =0.0;
@@ -828,20 +828,20 @@ namespace FRAT {
 					rest=totaltime%itsBufferLength;
                     channeltimeindex+=itsTotNrChannels; // increase index for each sample by the number of values on the channel axis
                     channelindex=channeltimeindex+itsStartChannel+itsNrChannels; // move to the highest frequency of this band. Then count downwards.
-                    
+
 					for(int channel=itsNrChannels-1; channel>0; channel--){
                         channelindex--;
 						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=data[channelindex];
                     } // for channel
                     //***  channel=0; *******
-                    
+
                     channelindex--;
-                    
+
                     //value = data[channelindex];
-                        
+
                     //DeDispersedBuffer[rest]+=value;
                     //value = data[channelindex];
-                        
+
                     DeDispersedBuffer[rest]+=data[channelindex];
                     blocksum+=DeDispersedBuffer[rest];
                     DeDispersed[rest]=DeDispersedBuffer[rest];
@@ -858,7 +858,7 @@ namespace FRAT {
                                 subsum+=DeDispersed[it+itsBufferLength];
                             }
                         }
-                        
+
                     }
                     SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
                     SBsumsamples++;
@@ -869,13 +869,13 @@ namespace FRAT {
                             //new trigger
                             //trigger.average[fc]/=triggerlength[fc];
                             trigger.time=totaltime+itsReferenceTime;//correction for dispersion fc* removed
-                            
+
                             trigger.sum=subsum;
                             trigger.length=1;
                             trigger.sample=time;
                             trigger.block=itsBlockNumber;
                             trigger.max=subsum;
-                        
+
                         }
                         else{
                             //old trigger, or trigger accross blocks
@@ -900,46 +900,46 @@ namespace FRAT {
                             //UDPtransmitter->SendTriggerMessage(trigger);
                             //}
 
-                           /* 
+                           /*
                             int latestindex = cc->add2buffer(trigger);
-                            
-                            
+
+
                             if(cc->coincidenceCheck(latestindex, CoinNr, CoinTime)) {
-                                
-                                
+
+
                                 float triggerstrength = trigger.max;//(trigger.max-itsSBaverage)/itsSBstdev;
                                 char output2[400];
                                 //std::string output;
-                                
+
                                 //sprintf(output,"%f4.2 %d %e %e %e %e %e" ,itsDM,itsSequenceNumber,1000*itsStartFreq,itsSBaverage,itsSBstdev,itsSBstdev/itsSBaverage,itsPrevTriggerLevel);
 
                                 sprintf(output2,"COINCIDENCE TRIGGER FOUND with DM %f at block %i / %i time: %f %f strength %f \n",itsDM,itsSequenceNumber,itsBlockNumber,totaltime*itsTimeResolution,trigger.time*itsTimeResolution,triggerstrength);
                                 itsFoundTriggers=itsFoundTriggers+std::string(output2);
-                                std::cout << "\n\n\n\n COINCIDENCE TRIGGER FOUND with DM " << itsDM << " at block" << itsSequenceNumber << " / " << itsBlockNumber << " time: " << totaltime*itsTimeResolution   << " " << trigger.time*itsTimeResolution << " strength " << triggerstrength << "\n\n";	
+                                std::cout << "\n\n\n\n COINCIDENCE TRIGGER FOUND with DM " << itsDM << " at block" << itsSequenceNumber << " / " << itsBlockNumber << " time: " << totaltime*itsTimeResolution   << " " << trigger.time*itsTimeResolution << " strength " << triggerstrength << "\n\n";
                                 //usleep(1000000);
                                 pulsefound=true;
                             }
                             */
-								
-								
-								
+
+
+
                         }
                         DeDispersedBuffer[rest]=0;
 
 				} // for time
-				
-				
-				
-				
-				
+
+
+
+
+
 				// Update class parameters;
 				//itsSBstdev = SBstdev;
-				
+
 				if(SBsumsamples>0){
 					itsSBaverage = SBaverage/SBsumsamples;
 				    //itsSBaverage=blocksum/SBsumsamples;
 					SBstdev/=SBsumsamples;
-					
+
 				}
 				itsSBstdev=sqrt(SBstdev);
 				itsTotalZeros += zerocounter;
@@ -951,29 +951,29 @@ namespace FRAT {
 				//SBaverageAlt/=SBsumsamples;
 				if(verbose){
                     std::cout << "verbose " << verbose << endl;
-                    
+
 					std::cerr << "verbose" << verbose << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
 				}
 				char output[200];
 				//std::string output;
-				
+
 				itsPrevTriggerLevel = (itsTriggerThreshold-itsSBaverage)/itsSBstdev;
 				itsTriggerThreshold = itsSBaverage+itsTriggerLevel*itsSBstdev;
                 itsSBaverageVector.push_back(itsSBaverage);
                 itsSBstdevVector.push_back(itsSBstdev);
 			}
-			
-			
+
+
 			return pulsefound;
 		}
-		
+
 		int SubbandTrigger::setNrFlaggedChannels(int nrFlaggedChannels){
-            trigger.nrFlaggedChannels=nrFlaggedChannels; 
+            trigger.nrFlaggedChannels=nrFlaggedChannels;
             return 0;
         }
 
 		int SubbandTrigger::setNrFlaggedSamples(int nrFlaggedSamples){
-            trigger.nrFlaggedSamples=nrFlaggedSamples; 
+            trigger.nrFlaggedSamples=nrFlaggedSamples;
             return 0;
         }
 
@@ -992,18 +992,18 @@ namespace FRAT {
 			return itsBufferLength;
 		}
 
-		
+
 		void SubbandTrigger::InitDedispersionOffset(){
 			dedispersionoffset.resize(itsNrChannels);
             float freq1=itsStartFreq-0.5*itsNrChannels*itsFreqResolution;
 			for(int channel=0;channel<itsNrChannels;channel++){
-				
+
 				float freq2=freq1+channel*itsFreqResolution;
 				float offset=DM_CONSTANT*itsDM*(1/(freq1*freq1)-1/(freq2*freq2))/itsTimeResolution;
 			//	 printf("%f ",offset);
-				
+
 				// dedispersionoffset[fc][channel]=(int) (nrCHANNELS-channel-1)*(64*64)/(channels_p*channels_p);
-				
+
 				dedispersionoffset[channel]=(int)offset;
 			}
             minBlockNumber=(dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
@@ -1012,7 +1012,7 @@ namespace FRAT {
             } else {
                 minBlockNumber+=2;
             }
-             
+
 
 			float freqA=itsReferenceFreq+0.5*itsFreqResolution;
 			float freqB=itsStartFreq+0.5*itsFreqResolution;
@@ -1020,21 +1020,21 @@ namespace FRAT {
 			itsReferenceTime=(int) offset;
 			CalculateBufferSize();
 		}
-        
-        
+
+
         void SubbandTrigger::InitDedispersionOffset(std::vector<float> FREQvalues){
             std::cout << itsNrChannels << std::endl;
             dedispersionoffset.resize(itsNrChannels);
             // Frequency= FREQvalues[itsStartChannel+currentChannel]
-            printf("Setting offsets with timeresolution %f start %i number %i tot number %i ", itsTimeResolution,itsStartChannel, itsNrChannels, itsTotNrChannels);	
+            printf("Setting offsets with timeresolution %f start %i number %i tot number %i ", itsTimeResolution,itsStartChannel, itsNrChannels, itsTotNrChannels);
             float freq1=FREQvalues[itsStartChannel]-0.5*itsChannelsPerSubband*itsFreqResolution;
 			for(int channel=0;channel<itsNrChannels;channel++){
 				float freq2=FREQvalues[itsStartChannel+channel]; //freq2=freq1+channel*itsFreqResolution;
 				float offset=DM_CONSTANT*itsDM*(1/(freq1*freq1)-1/(freq2*freq2))*1e18/itsTimeResolution;
                 //printf("%f %i ",offset,int(offset));
-				
+
 				// dedispersionoffset[fc][channel]=(int) (nrCHANNELS-channel-1)*(64*64)/(channels_p*channels_p);
-				
+
 				dedispersionoffset[channel]=(int)offset;
 			}
             minBlockNumber=(dedispersionoffset[0]-dedispersionoffset[itsNrChannels-1])/itsNrSamples;
@@ -1054,7 +1054,7 @@ namespace FRAT {
 			itsReferenceTime=(int) offset;
 			CalculateBufferSize();
 		}
-		
+
 		bool SubbandTrigger::makeplotBuffer(std::string pulselogfilename){
 			std::ofstream pulselogfile(pulselogfilename.c_str(), std::ios::out | std::ios::binary);
 			int totaltime=(itsSequenceNumber+1)*itsNrSamples;
@@ -1074,7 +1074,7 @@ namespace FRAT {
             /*
 			for(int j=intstart+1;j<buflen;j++){
 				pulselogfile << (totaltime-buflen+j)*itsTimeResolution <<  DeDispersed[j] << std::endl;
-				
+
 			}
                         float time;
                         //std::cout.precision(10);
@@ -1082,17 +1082,17 @@ namespace FRAT {
 				char output3[200];
 				sprintf(output3,"%.12f %e",(totaltime+r)*itsTimeResolution,DeDispersed[r]  );
 				time = (totaltime+r)*itsTimeResolution;
-                                
+
                                 pulselogfile << time << " " << DeDispersed[r] << std::endl;
                                // std::cout << time << std::endl;
 			}
             */
 			pulselogfile.close();
-			
+
 			return true;
-		
-		
-		
+
+
+
 		}
 
 
@@ -1103,8 +1103,8 @@ namespace FRAT {
             fsfile->write((const char*)&size2, sizeof(size2));
             fsfile->write((const char*)&itsSBaverageVector[0], size2 * sizeof(itsSBaverageVector[0]));
         }
-    
-       
+
+
         bool SubbandTrigger::writeStdDev(ofstream * fsfile){
             fsfile->write((const char*)&itsDM, sizeof(itsDM));
             fsfile->write((const char*)&itsStreamID, sizeof(itsStreamID));
@@ -1142,11 +1142,11 @@ namespace FRAT {
                 pulselogfile.write((char*) &DeDispersed[0], intstart*sizeof(float));
             }
 	    	pulselogfile.close();
-			
+
 			return true;
-		
-		
-		
+
+
+
 		}
 
         bool SubbandTrigger::makeplotDedispBlock(ofstream *pulselogfile){
@@ -1170,14 +1170,14 @@ namespace FRAT {
                 pulselogfile->write((char*) &DeDispersed[0], intstart*sizeof(float));
             }
 	    	//pulselogfile.close();
-			
+
 			return true;
-		
-		
-		
+
+
+
 		}
 
-        	
+
 		std::string SubbandTrigger::blockAnalysisSummary(){
 			char output[200];
 			//std::string output;
@@ -1185,8 +1185,8 @@ namespace FRAT {
 			//std::cerr << "DM " << itsDM << ", SBaverage over "<< SBsumsamples << "samples at block "<<  itsBlockNumber << " / " << itsSequenceNumber <<" at frequency " << itsStartFreq << " is "<< itsSBaverage << " or " << SBaverageAlt << " Standard deviation " << itsSBstdev << " " << itsSBstdev/itsSBaverage << " triggerlevel " << (itsTriggerThreshold-itsSBaverage)/itsSBstdev << std::endl;
 			return std::string(output);
 		}
-		
-        
+
+
 
 
 
@@ -1194,7 +1194,7 @@ namespace FRAT {
 		std::string SubbandTrigger::FoundTriggers(){
 			return itsFoundTriggers;
 		}
-		
+
 		bool SubbandTrigger::SendTriggerMessage(struct triggerEvent trigger){
 			send_data = (char*) &trigger;
 			int n = sendto(sock, send_data, sizeof(struct triggerEvent), 0,
@@ -1209,13 +1209,13 @@ namespace FRAT {
 		bool SubbandTrigger::dedisperseData(float* data, unsigned int sequenceNumber, FRAT::coincidence::CoinCheck* cc, int CoinNr, int CoinTime,bool Transposed){
             // Mostly the same as process data, but now without triggering
 			bool pulsefound=false;
-			if( ++itsSequenceNumber!=sequenceNumber && false) { 
-				std::cerr << "discontinous data" << std::endl; 
-			    return false; 
+			if( ++itsSequenceNumber!=sequenceNumber && false) {
+				std::cerr << "discontinous data" << std::endl;
+			    return false;
 			} else {
 				itsFoundTriggers="";
 				itsBlockNumber++;
-			    if(verbose) {	
+			    if(verbose) {
                     std::cout << "Processing block " << sequenceNumber << std::endl;
                 }
 
@@ -1235,22 +1235,22 @@ namespace FRAT {
 					rest=totaltime%itsBufferLength;
                     channeltimeindex+=itsTotNrChannels;
                     channelindex=channeltimeindex+itsStartChannel+itsNrChannels;
-                    
+
 					for(int channel=itsNrChannels-1; channel>0; channel--){
                         channelindex--;
-						
+
 						DeDispersedBuffer[(totaltime+dedispersionoffset[channel])%itsBufferLength]+=data[channelindex];
-					    
-						
-                        
-                    
+
+
+
+
                     } // for channel
                     //***  channel=0; *******
-                    
+
                     channelindex--;
-                    
+
                     value = data[channelindex];
-                        
+
                     DeDispersedBuffer[rest]+=value;
                     blocksum+=DeDispersedBuffer[rest];
                     DeDispersed[rest]=DeDispersedBuffer[rest];
@@ -1266,7 +1266,7 @@ namespace FRAT {
                                 subsum+=DeDispersed[it+itsBufferLength];
                             }
                         }
-                        
+
                     }
                     SBstdev+=(subsum-itsSBaverage)*(subsum-itsSBaverage);
                     SBsumsamples++;
@@ -1274,19 +1274,19 @@ namespace FRAT {
                     DeDispersedBuffer[rest]=0;
 
 				} // for time
-				
-				
-				
-				
-				
+
+
+
+
+
 				// Update class parameters;
 				//itsSBstdev = SBstdev;
-				
+
 				if(SBsumsamples>0){
 					itsSBaverage = SBaverage/SBsumsamples;
 				    //itsSBaverage=blocksum/SBsumsamples;
 					SBstdev/=SBsumsamples;
-					
+
 				}
 				itsSBstdev=sqrt(SBstdev);
 				itsTotalZeros += zerocounter;
@@ -1302,19 +1302,19 @@ namespace FRAT {
 				}
 				//char output[200];
 				//std::string output;
-				
+
 				itsPrevTriggerLevel = (itsTriggerThreshold-itsSBaverage)/itsSBstdev;
 				itsTriggerThreshold = itsSBaverage+itsTriggerLevel*itsSBstdev;
                 itsSBaverageVector.push_back(itsSBaverage);
                 itsSBstdevVector.push_back(itsSBstdev);
         	}
-			
+
             return pulsefound;
-	    }		
-			
-         
-    
-        /*			
+	    }
+
+
+
+        /*
 		 SubbandTrigger::setNrChannels(int NrChannels){ itsNrChannels = NrChannels; }
 		 SubbandTrigger::setNrSamples(int NrSamples){ itsNrSamples = NrSamples; }
 		 //inline void setDM( float DM ){ itsDM = DM; }
@@ -1323,10 +1323,10 @@ namespace FRAT {
 		 SubbandTrigger::setStartFreq( float StartFreq){ itsStartFreq = StartFreq; }
 		 SubbandTrigger::setFreqResolution(float FreqResolution) { itsFreqResolution = FreqResolution; }
 		 SubbandTrigger::setTimeResolution(float TimeResolution) { itsTimeResolution = TimeResolution; }
-		 */	    
-		//Vector commands: size, resize, front, back, at, [], push_back, pop_back, insert, erase, swap, clear	
-		
-		
+		 */
+		//Vector commands: size, resize, front, back, at, [], push_back, pop_back, insert, erase, swap, clear
+
+
 
 
 //##################################################################################
@@ -1410,7 +1410,7 @@ Save timeseries (append)
                 avgtimeseries.resize(itsNrSamples);
                 avgtimeseriesstream.resize(itsNrSamples);
                 sqrTimeseries.resize(itsNrSamples);
-                
+
         }
 
 
@@ -1419,7 +1419,7 @@ Save timeseries (append)
              #ifdef _OPENMP
                 #pragma omp parallel for private(it)
              #else
-             #endif // _OPENMP 
+             #endif // _OPENMP
              for(int ch=0; ch<itsNrChannels; ch++){
                     it=itsDataStart+ch;
                     baseline[ch]=0.0;
@@ -1429,9 +1429,9 @@ Save timeseries (append)
                 }
              return true;
         }
-        
-        
-        
+
+
+
         bool RFIcleaning::calcSqrBaseline(){
              float * it;
             #ifdef _OPENMP
@@ -1447,7 +1447,7 @@ Save timeseries (append)
                 }
             return true;
         }
-        
+
         bool RFIcleaning::calcTimeseries(){
              // calculate average timeseries
              float * it;
@@ -1468,7 +1468,7 @@ Save timeseries (append)
                 }
             return true;
         }
-        
+
         bool RFIcleaning::calcAverageTimeseries(){
              // calculate average timeseries
              float * it;
@@ -1490,7 +1490,7 @@ Save timeseries (append)
                 }
             return true;
         }
-        
+
         bool RFIcleaning::calcAverageTimeseriesStream(int startchan, int endchan){
              // calculate average timeseries
              float * it;
@@ -1530,10 +1530,10 @@ Save timeseries (append)
             }
             return true;
         }
-        
+
         bool RFIcleaning::calcSqrTimeseries(){
              float * it;
-             float * vec_end=itsDataStart;            
+             float * vec_end=itsDataStart;
              it=itsDataStart;
              #ifdef _OPENMP
                 #pragma omp parallel for private(it,vec_end)
@@ -1550,8 +1550,8 @@ Save timeseries (append)
                 }
             return true;
         }
-        
-        
+
+
 
         int RFIcleaning::calcBadChannels(int cutlevel, bool useInterpolatedBaseline=false) {
                 // divide sqrBaseline by baseline^2
@@ -1565,16 +1565,16 @@ Save timeseries (append)
                 it2=sqrBaseline.begin();
                 vec2_end=sqrBaseline.end();
                 it3=sqrDivBaseline.begin();
-                
+
 
                 while( it1 != vec1_end ) {
                     *it3 = *it2 / ((*it1)*(*it1));
                     ++it1; ++it2; ++it3;
                 }
-            
+
                 copy(sqrDivBaseline.begin(), sqrDivBaseline.end(), sqrDivBaselineSort.begin());
                 sort(sqrDivBaselineSort.begin(),  sqrDivBaselineSort.end() );
-                
+
            // Find top 10 and bottom 10 percent of stdOverPower and determine average and standarddeviation of the rest of the values.
                 double sum=0;
                 double sqr=0;
@@ -1589,7 +1589,7 @@ Save timeseries (append)
                 }
                 double average=sum/nrelem;
                 sortStd=sqrt(sqr/nrelem-average*average);
-    
+
                 //cout << " sum " << sum << " nrelem" << nrelem << " average " << average << " std " << sortStd << " sqr " << sqr << " ";
 
                 chanIdVal tempIdVal;
@@ -1599,7 +1599,7 @@ Save timeseries (append)
                     float lowerlimit=average-cutlevel*sortStd;
                     int index=0;
                     for(it2=sqrDivBaseline.begin(); it2<sqrDivBaseline.end(); it2++){
-                        if(isnan(*it2)){ 
+                        if(isnan(*it2)){
                             cout << " nan " <<  index;
                         }
                         if(*it2 > limit || *it2 < lowerlimit) {
@@ -1638,7 +1638,7 @@ Save timeseries (append)
 
         int RFIcleaning::calcBadSamples(int cutlevel) {
 // Channel collapse:
-        
+
 
             int subdiv=8;// subdivisions. into how many parts to split the data
             int reqsubdiv=2; // required subdivisions. how many parts should show a peak
@@ -1668,9 +1668,9 @@ Save timeseries (append)
 
                 collapsedData[div].resize(itsNrSamples);
                 #ifdef _OPENMP
-                    #pragma omp parallel for 
+                    #pragma omp parallel for
                 #else
-                #endif // _OPENMP                
+                #endif // _OPENMP
                 for(int sa=0; sa<itsNrSamples; sa++){
                     collapsedData[div][sa]=0.0;
                     float* it_start=itsDataStart+sa*itsNrChannels;
@@ -1701,10 +1701,10 @@ Save timeseries (append)
                         badcollapsedSamples.push_back(index);
                     }
                     index++;
-                } 
+                }
             }
-            
-            sort(badcollapsedSamples.begin(),badcollapsedSamples.end()); 
+
+            sort(badcollapsedSamples.begin(),badcollapsedSamples.end());
             int prevvalue=-1;
             int count=0;
             for(it=badcollapsedSamples.begin(); it<badcollapsedSamples.end();it++){
@@ -1724,7 +1724,7 @@ Save timeseries (append)
 
             return badSamples.size();
         }
-        
+
         bool RFIcleaning::cleanChannels(std::string method) {
         /*  Replaces the values in the channels in the badChans list
             according to the method. Options:
@@ -1732,8 +1732,8 @@ Save timeseries (append)
             method "prevfreq" replaces values with that from a channel closeby
             method "clean" replaces with values from a clean spectrum.
         */
-            
-            int ch;                
+
+            int ch;
             int choffset;
 
 
@@ -1781,11 +1781,11 @@ Save timeseries (append)
                     }
                 }
             }
-            
+
 
             return true;
         }
-        
+
         int  RFIcleaning::cleanChannel0(std::string method) {
         /*  Replaces the values in the channels in the badChans list
             according to the method. Options:
@@ -1793,8 +1793,8 @@ Save timeseries (append)
             method "prevfreq" replaces values with that from a channel closeby
             method "clean" replaces with values from a clean spectrum.
         */
-            
-            int ch;                
+
+            int ch;
             int choffset;
             #ifdef _OPENMP
                 #pragma omp parallel for private(ch,choffset)
@@ -1820,9 +1820,9 @@ Save timeseries (append)
 
             return itsChansPerSubband/itsNrChannels;
         }
-        
 
-                
+
+
         bool RFIcleaning::cleanSamples(std::string method){
             int sam;
             int samoffset=-3;
@@ -1831,9 +1831,9 @@ Save timeseries (append)
                 #pragma omp parallel for private(sam)
             #else
             #endif // _OPENMP
-        
+
             for(int i=0; i<badSamples.size(); i++){
-   //             validsamples--;                
+   //             validsamples--;
                 sam=badSamples[i];
                 if(sam<3){ //beware, this is hardcoded
                     samoffset=3;
@@ -1841,12 +1841,12 @@ Save timeseries (append)
                     samoffset=-3;
                 }
                 if( sam < itsNrSamples ){
-                    for(int ch=0; ch<itsNrChannels ; ch++){ 
+                    for(int ch=0; ch<itsNrChannels ; ch++){
                         if ( method == "1" ) {
                             *(itsDataStart+sam*itsNrChannels+ch)=1.0;
                         } else if (method == "previous" ) {
                             *(itsDataStart+sam*itsNrChannels+ch)=*(itsDataStart+(sam+samoffset)*itsNrChannels+ch);
-                        } 
+                        }
                     }
                 }
             }
@@ -1859,7 +1859,7 @@ Save timeseries (append)
                 cerr << badSamples[i] << " ";
             }
             cerr << endl;
-            return true;  
+            return true;
         }
 
         bool RFIcleaning::printBadChannels(){
@@ -1868,7 +1868,7 @@ Save timeseries (append)
                 cout << badChans[i].id << " " << badChans[i].val << " ";
             }
             cout << endl;
-            return true;  
+            return true;
         }
 
         bool RFIcleaning::printData(){
@@ -1886,76 +1886,76 @@ Save timeseries (append)
             cout << " Baseline     ";
             if(printindex){
                 for(int i=0; i<baseline.size(); i++){
-                    cout << i << " " << baseline[i] << " " ; 
+                    cout << i << " " << baseline[i] << " " ;
                 }
             } else {
                 for(int i=0; i<baseline.size(); i++){
-                    cout << baseline[i] << " " ; 
+                    cout << baseline[i] << " " ;
                 }
             }
             cout << endl;
-            return true;  
+            return true;
         }
 
         bool RFIcleaning::printTimeseries(bool printindex=true){
             cout << " Timeseries     ";
             if(printindex){
                 for(int i=0; i<timeseries.size(); i++){
-                    cout << i << " " << timeseries[i] << " " ; 
+                    cout << i << " " << timeseries[i] << " " ;
                 }
             } else {
                 for(int i=0; i<timeseries.size(); i++){
-                    cout << timeseries[i] << " " ; 
+                    cout << timeseries[i] << " " ;
                 }
             }
             cout << endl;
-            return true;  
+            return true;
         }
 
         bool RFIcleaning::printAverageTimeseries(bool printindex=true){
             cout << " Average Timeseries     ";
             if(printindex){
                 for(int i=0; i<avgtimeseries.size(); i++){
-                    cout << i << " " << avgtimeseries[i] << " " ; 
+                    cout << i << " " << avgtimeseries[i] << " " ;
                 }
             } else {
                 for(int i=0; i<avgtimeseries.size(); i++){
-                    cout << avgtimeseries[i] << " " ; 
+                    cout << avgtimeseries[i] << " " ;
                 }
             }
             cout << endl;
-            return true;  
+            return true;
         }
 
         bool RFIcleaning::printAverageTimeseriesStream(bool printindex=true){
             cout << " Average Timeseries     ";
             if(printindex){
                 for(int i=0; i<avgtimeseriesstream.size()/10; i++){
-                    cout << i << " " << avgtimeseriesstream[i] << " " ; 
+                    cout << i << " " << avgtimeseriesstream[i] << " " ;
                 }
             } else {
                 for(int i=0; i<avgtimeseriesstream.size()/10; i++){
-                    cout << avgtimeseriesstream[i] << " " ; 
+                    cout << avgtimeseriesstream[i] << " " ;
                 }
             }
             cout << endl;
-            return true;  
+            return true;
         }
 
         bool RFIcleaning::printSqrTimeseries(bool printindex=true){
             cout << " Square sum Timeseries     ";
-            
+
             if(printindex){
                 for(int i=0; i<sqrTimeseries.size(); i++){
-                    cout << i << " " << sqrTimeseries[i] << " " ; 
+                    cout << i << " " << sqrTimeseries[i] << " " ;
                 }
             } else {
                 for(int i=0; i<sqrTimeseries.size(); i++){
-                    cout << sqrTimeseries[i] << " " ; 
+                    cout << sqrTimeseries[i] << " " ;
                 }
             }
             cout << endl;
-            return true;  
+            return true;
         }
 
         bool RFIcleaning::divideBaseline(bool useInterpolatedBaseline=false){
@@ -1977,7 +1977,7 @@ Save timeseries (append)
                 }
             }
         }
-        
+
         bool RFIcleaning::subtractAverageTimeseries(){
             float * dataptr = itsDataStart;
             it1=avgtimeseries.begin();
@@ -1992,7 +1992,7 @@ Save timeseries (append)
                     chindex++;
                 }
                 chindex=0;
-                
+
                 it2++;
                 if(it2==vec1_end){
                     it2=avgtimeseries.begin();
@@ -2000,7 +2000,7 @@ Save timeseries (append)
             }
             return true;
         }
-        
+
         bool RFIcleaning::subtractAverageTimeseriesStream(int startchan, int endchan){
              float * it;
              float * vec_end=itsDataStart+endchan;
@@ -2018,7 +2018,7 @@ Save timeseries (append)
                     vec_end+=itsNrChannels;
                 }
             return true;
-            
+
             /*
             float * dataptr = itsDataStart+startchan;
             it1=avgtimeseriesstream.begin();
@@ -2033,8 +2033,8 @@ Save timeseries (append)
                     chindex++;
                 }
                 chindex=startchan;
-                dataptr+=itsNrChannels-endchan+startchan; 
-                
+                dataptr+=itsNrChannels-endchan+startchan;
+
                 it2++;
                 if(it2==vec1_end){
                     it2=avgtimeseriesstream.begin();
@@ -2084,10 +2084,10 @@ Save timeseries (append)
 
             // RFI cleaning destructor
         }
-		
+
 				//return true;
 	}; // namespace analysis
-	
-	
+
+
 }; // namespace FRAT
 
