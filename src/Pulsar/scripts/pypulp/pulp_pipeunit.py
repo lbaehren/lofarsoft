@@ -519,7 +519,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 			f = open(parf, 'r')
 			parlines = f.read().splitlines()
 			f.close()
-			res=[ii for ii in parlines if re.search("DM", ii) is not None]
+			res=[ii for ii in parlines if re.search("DM", ii) is not None and re.search("DMEPOCH", ii) is None]
 			if len(res) > 0:
 				dm=float(re.sub("\s+", " ", res[0]).split(" ")[1])
 		except: pass
