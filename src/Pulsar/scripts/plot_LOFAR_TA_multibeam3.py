@@ -223,12 +223,18 @@ if __name__ == '__main__':
         npoints = (options.nrings+1)**3-(options.nrings)**3 
         j=np.argsort(c)[-1]
         dsq=np.zeros(len(RAs_good))
+	# added by Vlad on June 10, 2013 (otherwise it crashed for Nrings=1)
+	if npoints > len(RAs_good): # it means that number of actual rings is smaller than what is given by options.nrings
+	    while npoints > len(RAs_good):
+	        options.nrings-=1
+	        npoints = (options.nrings+1)**3-(options.nrings)**3 
         linestyle=[ 'solid' for i in RAs_good ]
         for i,val in enumerate(weights):
             dsq[i] = (x[j]-x[i])**2 + (y[j]-y[i])**2
         # set the weights of the farther-out beams to zero
         outlist=[]
         for i,val in enumerate(weights):
+	    print i, val, dsq[i], npoints, options.nrings
             if dsq[i] > np.sort(dsq)[npoints-2]:
                 weights[i] = 0.0
                 outlist.append(i)
