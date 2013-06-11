@@ -720,7 +720,7 @@ CLK line will be removed from the parfile!" % (parfile,))
 		for psr in self.psrs:   # pulsar list is empty if --nofold is used
 			psr2=re.sub(r'[BJ]', '', psr)
 			psrdm=self.get_psr_dm("%s/%s.par" % (self.outdir, psr2))
-			lodm=psrdm-0.5 # we want to cover +-0.5 in DM with 0.01 steps (by default), i.e. ~100 DM trials
+			lodm=psrdm-1.0 # we want to cover +-1 in DM with 0.01 steps (by default), i.e. ~200 DM trials
 			if lodm <= 0.0: lodm = 0.01 # because we will do DM=0 with prepdata anyway
 			# running prepdata for DM=0 with mask (if --norfi was not set)
 			if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
@@ -733,10 +733,10 @@ CLK line will be removed from the parfile!" % (parfile,))
 
 			# running prepsubband with mask (if --norfi was not set)
 			if not cmdline.opts.is_norfi or os.path.exists("%s/%s_rfifind.mask" % (self.curdir, self.output_prefix)):
-				cmd="prepsubband -noscales -nooffsets -noclip -nobary -mask %s_rfifind.mask -lodm %f -dmstep 0.01 -numdms 100 -o %s_%s %s %s.fits" % \
+				cmd="prepsubband -noscales -nooffsets -noclip -nobary -mask %s_rfifind.mask -lodm %f -dmstep 0.01 -numdms 200 -o %s_%s %s %s.fits" % \
 					(self.output_prefix, lodm, psr, self.output_prefix, cmdline.opts.prepsubband_extra_opts, self.output_prefix)
 			else: # running prepsubband without mask
-				cmd="prepsubband -noscales -nooffsets -noclip -nobary -lodm %f -dmstep 0.01 -numdms 100 -o %s_%s %s %s.fits" % \
+				cmd="prepsubband -noscales -nooffsets -noclip -nobary -lodm %f -dmstep 0.01 -numdms 200 -o %s_%s %s %s.fits" % \
 					(lodm, psr, self.output_prefix, cmdline.opts.prepsubband_extra_opts, self.output_prefix)
 			self.execute(cmd, workdir=self.curdir)
 

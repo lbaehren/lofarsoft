@@ -91,7 +91,7 @@ and only one pulsar name should be given for --par option to work", default="", 
                            help="running single-pulse analysis in addition to folding a profile (implemented only \
 for IS/CS data (PRESTO part of the pipeline only), for CV data only filterbank file will be created on the processing node)", default=False)
         	self.cmd.add_option('--rrats', action="store_true", dest='is_rrats', 
-                           help="running prepsubband for a range of DMs (default - 100 around nominal DM of the pulsar) and prepdata for DM=0 \
+                           help="running prepsubband for a range of DMs (default - 200 DM trials +/-1 around nominal DM of the pulsar) and prepdata for DM=0 \
 followed by single_pulse_search.py. Use --prepsubband-extra-opts to set different DM range/step", default=False)
         	self.cmd.add_option('--beams', dest='beam_str', metavar='[^]SAP#:TAB#[,SAP#:TAB#,...]',
                            help="user-specified beams to process separated by commas and written as station beam number, colon, \
