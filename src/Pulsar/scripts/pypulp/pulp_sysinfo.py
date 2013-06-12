@@ -85,7 +85,7 @@ class CEP2Info:
 	        if len(self.hoover_nodes) > 1:
         	        for s in self.hoover_nodes[1:]:
                 	        cexeclocus += ",%s" % (self.cexec_nodes[s].split(":")[1])
-	        cmd="%s %s 'date' | grep -v xauth | grep -v connect | grep -v Permission | grep -v @ | egrep -v \'\\*\\*\\*\\*\\*\'" % (self.cexeccmd, cexeclocus)
+	        cmd="%s %s 'date' | grep -v xauth | grep -v connect | grep -v closed | grep -v Permission | grep -v @ | egrep -v \'\\*\\*\\*\\*\\*\'" % (self.cexeccmd, cexeclocus)
         	cexec_output=[line[:-1] for line in os.popen(cmd).readlines()]
 	        # finding all locus nodes that have the dir with raw data
 		try:
