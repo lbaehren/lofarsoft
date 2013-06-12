@@ -62,6 +62,9 @@ class BeamData(IOInterface):
         # Create keyword dict for easy access
         self.__setKeywordDict()
 
+        #Place holder for RFI Channels.
+        self.__rfi_channels = None
+
         # Mark file as opened
         self.closed = False
 
@@ -119,7 +122,7 @@ class BeamData(IOInterface):
         elif key is "NCHUNKS":
             self.__nchunks = value
         elif key is "RFI_CHANNELS":
-            self['RFI_CHANNELS'] = self.__addRFI_Channels(value)
+            self.__rfi_channels = self.__addRFI_Channels(value)
         elif key is "CAL_DELAY":
             self.__caldelay = cr.hArray(float, len(self.__files), fill=value)
             for i, dt in enumerate(self.__caldelay):
