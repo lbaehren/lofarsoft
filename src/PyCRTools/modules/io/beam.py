@@ -97,6 +97,7 @@ class BeamData(IOInterface):
         self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
         self.__keyworddict['CAL_DELAY'] = lambda: self.__caldelay
         self.__keyworddict['DM_OFFSET'] = lambda: self.__dm_offset
+        self.__keyworddict['RFI_CHANNELS'] = lambda: [self.__files[i].par.hdr['BeamFormer']['rfi_channels'] for i in range(self.__nofBeamDataSets)]
 
     setable_keywords = set(["CHUNK", "BLOCK", "DM", "NCHUNKS", "CAL_DELAY"])
 
@@ -445,7 +446,7 @@ class BeamData(IOInterface):
             #RFI excision
             try:
                 for i in range(len(self.__filename)):
-                    data[i,self['BEAM_RFI_CHANNELS']] /= 10000
+                    data[i,self['RFI_CHANNELS']] /= 1e6
             except:
                 pass
             pass
