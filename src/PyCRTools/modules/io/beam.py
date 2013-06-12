@@ -99,7 +99,7 @@ class BeamData(IOInterface):
         self.__keyworddict['DM_OFFSET'] = lambda: self.__dm_offset
         self.__keyworddict['RFI_CHANNELS'] = lambda: [self.__files[i].par.hdr['BeamFormer']['rfi_channels'] for i in range(self.__nofBeamDataSets)]
 
-    setable_keywords = set(["CHUNK", "BLOCK", "DM", "NCHUNKS", "CAL_DELAY"])
+    setable_keywords = set(["CHUNK", "BLOCK", "DM", "NCHUNKS", "CAL_DELAY", "RFI_CHANNELS"])
 
     def __setitem__(self, key, value):
         """Set values to keywords if allowed.
@@ -112,12 +112,14 @@ class BeamData(IOInterface):
             self.__block = value
         elif key is "DM":
             self.__dm = value
-            if self['FILENAMES'][0].split('/')[-1].split('_')[0]=='L43784':
+            if self['FILENAMES'][0].split('/')[-1].split('_')[0]=='L43784':  # Ugly code to make debuggin easy.
                 self.__dm_offset = self.calcDedispersionIndex(self.__dm, Ref_Freq=1.69e8)
             else:
                 self.__dm_offset = self.calcDedispersionIndex(self.__dm)
         elif key is "NCHUNKS":
             self.__nchunks = value
+        elif key is "RFI_CHANNELS":
+            self['RFI_CHANNELS'] = self.__addRFI_Channels(value)
         elif key is "CAL_DELAY":
             self.__caldelay = cr.hArray(float, len(self.__files), fill=value)
             for i, dt in enumerate(self.__caldelay):
@@ -153,6 +155,26 @@ class BeamData(IOInterface):
         """Display summary when printed.
         """
         return self.info(False, False)
+
+    def __addRFI_Channels(self,RFI_channels):
+        ''' Adding RFI Chaneels to excisting list (logical operator "or").
+            Mainly used after Beam_Tools.findRFI()
+
+        ============== ===== ===================================================================
+        *RFI_channels*       List of channels to append to RFI channel list.
+        ============== ===== ===================================================================
+
+        '''
+
+        if len(RFI_channels) != len(self['RFI_CHANNELS']):
+            raise ValueError('Variable incorrect lenght.')
+
+        RFI_channels2 = self['RFI_CHANNELS']
+
+        for i in range(self.__nofBeamDataSets):
+            RFI_channels[i]  = sorted(list(set(RFI_channels[i]) | set(RFI_channels2[i])))
+
+        return RFI_channels
 
     def info(self, verbose=True, show=True):
         """Display some information about the file. Short and long versions (verbose=False/True)
@@ -444,11 +466,9 @@ class BeamData(IOInterface):
                 cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i]*spec_len)
 
             #RFI excision
-            try:
-                for i in range(len(self.__filename)):
-                    data[i,self['RFI_CHANNELS']] /= 1e6
-            except:
-                pass
+            for i in range(len(self.__filename)):
+                data[i,self['RFI_CHANNELS'][i]] /= 1e6
+
             pass
 
             # Addding phase correction to DM offsets. (coherent dedispersion).
