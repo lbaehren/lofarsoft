@@ -59,11 +59,11 @@ class BeamData(IOInterface):
         # Current delay calibration (between stations) ...  from CC function.
         self.__caldelay = cr.hArray(float, len(self.__files), fill=0)  # Need to maybe replace this with a function that reads metadata in the future...?
 
+        #RFI Channels
+        self.__rfi_channels = [self.__files[i].par.hdr['BeamFormer']['rfi_channels'] for i in range(self.__nofBeamDataSets)]
+
         # Create keyword dict for easy access
         self.__setKeywordDict()
-
-        #Place holder for RFI Channels.
-        self.__rfi_channels = None
 
         # Mark file as opened
         self.closed = False
@@ -100,7 +100,7 @@ class BeamData(IOInterface):
         self.__keyworddict['SAMPLE_INTERVAL'] = self['TBB_SAMPLE_INTERVAL']
         self.__keyworddict['CAL_DELAY'] = lambda: self.__caldelay
         self.__keyworddict['DM_OFFSET'] = lambda: self.__dm_offset
-        self.__keyworddict['RFI_CHANNELS'] = lambda: [self.__files[i].par.hdr['BeamFormer']['rfi_channels'] for i in range(self.__nofBeamDataSets)]
+        self.__keyworddict['RFI_CHANNELS'] = lambda: self.__rfi_channels
 
     setable_keywords = set(["CHUNK", "BLOCK", "DM", "NCHUNKS", "CAL_DELAY", "RFI_CHANNELS"])
 
