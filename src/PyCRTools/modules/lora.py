@@ -97,10 +97,10 @@ def loraInfo(lora_second, datadir="/data/VHECR/LORAtriggered/LORA/", checkSurrou
     firstline = lines[0].strip('/').split()
     secondline = lines[1].strip('/').split()
     # Coreuncertainties and Moliere radius have been added later
-    reference = ['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)', 'CoreE(X)', 'CoreE(Y)', 'Moliere_rad(m)', 'ElevaErr', 'AziErr', 'EnergyErr(eV)', 'Ne', 'NeErr','CorCoef_XY']
+    reference = ['UTC_Time(secs)', 'nsecs', 'Core(X)', 'Core(Y)', 'Elevation', 'Azimuth', 'Energy(eV)', 'CoreE(X)', 'CoreE(Y)', 'Moliere_rad(m)', 'ElevaErr', 'AziErr', 'EnergyErr(eV)', 'Ne', 'NeErr','CorCoef_XY','Ne_RefA','NeErr_RefA','Energy_RefA','EnergyErr_RefA']
     len_firstline = len(firstline)
     
-    allowed_length = [7,9,10,13,15,16]
+    allowed_length = [7,9,10,13,15,16,20]
     
     if len_firstline not in allowed_length:
         print "Check LORA file format, update version ?!"
