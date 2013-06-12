@@ -43,7 +43,7 @@ def pickle_parameter(value):
 # Check whether one or all keys need to be updated
 # -------------------------------------------
 if options.key == "all":
-    keys = ['UTC_Time_secs', 'nsecs', 'Core_X', 'Core_Y', 'Elevation', 'Azimuth', 'Energy_eV', 'CoreE_X', 'CoreE_Y', 'Moliere_rad_m', 'ElevaErr', 'AziErr', 'EnergyErr_eV', 'Ne', 'NeErr','CorCoef_XY',"detectorid", "posX", "posY", "posZ", "time", "10_nsec", "particle_density__m2","moliere","coreuncertainties","core","direction","energy"]
+    keys = ['UTC_Time_secs', 'nsecs', 'Core_X', 'Core_Y', 'Elevation', 'Azimuth', 'Energy_eV', 'CoreE_X', 'CoreE_Y', 'Moliere_rad_m', 'ElevaErr', 'AziErr', 'EnergyErr_eV', 'Ne', 'NeErr','CorCoef_XY',"detectorid", "posX", "posY", "posZ", "time", "10_nsec", "particle_density__m2","moliere","coreuncertainties","core","direction","energy",'Ne_RefA','NeErr_RefA','Energy_RefA', 'EnergyErr_RefA' ]
 else:
     keys = [options.key] 
        
