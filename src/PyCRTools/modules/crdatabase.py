@@ -221,7 +221,10 @@ class CRDatabase(object):
             # ______________________________________________________________________
             #                                                              Version 14
             elif (14 == db_version_post):
-                sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_ne_refa, lora_neerr_refa, lora_energy_refa, lora_energyerr_refa TEXT;")
+                sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_ne_refa TEXT;")
+                sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_neerr_refa TEXT;")
+                sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_energy_refa TEXT;")
+                sql_list.append("ALTER TABLE eventparameters ADD COLUMN lora_energyerr_refa TEXT;")
             # ______________________________________________________________________
             #                                                         Default update
             # Upgrade the database version number.
