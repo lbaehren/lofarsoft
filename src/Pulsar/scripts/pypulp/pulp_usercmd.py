@@ -73,6 +73,9 @@ Default is corresponding *_red or *_redIS directory", default="", type='str')
         	self.cmd.add_option('--par', '--parfile', '--eph', dest='parfile', metavar='PARFILE',
                            help="specify the parfile for one pulsar to fold. Pulsar name should be given explicitely using --pulsar option \
 and only one pulsar name should be given for --par option to work", default="", type='str')
+        	self.cmd.add_option('--parfile-dir', dest='parfiledir', metavar='DIR',
+                           help="specify the directory where to search for parfiles. By default, parfiles are looked for in the build directory \
+unless parfile is given with the --par option", default="", type='str')
         	self.cmd.add_option('--nodecode', action="store_true", dest='is_nodecode',
                            help="optional parameter to skip decoding the data (2bf2fits/bf2puma2)", default=False)
         	self.cmd.add_option('--norfi', action="store_true", dest='is_norfi',
@@ -232,6 +235,10 @@ clip bright pulsar pulses. Default: %default (no clipping)", default=0.02, type=
 			if log != None: log.error(msg)
 			else: print msg
 			quit(1)
+
+		# check if parfile directory is specified. If it is, then we override the system directory with parfiles
+		if self.opts.parfiledir != "":
+			cep2.parfile_dir = self.opts.parfiledir
 
 		# when do only summaries (or plots-only or --nodecode) then ignore --del option if given, otherwise 
 		# everything will be deleted and if raw data are already erased then we are screwed
