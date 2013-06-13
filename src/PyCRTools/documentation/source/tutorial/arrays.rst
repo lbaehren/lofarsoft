@@ -143,11 +143,20 @@ To actually make a physically distinct copy, you need to explicitly
 copy the data over::
 
     >>> c=hArray(int,a)
-    >>> a.copy(c)
+    >>> c.copy(a)
+    >>> c[0,0] = -1
+    >>> c
+    hArray(int, [3, 3], fill=[-1,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    >>> a
+    hArray(int, [3, 3], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
 
 or more simply::
 
-    >>> c=hArray(int,a,a)
+    >>> c = hArray(int, a, a)
+
+or
+
+    >>> c = hArray(int, a.shape(), a)
 
 (the 2nd parameter is for the dimensions, the third one is the fill
 parameter that initiates the copying).
