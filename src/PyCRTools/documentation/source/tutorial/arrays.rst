@@ -62,6 +62,7 @@ The underlying vector of an array can be retrieved with the :meth:`vec()`
 method. I.e.::
 
     >>> a.vec()
+    Vector(int, 9, fill=[0,1,2,3,4,5,6,7,8])
 
 The arrays have most of the vector methods defined, so you can also
 add, multiply, etc. with scalars or other arrays::
@@ -78,6 +79,8 @@ array and then calls ``hMul``::
 
     >>> tmp_array = a.new()
     >>> tmp_array.mul(a,2)
+    >>> tmp_array
+    hArray(int, [3, 3], fill=[0,2,4,6,8,10,12,14,16]) # len=9 slice=[0:9])
     >>> a
     hArray(int, [3, 3], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
 
