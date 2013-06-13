@@ -172,7 +172,7 @@ of Python.
 Let us take our two-dimensional array from before::
 
     >>> a
-    hArray(int, [3,3], fill=range(9)) # len=9 slice=[0:9])
+    hArray(int, [3,3], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
 
 The vector followed by a single number in square brackets
 will *in principle* obtain the first column of the array::
@@ -186,6 +186,7 @@ data vector, but contain a different data slice which is then returned
 whenever a method tries to operate on the vector::
 
     >>> a[0].vec()
+    Vector(int, 3, fill=[0,1,2])
 
 This retrieves a copy of the data, since assigning a sub-slice of a
 vector to another vector actually requires copying the data - as
@@ -195,9 +196,21 @@ what you want to have are reference to a slice only.
 In contrast, ``a.vec()``, without slicing, will give you a reference to
 the underlying vector.
 
-For convenience ``a[0, 1]`` will return the value, rather than a one
-element slice. That behaviour changed from earlier versions and is a
-bit inconsistent ...
+    >>> a.vec()
+    Vector(int, 9, fill=[0,1,2,3,4,5,6,7,8])
+
+For convenience ``a[0, 1]``  will return the value, rather than a one
+element slice.
+
+    >>> a[0, 1]
+    1
+
+just like ``a[0, 1:2]``, as the index range ``1:2`` contains only 1 element and
+is therefore interpreted as a single index.
+
+.. note:: If the slice returns a single element, you can not use :meth:`vec` or :meth:`val`.
+
+.. note:: In the case that a Vector or hArray consist of a single element :meth:`vec` and :meth:`val` do work as intended.
 
 One may wonder, why one has to use the extra methods :meth:`vec` and
 :meth:`val` to access the data. The reason is that slicing on its own
@@ -208,25 +221,30 @@ Slicing can also be done over multiple elements of one dimension,
 using the known Python slicing syntax::
 
     >>> a[0, 0:2].val()
+    [0, 1]
 
 however, currently this is restricted to the last dimension only, in
 order to point to a contiguous memory slice. Hence::
 
     >>> a[0:2]
+    hArray(int, [3, 3], fill=[0,1,2,3,4,5]) # len=9 slice=[0:6])
 
-is possible, but not::
+is possible, but when using slices in multiple dimensions, e.g.::
 
-    >>> a[0:2, 0:2]
+    >>> a[1:2, 0:2]
+    hArray(int, [3, 3], fill=[3,4]) # len=9 slice=[3:5])
 
-where the first slice is simply ignored.
+the first slice is simply ignored. Instead, it's first element is used.
 
 Finally, negative indices count from the end of the slice, i.e.::
 
     >>> a[-1]
+    hArray(int, [3, 3], fill=[6,7,8]) # len=9 slice=[6:9])
 
 gives the last slice of the first index, while::
 
     >>> a[0:-1]
+    hArray(int, [3, 3], fill=[0,1,2,3,4,5]) # len=9 slice=[0:6])
 
 gives all but the last slice of the first index.
 
