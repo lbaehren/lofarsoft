@@ -169,13 +169,14 @@ class BeamData(IOInterface):
 
         '''
 
-        if len(RFI_channels) != len(self['RFI_CHANNELS']):
-            raise ValueError('Variable incorrect lenght.')
+        if RFI_channels == 'reset':
+            RFI_channels = [self.__files[i].par.hdr['BeamFormer']['rfi_channels'] for i in range(self.__nofBeamDataSets)]
+        else:
+            if len(RFI_channels) != len(self['RFI_CHANNELS']):  #same number of beams.
+                raise ValueError('Variable incorrect lenght.')
 
-        RFI_channels2 = self['RFI_CHANNELS']
-
-        for i in range(self.__nofBeamDataSets):
-            RFI_channels[i]  = sorted(list(set(RFI_channels[i]) | set(RFI_channels2[i])))
+            RFI_channels2 = self['RFI_CHANNELS']
+            RFI_channels = [sorted(list(set(RFI_channels[i]) | set(RFI_channels2[i]))) for i in range(self.__nofBeamDataSets)]
 
         return RFI_channels
 
