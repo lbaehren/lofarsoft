@@ -27,14 +27,14 @@ different types, such as ``IntArray``, ``FloatArray``, ``ComplexArray``,
 ``StringArray``, ``BoolArray``, referring to the different data types they
 contain. As for vectors, each array can only contain one type of data, e.g.::
 
-    >>> hArray(Type=float,dimensions=[n1,n2,n3...],fill=None) -> FloatArray
+    >>> hArray(Type=float, dimensions=[n1, n2, n3...], fill=None) -> FloatArray
 
 where ``Type`` can be a Python type, a Python list/tuple (where the first
 element determines the type), an STL vector, or another ``hArray``.
 
-Dimensions are given as a list of the form ``[dim1,dim2,dim3, ...]``. The
+Dimensions are given as a list of the form ``[dim1, dim2, dim3, ...]``. The
 size of the underlying vector will automatically be resized to
-``dim1*dim2*dim3*...`` to be able to contain all elements. Alternatively,
+``dim1 * dim2 * dim3 * ...`` to be able to contain all elements. Alternatively,
 one can provide another array, which dimensions will be copied.
 
 The array can be filled with initialization values that can be
@@ -45,7 +45,7 @@ type::
 
     >>> a = hArray(v, [3,3])
     >>> a
-    hArray(int, [3, 3], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
 
 One may wonder what the representation of the Array actually
 means.
@@ -62,27 +62,27 @@ The underlying vector of an array can be retrieved with the :meth:`vec()`
 method. I.e.::
 
     >>> a.vec()
-    Vector(int, 9, fill=[0,1,2,3,4,5,6,7,8])
+    Vector(int, 9, fill=[0, 1, 2, 3, 4, 5, 6, 7, 8])
 
 The arrays have most of the vector methods defined, so you can also
 add, multiply, etc. with scalars or other arrays::
 
     >>> a * 2
-    hArray(int, [3, 3], fill=[0,2,4,6,8,10,12,14,16]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 2, 4, 6, 8, 10, 12, 14, 16]) # len=9 slice=[0:9])
 
     >>> a * a
-    hArray(int, [3, 3], fill=[0,1,4,9,16,25,36,49,64]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 1, 4, 9, 16, 25, 36, 49, 64]) # len=9 slice=[0:9])
 
 Underlying these operations are the basic hftools functions, e.g. the
 multiplication is essentially a python method that first creates a new
 array and then calls ``hMul``::
 
     >>> tmp_array = a.new()
-    >>> tmp_array.mul(a,2)
+    >>> tmp_array.mul(a, 2)
     >>> tmp_array
-    hArray(int, [3, 3], fill=[0,2,4,6,8,10,12,14,16]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 2, 4, 6, 8, 10, 12, 14, 16]) # len=9 slice=[0:9])
     >>> a
-    hArray(int, [3, 3], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
 
 This could also be done calling the function ``hMul(tmp_array,a,2)``,
 rather than the corresponding method.
@@ -99,11 +99,11 @@ The dimensions can be obtained and set, using the :meth:`shape` and
 :meth:`reshape` methods. The length of the underlying vector must stay the
 same::
 
-    >>> a.reshape([1,9])
+    >>> a.reshape([1, 9])
     >>> a.shape()
     (1, 9)
 
-    >>> a.reshape([3,3])
+    >>> a.reshape([3, 3])
     >>> a.shape()
     (3, 3)
 
@@ -113,48 +113,48 @@ Memory sharing
 Note, that the array and vector point share the same memory. Changing
 an element in the vector::
 
-    >>> v[0]=-1
+    >>> v[0] = -1
     >>> v
-    Vector(int, 9, fill=[-1,1,2,3,4,5,6,7,8])
+    Vector(int, 9, fill=[-1, 1, 2, 3, 4, 5, 6, 7, 8])
 
     >>> a
-    hArray(int, [3, 3], fill=[-1,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[-1, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
 
 will also change the corresponding element in the array. The same is
 true if one creates an array from an array. Both will share the same
 underlying data vector. They will also share the same size and
 dimensions::
 
-    >>> b=hArray(a)
-    >>> b[0,0]=-2
+    >>> b = hArray(a)
+    >>> b[0, 0] = -2
 
     >>> b
-    hArray(int, [3, 3], fill=[-2,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[-2, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
     >>> a
-    hArray(int, [3, 3], fill=[-2,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[-2, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
     >>> v
-    Vector(int, 9, fill=[-2,1,2,3,4,5,6,7,8])
+    Vector(int, 9, fill=[-2, 1, 2, 3, 4, 5, 6, 7, 8])
 
-    >>> v[0]=0
+    >>> v[0] = 0
     >>> a
-    hArray(int, [3, 3], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
 
 To actually make a physically distinct copy, you need to explicitly
 copy the data over::
 
-    >>> c=hArray(int,a)
+    >>> c = hArray(int, a)
     >>> c.copy(a)
-    >>> c[0,0] = -1
+    >>> c[0, 0] = -1
     >>> c
-    hArray(int, [3, 3], fill=[-1,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[-1, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
     >>> a
-    hArray(int, [3, 3], fill=[0,1,2,3,4,5,6,7,8]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 1, 2, 3, 4, 5, 6, 7, 8]) # len=9 slice=[0:9])
 
 or more simply::
 
     >>> c = hArray(int, a, a)
 
-or
+or, to explicitly set the shape of the array::
 
     >>> c = hArray(int, a.shape(), a)
 
@@ -178,7 +178,7 @@ The vector followed by a single number in square brackets
 will *in principle* obtain the first column of the array::
 
     >>> a[0]
-    hArray(int, [3, 3], fill=[0,1,2]) # len=9 slice=[0:3])
+    hArray(int, [3, 3], fill=[0, 1, 2]) # len=9 slice=[0:3])
 
 It says *in principle*, because the only thing which that command does is
 to return a new ``hArray`` Python object, which will point to the same
@@ -195,7 +195,7 @@ what you want to have are reference to a slice only.
 In contrast, ``a.vec()``, without slicing, will give you a reference to
 the underlying vector.
 
-For convenience ``a[0,1]`` will return the value, rather than a one
+For convenience ``a[0, 1]`` will return the value, rather than a one
 element slice. That behaviour changed from earlier versions and is a
 bit inconsistent ...
 
@@ -207,7 +207,7 @@ purposes still.
 Slicing can also be done over multiple elements of one dimension,
 using the known Python slicing syntax::
 
-    >>> a[0,0:2].val()
+    >>> a[0, 0:2].val()
 
 however, currently this is restricted to the last dimension only, in
 order to point to a contiguous memory slice. Hence::
@@ -216,7 +216,7 @@ order to point to a contiguous memory slice. Hence::
 
 is possible, but not::
 
-    >>> a[0:2,0:2]
+    >>> a[0:2, 0:2]
 
 where the first slice is simply ignored.
 
@@ -239,18 +239,18 @@ Assume, we want to have a list of all the elements of a that are
 between the values (but excluding) 0 and 10 and perform an operation
 on it. Then we need to create an index vector first::
 
-    >>> indices = hArray(int,dimensions=a,fill=-1)
+    >>> indices = hArray(int, dimensions=a, fill=-1)
 
 and fill it with the indices according to our condition::
 
-    >>> number_of_indices = indices[...].findbetween(a[...],0,8)
+    >>> number_of_indices = indices[...].findbetween(a[...], 0, 8)
     >>> number_of_indices
-    Vector(int, 3, fill=[0,0,0])
+    Vector(int, 3, fill=[0, 0, 0])
 
     >>> indices[...].pprint(-1)
-      [-1,-1,-1]
-      [-1,-1,-1]
-      [-1,-1,-1]
+      [-1, -1, -1]
+      [-1, -1, -1]
+      [-1, -1, -1]
 
 As the result we get a vector with the number of elements in each row
 that have satisfied the condition and in ``indices`` we get their
@@ -272,7 +272,7 @@ to create a new array::
     >>> b.fill(-99)
     >>> b[...].copy(a[...], indices[..., [0]:number_of_indices], number_of_indices)
     >>> b.pprint(-1)
-    [-99,-99,-99,-99,-99,-99,-99,-99,-99]
+    [-99, -99, -99, -99, -99, -99, -99, -99, -99]
 
 This (contiguous) with variable length we can use for further looping
 operations (as described below) on the rows of the array. E.g.::
@@ -291,7 +291,7 @@ just ``0:number_of_indices``.
 It would have been nicer to do right away something like the
 following::
 
-    >>> a[indices[...,[0]:number_of_indices],...].sum()
+    >>> a[indices[..., [0]:number_of_indices], ...].sum()
 
 but that is not yet implemented, since looping cannot yet be done over
 nested indices!
@@ -309,10 +309,12 @@ array slices directly. E.g.::
 will return the sum over the first row of the array, i.e. the first
 three elements of the underlying vector. While::
 
-    >>> a[0].negate(); a
-    hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
-    >>> a[0].negate(); a
-    hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
+    >>> a[0].negate()
+    >>> a
+    hArray(int, [3, 3], fill=[0, 0, 0, 0, 0, 0, 0, 0, 0]) # len=9 slice=[0:9])
+    >>> a[0].negate()
+    >>> a
+    hArray(int, [3, 3], fill=[0, 0, 0, 0, 0, 0, 0, 0, 0]) # len=9 slice=[0:9])
 
 returns nothing, but will actually change ths sign of the first three
 elements in the underlying vector.
@@ -320,32 +322,33 @@ elements in the underlying vector.
 In principle one could now loop over all slices using a for loop::
 
     >>> for i in range(a.shape()[0]):
-    ...     print "Row",i,":",a[i].val(), " => a =", a
-    Row 0 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
-    Row 1 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
-    Row 2 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
+    ...     print "Row", i,":", a[i].val(), " => a =", a
+    Row 0 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0, 0, 0, 0, 0, 0, 0, 0, 0]) # len=9 slice=[0:9])
+    Row 1 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0, 0, 0, 0, 0, 0, 0, 0, 0]) # len=9 slice=[0:9])
+    Row 2 : [0, 0, 0]  => a = hArray(int, [3, 3], fill=[0, 0, 0, 0, 0, 0, 0, 0, 0]) # len=9 slice=[0:9])
 
 However, looping over slices in simple way is aready built into the
 arrays, by appending the *ellipsis symbol* ``...`` to the dimensions. This
 will actually put the array in *looping mode*::
 
-    >>> l = a[0:3,...]; l
-    hArray(int, [3, 3], fill=[0,0,0]) # len=9 slice=[0:3]*)
+    >>> l = a[0:3, ...]
+    >>> l
+    hArray(int, [3, 3], fill=[0, 0, 0]) # len=9 slice=[0:3]*)
 
 which is indicated in the screen representation of the array by an
 extra asterisk and actually means that one can loop over all the
 elements of the respective dimension::
 
-    >>> iterate=True
+    >>> iterate = True
     >>> while iterate:
-    ...     print "Row",l.loop_nslice(),":",l.val(), " => l =", l
-    ...     iterate=l.next().doLoopAgain()
-    Row 0 : [0, 0, 0]  => l = hArray(int, [3, 3], fill=[0,0,0]) # len=9 slice=[0:3]*)
-    Row 1 : [0, 0, 0]  => l = hArray(int, [3, 3], fill=[0,0,0]) # len=9 slice=[3:6]*)
-    Row 2 : [0, 0, 0]  => l = hArray(int, [3, 3], fill=[0,0,0]) # len=9 slice=[6:9]*)
+    ...     print "Row", l.loop_nslice(), ":", l.val(), " => l =", l
+    ...     iterate = l.next().doLoopAgain()
+    Row 0 : [0, 0, 0]  => l = hArray(int, [3, 3], fill=[0, 0, 0]) # len=9 slice=[0:3]*)
+    Row 1 : [0, 0, 0]  => l = hArray(int, [3, 3], fill=[0, 0, 0]) # len=9 slice=[3:6]*)
+    Row 2 : [0, 0, 0]  => l = hArray(int, [3, 3], fill=[0, 0, 0]) # len=9 slice=[6:9]*)
 
     >>> l
-    hArray(int, [3, 3], fill=[0,0,0]) # len=9 slice=[0:3]*)
+    hArray(int, [3, 3], fill=[0, 0, 0]) # len=9 slice=[0:3]*)
 
 This will do exactly the same as the for-loop above.
 
@@ -381,16 +384,16 @@ definition of the array.
 The looping over slices can be more complex taking start, stop, and
 increment values into account.
 
-    >>> a[1:,...].mean()
+    >>> a[1:, ...].mean()
 
 will loop over all top-level slices starting at the 2nd slice
 (slice #1) until the last.
 
-    >>> a[:2,...].mean()
+    >>> a[:2, ...].mean()
 
 will loop over the first two top-level slices.
 
-    >>> a[0:3:2,...].mean()
+    >>> a[0:3:2, ...].mean()
 
 will loop over the two top-level slices using an increment of 2,
 i.e. here take the first and third only (so, here non contiguous
@@ -403,24 +406,24 @@ leaving away the slice specification. Hence,
 
 will do the same as
 
-    >>> a[0:,..].mean()
+    >>> a[0:, ...].mean()
 
 It is even possible to specify an array of indices for the slicing.
 
-    >>> a[[0,2],...].mean()
+    >>> a[[0, 2], ...].mean()
 
 will loop over slices 0 and 2.
 
 It is possible to specify a slice after the ellipse, e.g.,
 
-    >>> a[...,0:2].mean()
+    >>> a[..., 0:2].mean()
 
 which means that the mean is taken only from the first two elements
 of each top-level slice.
 
 Even more complicated: the elements of the slice can be vectors or lists:
 
-    >>> a[...,[0,1]:[2,3]].mean()
+    >>> a[..., [0, 1]:[2, 3]].mean()
 
 over which one can loop as well. Hence, in the operation on the first
 row, the subslice ``[0:2]`` will be taken, while for the second slice/row
@@ -443,9 +446,9 @@ As an example we create a new array of the dimensions of ``a``::
 
 and fill it with slices from ``a`` multiplied by the scalar value 2::
 
-    >>> x[[0,2],...].mul(a[[0,2],...],2)
+    >>> x[[0,2], ...].mul(a[[0,2], ...], 2)
     >>> x
-    hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 0, 0, 0, 0, 0, 0, 0, 0]) # len=9 slice=[0:9])
 
 and indeed now the first and last slice were operated on and filled
 with the results of the operation.
@@ -456,9 +459,9 @@ the result will always be written (and overwritten) into the first
 three elements of ``x``, containing at the end only the results of the
 mutliplication of the last slice in ``a``::
 
-    >>> x.fill(0); x[...].mul(a,2)
+    >>> x.fill(0); x[...].mul(a, 2)
     >>> x
-    hArray(int, [3, 3], fill=[0,0,0,0,0,0,0,0,0]) # len=9 slice=[0:9])
+    hArray(int, [3, 3], fill=[0, 0, 0, 0, 0, 0, 0, 0, 0]) # len=9 slice=[0:9])
 
 NOTE: There are currently relatively strict rules on how to change the
 parameters from a vector to an array.
@@ -479,7 +482,7 @@ parameters from a vector to an array.
    be returned by the same algorithm if invoked with arrays.
 
 #. If a slice is specified with vectors as elements
-   (i.e. ``[1,2,3]:[5,6,7]``), both start and stop have to be
+   (i.e. ``[1, 2, 3]:[5, 6, 7]``), both start and stop have to be
    vectors. The algorithm will then loop over all elements in the
    lists.
 
@@ -491,16 +494,16 @@ Units and Scale Factors
 Numerical arrays allow one to set a (single) unit for the data. With
 ``setUnit(prefix, unit_name)`` one can specify the name of the unit and
 the scale factor, which is specified as a string being one of
-'f','p','n','micro','m','c','d','','h','k','M','G','T','P','E','Z'.
+"f", "p", "n", "micro", "m", "c", "d", "", "h", "k", "M", "G", "T", "P", "E", "Z".
 
-    >>> a.setUnit("M","Hz")
+    >>> a.setUnit("M", "Hz")
 
 will set the unit name to ``MHz`` without modifiying the values in the
 array (assuming that the values were deliverd initially in this
 unit). However, the scaling can be changed by calling setUnit again
 (with or without a unit name), e.g.::
 
-    >>> a.setUnit("k","")
+    >>> a.setUnit("k", "")
 
 Which has converted the values to ``kHz``.  The name of the unit can be
 retrieved with::
@@ -517,7 +520,7 @@ Keywords and Values
 For documenting the vector further and to store certain values, one
 can store keywords and values in the array. This is done with::
 
-    >>> a.setKey("name","TestArray")
+    >>> a.setKey("name", "TestArray")
 
 The keywords can be arbitrary strings ann the values also arbitrary
 strings. Thus numbers need to be converted to strings and back. The
