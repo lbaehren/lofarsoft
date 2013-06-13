@@ -447,6 +447,7 @@ class BeamData(IOInterface):
         if not self['DM']:
             for i, file in enumerate(self.__filename):
                 data[i].readfilebinary(os.path.join(file, "data.bin"), (block + self.__block_alignment[i])*spec_len)
+
         else:
 
             if len(self['DM_OFFSET'][0]) != spec_len:
@@ -467,10 +468,6 @@ class BeamData(IOInterface):
             # Note, this following loop could be slow (hOffsetReadFileBinary could maybe be optimized)
             for i, file in enumerate(self.__filename):
                 cr.hOffsetReadFileBinary(data[i], os.path.join(file, "data.bin"), real_offset + self.__block_alignment[i]*spec_len)
-
-            #RFI excision
-            for i in range(len(self.__filename)):
-                data[i,self['RFI_CHANNELS'][i]] /= 1e6
 
             pass
 
@@ -497,6 +494,11 @@ class BeamData(IOInterface):
             phases.delaytophase(self['BEAM_FREQUENCIES'], self['CAL_DELAY'])
             weights.phasetocomplex(phases)
             data[...].mul(weights[...])
+
+        #RFI excision
+        for i in range(len(self.__filename)):
+            data[i,self['RFI_CHANNELS'][i]] /= 1e6
+
 
     def getTimeseriesData(self, data=None, chunk=-1):
         """Returns timeseries data for selected antennas.
