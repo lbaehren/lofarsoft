@@ -11,7 +11,7 @@ import re
 import logging
 
 # checks if given pulsar is good ones, i.e. either in ATNF catalog
-# or par-file do exis
+# or par-file do exist
 # return value is True (psr is good), or False (psr is bad)
 def check_pulsars(psr, cmdline, cep2, log=None):
 	if psr not in cmdline.psrbs and psr not in cmdline.psrjs:

@@ -898,8 +898,8 @@ class Pipeline:
 		self.execute(cmd, workdir=sumdir)
 
 		# creating TA heatmaps 
-		# only when folding, and only if pulsars are set from the command line, or 'parset' or 'sapfind' or 'sapfind3' keywords are used (or
-		# nothing is given for --pulsar option
+		# only when folding, and only if pulsars are set from the command line, or 'parset' or 'sapfind' or 'sapfind3' or "tabfind+" keywords are used (or
+		# nothing is given for --pulsar option)
 		# otherwise, different TA beams will be folded for different pulsars, and TA heatmap does not have sense
 		if data_code == "CS" and not cmdline.opts.is_nofold and (len(cmdline.psrs) == 0 or (len(cmdline.psrs) != 0 and cmdline.psrs[0] != "tabfind")):
 			for sap in obs.saps:
@@ -907,8 +907,26 @@ class Pipeline:
 					if len(cmdline.psrs) != 0 and cmdline.psrs[0] != "parset" and cmdline.psrs[0] != "sapfind" and \
 										cmdline.psrs[0] != "sapfind3" and cmdline.psrs[0] != "tabfind+":
 						psrs = cmdline.psrs # getting list of pulsars from command line
-					else: # getting list of pulsars from SAP
-						psrs = sap.psrs
+					else: 
+						if len(cmdline.psrs) == 0:
+							if sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None): psrs = [sap.source]
+							else:
+								if len(sap.psrs) > 0: psrs = [sap.psrs[0]]
+								else: psrs = []
+						else:
+							if cmdline.psrs[0] == "parset":
+								if sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None): psrs = [sap.source]
+								else: psrs = []
+							if cmdline.psrs[0] == "sapfind" or cmdline.psrs[0] == "sapfind3":
+								if len(sap.psrs) > 0:
+									if cmdline.psrs[0] == "sapfind": psrs = [sap.psrs[0]]
+									else: psrs = sap.psrs
+								else: psrs = []
+							if cmdline.psrs[0] == "tabfind+":
+								if sap.source != "" and check_pulsars(sap.source, cmdline, cep2, None): psrs = [sap.source]
+								else: psrs = []
+								if len(sap.psrs) > 0: psrs.append(sap.psrs[0])
+								psrs = list(np.unique(psrs))
 					self.log.info("Creating TA heatmap with %d rings for SAP=%d..." % (sap.nrRings, sap.sapid))
 					for psr in psrs:
 						self.log.info(psr)
