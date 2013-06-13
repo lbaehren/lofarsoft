@@ -96,16 +96,16 @@ Changing dimensions
 -------------------
 
 The dimensions can be obtained and set, using the :meth:`shape` and
-:meth:`setDim` methods. If the length of the underlying vector changes
-due to a change in the dimensions, the vector will be resized and
-padded with zeros, if necessary::
+:meth:`reshape` methods. The length of the underlying vector must stay the
+same::
 
+    >>> a.reshape([1,9])
     >>> a.shape()
+    (1, 9)
 
-    >>> a.setDim([3,3,2])
-
-    >>> a.setDim([3,3])
-
+    >>> a.reshape([3,3])
+    >>> a.shape()
+    (3, 3)
 
 Memory sharing
 --------------
