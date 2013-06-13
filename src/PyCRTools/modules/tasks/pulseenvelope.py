@@ -153,7 +153,10 @@ class PulseEnvelope(Task):
                     n = k + j
                     self.maxpos[n] = self.maxpos[k+self.strongest_polarization]
                     self.peak_amplitude[n] = self.envelope[n, start + self.maxpos[k+self.strongest_polarization]]
-                    self.snr[n] = self.peak_amplitude[n] / self.rms[n]
+                    if self.rms[n] == 0.:
+                        self.snr[n] = 0.
+                    else:    
+                        self.snr[n] = self.peak_amplitude[n] / self.rms[n]
 
         # Convert to delay
         self.delays[:] = self.maxpos[:]
