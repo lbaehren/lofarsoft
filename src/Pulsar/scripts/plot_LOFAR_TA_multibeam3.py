@@ -223,18 +223,20 @@ if __name__ == '__main__':
         npoints = (options.nrings+1)**3-(options.nrings)**3 
         j=np.argsort(c)[-1]
         dsq=np.zeros(len(RAs_good))
+
 	# added by Vlad on June 10, 2013 (otherwise it crashed for Nrings=1)
 	if npoints > len(RAs_good): # it means that number of actual rings is smaller than what is given by options.nrings
 	    while npoints > len(RAs_good):
 	        options.nrings-=1
 	        npoints = (options.nrings+1)**3-(options.nrings)**3 
+
         linestyle=[ 'solid' for i in RAs_good ]
         for i,val in enumerate(weights):
             dsq[i] = (x[j]-x[i])**2 + (y[j]-y[i])**2
         # set the weights of the farther-out beams to zero
         outlist=[]
         for i,val in enumerate(weights):
-	    print i, val, dsq[i], npoints, options.nrings
+#	    print i, val, dsq[i], npoints, options.nrings
             if dsq[i] > np.sort(dsq)[npoints-2]:
                 weights[i] = 0.0
                 outlist.append(i)
@@ -335,22 +337,8 @@ if __name__ == '__main__':
         # Make the two plots
         for (label, filename, c) in plots:
 		ax = fig.add_subplot(111)
-		#add the beam numbers per beam onto the plot as text
-		plt.scatter(x,y,s=s, marker='o', c=c, hold='on', linestyle=linestyle)
-		for i in np.arange(np.size(x)):
-			plt.text(x[i], y[i], str(int(Beams_good[i])), color='black', fontsize=6, ha="center", va="center")
 
-		# plot the best position
-		plt.errorbar(xmean, ymean, yerr=yerr, xerr=xerr, fmt='w', linewidth=3)
-		plt.errorbar(xmean, ymean, yerr=yerr, xerr=xerr, fmt='black')
-		# plus a label with the value, top left
-		plt.errorbar(xmin+(xmax-xmin)/20, ymax-(ymax-ymin)/20, yerr=yerr, xerr=xerr, fmt='black')
-	#	plt.text(xmin+(xmax-xmin)/20+2*xerr, ymax-(ymax-ymin)/20, " dx = %f +/- %f \n dy = %f +/- %f" % (xmean, xerr, ymean, yerr),
-		plt.text(xmin+(xmax-xmin)/20+2*xerr, ymax-(ymax-ymin)/20, " %s +/- %s \n %s +/- %s " % 
-                         (str_f(src._ra), str_f(err._ra), str_f(src._dec), str_f(err._dec)),
-			 color='black', fontsize=6, ha="left", va="center")
-	
-		# plot the beam shape
+		# plot the beam shape in the background
 		if plot_beam==True:
 			angle=atan(raoff/decoff)
 	#		plt.plot([0,raoff*RAD2DEG],[0,decoff*RAD2DEG])
@@ -362,7 +350,24 @@ if __name__ == '__main__':
 			ax.add_artist(e)
 			r = Rectangle((xmin, ymin), 1.4*beamsize, 1.4*beamsize, fc='white')
 			ax.add_patch(r)
+
+		#add the beam numbers per beam onto the plot as text
+		plt.scatter(x,y,s=s, marker='o', c=c, hold='on', linestyle=linestyle, zorder=2)
+		for i in np.arange(np.size(x)):
+			plt.text(x[i], y[i], str(int(Beams_good[i])), color='black', fontsize=6, ha="center", va="center")
+
+		# plot the best position
+		plt.errorbar(xmean, ymean, yerr=yerr, xerr=xerr, fmt='w', linewidth=3)
+		plt.errorbar(xmean, ymean, yerr=yerr, xerr=xerr, fmt='black')
+
+		# plus a label with the value, top left
+		plt.errorbar(xmin+(xmax-xmin)/20, ymax-(ymax-ymin)/20, yerr=yerr, xerr=xerr, fmt='black')
+	#	plt.text(xmin+(xmax-xmin)/20+2*xerr, ymax-(ymax-ymin)/20, " dx = %f +/- %f \n dy = %f +/- %f" % (xmean, xerr, ymean, yerr),
+		plt.text(xmin+(xmax-xmin)/20+2*xerr, ymax-(ymax-ymin)/20, " %s +/- %s \n %s +/- %s " % 
+                         (str_f(src._ra), str_f(err._ra), str_f(src._dec), str_f(err._dec)),
+			 color='black', fontsize=6, ha="left", va="center")
 	
+
 		#axis("equal")
 		plt.xlim(xmin, xmax)
 		plt.ylim(ymin, ymax)
@@ -386,11 +391,10 @@ if __name__ == '__main__':
 		ax.xaxis.set_minor_locator(ticker.AutoMinorLocator())
 		ax.yaxis.set_minor_locator(ticker.AutoMinorLocator())
 	
-		# write the linear scale output file
+		# write to screen or output file
 		plt.savefig(filename)
-	
-		#### LOG plot ####
-	
+                plt.show()
+                    
 		# clear the plotting and now set up the log plot
 		plt.clf()
 
