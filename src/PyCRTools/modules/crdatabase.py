@@ -525,6 +525,10 @@ class CRDatabase(object):
         sql = "DELETE FROM datafileparameters WHERE datafileID={0};".format(datafileID)
         sql_list.append(sql)
 
+        # Delete entries from event_datafile table
+        sql = "DELETE FROM event_datafile WHERE datafileID={0};".format(datafileID)
+        sql_list.append(sql)
+
         # Get list of StationIDs
         sql = "SELECT stationID FROM datafile_station WHERE datafileID={0};".format(datafileID)
         results = self.db.select(sql)
@@ -690,7 +694,6 @@ class CRDatabase(object):
 
         return sql_list
 
-
     def getPolarizationIDs(self, eventID=None, datafileID=None, stationID=None, antennaset=None, direction=None, status=None, order=""):
         """Return a list of polarizationIDs that satisfy the values of the
         provided arguments of this method.
@@ -837,6 +840,7 @@ class CRDatabase(object):
 
         return sql_list
 
+
     def isLocked(self):
         """Check if the database is locked."""
         result = True
@@ -853,6 +857,7 @@ class CRDatabase(object):
         """Unlock the database to be able to modify it. An unlocked database cannot be locked again!
         """
         print "WARNING: this functionality is deprecated."
+
 
     def summary(self):
         """Summary of the CRDatabase object."""
