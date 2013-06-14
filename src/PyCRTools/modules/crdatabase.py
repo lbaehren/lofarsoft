@@ -842,14 +842,7 @@ class CRDatabase(object):
         result = True
 
         if self.db:
-            sql = "SELECT value FROM settings WHERE key='locked'"
-            if (int(self.db.select(sql)[0][0]) == 0):
-                if os.path.exists(self.lockfilename):
-                    sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('locked', str(1))
-                    self.db.execute(sql)
-                    result = True
-                else:
-                    result = False
+            result = True
 
         if debug_mode:
             print "isLocked(): ", result  # DEBUG
@@ -859,17 +852,7 @@ class CRDatabase(object):
     def unlock(self):
         """Unlock the database to be able to modify it. An unlocked database cannot be locked again!
         """
-        if self.isLocked():
-            if not os.path.exists(self.lockfilename):
-                print "UNLOCKING THE DATABASE..."
-                print "WARNING: An unlocked database cannot be locked again!"
-
-                sql = "UPDATE settings SET value='{1}' WHERE key='{0}'".format('locked', str(0))
-                self.db.execute(sql)
-            else:
-                print "Unable to unlock the database."
-        else:
-            print "Database is already unlocked."
+        print "WARNING: this functionality is deprecated."
 
     def summary(self):
         """Summary of the CRDatabase object."""
