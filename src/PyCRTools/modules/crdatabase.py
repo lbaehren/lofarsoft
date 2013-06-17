@@ -1620,7 +1620,7 @@ class Event(object):
         """
         result = False
 
-        if datafile:
+        if isinstance(datafile, Datafile):
             datafileID = datafile.id
 
         if datafileID > 0:
@@ -2031,7 +2031,7 @@ class Datafile(object):
         """
         result = False
 
-        if station:
+        if isinstance(station, Station):
             stationID = station.id
 
         if stationID > 0:
@@ -2466,7 +2466,7 @@ class Station(object):
         pol_id = polarizationID
         pol_key = key
 
-        if polarization:
+        if isinstance(polarization, Polarization):
             pol_id = polarization.id
             pol_key = polarization.direction
         elif id > 0:
