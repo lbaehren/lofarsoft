@@ -674,7 +674,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   z0 = pstart + pi * pstep; z1 = z0 + pstep;
 
   // Interpolate to find Jones matrix component for theta
-  *(J_it+2) = interpolate_trilinear(V, x, y, z_ydipole, x0, y0, z0, x1, y1, z1);
+  *(J_it+2) = -1 * interpolate_trilinear(V, x, y, z_ydipole, x0, y0, z0, x1, y1, z1);
 
   /********************************* x - dipole response for wave polarized purely in phi direction *********************************/
 
@@ -698,7 +698,7 @@ void HFPP_FUNC_NAME (const CIter J, const CIter J_end,
   z0 = pstart + pi * pstep; z1 = z0 + pstep;
 
   // Interpolate to find Jones matrix component for phi
-  *(J_it+1) = interpolate_trilinear(V, x, y, z_xdipole, x0, y0, z0, x1, y1, z1);
+  *(J_it+1) = -1 * interpolate_trilinear(V, x, y, z_xdipole, x0, y0, z0, x1, y1, z1);
 
   /********************************* y - dipole response for wave polarized purely in phi direction *********************************/
 
