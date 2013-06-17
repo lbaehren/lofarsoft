@@ -512,10 +512,7 @@ class TBBData(IOInterface):
             self.__block = block
 
         # Get timeseries data
-        self.getTimeseriesData(self.__scratch, block)
-
-        if datacheck:
-            cr.hNumberOfConsecutiveZeros(self.nof_consecutive_zeros[...], self.__scratch[...])
+        self.getTimeseriesData(self.__scratch, block, datacheck=datacheck)
 
         # Apply Hanning filter
         if hanning:
