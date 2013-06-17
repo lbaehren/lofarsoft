@@ -172,11 +172,15 @@ class BeamData(IOInterface):
         if RFI_channels == 'reset':
             RFI_channels = [self.__files[i].par.hdr['BeamFormer']['rfi_channels'] for i in range(self.__nofBeamDataSets)]
         else:
-            if len(RFI_channels) != len(self['RFI_CHANNELS']):  #same number of beams.
-                raise ValueError('Variable incorrect lenght.')
+            if len(list(RFI_channels)) != len(self['RFI_CHANNELS']):  #same number of beams
+                RFI_channels = cr.hArray(int, [self.__nofBeamDataSets,len(RFI_channels)], fill=RFI_channels)
 
             RFI_channels2 = self['RFI_CHANNELS']
-            RFI_channels = [sorted(list(set(RFI_channels[i]) | set(RFI_channels2[i]))) for i in range(self.__nofBeamDataSets)]
+
+            if isinstance(RFI_channels, list):
+                RFI_channels = [sorted(list(set(RFI_channels[i]) | set(RFI_channels2[i]))) for i in range(self.__nofBeamDataSets)]
+            else:
+                RFI_channels = [sorted(list(set(RFI_channels[i].vec()) | set(RFI_channels2[i]))) for i in range(self.__nofBeamDataSets)]
 
         return RFI_channels
 
