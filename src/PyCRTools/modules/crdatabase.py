@@ -2435,7 +2435,7 @@ class Station(object):
 
         return result
 
-    def removePolarization(self, polarization=None, key=None, id=0):
+    def removePolarization(self, polarization=None, polarizationID=0, key=None):
         """Remove polarization object with id= *polarizationID* from
         this station.
 
@@ -2450,20 +2450,20 @@ class Station(object):
         Parameter         Description
         ================  ===========================================================================
         *polarization*    polarization that needs to be removed from this station.
-        *id*              id of the polarization that needs to be removed from this station.
+        *polarizationID*  id of the polarization that needs to be removed from this station.
         *key*             key name of the polarization, this is equal to the polarization direction.
         ================  ===========================================================================
 
         Only one of the parameters is used to identify the
         polarization that needs to be removed.  The order of
         evaluating the parameters to identify the polarization is
-        *polarization*, *id*, *key*
+        *polarization*, *polarizationID*, *key*
 
         Returns *True* if removing the polarization object went
         successfully, *False* otherwise.
         """
         result = False
-        pol_id = id
+        pol_id = polarizationID
         pol_key = key
 
         if polarization:
