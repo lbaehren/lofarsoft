@@ -464,11 +464,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 fft_data_0 = cr.hArray(complex, dimensions=(nantennas, options.blocksize / 2 + 1))
                 fft_data_1 = cr.hArray(complex, dimensions=(nantennas, options.blocksize / 2 + 1))
 
-                fft_data_0[...].copy(fft_data[0:nantennas:2, ...])
-                fft_data_1[...].copy(fft_data[1:nantennas:2, ...])
+                fft_data_0[...].copy(fft_data[0:2*nantennas:2, ...])
+                fft_data_1[...].copy(fft_data[1:2*nantennas:2, ...])
 
                 antenna_positions_one = cr.hArray(float, dimensions=(nantennas, 3))
-                antenna_positions_one[...].copy(antenna_positions[0:nantennas:3, ...])
+                antenna_positions_one[...].copy(antenna_positions[0:3*nantennas:3, ...])
 
                 mb0 = cr.trun("MiniBeamformer", fft_data=fft_data_0, frequencies=frequencies, antpos=antenna_positions_one, direction=pulse_direction)
                 mb1 = cr.trun("MiniBeamformer", fft_data=fft_data_1, frequencies=frequencies, antpos=antenna_positions_one, direction=pulse_direction)
@@ -557,6 +557,11 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
 
                 np.save(os.path.join(directory, "calibrated_pulse_block-{0}-{1}.npy".format(options.id, station.stationname)), timeseries_data.toNumpy())
 
+            # Swap dipoles if needed
+            if f["ANTENNA_SET"] == "LBA_OUTER":
+                print "LBA_OUTER, swapping 0,1 dipoles"
+                cr.hSwap(fft_data[0:2*nantennas:2, ...], fft_data[1:2*nantennas:2, ...])
+
             # Start direction fitting loopim
             n = 0
             direction_fit_converged = False
@@ -569,10 +574,7 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                     cr.hFFTWExecutePlan(timeseries_data[...], fft_data[...], ifftwplan)
 
                 else:
-                    if f["ANTENNA_SET"] == "LBA_OUTER":
-                        antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction, swap_dipoles=True)
-                    else:
-                        antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
+                    antenna_response = cr.trun("AntennaResponse", instrumental_polarization=fft_data, frequencies=frequencies, direction=pulse_direction)
 
                     # Get timeseries data
                     cr.hFFTWExecutePlan(timeseries_data[...], antenna_response.on_sky_polarization[...], ifftwplan)
@@ -580,8 +582,8 @@ with process_event(crdb.Event(db=db, id=options.id)) as event:
                 # Run beamforming direction finder once
                 # not to find the direction but to at least have one point for outer stations
                 if options.beamform_outer_stations and n==0 and not hba:
-                    fft_data_0[...].copy(antenna_response.on_sky_polarization[0:nantennas:2, ...])
-                    fft_data_1[...].copy(antenna_response.on_sky_polarization[1:nantennas:2, ...])
+                    fft_data_0[...].copy(antenna_response.on_sky_polarization[0:2*nantennas:2, ...])
+                    fft_data_1[...].copy(antenna_response.on_sky_polarization[1:2*nantennas:2, ...])
 
                     dbf_theta = cr.trun("DirectionFitBF", fft_data=fft_data_0, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
                     dbf_phi = cr.trun("DirectionFitBF", fft_data=fft_data_1, frequencies=frequencies, antpos=antenna_positions, start_direction=lora_direction)
